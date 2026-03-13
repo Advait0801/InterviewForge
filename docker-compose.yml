@@ -1,0 +1,85 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    image: interviewforge-backend:latest
+    container_name: interviewforge-backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+      - interviewforge-backend-node-modules:/app/node_modules
+    env_file: ./docker/.env
+    depends_on:
+      - postgres
+
+  ai-service:
+    build: ./ai-service
+    image: interviewforge-ai:latest
+    container_name: interviewforge-ai
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai-service:/app
+    env_file: ./docker/.env
+    depends_on:
+      - chromadb
+
+  code-runner:
+    build: ./code-runner
+    image: interviewforge-code-runner:latest
+    container_name: interviewforge-code-runner
+    ports:
+      - "5050:5000"
+    volumes:
+      - ./code-runner:/app
+      - interviewforge-code-runner-node-modules:/app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file: ./docker/.env
+
+  frontend:
+    build: ./web
+    image: interviewforge-web:latest
+    container_name: interviewforge-web
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/app
+      - interviewforge-web-node-modules:/app/node_modules
+      - interviewforge-web-next-build:/app/.next
+    env_file: ./docker/.env
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: interviewforge-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: interviewforge
+    volumes:
+      - interviewforge-pgdata:/var/lib/postgresql/data
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: interviewforge-chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - interviewforge-chromadata:/chroma/chroma
+
+volumes:
+  interviewforge-pgdata:
+    name: interviewforge-pgdata
+  interviewforge-chromadata:
+    name: interviewforge-chromadata
+  interviewforge-backend-node-modules:
+    name: interviewforge-backend-node-modules
+  interviewforge-code-runner-node-modules:
+    name: interviewforge-code-runner-node-modules
+  interviewforge-web-node-modules:
+    name: interviewforge-web-node-modules
+  interviewforge-web-next-build:
+    name: interviewforge-web-next-build
