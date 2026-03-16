@@ -16,12 +16,12 @@
 - [x] Add `/health` endpoint to every service
 - [x] Verify: `docker-compose up` brings up all services
 
-### Day 3–4: Database, Auth & User Management
-- [ ] Define Prisma schema (users, sessions, problems, submissions, scores)
-- [ ] Run initial migration (`prisma migrate dev`)
-- [ ] Implement JWT auth (register, login, refresh token, auth middleware)
-- [ ] Build user routes (`/api/auth/register`, `/api/auth/login`, `/api/users/me`)
-- [ ] Verify: register + login returns JWT, protected routes work
+### Day 3–4: Database (Raw SQL), Auth & User Management
+- [x] Design relational schema (users, problems, submissions, scores)
+- [x] Write initial SQL migration script and apply to Postgres
+- [x] Implement JWT auth (register, login, auth middleware)
+- [x] Build user routes (`/api/auth/register`, `/api/auth/login`, `/api/users/me`)
+- [x] Verify: register + login returns JWT, protected routes work
 
 ### Day 5–7: Coding Problems API & Code Runner
 - [ ] Create seed data: 15–20 coding problems with test cases (JSON)
@@ -84,7 +84,7 @@
 
 ---
 
-## Week 4: System Design, OA Mode & Polish (Days 22–30)
+## Week 4: System Design, OA Mode, Deployment & Polish (Days 22–30)
 
 ### Day 22–23: System Design Module UI
 - [ ] Build system design prompts page
@@ -109,6 +109,13 @@
 - [ ] Make responsive (mobile-friendly)
 - [ ] Write README with setup guide + architecture diagram
 - [ ] Record demo video/GIF
+
+### (Optional) Deployment to AWS
+- [ ] Container registry: push images to ECR (frontend, backend, ai-service, code-runner)
+- [ ] Provision managed Postgres (Amazon RDS) + Chroma hosting strategy
+- [ ] Configure environment variables/secrets in AWS (DATABASE_URL, GEMINI_API_KEY, OPENAI_API_KEY, JWT_SECRET, etc.)
+- [ ] Deploy services (ECS/Fargate or EKS) behind an Application Load Balancer
+- [ ] Set up HTTPS (ACM certificates) and custom domain (Route 53)
 
 ---
 

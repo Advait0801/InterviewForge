@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import authRoutes from "./routes/auth.routes";
+import usersRoutes from "./routes/users.routes";
 
 dotenv.config();
 
@@ -21,6 +23,9 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
   res.json({ message: "InterviewForge Backend API" });
 });
+
+app.use("/api/auth", authRoutes);
+app.use("/api/users", usersRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
