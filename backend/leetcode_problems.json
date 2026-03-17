@@ -1,0 +1,313 @@
+[
+  {
+    "slug": "two-sum",
+    "title": "Two Sum",
+    "leetcodeNumber": 1,
+    "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume each input has exactly one solution, and you may not use the same element twice.",
+    "difficulty": "easy",
+    "topics": ["array", "hash-table"],
+    "companies": ["Amazon", "Google", "Microsoft", "Meta", "Apple"],
+    "testCases": [
+      { "input": "nums = [2, 7, 11, 15], target = 9", "expectedOutput": "[0, 1]" },
+      { "input": "nums = [3, 2, 4], target = 6", "expectedOutput": "[1, 2]" },
+      { "input": "nums = [3, 3], target = 6", "expectedOutput": "[0, 1]" }
+    ]
+  },
+  {
+    "slug": "reverse-string",
+    "title": "Reverse String",
+    "leetcodeNumber": 344,
+    "description": "Write a function that reverses a string. The input string is given as an array of characters s.\n\nYou must do this by modifying the input array in-place with O(1) extra memory.",
+    "difficulty": "easy",
+    "topics": ["two-pointers", "string"],
+    "companies": ["Amazon", "Microsoft", "Adobe"],
+    "testCases": [
+      { "input": "[\"h\",\"e\",\"l\",\"l\",\"o\"]", "expectedOutput": "[\"o\",\"l\",\"l\",\"e\",\"h\"]" },
+      { "input": "[\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]", "expectedOutput": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]" }
+    ]
+  },
+  {
+    "slug": "valid-parentheses",
+    "title": "Valid Parentheses",
+    "leetcodeNumber": 20,
+    "description": "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.\n\nAn input string is valid if:\n- Open brackets must be closed by the same type of brackets.\n- Open brackets must be closed in the correct order.\n- Every close bracket has a corresponding open bracket of the same type.",
+    "difficulty": "easy",
+    "topics": ["string", "stack"],
+    "companies": ["Amazon", "Google", "Meta", "Microsoft", "Bloomberg"],
+    "testCases": [
+      { "input": "s = \"()\"", "expectedOutput": "true" },
+      { "input": "s = \"()[]{}\"", "expectedOutput": "true" },
+      { "input": "s = \"(]\"", "expectedOutput": "false" },
+      { "input": "s = \"([)]\"", "expectedOutput": "false" }
+    ]
+  },
+  {
+    "slug": "best-time-to-buy-and-sell-stock",
+    "title": "Best Time to Buy and Sell Stock",
+    "leetcodeNumber": 121,
+    "description": "You are given an array prices where prices[i] is the price of a given stock on the ith day.\n\nYou want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.\n\nReturn the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.",
+    "difficulty": "easy",
+    "topics": ["array", "dynamic-programming", "greedy"],
+    "companies": ["Amazon", "Google", "Microsoft", "Goldman Sachs", "Bloomberg"],
+    "testCases": [
+      { "input": "prices = [7, 1, 5, 3, 6, 4]", "expectedOutput": "5" },
+      { "input": "prices = [7, 6, 4, 3, 1]", "expectedOutput": "0" }
+    ]
+  },
+  {
+    "slug": "merge-two-sorted-lists",
+    "title": "Merge Two Sorted Lists",
+    "leetcodeNumber": 21,
+    "description": "You are given the heads of two sorted linked lists list1 and list2.\n\nMerge the two lists into one sorted list. The list should be made by splicing together the nodes of the first two lists.\n\nReturn the head of the merged linked list.",
+    "difficulty": "easy",
+    "topics": ["linked-list", "recursion"],
+    "companies": ["Amazon", "Microsoft", "Google", "Apple", "Adobe"],
+    "testCases": [
+      { "input": "list1 = [1,2,4], list2 = [1,3,4]", "expectedOutput": "[1,1,2,3,4,4]" },
+      { "input": "list1 = [], list2 = []", "expectedOutput": "[]" },
+      { "input": "list1 = [], list2 = [0]", "expectedOutput": "[0]" }
+    ]
+  },
+  {
+    "slug": "missing-number",
+    "title": "Missing Number",
+    "leetcodeNumber": 268,
+    "description": "Given an array nums containing n distinct numbers in the range [0, n], return the only number in the range that is missing from the array.",
+    "difficulty": "easy",
+    "topics": ["array", "bit-manipulation", "math"],
+    "companies": ["Amazon", "Microsoft", "Google", "Apple"],
+    "testCases": [
+      { "input": "nums = [3, 0, 1]", "expectedOutput": "2" },
+      { "input": "nums = [0, 1]", "expectedOutput": "2" },
+      { "input": "nums = [9,6,4,2,3,5,7,0,1]", "expectedOutput": "8" }
+    ]
+  },
+  {
+    "slug": "longest-substring-without-repeating-characters",
+    "title": "Longest Substring Without Repeating Characters",
+    "leetcodeNumber": 3,
+    "description": "Given a string s, find the length of the longest substring without repeating characters.",
+    "difficulty": "medium",
+    "topics": ["string", "sliding-window", "hash-table"],
+    "companies": ["Amazon", "Google", "Microsoft", "Meta", "Bloomberg"],
+    "testCases": [
+      { "input": "s = \"abcabcbb\"", "expectedOutput": "3" },
+      { "input": "s = \"bbbbb\"", "expectedOutput": "1" },
+      { "input": "s = \"pwwkew\"", "expectedOutput": "3" }
+    ]
+  },
+  {
+    "slug": "3sum",
+    "title": "3Sum",
+    "leetcodeNumber": 15,
+    "description": "Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.\n\nThe solution set must not contain duplicate triplets.",
+    "difficulty": "medium",
+    "topics": ["array", "two-pointers", "sorting"],
+    "companies": ["Amazon", "Google", "Microsoft", "Meta", "Adobe"],
+    "testCases": [
+      { "input": "nums = [-1,0,1,2,-1,-4]", "expectedOutput": "[[-1,-1,2],[-1,0,1]]" },
+      { "input": "nums = [0,1,1]", "expectedOutput": "[]" },
+      { "input": "nums = [0,0,0]", "expectedOutput": "[[0,0,0]]" }
+    ]
+  },
+  {
+    "slug": "product-of-array-except-self",
+    "title": "Product of Array Except Self",
+    "leetcodeNumber": 238,
+    "description": "Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i].\n\nThe product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer.\n\nYou must write an algorithm that runs in O(n) time and without using the division operation.",
+    "difficulty": "medium",
+    "topics": ["array", "prefix-sum"],
+    "companies": ["Amazon", "Google", "Microsoft", "Meta", "Apple"],
+    "testCases": [
+      { "input": "nums = [1,2,3,4]", "expectedOutput": "[24,12,8,6]" },
+      { "input": "nums = [-1,1,0,-3,3]", "expectedOutput": "[0,0,9,0,0]" }
+    ]
+  },
+  {
+    "slug": "number-of-islands",
+    "title": "Number of Islands",
+    "leetcodeNumber": 200,
+    "description": "Given an m x n 2D binary grid which represents a map of '1's (land) and '0's (water), return the number of islands.\n\nAn island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.",
+    "difficulty": "medium",
+    "topics": ["graph", "BFS", "DFS", "matrix", "union-find"],
+    "companies": ["Amazon", "Google", "Microsoft", "Bloomberg", "Meta"],
+    "testCases": [
+      {
+        "input": "grid = [[\"1\",\"1\",\"1\",\"1\",\"0\"],[\"1\",\"1\",\"0\",\"1\",\"0\"],[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"0\",\"0\",\"0\",\"0\",\"0\"]]",
+        "expectedOutput": "1"
+      },
+      {
+        "input": "grid = [[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"1\",\"1\",\"0\",\"0\",\"0\"],[\"0\",\"0\",\"1\",\"0\",\"0\"],[\"0\",\"0\",\"0\",\"1\",\"1\"]]",
+        "expectedOutput": "3"
+      }
+    ]
+  },
+  {
+    "slug": "course-schedule",
+    "title": "Course Schedule",
+    "leetcodeNumber": 207,
+    "description": "There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai.\n\nReturn true if you can finish all courses. Otherwise, return false.",
+    "difficulty": "medium",
+    "topics": ["graph", "topological-sort", "BFS", "DFS"],
+    "companies": ["Google", "Amazon", "Meta", "Uber", "Microsoft"],
+    "testCases": [
+      { "input": "numCourses = 2, prerequisites = [[1,0]]", "expectedOutput": "true" },
+      { "input": "numCourses = 2, prerequisites = [[1,0],[0,1]]", "expectedOutput": "false" }
+    ]
+  },
+  {
+    "slug": "coin-change",
+    "title": "Coin Change",
+    "leetcodeNumber": 322,
+    "description": "You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.\n\nReturn the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.\n\nYou may assume that you have an infinite number of each kind of coin.",
+    "difficulty": "medium",
+    "topics": ["dynamic-programming", "BFS"],
+    "companies": ["Amazon", "Google", "Microsoft", "Goldman Sachs", "Bloomberg"],
+    "testCases": [
+      { "input": "coins = [1,2,5], amount = 11", "expectedOutput": "3" },
+      { "input": "coins = [2], amount = 3", "expectedOutput": "-1" },
+      { "input": "coins = [1], amount = 0", "expectedOutput": "0" }
+    ]
+  },
+  {
+    "slug": "top-k-frequent-elements",
+    "title": "Top K Frequent Elements",
+    "leetcodeNumber": 347,
+    "description": "Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order.\n\nYour algorithm's time complexity must be better than O(n log n), where n is the array's size.",
+    "difficulty": "medium",
+    "topics": ["array", "hash-table", "heap", "bucket-sort"],
+    "companies": ["Amazon", "Google", "Microsoft", "Meta", "Yelp"],
+    "testCases": [
+      { "input": "nums = [1,1,1,2,2,3], k = 2", "expectedOutput": "[1,2]" },
+      { "input": "nums = [1], k = 1", "expectedOutput": "[1]" }
+    ]
+  },
+  {
+    "slug": "lowest-common-ancestor-of-a-binary-search-tree",
+    "title": "Lowest Common Ancestor of a Binary Search Tree",
+    "leetcodeNumber": 235,
+    "description": "Given a binary search tree (BST), find the lowest common ancestor (LCA) node of two given nodes in the BST.\n\nAccording to the definition of LCA on Wikipedia: The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself).",
+    "difficulty": "medium",
+    "topics": ["tree", "binary-search-tree", "DFS"],
+    "companies": ["Amazon", "Google", "Microsoft", "Meta", "LinkedIn"],
+    "testCases": [
+      { "input": "root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8", "expectedOutput": "6" },
+      { "input": "root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4", "expectedOutput": "2" }
+    ]
+  },
+  {
+    "slug": "implement-trie-prefix-tree",
+    "title": "Implement Trie (Prefix Tree)",
+    "leetcodeNumber": 208,
+    "description": "A trie (pronounced as \"try\") or prefix tree is a tree data structure used to efficiently store and retrieve keys in a dataset of strings.\n\nImplement the Trie class:\n- Trie() Initializes the trie object.\n- void insert(String word) Inserts the string word into the trie.\n- boolean search(String word) Returns true if the string word is in the trie, and false otherwise.\n- boolean startsWith(String prefix) Returns true if there is a previously inserted string that has the prefix, and false otherwise.",
+    "difficulty": "medium",
+    "topics": ["trie", "string", "design"],
+    "companies": ["Amazon", "Google", "Microsoft", "Uber", "Airbnb"],
+    "testCases": [
+      {
+        "input": "[\"Trie\",\"insert\",\"search\",\"search\",\"startsWith\",\"insert\",\"search\"]\n[[],[\"apple\"],[\"apple\"],[\"app\"],[\"app\"],[\"app\"],[\"app\"]]",
+        "expectedOutput": "[null,null,true,false,true,null,true]"
+      }
+    ]
+  },
+  {
+    "slug": "task-scheduler",
+    "title": "Task Scheduler",
+    "leetcodeNumber": 621,
+    "description": "You are given an array of CPU tasks, each labeled with a letter from A to Z, and a number n. Each CPU interval can be idle or allow the completion of one task. Tasks can be completed in any order, but there's a constraint: there has to be a gap of at least n intervals between two tasks with the same label.\n\nReturn the minimum number of CPU intervals required to complete all the tasks.",
+    "difficulty": "medium",
+    "topics": ["greedy", "heap", "sorting"],
+    "companies": ["Amazon", "Microsoft", "Google", "Facebook"],
+    "testCases": [
+      { "input": "tasks = [\"A\",\"A\",\"A\",\"B\",\"B\",\"B\"], n = 2", "expectedOutput": "8" },
+      { "input": "tasks = [\"A\",\"C\",\"A\",\"B\",\"D\",\"B\"], n = 1", "expectedOutput": "6" }
+    ]
+  },
+  {
+    "slug": "trapping-rain-water",
+    "title": "Trapping Rain Water",
+    "leetcodeNumber": 42,
+    "description": "Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.",
+    "difficulty": "hard",
+    "topics": ["array", "two-pointers", "dynamic-programming", "stack", "monotonic-stack"],
+    "companies": ["Amazon", "Google", "Microsoft", "Meta", "Goldman Sachs"],
+    "testCases": [
+      { "input": "height = [0,1,0,2,1,0,1,3,2,1,2,1]", "expectedOutput": "6" },
+      { "input": "height = [4,2,0,3,2,5]", "expectedOutput": "9" }
+    ]
+  },
+  {
+    "slug": "merge-k-sorted-lists",
+    "title": "Merge k Sorted Lists",
+    "leetcodeNumber": 23,
+    "description": "You are given an array of k linked-lists lists, each linked-list is sorted in ascending order.\n\nMerge all the linked-lists into one sorted linked-list and return it.",
+    "difficulty": "hard",
+    "topics": ["linked-list", "heap", "divide-and-conquer", "merge-sort"],
+    "companies": ["Amazon", "Google", "Microsoft", "Meta", "Uber"],
+    "testCases": [
+      { "input": "lists = [[1,4,5],[1,3,4],[2,6]]", "expectedOutput": "[1,1,2,3,4,4,5,6]" },
+      { "input": "lists = []", "expectedOutput": "[]" },
+      { "input": "lists = [[]]", "expectedOutput": "[]" }
+    ]
+  },
+  {
+    "slug": "word-search-ii",
+    "title": "Word Search II",
+    "leetcodeNumber": 212,
+    "description": "Given an m x n board of characters and a list of strings words, return all words on the board.\n\nEach word must be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. The same letter cell may not be used more than once in a word.",
+    "difficulty": "hard",
+    "topics": ["trie", "backtracking", "graph", "matrix"],
+    "companies": ["Amazon", "Google", "Microsoft", "Airbnb"],
+    "testCases": [
+      {
+        "input": "board = [[\"o\",\"a\",\"a\",\"n\"],[\"e\",\"t\",\"a\",\"e\"],[\"i\",\"h\",\"k\",\"r\"],[\"i\",\"f\",\"l\",\"v\"]], words = [\"oath\",\"pea\",\"eat\",\"rain\"]",
+        "expectedOutput": "[\"eat\",\"oath\"]"
+      },
+      {
+        "input": "board = [[\"a\",\"b\"],[\"c\",\"d\"]], words = [\"abcb\"]",
+        "expectedOutput": "[]"
+      }
+    ]
+  },
+  {
+    "slug": "median-of-two-sorted-arrays",
+    "title": "Median of Two Sorted Arrays",
+    "leetcodeNumber": 4,
+    "description": "Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays.\n\nThe overall run time complexity should be O(log (m+n)).",
+    "difficulty": "hard",
+    "topics": ["array", "binary-search", "divide-and-conquer"],
+    "companies": ["Amazon", "Google", "Microsoft", "Apple", "Adobe"],
+    "testCases": [
+      { "input": "nums1 = [1,3], nums2 = [2]", "expectedOutput": "2.00000" },
+      { "input": "nums1 = [1,2], nums2 = [3,4]", "expectedOutput": "2.50000" }
+    ]
+  },
+  {
+    "slug": "serialize-and-deserialize-binary-tree",
+    "title": "Serialize and Deserialize Binary Tree",
+    "leetcodeNumber": 297,
+    "description": "Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.\n\nDesign an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. Just make sure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.",
+    "difficulty": "hard",
+    "topics": ["tree", "BFS", "DFS", "design", "string"],
+    "companies": ["Amazon", "Google", "Microsoft", "Meta", "LinkedIn"],
+    "testCases": [
+      { "input": "root = [1,2,3,null,null,4,5]", "expectedOutput": "[1,2,3,null,null,4,5]" },
+      { "input": "root = []", "expectedOutput": "[]" }
+    ]
+  },
+  {
+    "slug": "find-median-from-data-stream",
+    "title": "Find Median from Data Stream",
+    "leetcodeNumber": 295,
+    "description": "The median is the middle value in an ordered integer list. If the size of the list is even, there is no middle value, and the median is the mean of the two middle values.\n\nImplement the MedianFinder class:\n- MedianFinder() initializes the MedianFinder object.\n- void addNum(int num) adds the integer num from the data stream to the data structure.\n- double findMedian() returns the median of all elements so far.",
+    "difficulty": "hard",
+    "topics": ["heap", "design", "sorting", "two-pointers"],
+    "companies": ["Amazon", "Google", "Microsoft", "Apple"],
+    "testCases": [
+      {
+        "input": "[\"MedianFinder\",\"addNum\",\"addNum\",\"findMedian\",\"addNum\",\"findMedian\"]\n[[],[1],[2],[],[3],[]]",
+        "expectedOutput": "[null,null,null,1.5,null,2.0]"
+      }
+    ]
+  }
+]

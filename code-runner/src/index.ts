@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import runRoutes from "./routes/run.routes";
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
   res.json({ message: "InterviewForge Code Runner Service" });
 });
+
+app.use("/", runRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Code Runner service running on port ${PORT}`);

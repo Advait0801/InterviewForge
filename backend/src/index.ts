@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes";
 import usersRoutes from "./routes/users.routes";
+import problemsRoutes from "./routes/problems.routes";
+import submissionRoutes from "./routes/submission.routes";
 
 dotenv.config();
 
@@ -26,6 +28,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/problems", problemsRoutes);
+app.use("/api/submissions", submissionRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
