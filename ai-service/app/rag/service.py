@@ -1,7 +1,7 @@
 import hashlib
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from app.core import config
-from app.rag.chunking import simple_chunk_text
+from app.rag.chunking import chunk_text
 from app.rag.embeddings import EmbeddingService
 from app.rag.chroma_client import get_chroma_collection
 
@@ -24,7 +24,7 @@ class RAGService:
             if not text:
                 continue
 
-            parts = simple_chunk_text(
+            parts = chunk_text(
                 text,
                 chunk_size=config.CHUNK_SIZE_CHARS,
                 overlap=config.CHUNK_OVERLAP_CHARS,

@@ -1,4 +1,3 @@
-from typing import Optional
 from app.core import config
 
 class LLMService:

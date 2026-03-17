@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import List
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 
 @dataclass(frozen=True)
 class Chunk:
@@ -7,17 +9,22 @@ class Chunk:
     text: str
     metadata: dict
 
-def simple_chunk_text(text: str, *, chunk_size: int, overlap: int) -> List[str]:
+
+def chunk_text(text: str, *, chunk_size: int, overlap: int) -> List[str]:
+    """
+    Split text using RecursiveCharacterTextSplitter which respects natural
+    boundaries (paragraphs -> newlines -> sentences -> words) instead of
+    cutting at a fixed character offset.
+    """
     text = text.strip()
     if not text:
         return []
-    chunks = []
-    i = 0
-    n = len(text)
-    while i < n:
-        j = min(i + chunk_size, n)
-        chunks.append(text[i:j])
-        if j == n:
-            break
-        i = max(0, j - overlap)
-    return chunks
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=overlap,
+        separators=["\n\n", "\n", ". ", ", ", " ", ""],
+        length_function=len,
+        is_separator_regex=False,
+    )
+    return splitter.split_text(text)
