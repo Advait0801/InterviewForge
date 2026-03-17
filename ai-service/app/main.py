@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from datetime import datetime, timezone
-import os
 from dotenv import load_dotenv
+from app.api.rag import router as rag_router
 
 load_dotenv()
 
@@ -20,3 +20,5 @@ def health():
 @app.get("/")
 def root():
     return {"message": "InterviewForge AI Service"}
+
+app.include_router(rag_router)

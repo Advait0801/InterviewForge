@@ -61,7 +61,7 @@ services:
       - interviewforge-pgdata:/var/lib/postgresql/data
 
   chromadb:
-    image: chromadb/chroma:latest
+    image: chromadb/chroma:0.5.5
     container_name: interviewforge-chroma
     ports:
       - "8001:8000"
