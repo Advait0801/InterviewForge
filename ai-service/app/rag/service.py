@@ -1,5 +1,5 @@
 import hashlib
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from app.core import config
 from app.rag.chunking import chunk_text
 from app.rag.embeddings import EmbeddingService
@@ -12,7 +12,7 @@ class RAGService:
 
     def ingest_documents(self, docs: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        docs: [{ "source": "...", "text": "..." }]
+        docs: [{ "source": "...", "text": "...", "metadata": {...} }]
         """
         ids: List[str] = []
         texts: List[str] = []
@@ -21,6 +21,7 @@ class RAGService:
         for d in docs:
             source = str(d.get("source", "unknown"))
             text = str(d.get("text", "")).strip()
+            base_metadata = dict(d.get("metadata", {}) or {})
             if not text:
                 continue
 
@@ -35,7 +36,11 @@ class RAGService:
                 cid = hashlib.sha256(stable.encode("utf-8")).hexdigest()
                 ids.append(cid)
                 texts.append(part)
-                metadatas.append({"source": source, "chunk_index": idx})
+                metadatas.append({
+                    "source": source,
+                    "chunk_index": idx,
+                    **base_metadata,
+                })
 
         if not ids:
             return {"ingested": 0}
@@ -52,12 +57,13 @@ class RAGService:
 
         return {"ingested": len(ids)}
 
-    def retrieve(self, query: str, *, top_k: int) -> Dict[str, Any]:
+    def retrieve(self, query: str, *, top_k: int, where: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         qvec = self.embedder.embed([query])[0]
         result = self.collection.query(
             query_embeddings=[qvec],
             n_results=top_k,
             include=["documents", "metadatas", "distances"],
+            where=where,
         )
 
         hits = []
@@ -71,4 +77,4 @@ class RAGService:
                 }
             )
 
-        return {"query": query, "top_k": top_k, "hits": hits}
+        return {"query": query, "top_k": top_k, "where": where, "hits": hits}

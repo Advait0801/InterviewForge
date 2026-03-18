@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.routes";
 import usersRoutes from "./routes/users.routes";
 import problemsRoutes from "./routes/problems.routes";
 import submissionRoutes from "./routes/submission.routes";
+import interviewsRoutes from "./routes/interviews.routes";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/problems", problemsRoutes);
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/interviews", interviewsRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on port ${PORT}`);

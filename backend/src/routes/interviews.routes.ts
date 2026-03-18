@@ -1,0 +1,330 @@
+import { Router } from "express";
+import { query } from "../db";
+import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
+import {
+  UUID_REGEX,
+  normalizeCompany,
+  isValidInterviewStage,
+  type InterviewStage,
+  shouldAskFollowup,
+  getNextStage,
+  getDefaultDifficulty,
+  buildEvaluationSummary,
+} from "../services/interview-state.service";
+import {
+  evaluateAnswer,
+  generateFollowup,
+  generateNextQuestion,
+} from "../services/ai.service";
+
+const router = Router();
+
+type SessionRow = {
+  id: string;
+  user_id: string;
+  company: string;
+  current_stage: string;
+  status: string;
+  stage_turn_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+type MessageRow = {
+  id: string;
+  session_id: string;
+  role: string;
+  stage: string;
+  content: string;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+};
+
+function getSingleParam(value: string | string[] | undefined): string | null {
+  return typeof value === "string" ? value : null;
+}
+
+async function getSessionForUser(sessionId: string, userId: string) {
+  return query<SessionRow>(
+    `SELECT id, user_id, company, current_stage, status, stage_turn_count, created_at, updated_at
+     FROM interview_sessions
+     WHERE id = $1 AND user_id = $2`,
+    [sessionId, userId]
+  );
+}
+
+async function getSessionMessages(sessionId: string) {
+  return query<MessageRow>(
+    `SELECT id, session_id, role, stage, content, metadata_json, created_at
+     FROM interview_messages
+     WHERE session_id = $1
+     ORDER BY created_at ASC`,
+    [sessionId]
+  );
+}
+
+async function insertMessage(params: {
+  sessionId: string;
+  role: "assistant" | "candidate" | "system";
+  stage: string;
+  content: string;
+  metadata: Record<string, unknown>;
+}) {
+  await query(
+    `INSERT INTO interview_messages (session_id, role, stage, content, metadata_json)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [params.sessionId, params.role, params.stage, params.content, JSON.stringify(params.metadata)]
+  );
+}
+
+router.post("/", requireAuth, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  const { company, difficulty } = req.body as { company?: string; difficulty?: string };
+
+  if (!company) {
+    return res.status(400).json({ error: "company is required" });
+  }
+
+  const normalizedCompany = normalizeCompany(company);
+  if (!normalizedCompany) {
+    return res.status(400).json({ error: "company must be one of: amazon, google, meta" });
+  }
+
+  const startingStage: InterviewStage = "behavioral";
+  const stageDifficulty = difficulty ?? getDefaultDifficulty(startingStage);
+
+  try {
+    const sessionResult = await query<{ id: string }>(
+      `INSERT INTO interview_sessions (user_id, company, current_stage, status, stage_turn_count)
+       VALUES ($1, $2, $3, 'active', 0)
+       RETURNING id`,
+      [userId, normalizedCompany, startingStage]
+    );
+
+    const sessionId = sessionResult.rows[0].id;
+    const nextQuestion = await generateNextQuestion({
+      company: normalizedCompany,
+      stage: startingStage,
+      difficulty: stageDifficulty,
+    });
+
+    await insertMessage({
+      sessionId,
+      role: "assistant",
+      stage: startingStage,
+      content: nextQuestion.question,
+      metadata: {
+        kind: "question",
+        company: normalizedCompany,
+        stage: startingStage,
+        reasoningFocus: nextQuestion.reasoningFocus,
+        expectedCompetencies: nextQuestion.expectedCompetencies,
+        context: nextQuestion.context,
+      },
+    });
+
+    return res.status(201).json({
+      session: {
+        id: sessionId,
+        company: normalizedCompany,
+        currentStage: startingStage,
+        status: "active",
+      },
+      openingQuestion: nextQuestion,
+    });
+  } catch (err) {
+    console.error("Create interview session error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/:id", requireAuth, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  const id = getSingleParam(req.params.id);
+
+  if (!id || !UUID_REGEX.test(id)) {
+    return res.status(400).json({ error: "Invalid session id" });
+  }
+
+  try {
+    const sessionResult = await getSessionForUser(id, userId);
+    if (sessionResult.rows.length === 0) {
+      return res.status(404).json({ error: "Interview session not found" });
+    }
+
+    const messagesResult = await getSessionMessages(id);
+    return res.json({
+      session: sessionResult.rows[0],
+      messages: messagesResult.rows,
+    });
+  } catch (err) {
+    console.error("Get interview session error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/:id/answer", requireAuth, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  const id = getSingleParam(req.params.id);
+  const { answer } = req.body as { answer?: string };
+
+  if (!id || !UUID_REGEX.test(id)) {
+    return res.status(400).json({ error: "Invalid session id" });
+  }
+
+  if (!answer?.trim()) {
+    return res.status(400).json({ error: "answer is required" });
+  }
+
+  try {
+    const sessionResult = await getSessionForUser(id, userId);
+    if (sessionResult.rows.length === 0) {
+      return res.status(404).json({ error: "Interview session not found" });
+    }
+
+    const session = sessionResult.rows[0];
+    if (!isValidInterviewStage(session.current_stage)) {
+      return res.status(500).json({ error: "Interview session is in an invalid stage" });
+    }
+
+    if (session.status !== "active") {
+      return res.status(400).json({ error: "Interview session is not active" });
+    }
+
+    const latestQuestionResult = await query<MessageRow>(
+      `SELECT id, session_id, role, stage, content, metadata_json, created_at
+       FROM interview_messages
+       WHERE session_id = $1 AND role = 'assistant' AND stage = $2
+         AND (metadata_json->>'kind' = 'question' OR metadata_json->>'kind' = 'followup')
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [id, session.current_stage]
+    );
+
+    if (latestQuestionResult.rows.length === 0) {
+      return res.status(400).json({ error: "No active interview question found" });
+    }
+
+    const latestQuestion = latestQuestionResult.rows[0];
+
+    await insertMessage({
+      sessionId: id,
+      role: "candidate",
+      stage: session.current_stage,
+      content: answer,
+      metadata: { kind: "answer" },
+    });
+
+    const evaluation = await evaluateAnswer({
+      company: normalizeCompany(session.company)!,
+      stage: session.current_stage,
+      question: latestQuestion.content,
+      answer,
+      context: String(latestQuestion.metadata_json.context ?? ""),
+    });
+
+    await insertMessage({
+      sessionId: id,
+      role: "system",
+      stage: session.current_stage,
+      content: buildEvaluationSummary(evaluation),
+      metadata: { kind: "evaluation", ...evaluation },
+    });
+
+    if (shouldAskFollowup(session.stage_turn_count) && evaluation.shouldAskFollowup) {
+      const followup = await generateFollowup({
+        company: normalizeCompany(session.company)!,
+        stage: session.current_stage,
+        question: latestQuestion.content,
+        answer,
+        evaluation,
+      });
+
+      await insertMessage({
+        sessionId: id,
+        role: "assistant",
+        stage: session.current_stage,
+        content: followup.question,
+        metadata: {
+          kind: "followup",
+          focus: followup.focus,
+          reason: followup.reason,
+        },
+      });
+
+      await query(
+        `UPDATE interview_sessions
+         SET stage_turn_count = stage_turn_count + 1, updated_at = NOW()
+         WHERE id = $1`,
+        [id]
+      );
+
+      return res.json({
+        action: "followup",
+        sessionId: id,
+        stage: session.current_stage,
+        evaluation,
+        nextQuestion: followup,
+      });
+    }
+
+    const nextStage = getNextStage(session.current_stage);
+    if (nextStage === "report") {
+      await query(
+        `UPDATE interview_sessions
+         SET current_stage = 'report', status = 'completed', stage_turn_count = 0, updated_at = NOW()
+         WHERE id = $1`,
+        [id]
+      );
+
+      return res.json({
+        action: "completed",
+        sessionId: id,
+        evaluation,
+      });
+    }
+
+    const nextQuestion = await generateNextQuestion({
+      company: normalizeCompany(session.company)!,
+      stage: nextStage,
+      difficulty: getDefaultDifficulty(nextStage),
+      previousAnswer: answer,
+    });
+
+    await insertMessage({
+      sessionId: id,
+      role: "assistant",
+      stage: nextStage,
+      content: nextQuestion.question,
+      metadata: {
+        kind: "question",
+        company: session.company,
+        stage: nextStage,
+        reasoningFocus: nextQuestion.reasoningFocus,
+        expectedCompetencies: nextQuestion.expectedCompetencies,
+        context: nextQuestion.context,
+      },
+    });
+
+    await query(
+      `UPDATE interview_sessions
+       SET current_stage = $2, stage_turn_count = 0, updated_at = NOW()
+       WHERE id = $1`,
+      [id, nextStage]
+    );
+
+    return res.json({
+      action: "advance_stage",
+      sessionId: id,
+      previousStage: session.current_stage,
+      currentStage: nextStage,
+      evaluation,
+      nextQuestion,
+    });
+  } catch (err) {
+    console.error("Submit interview answer error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+export default router;
