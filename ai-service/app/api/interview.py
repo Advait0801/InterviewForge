@@ -86,6 +86,16 @@ def _safe_company_style(company: str) -> str:
     return get_company_style(company)
 
 
+def _raise_llm_http_error(exc: Exception) -> None:
+    text = str(exc)
+    lowered = text.lower()
+
+    if "429" in lowered or "quota" in lowered or "rate limit" in lowered or "resourceexhausted" in lowered:
+        raise HTTPException(status_code=429, detail=f"LLM rate limited: {text}")
+
+    raise HTTPException(status_code=503, detail=f"LLM unavailable: {text}")
+
+
 @router.post("/generate-question")
 async def generate_question(req: GenerateQuestionRequest):
     rag = _get_rag_service()
@@ -98,11 +108,14 @@ async def generate_question(req: GenerateQuestionRequest):
         raise HTTPException(status_code=503, detail=f"RAG backend unavailable (Chroma down?): {e}")
     context = build_context_from_hits(retrieved["hits"])
 
-    result = await invoke_with_fallback(question_generation_chain, {
-        "context": context,
-        "topic": req.topic,
-        "difficulty": req.difficulty,
-    })
+    try:
+        result = await invoke_with_fallback(question_generation_chain, {
+            "context": context,
+            "topic": req.topic,
+            "difficulty": req.difficulty,
+        })
+    except Exception as exc:
+        _raise_llm_http_error(exc)
 
     return {
         "question": result,
@@ -114,11 +127,14 @@ async def generate_question(req: GenerateQuestionRequest):
 
 @router.post("/evaluate")
 async def evaluate(req: EvaluateRequest):
-    result = await invoke_with_fallback(evaluation_chain, {
-        "question": req.question,
-        "answer": req.answer,
-        "context": req.context or "No additional context provided.",
-    })
+    try:
+        result = await invoke_with_fallback(evaluation_chain, {
+            "question": req.question,
+            "answer": req.answer,
+            "context": req.context or "No additional context provided.",
+        })
+    except Exception as exc:
+        _raise_llm_http_error(exc)
 
     return {
         "evaluation": result,
@@ -128,11 +144,14 @@ async def evaluate(req: EvaluateRequest):
 
 @router.post("/followup")
 async def followup(req: FollowUpRequest):
-    result = await invoke_with_fallback(followup_chain, {
-        "question": req.question,
-        "answer": req.answer,
-        "evaluation": req.evaluation,
-    })
+    try:
+        result = await invoke_with_fallback(followup_chain, {
+            "question": req.question,
+            "answer": req.answer,
+            "evaluation": req.evaluation,
+        })
+    except Exception as exc:
+        _raise_llm_http_error(exc)
 
     return {
         "followup_question": result,
@@ -164,13 +183,16 @@ async def next_question(req: NextQuestionRequest):
         raise HTTPException(status_code=503, detail=f"RAG backend unavailable (Chroma down?): {e}")
 
     context = build_context_from_hits(retrieved["hits"])
-    result = await invoke_with_fallback(structured_question_chain, {
-        "company": req.company,
-        "company_style": _safe_company_style(req.company),
-        "stage": req.stage,
-        "difficulty": req.difficulty,
-        "context": context,
-    })
+    try:
+        result = await invoke_with_fallback(structured_question_chain, {
+            "company": req.company,
+            "company_style": _safe_company_style(req.company),
+            "stage": req.stage,
+            "difficulty": req.difficulty,
+            "context": context,
+        })
+    except Exception as exc:
+        _raise_llm_http_error(exc)
     return {
         **result,
         "retrievalHits": len(retrieved["hits"]),
@@ -185,14 +207,17 @@ async def evaluate_answer(req: EvaluateAnswerRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    result = await invoke_with_fallback(structured_evaluation_chain, {
-        "company": req.company,
-        "company_style": _safe_company_style(req.company),
-        "stage": req.stage,
-        "question": req.question,
-        "answer": req.answer,
-        "context": req.context or "No additional context provided.",
-    })
+    try:
+        result = await invoke_with_fallback(structured_evaluation_chain, {
+            "company": req.company,
+            "company_style": _safe_company_style(req.company),
+            "stage": req.stage,
+            "question": req.question,
+            "answer": req.answer,
+            "context": req.context or "No additional context provided.",
+        })
+    except Exception as exc:
+        _raise_llm_http_error(exc)
     return result
 
 
@@ -203,12 +228,15 @@ async def generate_followup(req: GenerateFollowupRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    result = await invoke_with_fallback(structured_followup_chain, {
-        "company": req.company,
-        "company_style": _safe_company_style(req.company),
-        "stage": req.stage,
-        "question": req.question,
-        "answer": req.answer,
-        "evaluation": json.dumps(req.evaluation),
-    })
+    try:
+        result = await invoke_with_fallback(structured_followup_chain, {
+            "company": req.company,
+            "company_style": _safe_company_style(req.company),
+            "stage": req.stage,
+            "question": req.question,
+            "answer": req.answer,
+            "evaluation": json.dumps(req.evaluation),
+        })
+    except Exception as exc:
+        _raise_llm_http_error(exc)
     return result

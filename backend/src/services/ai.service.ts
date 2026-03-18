@@ -5,6 +5,18 @@ import {
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://ai-service:8000";
 
+export class AIServiceError extends Error {
+  statusCode: number;
+  details: unknown;
+
+  constructor(statusCode: number, message: string, details?: unknown) {
+    super(message);
+    this.name = "AIServiceError";
+    this.statusCode = statusCode;
+    this.details = details;
+  }
+}
+
 export interface StructuredEvaluation {
   score: number;
   strengths: string[];
@@ -29,15 +41,37 @@ export interface StructuredFollowup {
 }
 
 async function postJson<T>(path: string, payload: unknown): Promise<T> {
-  const response = await fetch(`${AI_SERVICE_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  let response: globalThis.Response;
+  try {
+    response = await fetch(`${AI_SERVICE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "AI service request failed before receiving a response";
+    throw new AIServiceError(503, `AI service unavailable: ${message}`);
+  }
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`AI service error (${response.status}): ${text}`);
+    let parsed: unknown = text;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      parsed = text;
+    }
+
+    const message =
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "detail" in parsed &&
+      typeof (parsed as { detail?: unknown }).detail === "string"
+        ? (parsed as { detail: string }).detail
+        : `AI service error (${response.status})`;
+
+    throw new AIServiceError(response.status, message, parsed);
   }
 
   return response.json() as Promise<T>;

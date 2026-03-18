@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Response, Router } from "express";
 import { query } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
 import {
@@ -15,6 +15,7 @@ import {
   evaluateAnswer,
   generateFollowup,
   generateNextQuestion,
+  AIServiceError,
 } from "../services/ai.service";
 
 const router = Router();
@@ -42,6 +43,27 @@ type MessageRow = {
 
 function getSingleParam(value: string | string[] | undefined): string | null {
   return typeof value === "string" ? value : null;
+}
+
+function getAIServiceMessage(err: AIServiceError): string {
+  if (
+    typeof err.details === "object" &&
+    err.details !== null &&
+    "detail" in err.details &&
+    typeof (err.details as { detail?: unknown }).detail === "string"
+  ) {
+    return (err.details as { detail: string }).detail;
+  }
+
+  return err.message;
+}
+
+function sendAIServiceError(res: Response, err: AIServiceError) {
+  const statusCode = err.statusCode === 429 ? 429 : 503;
+  return res.status(statusCode).json({
+    error: getAIServiceMessage(err),
+    retryable: true,
+  });
 }
 
 async function getSessionForUser(sessionId: string, userId: string) {
@@ -94,6 +116,12 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
   const stageDifficulty = difficulty ?? getDefaultDifficulty(startingStage);
 
   try {
+    const nextQuestion = await generateNextQuestion({
+      company: normalizedCompany,
+      stage: startingStage,
+      difficulty: stageDifficulty,
+    });
+
     const sessionResult = await query<{ id: string }>(
       `INSERT INTO interview_sessions (user_id, company, current_stage, status, stage_turn_count)
        VALUES ($1, $2, $3, 'active', 0)
@@ -102,11 +130,6 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
     );
 
     const sessionId = sessionResult.rows[0].id;
-    const nextQuestion = await generateNextQuestion({
-      company: normalizedCompany,
-      stage: startingStage,
-      difficulty: stageDifficulty,
-    });
 
     await insertMessage({
       sessionId,
@@ -133,6 +156,9 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
       openingQuestion: nextQuestion,
     });
   } catch (err) {
+    if (err instanceof AIServiceError) {
+      return sendAIServiceError(res, err);
+    }
     console.error("Create interview session error", err);
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -206,38 +232,42 @@ router.post("/:id/answer", requireAuth, async (req: AuthRequest, res) => {
     }
 
     const latestQuestion = latestQuestionResult.rows[0];
-
-    await insertMessage({
-      sessionId: id,
-      role: "candidate",
-      stage: session.current_stage,
-      content: answer,
-      metadata: { kind: "answer" },
-    });
+    const normalizedCompany = normalizeCompany(session.company);
+    if (!normalizedCompany) {
+      return res.status(500).json({ error: "Interview session has an invalid company" });
+    }
 
     const evaluation = await evaluateAnswer({
-      company: normalizeCompany(session.company)!,
+      company: normalizedCompany,
       stage: session.current_stage,
       question: latestQuestion.content,
       answer,
       context: String(latestQuestion.metadata_json.context ?? ""),
     });
 
-    await insertMessage({
-      sessionId: id,
-      role: "system",
-      stage: session.current_stage,
-      content: buildEvaluationSummary(evaluation),
-      metadata: { kind: "evaluation", ...evaluation },
-    });
-
     if (shouldAskFollowup(session.stage_turn_count) && evaluation.shouldAskFollowup) {
       const followup = await generateFollowup({
-        company: normalizeCompany(session.company)!,
+        company: normalizedCompany,
         stage: session.current_stage,
         question: latestQuestion.content,
         answer,
         evaluation,
+      });
+
+      await insertMessage({
+        sessionId: id,
+        role: "candidate",
+        stage: session.current_stage,
+        content: answer,
+        metadata: { kind: "answer" },
+      });
+
+      await insertMessage({
+        sessionId: id,
+        role: "system",
+        stage: session.current_stage,
+        content: buildEvaluationSummary(evaluation),
+        metadata: { kind: "evaluation", ...evaluation },
       });
 
       await insertMessage({
@@ -270,6 +300,22 @@ router.post("/:id/answer", requireAuth, async (req: AuthRequest, res) => {
 
     const nextStage = getNextStage(session.current_stage);
     if (nextStage === "report") {
+      await insertMessage({
+        sessionId: id,
+        role: "candidate",
+        stage: session.current_stage,
+        content: answer,
+        metadata: { kind: "answer" },
+      });
+
+      await insertMessage({
+        sessionId: id,
+        role: "system",
+        stage: session.current_stage,
+        content: buildEvaluationSummary(evaluation),
+        metadata: { kind: "evaluation", ...evaluation },
+      });
+
       await query(
         `UPDATE interview_sessions
          SET current_stage = 'report', status = 'completed', stage_turn_count = 0, updated_at = NOW()
@@ -285,10 +331,26 @@ router.post("/:id/answer", requireAuth, async (req: AuthRequest, res) => {
     }
 
     const nextQuestion = await generateNextQuestion({
-      company: normalizeCompany(session.company)!,
+      company: normalizedCompany,
       stage: nextStage,
       difficulty: getDefaultDifficulty(nextStage),
       previousAnswer: answer,
+    });
+
+    await insertMessage({
+      sessionId: id,
+      role: "candidate",
+      stage: session.current_stage,
+      content: answer,
+      metadata: { kind: "answer" },
+    });
+
+    await insertMessage({
+      sessionId: id,
+      role: "system",
+      stage: session.current_stage,
+      content: buildEvaluationSummary(evaluation),
+      metadata: { kind: "evaluation", ...evaluation },
     });
 
     await insertMessage({
@@ -322,6 +384,9 @@ router.post("/:id/answer", requireAuth, async (req: AuthRequest, res) => {
       nextQuestion,
     });
   } catch (err) {
+    if (err instanceof AIServiceError) {
+      return sendAIServiceError(res, err);
+    }
     console.error("Submit interview answer error", err);
     return res.status(500).json({ error: "Internal server error" });
   }
