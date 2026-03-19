@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from app.api.rag import router as rag_router
 from app.api.interview import router as interview_router
+from app.api.speech import router as speech_router
+from app.api.system_design import router as system_design_router
 
 load_dotenv()
 
@@ -24,3 +26,5 @@ def root():
 
 app.include_router(rag_router)
 app.include_router(interview_router)
+app.include_router(speech_router)
+app.include_router(system_design_router)

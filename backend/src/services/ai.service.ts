@@ -40,6 +40,51 @@ export interface StructuredFollowup {
   reason: string;
 }
 
+export interface VoiceRubricSection {
+  score: number;
+  notes: string;
+}
+
+export interface VoiceEvaluation {
+  overallScore: number;
+  technicalCorrectness: VoiceRubricSection;
+  communicationClarity: VoiceRubricSection;
+  completeness: VoiceRubricSection;
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+}
+
+export interface SpeechTranscriptionResult {
+  transcript: string;
+}
+
+export interface VoiceEvaluationResult {
+  transcript: string;
+  evaluation: VoiceEvaluation;
+}
+
+export interface SystemDesignNode {
+  id: string;
+  label: string;
+  type: string;
+}
+
+export interface SystemDesignEdge {
+  source: string;
+  target: string;
+  label: string;
+}
+
+export interface SystemDesignAnalysis {
+  summary: string;
+  nodes: SystemDesignNode[];
+  edges: SystemDesignEdge[];
+  risks: string[];
+  improvements: string[];
+  rubric: Record<string, VoiceRubricSection>;
+}
+
 async function postJson<T>(path: string, payload: unknown): Promise<T> {
   let response: globalThis.Response;
   try {
@@ -104,4 +149,32 @@ export async function generateFollowup(params: {
   evaluation: StructuredEvaluation;
 }): Promise<StructuredFollowup> {
   return postJson<StructuredFollowup>("/api/interview/generate-followup", params);
+}
+
+export async function transcribeSpeech(params: {
+  audioBase64: string;
+  mimeType?: string;
+  filename?: string;
+  language?: string;
+}): Promise<SpeechTranscriptionResult> {
+  return postJson<SpeechTranscriptionResult>("/api/speech/transcribe", params);
+}
+
+export async function evaluateVoiceExplanation(params: {
+  audioBase64: string;
+  mimeType?: string;
+  filename?: string;
+  language?: string;
+  question: string;
+  context?: string;
+}): Promise<VoiceEvaluationResult> {
+  return postJson<VoiceEvaluationResult>("/api/speech/evaluate-explanation", params);
+}
+
+export async function analyzeSystemDesign(params: {
+  prompt: string;
+  explanation: string;
+  company?: string;
+}): Promise<SystemDesignAnalysis> {
+  return postJson<SystemDesignAnalysis>("/api/system-design/analyze", params);
 }

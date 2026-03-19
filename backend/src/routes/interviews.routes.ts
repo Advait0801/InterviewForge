@@ -12,10 +12,13 @@ import {
   buildEvaluationSummary,
 } from "../services/interview-state.service";
 import {
+  analyzeSystemDesign,
   evaluateAnswer,
+  evaluateVoiceExplanation,
   generateFollowup,
   generateNextQuestion,
   AIServiceError,
+  transcribeSpeech,
 } from "../services/ai.service";
 
 const router = Router();
@@ -388,6 +391,101 @@ router.post("/:id/answer", requireAuth, async (req: AuthRequest, res) => {
       return sendAIServiceError(res, err);
     }
     console.error("Submit interview answer error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/speech/transcribe", requireAuth, async (req: AuthRequest, res) => {
+  const { audioBase64, mimeType, filename, language } = req.body as {
+    audioBase64?: string;
+    mimeType?: string;
+    filename?: string;
+    language?: string;
+  };
+
+  if (!audioBase64?.trim()) {
+    return res.status(400).json({ error: "audioBase64 is required" });
+  }
+
+  try {
+    const result = await transcribeSpeech({
+      audioBase64,
+      mimeType,
+      filename,
+      language,
+    });
+    return res.json(result);
+  } catch (err) {
+    if (err instanceof AIServiceError) {
+      return sendAIServiceError(res, err);
+    }
+    console.error("Speech transcription error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/speech/evaluate-explanation", requireAuth, async (req: AuthRequest, res) => {
+  const { audioBase64, mimeType, filename, language, question, context } = req.body as {
+    audioBase64?: string;
+    mimeType?: string;
+    filename?: string;
+    language?: string;
+    question?: string;
+    context?: string;
+  };
+
+  if (!audioBase64?.trim()) {
+    return res.status(400).json({ error: "audioBase64 is required" });
+  }
+  if (!question?.trim()) {
+    return res.status(400).json({ error: "question is required" });
+  }
+
+  try {
+    const result = await evaluateVoiceExplanation({
+      audioBase64,
+      mimeType,
+      filename,
+      language,
+      question,
+      context,
+    });
+    return res.json(result);
+  } catch (err) {
+    if (err instanceof AIServiceError) {
+      return sendAIServiceError(res, err);
+    }
+    console.error("Voice explanation evaluation error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/system-design/analyze", requireAuth, async (req: AuthRequest, res) => {
+  const { prompt, explanation, company } = req.body as {
+    prompt?: string;
+    explanation?: string;
+    company?: string;
+  };
+
+  if (!prompt?.trim()) {
+    return res.status(400).json({ error: "prompt is required" });
+  }
+  if (!explanation?.trim()) {
+    return res.status(400).json({ error: "explanation is required" });
+  }
+
+  try {
+    const result = await analyzeSystemDesign({
+      prompt,
+      explanation,
+      company,
+    });
+    return res.json(result);
+  } catch (err) {
+    if (err instanceof AIServiceError) {
+      return sendAIServiceError(res, err);
+    }
+    console.error("System design analysis error", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

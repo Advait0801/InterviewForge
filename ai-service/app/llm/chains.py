@@ -1,6 +1,6 @@
 import re
 import time
-from typing import Callable, List, Optional, TypeVar
+from typing import Callable, Dict, List, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
@@ -180,6 +180,42 @@ class StructuredFollowupOutput(BaseModel):
     reason: str = Field(description="Why this follow-up is appropriate.")
 
 
+class RubricSectionScore(BaseModel):
+    score: int = Field(ge=1, le=10, description="Section score from 1 to 10.")
+    notes: str = Field(description="Short rationale for the section score.")
+
+
+class VoiceRubricOutput(BaseModel):
+    overallScore: int = Field(ge=1, le=10, description="Overall score from 1 to 10.")
+    technicalCorrectness: RubricSectionScore
+    communicationClarity: RubricSectionScore
+    completeness: RubricSectionScore
+    strengths: List[str]
+    weaknesses: List[str]
+    suggestions: List[str]
+
+
+class ArchitectureNode(BaseModel):
+    id: str = Field(description="Stable node identifier in snake_case.")
+    label: str = Field(description="Human-readable component label.")
+    type: str = Field(description="Component type, e.g. client, service, db, queue.")
+
+
+class ArchitectureEdge(BaseModel):
+    source: str = Field(description="Source node id.")
+    target: str = Field(description="Target node id.")
+    label: str = Field(description="Connection description.")
+
+
+class SystemDesignAnalysisOutput(BaseModel):
+    summary: str = Field(description="Concise architecture summary.")
+    nodes: List[ArchitectureNode]
+    edges: List[ArchitectureEdge]
+    risks: List[str]
+    improvements: List[str]
+    rubric: Dict[str, RubricSectionScore]
+
+
 def structured_question_chain(provider: Optional[str] = None):
     parser = JsonOutputParser(pydantic_object=StructuredQuestionOutput)
     prompt = ChatPromptTemplate.from_messages([
@@ -234,6 +270,41 @@ def structured_followup_chain(provider: Optional[str] = None):
             "## Original question\n{question}\n\n"
             "## Candidate answer\n{answer}\n\n"
             "## Evaluation summary\n{evaluation}"
+        )),
+    ]).partial(format_instructions=parser.get_format_instructions())
+    return prompt | _get_llm(provider) | parser
+
+
+def voice_explanation_rubric_chain(provider: Optional[str] = None):
+    parser = JsonOutputParser(pydantic_object=VoiceRubricOutput)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "You are InterviewForge, an expert technical interviewer. "
+            "Evaluate the candidate's spoken explanation transcript. "
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", (
+            "## Question\n{question}\n\n"
+            "## Candidate Transcript\n{transcript}\n\n"
+            "## Optional Context\n{context}"
+        )),
+    ]).partial(format_instructions=parser.get_format_instructions())
+    return prompt | _get_llm(provider) | parser
+
+
+def system_design_analysis_chain(provider: Optional[str] = None):
+    parser = JsonOutputParser(pydantic_object=SystemDesignAnalysisOutput)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "You are InterviewForge, a senior system design interviewer. "
+            "Extract architecture components and relationships from the candidate explanation. "
+            "Always include realistic trade-offs and score sections in the rubric map using these keys: "
+            "requirements, scalability, reliability, data_modeling, communication. "
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", (
+            "## Prompt\n{prompt}\n\n"
+            "## Candidate Explanation\n{explanation}"
         )),
     ]).partial(format_instructions=parser.get_format_instructions())
     return prompt | _get_llm(provider) | parser
