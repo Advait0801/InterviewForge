@@ -2,12 +2,22 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { api, Problem } from "@/lib/api";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.04, duration: 0.35, ease: "easeOut" as const },
+  }),
+};
 
 export default function ProblemsPage() {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -32,37 +42,48 @@ export default function ProblemsPage() {
   return (
     <Protected>
       <PageShell>
-        <h1 className="mb-4 text-3xl font-semibold">Problems</h1>
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <Input className="max-w-sm" placeholder="Search problems..." value={query} onChange={(e) => setQuery(e.target.value)} />
-          {(["all", "easy", "medium", "hard"] as const).map((d) => (
-            <button
-              key={d}
-              onClick={() => setDifficulty(d)}
-              className={`rounded-full border px-3 py-1 text-sm ${difficulty === d ? "border-primary text-primary" : "border-border text-text-secondary"}`}
-              type="button"
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-        <div className="space-y-3">
-          {filtered.map((p) => (
-            <Link href={`/problems/${p.id}`} key={p.id}>
-              <Card className="transition hover:border-primary">
-                <div className="mb-2 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">{p.title}</h2>
-                  <Badge
-                    tone={p.difficulty === "easy" ? "success" : p.difficulty === "medium" ? "warning" : "danger"}
-                  >
-                    {p.difficulty}
-                  </Badge>
-                </div>
-                <p className="text-sm text-text-secondary">{p.description}</p>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <motion.div initial="hidden" animate="visible">
+          <motion.h1 variants={fadeUp} custom={0} className="mb-4 text-3xl font-semibold">
+            Problems
+          </motion.h1>
+          <motion.div variants={fadeUp} custom={1} className="mb-4 flex flex-wrap items-center gap-2">
+            <Input
+              className="max-w-sm"
+              placeholder="Search problems..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            {(["all", "easy", "medium", "hard"] as const).map((d) => (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={`rounded-full border px-3 py-1 text-sm transition ${difficulty === d ? "border-primary text-primary" : "border-border text-text-secondary hover:border-primary/50"}`}
+                type="button"
+              >
+                {d}
+              </button>
+            ))}
+          </motion.div>
+          <div className="space-y-3">
+            {filtered.map((p, i) => (
+              <motion.div key={p.id} variants={fadeUp} custom={i + 2}>
+                <Link href={`/problems/${p.id}`}>
+                  <Card className="transition hover:border-primary">
+                    <div className="mb-2 flex items-center justify-between">
+                      <h2 className="text-lg font-semibold">{p.title}</h2>
+                      <Badge
+                        tone={p.difficulty === "easy" ? "success" : p.difficulty === "medium" ? "warning" : "danger"}
+                      >
+                        {p.difficulty}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-text-secondary">{p.description}</p>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </PageShell>
     </Protected>
   );

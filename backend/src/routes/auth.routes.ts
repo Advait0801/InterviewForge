@@ -5,25 +5,42 @@ import { hashPassword, verifyPassword, signAccessToken } from "../auth";
 const router = Router();
 
 router.post("/register", async (req, res) => {
-  const { email, password, name } = req.body as { email?: string; password?: string; name?: string };
+  const { username, email, password, fullName } = req.body as {
+    username?: string;
+    email?: string;
+    password?: string;
+    fullName?: string;
+  };
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: "Username, email, and password are required" });
+  }
+
+  if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+    return res.status(400).json({ error: "Username must be 3-20 characters (letters, numbers, underscore)" });
   }
 
   try {
-    const existing = await query<{ id: string }>("SELECT id FROM users WHERE email = $1", [email]);
-    if (existing.rows.length > 0) {
-      return res.status(409).json({ error: "User already exists" });
+    const existingEmail = await query<{ id: string }>("SELECT id FROM users WHERE LOWER(email) = LOWER($1)", [email]);
+    if (existingEmail.rows.length > 0) {
+      return res.status(409).json({ error: "Email already in use" });
+    }
+
+    const existingUsername = await query<{ id: string }>(
+      "SELECT id FROM users WHERE LOWER(username) = LOWER($1)",
+      [username]
+    );
+    if (existingUsername.rows.length > 0) {
+      return res.status(409).json({ error: "Username already taken" });
     }
 
     const passwordHash = await hashPassword(password);
 
     const result = await query<{ id: string }>(
-      `INSERT INTO users (email, password_hash, name)
-       VALUES ($1, $2, $3)
+      `INSERT INTO users (username, email, password_hash, name)
+       VALUES ($1, $2, $3, $4)
        RETURNING id`,
-      [email, passwordHash, name ?? null]
+      [username, email, passwordHash, fullName ?? null]
     );
 
     const userId = result.rows[0].id;
@@ -37,16 +54,19 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body as { email?: string; password?: string };
+  const { identifier, password } = req.body as { identifier?: string; password?: string };
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
+  if (!identifier || !password) {
+    return res.status(400).json({ error: "Email/username and password are required" });
   }
 
   try {
+    const isEmail = identifier.includes("@");
     const result = await query<{ id: string; password_hash: string }>(
-      "SELECT id, password_hash FROM users WHERE email = $1",
-      [email]
+      isEmail
+        ? "SELECT id, password_hash FROM users WHERE LOWER(email) = LOWER($1)"
+        : "SELECT id, password_hash FROM users WHERE LOWER(username) = LOWER($1)",
+      [identifier]
     );
 
     if (result.rows.length === 0) {

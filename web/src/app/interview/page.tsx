@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
@@ -20,6 +21,11 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
+};
+
 export default function InterviewPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<InterviewMessage[]>([]);
@@ -33,7 +39,14 @@ export default function InterviewPage() {
   const chunksRef = useRef<Blob[]>([]);
 
   const lastQuestion = useMemo(
-    () => [...messages].reverse().find((m) => m.role === "assistant" && (m.metadata_json?.kind === "question" || m.metadata_json?.kind === "followup")),
+    () =>
+      [...messages]
+        .reverse()
+        .find(
+          (m) =>
+            m.role === "assistant" &&
+            (m.metadata_json?.kind === "question" || m.metadata_json?.kind === "followup"),
+        ),
     [messages],
   );
 
@@ -97,79 +110,84 @@ export default function InterviewPage() {
   return (
     <Protected>
       <PageShell>
-        <div className="mb-4 flex items-center gap-2">
-          <StatusPill label="Interview in Progress" tone="success" />
-          <StatusPill label={typing ? "AI typing..." : "Ready"} tone="secondary" />
-          <StatusPill label={recording ? "Listening..." : "Mic idle"} tone="warning" />
-        </div>
+        <motion.div initial="hidden" animate="visible" variants={fadeUp}>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <StatusPill label="Interview in Progress" tone="success" />
+            <StatusPill label={typing ? "AI typing..." : "Ready"} tone="secondary" />
+            <StatusPill label={recording ? "Listening..." : "Mic idle"} tone="warning" />
+          </div>
 
-        {!sessionId ? (
-          <Card>
-            <h1 className="mb-3 text-2xl font-semibold">Live Interview Mode</h1>
-            <p className="mb-4 text-sm text-text-secondary">Start a new interview session to receive your first question.</p>
-            <Button onClick={startSession}>Start Interview</Button>
-          </Card>
-        ) : (
-          <Card className="space-y-4">
-            <div className="max-h-[420px] space-y-3 overflow-y-auto rounded-xl border border-border bg-background p-3">
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`rounded-xl border p-3 text-sm ${
-                    m.role === "assistant"
-                      ? "border-primary/50 bg-surface"
-                      : m.role === "candidate"
-                        ? "border-border bg-black/20"
-                        : "border-secondary/40 bg-secondary/10"
-                  }`}
-                >
-                  <p className="mb-1 text-xs uppercase text-text-secondary">{m.role}</p>
-                  <p className="whitespace-pre-wrap">{m.content}</p>
-                </div>
-              ))}
-              {typing ? <p className="text-sm text-text-secondary">AI is thinking...</p> : null}
-            </div>
-
-            {transcript ? (
-              <div className="rounded-xl border border-secondary/40 bg-secondary/10 p-3 text-sm">
-                <p className="mb-1 text-xs text-text-secondary">Last transcript</p>
-                <p>{transcript}</p>
+          {!sessionId ? (
+            <Card>
+              <h1 className="mb-3 text-2xl font-semibold">Live Interview Mode</h1>
+              <p className="mb-4 text-sm text-text-secondary">
+                Start a new interview session to receive your first question.
+              </p>
+              <Button onClick={startSession}>Start Interview</Button>
+            </Card>
+          ) : (
+            <Card className="space-y-4">
+              <div className="max-h-[420px] space-y-3 overflow-y-auto rounded-xl border border-border bg-background p-3">
+                {messages.map((m) => (
+                  <motion.div
+                    key={m.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className={`rounded-xl border p-3 text-sm ${
+                      m.role === "assistant"
+                        ? "border-primary/50 bg-surface"
+                        : m.role === "candidate"
+                          ? "border-border bg-black/20"
+                          : "border-secondary/40 bg-secondary/10"
+                    }`}
+                  >
+                    <p className="mb-1 text-xs uppercase text-text-secondary">{m.role}</p>
+                    <p className="whitespace-pre-wrap">{m.content}</p>
+                  </motion.div>
+                ))}
+                {typing ? <p className="text-sm text-text-secondary">AI is thinking...</p> : null}
               </div>
-            ) : null}
 
-            <div className="flex flex-col gap-2 md:flex-row">
-              <Input
-                placeholder="Type your answer..."
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                className="flex-1"
-              />
-              <Button onClick={submitAnswer}>Send</Button>
-              <Button variant={recording ? "danger" : "ghost"} onClick={toggleRecording}>
-                {recording ? "Stop Mic" : "Record"}
-              </Button>
-              {lastQuestion ? (
-                <Button
-                  variant="ghost"
-                  onClick={async () => {
-                    const audio = transcript;
-                    if (!audio || !lastQuestion) return;
-                    setTyping(true);
-                    try {
-                      if (!lastAudioBase64) return;
-                      await api.evaluateExplanation(lastAudioBase64, lastQuestion.content);
-                    } finally {
-                      setTyping(false);
-                    }
-                  }}
-                >
-                  Evaluate Voice
-                </Button>
+              {transcript ? (
+                <div className="rounded-xl border border-secondary/40 bg-secondary/10 p-3 text-sm">
+                  <p className="mb-1 text-xs text-text-secondary">Last transcript</p>
+                  <p>{transcript}</p>
+                </div>
               ) : null}
-            </div>
-            {error ? <p className="text-sm text-error">{error}</p> : null}
-          </Card>
-        )}
+
+              <div className="flex flex-col gap-2 md:flex-row">
+                <Input
+                  placeholder="Type your answer..."
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  className="flex-1"
+                />
+                <Button onClick={submitAnswer}>Send</Button>
+                <Button variant={recording ? "danger" : "ghost"} onClick={toggleRecording}>
+                  {recording ? "Stop Mic" : "Record"}
+                </Button>
+                {lastQuestion ? (
+                  <Button
+                    variant="ghost"
+                    onClick={async () => {
+                      if (!lastAudioBase64 || !lastQuestion) return;
+                      setTyping(true);
+                      try {
+                        await api.evaluateExplanation(lastAudioBase64, lastQuestion.content);
+                      } finally {
+                        setTyping(false);
+                      }
+                    }}
+                  >
+                    Evaluate Voice
+                  </Button>
+                ) : null}
+              </div>
+              {error ? <p className="text-sm text-error">{error}</p> : null}
+            </Card>
+          )}
+        </motion.div>
       </PageShell>
     </Protected>
   );

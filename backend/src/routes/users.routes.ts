@@ -7,8 +7,8 @@ const router = Router();
 router.get("/me", requireAuth, async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
-    const result = await query<{ id: string; email: string; name: string | null; created_at: string }>(
-      "SELECT id, email, name, created_at FROM users WHERE id = $1",
+    const result = await query<{ id: string; email: string; username: string | null; name: string | null; created_at: string }>(
+      "SELECT id, email, username, name, created_at FROM users WHERE id = $1",
       [userId]
     );
 

@@ -56,17 +56,20 @@ export type InterviewMessage = {
 };
 
 export const api = {
-  register: (email: string, password: string, name?: string) =>
+  register: (username: string, email: string, password: string, fullName?: string) =>
     request<{ token: string }>("/auth/register", {
       method: "POST",
-      body: { email, password, name },
+      body: { username, email, password, fullName },
     }),
-  login: (email: string, password: string) =>
+  login: (identifier: string, password: string) =>
     request<{ token: string }>("/auth/login", {
       method: "POST",
-      body: { email, password },
+      body: { identifier, password },
     }),
-  me: () => request<{ user: { id: string; email: string; name: string | null } }>("/users/me", { auth: true }),
+  me: () =>
+    request<{ user: { id: string; email: string; username: string | null; name: string | null } }>("/users/me", {
+      auth: true,
+    }),
   listProblems: () => request<{ problems: Problem[] }>("/problems"),
   getProblem: (id: string) => request<{ problem: ProblemDetail }>(`/problems/${id}`),
   submitCode: (problemId: string, language: string, code: string) =>
