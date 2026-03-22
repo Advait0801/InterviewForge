@@ -8,6 +8,7 @@ import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { api, Problem } from "@/lib/api";
 
 const fadeUp = {
@@ -25,7 +26,13 @@ export default function ProblemsPage() {
   const [difficulty, setDifficulty] = useState<"all" | "easy" | "medium" | "hard">("all");
 
   useEffect(() => {
-    api.listProblems().then((res) => setProblems(res.problems)).catch(() => setProblems([]));
+    api
+      .listProblems()
+      .then((res) => setProblems(res.problems))
+      .catch((err) => {
+        toast.error(err instanceof Error ? err.message : "Could not load problems");
+        setProblems([]);
+      });
   }, []);
 
   const filtered = useMemo(

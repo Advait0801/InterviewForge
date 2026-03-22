@@ -6,6 +6,7 @@ import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { api, ProblemDetail } from "@/lib/api";
 
 type SubmissionResult = {
@@ -29,7 +30,11 @@ export default function ProblemDetailPage() {
     api
       .getProblem(params.id)
       .then((res) => setProblem(res.problem))
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load problem"));
+      .catch((err) => {
+        const msg = err instanceof Error ? err.message : "Failed to load problem";
+        toast.error(msg);
+        setError(msg);
+      });
   }, [params.id]);
 
   const runSubmission = async () => {
@@ -45,7 +50,9 @@ export default function ProblemDetailPage() {
         runtimeMs: res.runtimeMs,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Submission failed");
+      const msg = err instanceof Error ? err.message : "Submission failed";
+      toast.error(msg);
+      setError(msg);
     } finally {
       setLoading(false);
     }

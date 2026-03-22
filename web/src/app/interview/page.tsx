@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusPill } from "@/components/ui/status-pill";
+import { toast } from "sonner";
 import { api, InterviewMessage } from "@/lib/api";
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -58,7 +59,9 @@ export default function InterviewPage() {
       const detail = await api.getInterview(started.session.id);
       setMessages(detail.messages);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start interview");
+      const msg = err instanceof Error ? err.message : "Failed to start interview";
+      toast.error(msg);
+      setError(msg);
     }
   };
 
@@ -72,7 +75,9 @@ export default function InterviewPage() {
       setMessages(detail.messages);
       setAnswer("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send answer");
+      const msg = err instanceof Error ? err.message : "Failed to send answer";
+      toast.error(msg);
+      setError(msg);
     } finally {
       setTyping(false);
     }
@@ -92,18 +97,26 @@ export default function InterviewPage() {
         if (ev.data.size > 0) chunksRef.current.push(ev.data);
       };
       recorder.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const buffer = await blob.arrayBuffer();
-        const base64Audio = arrayBufferToBase64(buffer);
-        setLastAudioBase64(base64Audio);
-        const transcribed = await api.transcribeSpeech(base64Audio);
-        setTranscript(transcribed.transcript);
+        try {
+          const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+          const buffer = await blob.arrayBuffer();
+          const base64Audio = arrayBufferToBase64(buffer);
+          setLastAudioBase64(base64Audio);
+          const transcribed = await api.transcribeSpeech(base64Audio);
+          setTranscript(transcribed.transcript);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Transcription failed";
+          toast.error(msg);
+          setError(msg);
+        }
       };
       mediaRecorderRef.current = recorder;
       recorder.start();
       setRecording(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not access microphone");
+      const msg = err instanceof Error ? err.message : "Could not access microphone";
+      toast.error(msg);
+      setError(msg);
     }
   };
 
@@ -175,6 +188,11 @@ export default function InterviewPage() {
                       setTyping(true);
                       try {
                         await api.evaluateExplanation(lastAudioBase64, lastQuestion.content);
+                        toast.success("Voice evaluation complete");
+                      } catch (err) {
+                        const msg = err instanceof Error ? err.message : "Evaluation failed";
+                        toast.error(msg);
+                        setError(msg);
                       } finally {
                         setTyping(false);
                       }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
@@ -58,7 +59,13 @@ export default function DashboardPage() {
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    api.me().then((res) => setEmail(res.user.email)).catch(() => {});
+    api
+      .me()
+      .then((res) => setEmail(res.user.email))
+      .catch((err) => {
+        const msg = err instanceof Error ? err.message : "Could not load profile";
+        toast.error(msg);
+      });
   }, []);
 
   return (

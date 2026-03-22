@@ -1,11 +1,17 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { getToken, clearToken } from "@/lib/auth";
 
 export function Navbar() {
-  const isAuthed = Boolean(getToken());
+  // Avoid hydration mismatch: localStorage is unavailable on the server, so auth is read only after mount.
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setIsAuthed(Boolean(getToken()));
+  }, []);
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-surface/90 backdrop-blur">
@@ -24,11 +30,17 @@ export function Navbar() {
             Interview
           </Link>
           <ThemeToggle />
-          {isAuthed ? (
+          {isAuthed === true ? (
+            <Link href="/settings" className="text-sm text-text-secondary hover:text-text-primary">
+              Settings
+            </Link>
+          ) : null}
+          {isAuthed === true ? (
             <button
               className="rounded-xl border border-border px-3 py-1 text-sm"
               onClick={() => {
                 clearToken();
+                setIsAuthed(false);
                 window.location.href = "/login";
               }}
               type="button"

@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PasswordField } from "@/components/ui/password-field";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { setToken } from "@/lib/auth";
 
@@ -63,6 +64,7 @@ export default function RegisterPage() {
     try {
       const res = await api.register(username, email, password, fullName || undefined);
       setToken(res.token);
+      toast.success("Account created");
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");

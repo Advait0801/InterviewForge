@@ -70,6 +70,12 @@ export const api = {
     request<{ user: { id: string; email: string; username: string | null; name: string | null } }>("/users/me", {
       auth: true,
     }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request<{ ok: boolean }>("/users/change-password", {
+      method: "POST",
+      auth: true,
+      body: { currentPassword, newPassword },
+    }),
   listProblems: () => request<{ problems: Problem[] }>("/problems"),
   getProblem: (id: string) => request<{ problem: ProblemDetail }>(`/problems/${id}`),
   submitCode: (problemId: string, language: string, code: string) =>
