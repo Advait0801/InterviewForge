@@ -23,21 +23,21 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.4, ease: "easeOut" as const },
+    transition: { delay: i * 0.08, duration: 0.45, ease: "easeOut" as const },
   }),
 };
 
 type Company = "amazon" | "google" | "meta";
 type Difficulty = "easy" | "medium" | "hard";
 
-const COMPANIES: { value: Company; label: string; focus: string }[] = [
-  { value: "amazon", label: "Amazon", focus: "Leadership principles, system design, and behavioral depth." },
-  { value: "google", label: "Google", focus: "Algorithms, problem solving, and analytical thinking." },
-  { value: "meta", label: "Meta", focus: "Practical coding, system scalability, and move-fast culture." },
+const COMPANIES: { value: Company; label: string; focus: string; color: string; icon: string }[] = [
+  { value: "amazon", label: "Amazon", focus: "Leadership principles, system design, and behavioral depth.", color: "border-warning hover:border-warning/70 hover:shadow-warning/10", icon: "🛒" },
+  { value: "google", label: "Google", focus: "Algorithms, problem solving, and analytical thinking.", color: "border-secondary hover:border-secondary/70 hover:shadow-secondary/10", icon: "🔍" },
+  { value: "meta", label: "Meta", focus: "Practical coding, system scalability, and move-fast culture.", color: "border-primary hover:border-primary/70 hover:shadow-primary/10", icon: "🌐" },
 ];
 
 const DIFFICULTIES: { value: Difficulty; label: string }[] = [
@@ -178,8 +178,8 @@ export default function InterviewPage() {
             /* ── Pre-session setup ── */
             <div className="space-y-8">
               <motion.div variants={fadeUp} custom={0}>
-                <h1 className="mb-2 text-3xl font-semibold sm:text-4xl">Live Interview Mode</h1>
-                <p className="max-w-2xl text-text-secondary">
+                <h1 className="mb-2 text-3xl font-bold sm:text-4xl lg:text-5xl tracking-tight">Live Interview Mode</h1>
+                <p className="max-w-2xl text-text-secondary text-lg leading-relaxed">
                   Simulate a full multi-stage technical interview. Choose a company and difficulty, then work through
                   behavioral, coding, system design, and core CS rounds — just like the real thing.
                 </p>
@@ -194,14 +194,15 @@ export default function InterviewPage() {
                       key={c.value}
                       type="button"
                       onClick={() => setSelectedCompany(c.value)}
-                      className={`rounded-2xl border-2 p-4 text-left transition ${
+                      className={`rounded-2xl border-2 p-5 text-left transition-all duration-300 hover:shadow-lg ${c.color} ${
                         selectedCompany === c.value
-                          ? "border-primary bg-primary/5"
-                          : "border-border bg-surface hover:border-primary/40"
+                          ? "bg-surface shadow-lg scale-[1.02]"
+                          : "border-border bg-surface/60 hover:scale-[1.01]"
                       }`}
                     >
-                      <p className="mb-1 text-lg font-semibold">{c.label}</p>
-                      <p className="text-sm text-text-secondary">{c.focus}</p>
+                      <span className="text-2xl">{c.icon}</span>
+                      <p className="mt-2 mb-1 text-lg font-bold">{c.label}</p>
+                      <p className="text-sm text-text-secondary leading-relaxed">{c.focus}</p>
                     </button>
                   ))}
                 </div>
@@ -210,35 +211,42 @@ export default function InterviewPage() {
               {/* Difficulty selector */}
               <motion.div variants={fadeUp} custom={2}>
                 <h2 className="mb-3 text-lg font-semibold">Difficulty</h2>
-                <div className="flex flex-wrap gap-2">
-                  {DIFFICULTIES.map((d) => (
-                    <button
-                      key={d.value}
-                      type="button"
-                      onClick={() => setSelectedDifficulty(d.value)}
-                      className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
-                        selectedDifficulty === d.value
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border text-text-secondary hover:border-primary/50"
-                      }`}
-                    >
-                      {d.label}
-                    </button>
-                  ))}
+                <div className="flex flex-wrap gap-3">
+                  {DIFFICULTIES.map((d) => {
+                    const diffColors: Record<string, string> = {
+                      easy: "border-accent bg-accent/10 text-accent",
+                      medium: "border-warning bg-warning/10 text-warning",
+                      hard: "border-error bg-error/10 text-error",
+                    };
+                    return (
+                      <button
+                        key={d.value}
+                        type="button"
+                        onClick={() => setSelectedDifficulty(d.value)}
+                        className={`rounded-full border px-6 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                          selectedDifficulty === d.value
+                            ? diffColors[d.value]
+                            : "border-border text-text-secondary hover:border-border-hover"
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </motion.div>
 
               {/* Stages overview */}
               <motion.div variants={fadeUp} custom={3}>
                 <h2 className="mb-3 text-lg font-semibold">Interview Stages</h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {STAGES.map((s, i) => (
                     <Card key={s.key} className="relative">
-                      <span className="mb-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                      <span className="mb-3 flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-secondary/10 text-xs font-bold text-primary border border-primary/20">
                         {i + 1}
                       </span>
                       <h3 className="mb-1 font-semibold">{s.label}</h3>
-                      <p className="text-xs text-text-secondary">{s.description}</p>
+                      <p className="text-xs text-text-secondary leading-relaxed">{s.description}</p>
                     </Card>
                   ))}
                 </div>
@@ -255,23 +263,23 @@ export default function InterviewPage() {
               {/* Tips */}
               <motion.div variants={fadeUp} custom={5}>
                 <Card className="border-dashed">
-                  <h3 className="mb-2 font-semibold text-text-secondary">Tips</h3>
-                  <ul className="space-y-1.5 text-sm text-text-secondary">
-                    <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">&#9656;</span>Think aloud — interviewers value your reasoning process.</li>
-                    <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">&#9656;</span>Use the voice recorder to practice explaining solutions verbally.</li>
-                    <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">&#9656;</span>Each stage has 1-2 questions with follow-ups before advancing.</li>
+                  <h3 className="mb-3 font-semibold text-text-secondary">Tips</h3>
+                  <ul className="space-y-2 text-sm text-text-secondary">
+                    <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span>Think aloud — interviewers value your reasoning process.</li>
+                    <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span>Use the voice recorder to practice explaining solutions verbally.</li>
+                    <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span>Each stage has 1-2 questions with follow-ups before advancing.</li>
                   </ul>
                 </Card>
               </motion.div>
             </div>
           ) : (
             /* ── Active interview session ── */
-            <motion.div variants={fadeUp} custom={0} className="space-y-4">
+            <motion.div variants={fadeUp} custom={0} className="space-y-5">
               {/* Stage progress bar */}
-              <div className="rounded-2xl border border-border bg-surface p-4">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold">
+              <div className="rounded-2xl border border-border bg-surface/80 backdrop-blur-sm p-5">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-bold">
                       {isCompleted
                         ? "Interview Complete"
                         : `Stage ${stageIdx + 1}/${STAGES.length}: ${STAGES[stageIdx]?.label ?? currentStage}`}
@@ -287,33 +295,33 @@ export default function InterviewPage() {
                   </div>
                 </div>
                 {/* Stage stepper */}
-                <div className="flex gap-1">
-                  {STAGES.map((s, i) => (
-                    <div key={s.key} className="flex flex-1 flex-col items-center gap-1">
-                      <div
-                        className={`h-1.5 w-full rounded-full transition-colors ${
-                          i < stageIdx
-                            ? "bg-accent"
-                            : i === stageIdx && !isCompleted
-                              ? "bg-primary"
-                              : isCompleted
-                                ? "bg-accent"
-                                : "bg-border"
-                        }`}
-                      />
-                      <span className={`text-[10px] font-medium ${
-                        i === stageIdx && !isCompleted ? "text-primary" : i < stageIdx || isCompleted ? "text-accent" : "text-text-secondary"
-                      }`}>
-                        {s.label}
-                      </span>
-                    </div>
-                  ))}
+                <div className="flex gap-2">
+                  {STAGES.map((s, i) => {
+                    const done = i < stageIdx || isCompleted;
+                    const active = i === stageIdx && !isCompleted;
+                    return (
+                      <div key={s.key} className="flex flex-1 flex-col items-center gap-1.5">
+                        <div className="flex w-full items-center gap-1">
+                          <div
+                            className={`h-2 flex-1 rounded-full transition-all duration-500 ${
+                              done ? "bg-accent" : active ? "bg-gradient-to-r from-primary to-secondary" : "bg-border"
+                            }`}
+                          />
+                        </div>
+                        <span className={`text-[10px] font-semibold ${
+                          active ? "text-primary" : done ? "text-accent" : "text-text-secondary"
+                        }`}>
+                          {s.label}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Chat area */}
-              <Card className="space-y-4">
-                <div className="max-h-[calc(100vh-380px)] min-h-[320px] space-y-3 overflow-y-auto rounded-xl border border-border bg-background p-3">
+              <Card className="space-y-4 p-5">
+                <div className="max-h-[calc(100vh-380px)] min-h-[320px] space-y-3 overflow-y-auto rounded-xl border border-border bg-background/60 p-4">
                   {messages.map((m, idx) => {
                     const prevMsg = idx > 0 ? messages[idx - 1] : null;
                     const showStageTransition = prevMsg && prevMsg.stage !== m.stage && m.role === "assistant";
@@ -321,52 +329,57 @@ export default function InterviewPage() {
                     return (
                       <div key={m.id}>
                         {showStageTransition && (
-                          <div className="my-3 flex items-center gap-3">
-                            <div className="h-px flex-1 bg-primary/30" />
-                            <span className="text-xs font-semibold uppercase text-primary">
+                          <div className="my-4 flex items-center gap-3">
+                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-primary">
                               {STAGES.find((s) => s.key === m.stage)?.label ?? m.stage}
                             </span>
-                            <div className="h-px flex-1 bg-primary/30" />
+                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
                           </div>
                         )}
                         <motion.div
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.25 }}
-                          className={`rounded-xl border p-3 text-sm ${
+                          className={`rounded-xl border p-4 text-sm ${
                             m.role === "assistant"
-                              ? "border-primary/50 bg-surface"
+                              ? "border-primary/30 bg-primary/5"
                               : m.role === "candidate"
-                                ? "border-border bg-black/20"
-                                : "border-secondary/40 bg-secondary/10"
+                                ? "border-border bg-surface/60"
+                                : "border-secondary/30 bg-secondary/5"
                           }`}
                         >
-                          <div className="mb-1 flex items-center gap-2">
-                            <p className="text-xs uppercase text-text-secondary">{m.role}</p>
-                            {m.role === "assistant" && m.metadata_json?.kind && (
-                              <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                                {String(m.metadata_json.kind)}
+                          <div className="mb-1.5 flex items-center gap-2">
+                            <p className="text-xs font-semibold uppercase text-text-secondary">{m.role}</p>
+                            {m.role === "assistant" && m.metadata_json?.kind != null && (
+                              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary border border-primary/20">
+                                {String(m.metadata_json.kind as string)}
                               </span>
                             )}
                           </div>
-                          <p className="whitespace-pre-wrap">{m.content}</p>
+                          <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
                         </motion.div>
                       </div>
                     );
                   })}
-                  {typing && <p className="text-sm text-text-secondary">AI is thinking...</p>}
+                  {typing && (
+                    <div className="flex items-center gap-2 text-sm text-text-secondary">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      AI is thinking...
+                    </div>
+                  )}
                   <div ref={chatEndRef} />
                 </div>
 
                 {transcript && (
-                  <div className="rounded-xl border border-secondary/40 bg-secondary/10 p-3 text-sm">
-                    <p className="mb-1 text-xs text-text-secondary">Last transcript</p>
-                    <p>{transcript}</p>
+                  <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 text-sm">
+                    <p className="mb-1 text-xs font-semibold text-text-secondary">Last transcript</p>
+                    <p className="leading-relaxed">{transcript}</p>
                   </div>
                 )}
 
                 {!isCompleted && (
-                  <div className="flex flex-col gap-2 md:flex-row">
+                  <div className="flex flex-col gap-3 md:flex-row">
                     <Input
                       placeholder="Type your answer..."
                       value={answer}
@@ -403,9 +416,9 @@ export default function InterviewPage() {
                 )}
 
                 {isCompleted && (
-                  <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 text-center">
-                    <p className="mb-2 text-lg font-semibold text-accent">Interview Complete</p>
-                    <p className="mb-3 text-sm text-text-secondary">
+                  <div className="rounded-xl border border-accent/30 bg-gradient-to-br from-accent/5 to-accent/10 p-6 text-center">
+                    <p className="mb-2 text-xl font-bold text-accent">🎉 Interview Complete</p>
+                    <p className="mb-4 text-sm text-text-secondary">
                       You finished all four stages. Review the conversation above to see feedback from each round.
                     </p>
                     <Button variant="ghost" onClick={() => {

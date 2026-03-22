@@ -31,14 +31,16 @@ type RunResponse = {
 };
 
 function DifficultyBadge({ d }: { d: string }) {
-  const color =
+  const styles =
     d === "easy"
-      ? "text-green-500"
+      ? "bg-accent/15 text-accent border-accent/25"
       : d === "medium"
-        ? "text-yellow-500"
-        : "text-red-500";
+        ? "bg-warning/15 text-warning border-warning/25"
+        : "bg-error/15 text-error border-error/25";
   return (
-    <span className={`text-xs font-semibold uppercase ${color}`}>{d}</span>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase ${styles}`}>
+      {d}
+    </span>
   );
 }
 
@@ -131,11 +133,11 @@ export default function WorkspacePage() {
   return (
     <div className="flex h-screen flex-col bg-background text-text-primary">
       {/* Toolbar */}
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-surface px-3">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border glass px-4">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/problems")}
-            className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm text-text-secondary transition hover:bg-border hover:text-text-primary"
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-text-secondary transition-all hover:bg-surface-hover hover:text-text-primary"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -151,7 +153,7 @@ export default function WorkspacePage() {
           <select
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value as Language)}
-            className="rounded-lg border border-border bg-surface px-2 py-1 text-xs"
+            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-primary transition focus:border-primary focus:outline-none"
           >
             {LANGUAGES.map((l) => (
               <option key={l.value} value={l.value}>
@@ -163,14 +165,14 @@ export default function WorkspacePage() {
           <button
             onClick={handleRun}
             disabled={running || submitting}
-            className="rounded-lg border border-accent px-3 py-1 text-xs font-medium text-accent transition hover:bg-accent/10 disabled:opacity-50"
+            className="rounded-lg border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary transition-all hover:bg-primary/20 hover:border-primary/50 disabled:opacity-50 active:scale-[0.97]"
           >
             {running ? "Running..." : "Run"}
           </button>
           <button
             onClick={handleSubmit}
             disabled={running || submitting}
-            className="rounded-lg bg-accent px-3 py-1 text-xs font-medium text-white shadow-md shadow-accent/20 transition hover:opacity-90 disabled:opacity-50"
+            className="rounded-lg bg-gradient-to-r from-accent to-emerald-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-accent/20 transition-all hover:shadow-lg hover:shadow-accent/30 disabled:opacity-50 active:scale-[0.97]"
           >
             {submitting ? "Submitting..." : "Submit"}
           </button>
@@ -178,13 +180,13 @@ export default function WorkspacePage() {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
         {/* Left pane — description */}
-        <div className="flex w-1/2 flex-col border-r border-border">
+        <div className="flex w-full md:w-1/2 flex-col border-b md:border-b-0 md:border-r border-border">
           <div className="flex shrink-0 border-b border-border">
             <button
               onClick={() => setActiveTab("description")}
-              className={`px-4 py-2 text-xs font-medium transition ${
+              className={`px-4 py-2.5 text-xs font-medium transition-all ${
                 activeTab === "description"
                   ? "border-b-2 border-primary text-primary"
                   : "text-text-secondary hover:text-text-primary"
@@ -193,7 +195,7 @@ export default function WorkspacePage() {
               Description
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-5">
             <div className="prose prose-sm max-w-none text-text-primary">
               <div className="whitespace-pre-wrap text-sm leading-relaxed">
                 {problem.description}
@@ -205,16 +207,16 @@ export default function WorkspacePage() {
                   {sampleCases.map((tc, idx) => (
                     <div
                       key={idx}
-                      className="mb-3 rounded-lg border border-border bg-surface p-3"
+                      className="mb-3 rounded-xl border border-border bg-surface/60 p-4"
                     >
-                      <p className="mb-1 text-xs font-medium text-text-secondary">
+                      <p className="mb-1.5 text-xs font-semibold text-text-secondary">
                         Example {idx + 1}:
                       </p>
-                      <pre className="mono whitespace-pre-wrap text-xs text-text-primary">
+                      <pre className="mono whitespace-pre-wrap text-xs text-text-primary leading-relaxed">
                         <span className="text-text-secondary">Input: </span>
                         {tc.input}
                       </pre>
-                      <pre className="mono whitespace-pre-wrap text-xs text-text-primary">
+                      <pre className="mono whitespace-pre-wrap text-xs text-text-primary leading-relaxed">
                         <span className="text-text-secondary">Output: </span>
                         {tc.expectedOutput}
                       </pre>
@@ -227,14 +229,14 @@ export default function WorkspacePage() {
         </div>
 
         {/* Right pane — editor + results */}
-        <div className="flex w-1/2 flex-col">
+        <div className="flex w-full md:w-1/2 flex-col">
           {/* Code editor */}
           <div className={`flex flex-col ${showResults ? "h-3/5" : "flex-1"}`}>
-            <div className="flex shrink-0 items-center border-b border-border px-3 py-1.5">
-              <span className="mono text-xs text-text-secondary">Code</span>
+            <div className="flex shrink-0 items-center border-b border-border px-4 py-2">
+              <span className="mono text-xs font-medium text-text-secondary">Code</span>
             </div>
             <textarea
-              className="mono flex-1 resize-none border-none bg-[#0d1117] p-3 text-sm leading-relaxed text-green-400 outline-none placeholder:text-text-secondary/40"
+              className="mono flex-1 resize-none border-none bg-[#0a0e17] p-4 text-sm leading-relaxed text-green-400 outline-none placeholder:text-text-secondary/30 selection:bg-primary/30"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="Write your solution here..."
@@ -249,7 +251,7 @@ export default function WorkspacePage() {
                 <div className="flex">
                   <button
                     onClick={() => setResultTab("result")}
-                    className={`px-4 py-2 text-xs font-medium transition ${
+                    className={`px-4 py-2.5 text-xs font-medium transition-all ${
                       resultTab === "result"
                         ? "border-b-2 border-primary text-primary"
                         : "text-text-secondary hover:text-text-primary"
@@ -259,7 +261,7 @@ export default function WorkspacePage() {
                   </button>
                   <button
                     onClick={() => setResultTab("testcases")}
-                    className={`px-4 py-2 text-xs font-medium transition ${
+                    className={`px-4 py-2.5 text-xs font-medium transition-all ${
                       resultTab === "testcases"
                         ? "border-b-2 border-primary text-primary"
                         : "text-text-secondary hover:text-text-primary"
@@ -270,7 +272,7 @@ export default function WorkspacePage() {
                 </div>
                 <button
                   onClick={() => setShowResults(false)}
-                  className="mr-2 rounded p-1 text-text-secondary transition hover:bg-border hover:text-text-primary"
+                  className="mr-3 rounded-lg p-1.5 text-text-secondary transition hover:bg-surface-hover hover:text-text-primary"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -278,7 +280,7 @@ export default function WorkspacePage() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-3">
+              <div className="flex-1 overflow-y-auto p-4">
                 {resultTab === "result" && (
                   <ResultPanel
                     result={runResult}
@@ -291,9 +293,9 @@ export default function WorkspacePage() {
                     {sampleCases.map((tc, idx) => (
                       <div
                         key={idx}
-                        className="rounded-lg border border-border bg-surface p-2"
+                        className="rounded-xl border border-border bg-surface/60 p-3"
                       >
-                        <p className="mb-1 text-xs font-medium text-text-secondary">
+                        <p className="mb-1 text-xs font-semibold text-text-secondary">
                           Case {idx + 1}
                         </p>
                         <pre className="mono whitespace-pre-wrap text-xs text-text-primary">
@@ -309,13 +311,13 @@ export default function WorkspacePage() {
 
           {/* Bottom bar when results hidden */}
           {!showResults && (
-            <div className="flex shrink-0 items-center justify-between border-t border-border px-3 py-2">
+            <div className="flex shrink-0 items-center justify-between border-t border-border px-4 py-2.5">
               <button
                 onClick={() => {
                   setShowResults(true);
                   setResultTab("testcases");
                 }}
-                className="text-xs text-text-secondary transition hover:text-text-primary"
+                className="text-xs font-medium text-text-secondary transition hover:text-text-primary"
               >
                 Console
               </button>
@@ -362,7 +364,7 @@ function ResultPanel({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span
-            className={`text-lg font-bold ${isAccepted ? "text-green-500" : "text-red-500"}`}
+            className={`text-lg font-bold ${isAccepted ? "text-accent" : "text-error"}`}
           >
             {result.mode === "submit"
               ? isAccepted
@@ -386,13 +388,13 @@ function ResultPanel({
         {result.results.map((r, idx) => (
           <div
             key={idx}
-            className={`rounded-lg border p-2 ${
-              r.passed ? "border-green-500/30 bg-green-500/5" : "border-red-500/30 bg-red-500/5"
+            className={`rounded-xl border p-3 ${
+              r.passed ? "border-accent/30 bg-accent/5" : "border-error/30 bg-error/5"
             }`}
           >
             <div className="mb-1 flex items-center gap-2">
               <span
-                className={`text-xs font-semibold ${r.passed ? "text-green-500" : "text-red-500"}`}
+                className={`text-xs font-semibold ${r.passed ? "text-accent" : "text-error"}`}
               >
                 {r.passed ? "✓" : "✗"} Case {idx + 1}
               </span>
@@ -410,7 +412,7 @@ function ResultPanel({
                 {r.actualOutput != null && (
                   <div>
                     <span className="text-text-secondary">Output: </span>
-                    <span className={r.passed ? "text-green-400" : "text-red-400"}>
+                    <span className={r.passed ? "text-accent" : "text-error"}>
                       {r.actualOutput}
                     </span>
                   </div>
@@ -418,7 +420,7 @@ function ResultPanel({
                 {r.error && (
                   <div>
                     <span className="text-text-secondary">Error: </span>
-                    <span className="text-red-400">{r.error}</span>
+                    <span className="text-error">{r.error}</span>
                   </div>
                 )}
               </div>
