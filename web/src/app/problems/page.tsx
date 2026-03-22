@@ -35,16 +35,17 @@ export default function ProblemsPage() {
       });
   }, []);
 
-  const filtered = useMemo(
-    () =>
-      problems.filter((p) => {
+  const filtered = useMemo(() => {
+    const DIFF_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
+    return problems
+      .filter((p) => {
         const matchDiff = difficulty === "all" || p.difficulty === difficulty;
         const q = query.trim().toLowerCase();
         const matchQuery = !q || p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
         return matchDiff && matchQuery;
-      }),
-    [problems, query, difficulty],
-  );
+      })
+      .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
+  }, [problems, query, difficulty]);
 
   return (
     <Protected>

@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getToken } from "@/lib/auth";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -28,9 +30,19 @@ const features = [
     title: "Speech Feedback",
     description: "Record your explanation and receive structured communication feedback.",
   },
+  {
+    title: "Company-Specific Interviews",
+    description: "Practice interviews tailored to Amazon, Google, and Meta with multi-stage rounds.",
+  },
 ];
 
 export default function Home() {
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setIsAuthed(Boolean(getToken()));
+  }, []);
+
   return (
     <PageShell>
       <div className="flex flex-1 flex-col justify-center">
@@ -52,19 +64,32 @@ export default function Home() {
             rounds — all powered by AI.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/register">
-              <Button>Get Started</Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="ghost">Sign In</Button>
-            </Link>
+            {isAuthed ? (
+              <>
+                <Link href="/dashboard">
+                  <Button>Go to Dashboard</Button>
+                </Link>
+                <Link href="/problems">
+                  <Button variant="ghost">Start Practicing</Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/register">
+                  <Button>Get Started</Button>
+                </Link>
+                <Link href="/login">
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
+              </>
+            )}
           </div>
         </motion.section>
 
         <motion.section
           initial="hidden"
           animate="visible"
-          className="mt-8 grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          className="mt-8 grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-4"
         >
           {features.map((f, i) => (
             <motion.div key={f.title} variants={fadeUp} custom={i + 1}>

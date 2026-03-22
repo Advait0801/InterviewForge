@@ -15,7 +15,7 @@ router.get("/", async (_req, res) => {
     }>(
       `SELECT id, slug, title, description, difficulty, created_at
        FROM problems
-       ORDER BY difficulty, created_at`
+       ORDER BY CASE difficulty WHEN 'easy' THEN 1 WHEN 'medium' THEN 2 WHEN 'hard' THEN 3 ELSE 4 END, created_at`
     );
     return res.json({ problems: result.rows });
   } catch (err) {
