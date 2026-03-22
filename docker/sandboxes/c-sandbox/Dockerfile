@@ -1,4 +1,4 @@
-FROM gcc:12-bookworm-slim
+FROM gcc:12-bookworm
 RUN useradd --create-home runner
 WORKDIR /home/runner
 USER runner

@@ -39,7 +39,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     env_file: ./code-runner/.env
 
-  frontend:
+  web:
     build: ./web
     image: interviewforge-web:latest
     container_name: interviewforge-web

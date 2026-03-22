@@ -44,6 +44,7 @@ export type Problem = {
 
 export type ProblemDetail = Problem & {
   test_cases: Array<{ input: string; expectedOutput: string }>;
+  starter_code: Record<string, string>;
 };
 
 export type InterviewMessage = {
@@ -78,17 +79,29 @@ export const api = {
     }),
   listProblems: () => request<{ problems: Problem[] }>("/problems"),
   getProblem: (id: string) => request<{ problem: ProblemDetail }>(`/problems/${id}`),
-  submitCode: (problemId: string, language: string, code: string) =>
+  runCode: (problemId: string, language: string, code: string) =>
     request<{
-      submissionId: string;
-      status: string;
+      mode: "run";
       passed: boolean;
-      results: Array<{ passed: boolean }>;
+      results: Array<{ passed: boolean; actualOutput?: string; error?: string }>;
       runtimeMs?: number;
     }>("/submissions", {
       method: "POST",
       auth: true,
-      body: { problemId, language, code },
+      body: { problemId, language, code, mode: "run" },
+    }),
+  submitCode: (problemId: string, language: string, code: string) =>
+    request<{
+      mode: "submit";
+      submissionId: string;
+      status: string;
+      passed: boolean;
+      results: Array<{ passed: boolean; actualOutput?: string; error?: string }>;
+      runtimeMs?: number;
+    }>("/submissions", {
+      method: "POST",
+      auth: true,
+      body: { problemId, language, code, mode: "submit" },
     }),
   startInterview: (company: string, difficulty?: string) =>
     request<{

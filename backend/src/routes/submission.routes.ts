@@ -9,10 +9,11 @@ type TestCase = { input: string; expectedOutput: string };
 
 router.post("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
-  const { problemId, language, code } = req.body as {
+  const { problemId, language, code, mode = "submit" } = req.body as {
     problemId?: string;
     language?: string;
     code?: string;
+    mode?: "run" | "submit";
   };
 
   if (!problemId || !language || !code) {
@@ -22,8 +23,8 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
   }
 
   try {
-    const problemResult = await query<{ id: string; test_cases: TestCase[] }>(
-      "SELECT id, test_cases FROM problems WHERE id = $1",
+    const problemResult = await query<{ id: string; slug: string; test_cases: TestCase[] }>(
+      "SELECT id, slug, test_cases FROM problems WHERE id = $1",
       [problemId]
     );
 
@@ -32,12 +33,13 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
     }
 
     const problem = problemResult.rows[0];
-    const testCases = problem.test_cases || [];
+    const allTestCases = problem.test_cases || [];
+    const testCases = mode === "run" ? allTestCases.slice(0, 3) : allTestCases;
 
     const runRes = await fetch(`${CODE_RUNNER_URL}/run`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ language, code, testCases }),
+      body: JSON.stringify({ language, code, testCases, slug: problem.slug }),
     });
 
     if (!runRes.ok) {
@@ -48,9 +50,18 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
 
     const runResult = (await runRes.json()) as {
       passed: boolean;
-      results: Array<{ passed: boolean }>;
+      results: Array<{ passed: boolean; actualOutput?: string; error?: string }>;
       runtimeMs?: number;
     };
+
+    if (mode === "run") {
+      return res.json({
+        mode: "run",
+        passed: runResult.passed,
+        results: runResult.results,
+        runtimeMs: runResult.runtimeMs,
+      });
+    }
 
     const status = runResult.passed ? "passed" : "failed";
 
@@ -62,6 +73,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
     );
 
     return res.status(201).json({
+      mode: "submit",
       submissionId: insertResult.rows[0].id,
       status,
       passed: runResult.passed,

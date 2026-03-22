@@ -39,9 +39,10 @@ router.get("/:id", async (req, res) => {
       description: string;
       difficulty: string;
       test_cases: unknown;
+      starter_code: unknown;
       created_at: string;
     }>(
-      `SELECT id, slug, title, description, difficulty, test_cases, created_at
+      `SELECT id, slug, title, description, difficulty, test_cases, starter_code, created_at
        FROM problems
        WHERE id = $1`,
       [id]

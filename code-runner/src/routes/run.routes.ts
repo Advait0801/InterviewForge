@@ -1,15 +1,17 @@
 import { Router } from "express";
-import { runCode, TestCase, SupportedLanguage } from "../runner";
+import { runCode } from "../runner";
+import { TestCase, SupportedLanguage } from "../types";
 
 const router = Router();
 
-const SUPPORTED_LANGUAGES: SupportedLanguage[] = ["python", "c", "cpp", "java"];
+const SUPPORTED_LANGUAGES: SupportedLanguage[] = ["python3", "c", "cpp", "java"];
 
 router.post("/run", async (req, res) => {
-  const { language, code, testCases } = req.body as {
+  const { language, code, testCases, slug } = req.body as {
     language?: string;
     code?: string;
     testCases?: TestCase[];
+    slug?: string;
   };
 
   if (!language || !code || !Array.isArray(testCases)) {
@@ -29,6 +31,7 @@ router.post("/run", async (req, res) => {
       language: language as SupportedLanguage,
       code,
       testCases,
+      slug,
     });
     return res.json(result);
   } catch (err) {
