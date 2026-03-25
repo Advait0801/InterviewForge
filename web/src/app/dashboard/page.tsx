@@ -63,13 +63,19 @@ const modes = [
       </svg>
     ),
   },
+  {
+    title: "System Design",
+    description: "Describe architecture, get AI-generated diagrams, and scored feedback.",
+    href: "/system-design",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-secondary">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 8h2m2 0h2m2 0h2"/>
+      </svg>
+    ),
+  },
 ];
 
 const comingSoon = [
-  {
-    title: "System Design Canvas",
-    description: "Draw architecture diagrams and get AI feedback on your design choices.",
-  },
   {
     title: "Online Assessment Mode",
     description: "Timed multi-problem coding tests with scoring report.",

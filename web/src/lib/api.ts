@@ -56,6 +56,32 @@ export type InterviewMessage = {
   created_at: string;
 };
 
+export type RubricSection = {
+  score: number;
+  notes: string;
+};
+
+export type SystemDesignNode = {
+  id: string;
+  label: string;
+  type: string;
+};
+
+export type SystemDesignEdge = {
+  source: string;
+  target: string;
+  label: string;
+};
+
+export type SystemDesignAnalysis = {
+  summary: string;
+  nodes: SystemDesignNode[];
+  edges: SystemDesignEdge[];
+  risks: string[];
+  improvements: string[];
+  rubric: Record<string, RubricSection>;
+};
+
 export const api = {
   register: (username: string, email: string, password: string, fullName?: string) =>
     request<{ token: string }>("/auth/register", {
@@ -139,5 +165,11 @@ export const api = {
       method: "POST",
       auth: true,
       body: { audioBase64, question, mimeType, filename },
+    }),
+  analyzeSystemDesign: (prompt: string, explanation: string, company?: string) =>
+    request<SystemDesignAnalysis>("/interviews/system-design/analyze", {
+      method: "POST",
+      auth: true,
+      body: { prompt, explanation, company },
     }),
 };
