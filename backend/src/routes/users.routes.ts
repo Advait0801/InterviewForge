@@ -70,4 +70,43 @@ router.get("/me", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+router.get("/stats", requireAuth, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  try {
+    const [problemsRes, interviewsRes, streakRes] = await Promise.all([
+      query<{ count: string }>(
+        "SELECT COUNT(DISTINCT problem_id) AS count FROM submissions WHERE user_id = $1",
+        [userId],
+      ),
+      query<{ count: string }>(
+        "SELECT COUNT(*) AS count FROM interview_sessions WHERE user_id = $1",
+        [userId],
+      ),
+      query<{ best_streak: string | null }>(
+        `WITH activity_dates AS (
+           SELECT DISTINCT created_at::date AS d FROM submissions WHERE user_id = $1
+           UNION
+           SELECT DISTINCT created_at::date AS d FROM interview_sessions WHERE user_id = $1
+         ),
+         grouped AS (
+           SELECT d, d - (ROW_NUMBER() OVER (ORDER BY d))::int AS grp FROM activity_dates
+         )
+         SELECT COALESCE(MAX(streak), 0) AS best_streak FROM (
+           SELECT COUNT(*) AS streak FROM grouped GROUP BY grp
+         ) t`,
+        [userId],
+      ),
+    ]);
+
+    return res.json({
+      problemsAttempted: parseInt(problemsRes.rows[0].count, 10),
+      interviewsStarted: parseInt(interviewsRes.rows[0].count, 10),
+      bestStreak: parseInt(streakRes.rows[0].best_streak ?? "0", 10),
+    });
+  } catch (err) {
+    console.error("Get user stats error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

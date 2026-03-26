@@ -15,6 +15,19 @@ const LANGUAGES: { value: Language; label: string }[] = [
   { value: "java", label: "Java" },
 ];
 
+const LANG_KEY = "if-preferred-lang";
+const VALID_LANGS = new Set<string>(["python3", "cpp", "c", "java"]);
+
+function getSavedLanguage(): Language {
+  if (typeof window === "undefined") return "python3";
+  const saved = localStorage.getItem(LANG_KEY);
+  return saved && VALID_LANGS.has(saved) ? (saved as Language) : "python3";
+}
+
+function saveLanguage(lang: Language) {
+  localStorage.setItem(LANG_KEY, lang);
+}
+
 type CaseResult = {
   passed: boolean;
   actualOutput?: string;
@@ -49,7 +62,7 @@ export default function WorkspacePage() {
   const router = useRouter();
 
   const [problem, setProblem] = useState<ProblemDetail | null>(null);
-  const [language, setLanguage] = useState<Language>("python3");
+  const [language, setLanguage] = useState<Language>(getSavedLanguage);
   const [code, setCode] = useState("");
   const [runResult, setRunResult] = useState<RunResponse | null>(null);
   const [running, setRunning] = useState(false);
@@ -66,11 +79,13 @@ export default function WorkspacePage() {
       router.push("/login");
       return;
     }
+    const preferredLang = getSavedLanguage();
+    setLanguage(preferredLang);
     api
       .getProblem(params.id)
       .then((res) => {
         setProblem(res.problem);
-        const starter = res.problem.starter_code?.python3 || "";
+        const starter = res.problem.starter_code?.[preferredLang] || "";
         setCode(starter);
         prevStarterRef.current = starter;
       })
@@ -88,6 +103,7 @@ export default function WorkspacePage() {
       prevStarterRef.current = newStarter;
     }
     setLanguage(newLang);
+    saveLanguage(newLang);
   };
 
   const handleRun = async () => {
@@ -98,6 +114,7 @@ export default function WorkspacePage() {
     try {
       const res = await api.runCode(problem.id, language, code);
       setRunResult({ ...res, mode: "run" });
+      saveLanguage(language);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Run failed");
     } finally {
@@ -113,6 +130,7 @@ export default function WorkspacePage() {
     try {
       const res = await api.submitCode(problem.id, language, code);
       setRunResult({ ...res, mode: "submit" });
+      saveLanguage(language);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Submission failed");
     } finally {

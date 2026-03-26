@@ -172,4 +172,8 @@ export const api = {
       auth: true,
       body: { prompt, explanation, company },
     }),
+  userStats: () =>
+    request<{ problemsAttempted: number; interviewsStarted: number; bestStreak: number }>("/users/stats", {
+      auth: true,
+    }),
 };

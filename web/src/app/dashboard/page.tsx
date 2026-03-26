@@ -18,28 +18,10 @@ const fadeUp = {
   }),
 };
 
-const stats = [
-  {
-    label: "Problems Attempted",
-    value: "—",
-    icon: "💻",
-    gradient: "from-primary/20 to-secondary/10",
-    border: "border-primary/20",
-  },
-  {
-    label: "Interviews Started",
-    value: "—",
-    icon: "🎙️",
-    gradient: "from-accent/20 to-secondary/10",
-    border: "border-accent/20",
-  },
-  {
-    label: "Best Streak",
-    value: "—",
-    icon: "🔥",
-    gradient: "from-warning/20 to-error/10",
-    border: "border-warning/20",
-  },
+const statCards = [
+  { key: "problemsAttempted" as const, label: "Problems Attempted", icon: "💻", gradient: "from-primary/20 to-secondary/10", border: "border-primary/20", suffix: "" },
+  { key: "interviewsStarted" as const, label: "Interviews Started", icon: "🎙️", gradient: "from-accent/20 to-secondary/10", border: "border-accent/20", suffix: "" },
+  { key: "bestStreak" as const, label: "Best Streak", icon: "🔥", gradient: "from-warning/20 to-error/10", border: "border-warning/20", suffix: "d" },
 ];
 
 const modes = [
@@ -91,6 +73,7 @@ const tips = [
 
 export default function DashboardPage() {
   const [userName, setUserName] = useState<string | null>(null);
+  const [stats, setStats] = useState({ problemsAttempted: 0, interviewsStarted: 0, bestStreak: 0 });
 
   useEffect(() => {
     api
@@ -100,6 +83,10 @@ export default function DashboardPage() {
         const msg = err instanceof Error ? err.message : "Could not load profile";
         toast.error(msg);
       });
+    api
+      .userStats()
+      .then((res) => setStats(res))
+      .catch(() => {});
   }, []);
 
   return (
@@ -116,7 +103,7 @@ export default function DashboardPage() {
 
           {/* Quick stats */}
           <motion.div variants={fadeUp} custom={1} className="grid gap-4 sm:grid-cols-3">
-            {stats.map((s) => (
+            {statCards.map((s) => (
               <div
                 key={s.label}
                 className={`rounded-2xl border ${s.border} bg-gradient-to-br ${s.gradient} backdrop-blur-sm p-5 transition-all duration-300 hover:scale-[1.02]`}
@@ -124,7 +111,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">{s.icon}</span>
                   <div>
-                    <p className="text-2xl font-bold">{s.value}</p>
+                    <p className="text-2xl font-bold">{stats[s.key]}{s.suffix}</p>
                     <p className="text-xs text-text-secondary font-medium">{s.label}</p>
                   </div>
                 </div>
