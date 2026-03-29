@@ -171,6 +171,21 @@ export async function evaluateVoiceExplanation(params: {
   return postJson<VoiceEvaluationResult>("/api/speech/evaluate-explanation", params);
 }
 
+export interface InterviewReport {
+  overallScore: number;
+  stageScores: Record<string, { score: number; feedback: string }>;
+  strengths: string[];
+  weaknesses: string[];
+  recommendations: string[];
+}
+
+export async function generateReport(params: {
+  company: string;
+  conversation: string;
+}): Promise<InterviewReport> {
+  return postJson<InterviewReport>("/api/interview/generate-report", params);
+}
+
 export async function analyzeSystemDesign(params: {
   prompt: string;
   explanation: string;

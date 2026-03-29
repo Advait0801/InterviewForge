@@ -57,10 +57,16 @@ const modes = [
   },
 ];
 
-const comingSoon = [
+const extraModes = [
   {
-    title: "Online Assessment Mode",
+    title: "Online Assessment",
     description: "Timed multi-problem coding tests with scoring report.",
+    href: "/assessments",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-warning">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+    ),
   },
 ];
 
@@ -138,20 +144,23 @@ export default function DashboardPage() {
             ))}
           </motion.div>
 
-          {/* Coming soon */}
-          <motion.div variants={fadeUp} custom={3}>
-            <h2 className="mb-3 text-lg font-semibold text-text-secondary">Coming Soon</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              {comingSoon.map((c) => (
-                <Card key={c.title} className="relative border-dashed opacity-60 hover:opacity-80">
-                  <span className="absolute top-3 right-3 rounded-full bg-warning/10 border border-warning/20 px-2 py-0.5 text-[10px] font-semibold text-warning uppercase">
-                    Soon
-                  </span>
-                  <h3 className="mb-1 font-semibold">{c.title}</h3>
-                  <p className="text-sm text-text-secondary">{c.description}</p>
+          {/* More modes */}
+          <motion.div variants={fadeUp} custom={3} className="grid gap-5 md:grid-cols-2">
+            {extraModes.map((m) => (
+              <Link href={m.href} key={m.title}>
+                <Card className="h-full group hover:scale-[1.01] transition-transform duration-300 hover:border-warning/40">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface-hover border border-border group-hover:border-warning/30 transition-colors">
+                      {m.icon}
+                    </div>
+                    <div>
+                      <h2 className="mb-1.5 text-xl font-semibold group-hover:text-warning transition-colors">{m.title}</h2>
+                      <p className="text-sm text-text-secondary leading-relaxed">{m.description}</p>
+                    </div>
+                  </div>
                 </Card>
-              ))}
-            </div>
+              </Link>
+            ))}
           </motion.div>
 
           {/* Tips */}

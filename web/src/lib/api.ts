@@ -47,6 +47,17 @@ export type ProblemDetail = Problem & {
   starter_code: Record<string, string>;
 };
 
+export type Submission = {
+  id: string;
+  problem_id: string;
+  problem_title: string;
+  language: string;
+  status: string;
+  runtime_ms: number | null;
+  memory_kb: number | null;
+  created_at: string;
+};
+
 export type InterviewMessage = {
   id: string;
   role: "assistant" | "candidate" | "system";
@@ -71,6 +82,63 @@ export type SystemDesignEdge = {
   source: string;
   target: string;
   label: string;
+};
+
+export type VoiceRubricSection = {
+  score: number;
+  notes: string;
+};
+
+export type VoiceEvaluation = {
+  overallScore: number;
+  technicalCorrectness: VoiceRubricSection;
+  communicationClarity: VoiceRubricSection;
+  completeness: VoiceRubricSection;
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+};
+
+export type InterviewSession = {
+  id: string;
+  company: string;
+  current_stage: string;
+  status: string;
+  created_at: string;
+};
+
+export type InterviewReport = {
+  sessionId: string;
+  company: string;
+  overallScore: number;
+  stageScores: Record<string, { score: number; feedback: string }>;
+  strengths: string[];
+  weaknesses: string[];
+  recommendations: string[];
+};
+
+export type Assessment = {
+  id: string;
+  status: string;
+  time_limit_minutes: number;
+  difficulty_mix: string;
+  problem_count: number;
+  started_at: string;
+  finished_at: string | null;
+  score: number | null;
+  created_at: string;
+};
+
+export type AssessmentProblem = {
+  id: string;
+  assessment_id: string;
+  problem_id: string;
+  problem_order: number;
+  submission_id: string | null;
+  title: string;
+  slug: string;
+  difficulty: string;
+  submission_status: string | null;
 };
 
 export type SystemDesignAnalysis = {
@@ -161,7 +229,7 @@ export const api = {
     mimeType = "audio/webm",
     filename = "recording.webm",
   ) =>
-    request<{ transcript: string; evaluation: unknown }>("/interviews/speech/evaluate-explanation", {
+    request<{ transcript: string; evaluation: VoiceEvaluation }>("/interviews/speech/evaluate-explanation", {
       method: "POST",
       auth: true,
       body: { audioBase64, question, mimeType, filename },
@@ -172,6 +240,38 @@ export const api = {
       auth: true,
       body: { prompt, explanation, company },
     }),
+  getSubmissions: (problemId?: string) =>
+    request<{ submissions: Submission[] }>(
+      problemId ? `/submissions?problemId=${problemId}` : "/submissions",
+      { auth: true },
+    ),
+  createAssessment: (opts: { timeLimitMinutes?: number; problemCount?: number; difficultyMix?: string } = {}) =>
+    request<{ assessmentId: string; problemCount: number; timeLimitMinutes: number }>("/assessments", {
+      method: "POST",
+      auth: true,
+      body: opts,
+    }),
+  getAssessment: (id: string) =>
+    request<{ assessment: Assessment; problems: AssessmentProblem[]; remainingMs: number }>(`/assessments/${id}`, {
+      auth: true,
+    }),
+  listAssessments: () =>
+    request<{ assessments: Assessment[] }>("/assessments", { auth: true }),
+  linkAssessmentSubmission: (assessmentId: string, problemId: string, submissionId: string) =>
+    request<{ ok: boolean }>(`/assessments/${assessmentId}/solve`, {
+      method: "POST",
+      auth: true,
+      body: { problemId, submissionId },
+    }),
+  submitAssessment: (id: string) =>
+    request<{ score: number; passed: number; total: number; status: string }>(`/assessments/${id}/submit`, {
+      method: "POST",
+      auth: true,
+    }),
+  listInterviews: () =>
+    request<{ sessions: InterviewSession[] }>("/interviews", { auth: true }),
+  getInterviewReport: (id: string) =>
+    request<InterviewReport>(`/interviews/${id}/report`, { auth: true }),
   userStats: () =>
     request<{ problemsAttempted: number; interviewsStarted: number; bestStreak: number }>("/users/stats", {
       auth: true,

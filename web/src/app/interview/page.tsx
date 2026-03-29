@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusPill } from "@/components/ui/status-pill";
 import { toast } from "sonner";
-import { api, InterviewMessage } from "@/lib/api";
+import { api, InterviewMessage, InterviewReport, VoiceEvaluation } from "@/lib/api";
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   let binary = "";
@@ -73,6 +73,9 @@ export default function InterviewPage() {
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState<string>("");
   const [lastAudioBase64, setLastAudioBase64] = useState<string>("");
+  const [voiceEval, setVoiceEval] = useState<VoiceEvaluation | null>(null);
+  const [report, setReport] = useState<InterviewReport | null>(null);
+  const [loadingReport, setLoadingReport] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -378,6 +381,8 @@ export default function InterviewPage() {
                   </div>
                 )}
 
+                {voiceEval && <VoiceEvalCard evaluation={voiceEval} onClose={() => setVoiceEval(null)} />}
+
                 {!isCompleted && (
                   <div className="flex flex-col gap-3 md:flex-row">
                     <Input
@@ -398,7 +403,8 @@ export default function InterviewPage() {
                           if (!lastAudioBase64 || !lastQuestion) return;
                           setTyping(true);
                           try {
-                            await api.evaluateExplanation(lastAudioBase64, lastQuestion.content);
+                            const res = await api.evaluateExplanation(lastAudioBase64, lastQuestion.content);
+                            setVoiceEval(res.evaluation);
                             toast.success("Voice evaluation complete");
                           } catch (err) {
                             const msg = err instanceof Error ? err.message : "Evaluation failed";
@@ -416,22 +422,51 @@ export default function InterviewPage() {
                 )}
 
                 {isCompleted && (
-                  <div className="rounded-xl border border-accent/30 bg-gradient-to-br from-accent/5 to-accent/10 p-6 text-center">
-                    <p className="mb-2 text-xl font-bold text-accent">🎉 Interview Complete</p>
-                    <p className="mb-4 text-sm text-text-secondary">
-                      You finished all four stages. Review the conversation above to see feedback from each round.
-                    </p>
-                    <Button variant="ghost" onClick={() => {
-                      setSessionId(null);
-                      setMessages([]);
-                      setCurrentStage("behavioral");
-                      setSessionStatus("active");
-                      setTranscript("");
-                      setLastAudioBase64("");
-                      setError(null);
-                    }}>
-                      Start New Interview
-                    </Button>
+                  <div className="space-y-4">
+                    <div className="rounded-xl border border-accent/30 bg-gradient-to-br from-accent/5 to-accent/10 p-6 text-center">
+                      <p className="mb-2 text-xl font-bold text-accent">Interview Complete</p>
+                      <p className="mb-4 text-sm text-text-secondary">
+                        You finished all four stages. Review the conversation above to see feedback from each round.
+                      </p>
+                      <div className="flex items-center justify-center gap-3">
+                        {!report && !loadingReport && (
+                          <Button onClick={async () => {
+                            if (!sessionId) return;
+                            setLoadingReport(true);
+                            try {
+                              const r = await api.getInterviewReport(sessionId);
+                              setReport(r);
+                            } catch (err) {
+                              toast.error(err instanceof Error ? err.message : "Failed to generate report");
+                            } finally {
+                              setLoadingReport(false);
+                            }
+                          }}>
+                            Generate Report
+                          </Button>
+                        )}
+                        {loadingReport && (
+                          <div className="flex items-center gap-2 text-sm text-text-secondary">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                            Generating report...
+                          </div>
+                        )}
+                        <Button variant="ghost" onClick={() => {
+                          setSessionId(null);
+                          setMessages([]);
+                          setCurrentStage("behavioral");
+                          setSessionStatus("active");
+                          setTranscript("");
+                          setLastAudioBase64("");
+                          setError(null);
+                          setReport(null);
+                          setVoiceEval(null);
+                        }}>
+                          Start New Interview
+                        </Button>
+                      </div>
+                    </div>
+                    {report && <InterviewReportCard report={report} />}
                   </div>
                 )}
 
@@ -442,5 +477,136 @@ export default function InterviewPage() {
         </motion.div>
       </PageShell>
     </Protected>
+  );
+}
+
+function ScoreBar({ label, score, notes }: { label: string; score: number; notes: string }) {
+  const pct = (score / 10) * 100;
+  const color = score >= 7 ? "bg-accent" : score >= 4 ? "bg-warning" : "bg-error";
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between text-xs">
+        <span className="font-medium">{label}</span>
+        <span className="font-bold">{score}/10</span>
+      </div>
+      <div className="h-2 rounded-full bg-border">
+        <div className={`h-2 rounded-full ${color} transition-all duration-500`} style={{ width: `${pct}%` }} />
+      </div>
+      {notes && <p className="mt-0.5 text-[10px] text-text-secondary">{notes}</p>}
+    </div>
+  );
+}
+
+function VoiceEvalCard({ evaluation, onClose }: { evaluation: VoiceEvaluation; onClose: () => void }) {
+  const overallColor = evaluation.overallScore >= 7 ? "text-accent" : evaluation.overallScore >= 4 ? "text-warning" : "text-error";
+  return (
+    <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 text-sm space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h3 className="font-semibold">Voice Evaluation</h3>
+          <span className={`text-lg font-bold ${overallColor}`}>{evaluation.overallScore}/10</span>
+        </div>
+        <button onClick={onClose} className="rounded-lg p-1 text-text-secondary hover:bg-surface-hover hover:text-text-primary transition">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        <ScoreBar label="Technical Correctness" score={evaluation.technicalCorrectness.score} notes={evaluation.technicalCorrectness.notes} />
+        <ScoreBar label="Communication Clarity" score={evaluation.communicationClarity.score} notes={evaluation.communicationClarity.notes} />
+        <ScoreBar label="Completeness" score={evaluation.completeness.score} notes={evaluation.completeness.notes} />
+      </div>
+
+      {evaluation.strengths.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-semibold text-accent">Strengths</p>
+          <ul className="space-y-0.5 text-xs text-text-secondary">
+            {evaluation.strengths.map((s, i) => <li key={i} className="flex gap-1.5"><span className="text-accent">+</span>{s}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {evaluation.weaknesses.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-semibold text-error">Weaknesses</p>
+          <ul className="space-y-0.5 text-xs text-text-secondary">
+            {evaluation.weaknesses.map((w, i) => <li key={i} className="flex gap-1.5"><span className="text-error">-</span>{w}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {evaluation.suggestions.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-semibold text-secondary">Suggestions</p>
+          <ul className="space-y-0.5 text-xs text-text-secondary">
+            {evaluation.suggestions.map((s, i) => <li key={i} className="flex gap-1.5"><span className="text-secondary">*</span>{s}</li>)}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const STAGE_LABELS: Record<string, string> = {
+  behavioral: "Behavioral",
+  coding: "Coding",
+  system_design: "System Design",
+  core_cs: "Core CS",
+};
+
+function InterviewReportCard({ report }: { report: InterviewReport }) {
+  const overallColor = report.overallScore >= 7 ? "text-accent" : report.overallScore >= 4 ? "text-warning" : "text-error";
+  return (
+    <div className="rounded-xl border border-primary/30 bg-surface/80 p-6 space-y-5">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-bold">Interview Report</h3>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-text-secondary">Overall:</span>
+          <span className={`text-2xl font-bold ${overallColor}`}>{report.overallScore}/10</span>
+        </div>
+      </div>
+
+      {report.stageScores && Object.keys(report.stageScores).length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-text-secondary">Stage Scores</h4>
+          {Object.entries(report.stageScores).map(([stage, data]) => (
+            <div key={stage}>
+              <ScoreBar
+                label={STAGE_LABELS[stage] || stage}
+                score={typeof data.score === "string" ? parseInt(data.score, 10) : data.score}
+                notes={data.feedback || ""}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {report.strengths?.length > 0 && (
+        <div>
+          <h4 className="mb-1.5 text-sm font-semibold text-accent">Strengths</h4>
+          <ul className="space-y-1 text-sm text-text-secondary">
+            {report.strengths.map((s, i) => <li key={i} className="flex gap-2"><span className="text-accent">+</span>{s}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {report.weaknesses?.length > 0 && (
+        <div>
+          <h4 className="mb-1.5 text-sm font-semibold text-error">Areas for Improvement</h4>
+          <ul className="space-y-1 text-sm text-text-secondary">
+            {report.weaknesses.map((w, i) => <li key={i} className="flex gap-2"><span className="text-error">-</span>{w}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {report.recommendations?.length > 0 && (
+        <div>
+          <h4 className="mb-1.5 text-sm font-semibold text-secondary">Recommendations</h4>
+          <ul className="space-y-1 text-sm text-text-secondary">
+            {report.recommendations.map((r, i) => <li key={i} className="flex gap-2"><span className="text-secondary">*</span>{r}</li>)}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }

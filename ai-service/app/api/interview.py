@@ -14,6 +14,7 @@ from app.interview.orchestrator import (
 from app.llm.chains import (
     evaluation_chain,
     followup_chain,
+    interview_report_chain,
     invoke_with_fallback,
     question_generation_chain,
     structured_evaluation_chain,
@@ -80,6 +81,11 @@ class GenerateFollowupRequest(BaseModel):
     question: str
     answer: str
     evaluation: Dict[str, Any]
+
+
+class GenerateReportRequest(BaseModel):
+    company: str = Field(..., examples=["google"])
+    conversation: str = Field(..., description="Full interview conversation text.")
 
 
 def _safe_company_style(company: str) -> str:
@@ -236,6 +242,18 @@ async def generate_followup(req: GenerateFollowupRequest):
             "question": req.question,
             "answer": req.answer,
             "evaluation": json.dumps(req.evaluation),
+        })
+    except Exception as exc:
+        _raise_llm_http_error(exc)
+    return result
+
+
+@router.post("/generate-report")
+async def generate_report(req: GenerateReportRequest):
+    try:
+        result = await invoke_with_fallback(interview_report_chain, {
+            "company": req.company,
+            "conversation": req.conversation,
         })
     except Exception as exc:
         _raise_llm_http_error(exc)

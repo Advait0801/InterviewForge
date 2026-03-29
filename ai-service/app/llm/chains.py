@@ -292,6 +292,33 @@ def voice_explanation_rubric_chain(provider: Optional[str] = None):
     return prompt | _get_llm(provider) | parser
 
 
+class InterviewReportOutput(BaseModel):
+    overallScore: int = Field(ge=1, le=10, description="Overall interview score from 1 to 10.")
+    stageScores: Dict[str, Dict[str, str]] = Field(
+        description="Score and feedback per stage. Keys are stage names, values have 'score' (int) and 'feedback' (string)."
+    )
+    strengths: List[str] = Field(description="Top strengths demonstrated across the interview.")
+    weaknesses: List[str] = Field(description="Key areas needing improvement.")
+    recommendations: List[str] = Field(description="Actionable next-step recommendations for the candidate.")
+
+
+def interview_report_chain(provider: Optional[str] = None):
+    parser = JsonOutputParser(pydantic_object=InterviewReportOutput)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "You are InterviewForge, a senior technical interviewer writing a comprehensive post-interview report. "
+            "Analyze the full interview conversation across all stages and produce a structured evaluation. "
+            "Score each stage individually and give an overall score. Be honest, constructive, and specific. "
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", (
+            "## Company\n{company}\n\n"
+            "## Interview Conversation\n{conversation}"
+        )),
+    ]).partial(format_instructions=parser.get_format_instructions())
+    return prompt | _get_llm(provider) | parser
+
+
 def system_design_analysis_chain(provider: Optional[str] = None):
     parser = JsonOutputParser(pydantic_object=SystemDesignAnalysisOutput)
     prompt = ChatPromptTemplate.from_messages([

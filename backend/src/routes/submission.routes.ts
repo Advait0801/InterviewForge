@@ -4,8 +4,53 @@ import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
 
 const router = Router();
 const CODE_RUNNER_URL = process.env.CODE_RUNNER_URL || "http://code-runner:5000";
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type TestCase = { input: string; expectedOutput: string };
+
+router.get("/", requireAuth, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  const problemId = req.query.problemId as string | undefined;
+
+  if (problemId && !UUID_REGEX.test(problemId)) {
+    return res.status(400).json({ error: "Invalid problemId" });
+  }
+
+  try {
+    const conditions = ["s.user_id = $1"];
+    const params: (string | number)[] = [userId];
+
+    if (problemId) {
+      conditions.push(`s.problem_id = $2`);
+      params.push(problemId);
+    }
+
+    const result = await query<{
+      id: string;
+      problem_id: string;
+      problem_title: string;
+      language: string;
+      status: string;
+      runtime_ms: number | null;
+      memory_kb: number | null;
+      created_at: string;
+    }>(
+      `SELECT s.id, s.problem_id, p.title AS problem_title, s.language, s.status,
+              s.runtime_ms, s.memory_kb, s.created_at
+       FROM submissions s
+       JOIN problems p ON p.id = s.problem_id
+       WHERE ${conditions.join(" AND ")}
+       ORDER BY s.created_at DESC
+       LIMIT 50`,
+      params
+    );
+
+    return res.json({ submissions: result.rows });
+  } catch (err) {
+    console.error("List submissions error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 router.post("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
@@ -52,6 +97,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
       passed: boolean;
       results: Array<{ passed: boolean; actualOutput?: string; error?: string }>;
       runtimeMs?: number;
+      memoryKb?: number;
     };
 
     if (mode === "run") {
@@ -66,10 +112,10 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
     const status = runResult.passed ? "passed" : "failed";
 
     const insertResult = await query<{ id: string }>(
-      `INSERT INTO submissions (user_id, problem_id, language, code, status, runtime_ms)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO submissions (user_id, problem_id, language, code, status, runtime_ms, memory_kb)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
-      [userId, problemId, language, code, status, runResult.runtimeMs ?? null]
+      [userId, problemId, language, code, status, runResult.runtimeMs ?? null, runResult.memoryKb ?? null]
     );
 
     return res.status(201).json({

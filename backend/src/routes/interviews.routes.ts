@@ -17,6 +17,7 @@ import {
   evaluateVoiceExplanation,
   generateFollowup,
   generateNextQuestion,
+  generateReport,
   AIServiceError,
   transcribeSpeech,
 } from "../services/ai.service";
@@ -101,6 +102,24 @@ async function insertMessage(params: {
     [params.sessionId, params.role, params.stage, params.content, JSON.stringify(params.metadata)]
   );
 }
+
+router.get("/", requireAuth, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  try {
+    const result = await query<SessionRow>(
+      `SELECT id, user_id, company, current_stage, status, stage_turn_count, created_at, updated_at
+       FROM interview_sessions
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 50`,
+      [userId]
+    );
+    return res.json({ sessions: result.rows });
+  } catch (err) {
+    console.error("List interview sessions error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 router.post("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
@@ -188,6 +207,69 @@ router.get("/:id", requireAuth, async (req: AuthRequest, res) => {
     });
   } catch (err) {
     console.error("Get interview session error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/:id/report", requireAuth, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  const id = getSingleParam(req.params.id);
+
+  if (!id || !UUID_REGEX.test(id)) {
+    return res.status(400).json({ error: "Invalid session id" });
+  }
+
+  try {
+    const sessionResult = await getSessionForUser(id, userId);
+    if (sessionResult.rows.length === 0) {
+      return res.status(404).json({ error: "Interview session not found" });
+    }
+
+    const session = sessionResult.rows[0];
+    if (session.status !== "completed") {
+      return res.status(400).json({ error: "Interview is not yet completed" });
+    }
+
+    const messagesResult = await getSessionMessages(id);
+    const conversation = messagesResult.rows
+      .map((m) => `[${m.stage}] ${m.role}: ${m.content}`)
+      .join("\n\n");
+
+    const report = await generateReport({
+      company: session.company,
+      conversation,
+    });
+
+    const stageScores = report.stageScores || {};
+    for (const [stage, data] of Object.entries(stageScores)) {
+      const score = typeof data.score === "string" ? parseInt(data.score, 10) : data.score;
+      if (!isNaN(score)) {
+        await query(
+          `INSERT INTO scores (user_id, category, score, max_score)
+           VALUES ($1, $2, $3, 10)`,
+          [userId, stage, score]
+        );
+      }
+    }
+
+    if (report.overallScore) {
+      await query(
+        `INSERT INTO scores (user_id, category, score, max_score)
+         VALUES ($1, 'overall', $2, 10)`,
+        [userId, report.overallScore]
+      );
+    }
+
+    return res.json({
+      sessionId: id,
+      company: session.company,
+      ...report,
+    });
+  } catch (err) {
+    if (err instanceof AIServiceError) {
+      return sendAIServiceError(res, err);
+    }
+    console.error("Generate interview report error", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

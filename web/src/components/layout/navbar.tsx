@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/problems", label: "Practice" },
   { href: "/interview", label: "Interview" },
   { href: "/system-design", label: "System Design" },
+  { href: "/assessments", label: "OA" },
 ];
 
 export function Navbar() {
@@ -21,11 +22,11 @@ export function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    setIsAuthed(Boolean(getToken()));
+    queueMicrotask(() => setIsAuthed(Boolean(getToken())));
   }, []);
-
+  
   useEffect(() => {
-    setMobileOpen(false);
+    queueMicrotask(() => setMobileOpen(false));
   }, [pathname]);
 
   return (

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { api, ProblemDetail } from "@/lib/api";
+import { api, ProblemDetail, Submission } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 
 type Language = "python3" | "cpp" | "c" | "java";
@@ -70,6 +70,8 @@ export default function WorkspacePage() {
   const [activeTab, setActiveTab] = useState<"description" | "submissions">("description");
   const [resultTab, setResultTab] = useState<"result" | "testcases">("testcases");
   const [showResults, setShowResults] = useState(false);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
 
   const prevStarterRef = useRef<string>("");
 
@@ -93,6 +95,19 @@ export default function WorkspacePage() {
         toast.error(err instanceof Error ? err.message : "Failed to load problem");
       });
   }, [params.id, router]);
+
+  const fetchSubmissions = async () => {
+    if (!params.id) return;
+    setLoadingSubmissions(true);
+    try {
+      const res = await api.getSubmissions(params.id);
+      setSubmissions(res.submissions);
+    } catch {
+      /* silent — non-critical */
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  };
 
   const handleLanguageChange = (newLang: Language) => {
     if (!problem) return;
@@ -131,6 +146,7 @@ export default function WorkspacePage() {
       const res = await api.submitCode(problem.id, language, code);
       setRunResult({ ...res, mode: "submit" });
       saveLanguage(language);
+      fetchSubmissions();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Submission failed");
     } finally {
@@ -212,8 +228,19 @@ export default function WorkspacePage() {
             >
               Description
             </button>
+            <button
+              onClick={() => { setActiveTab("submissions"); fetchSubmissions(); }}
+              className={`px-4 py-2.5 text-xs font-medium transition-all ${
+                activeTab === "submissions"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
+            >
+              Submissions
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto p-5">
+            {activeTab === "description" && (
             <div className="prose prose-sm max-w-none text-text-primary">
               <div className="whitespace-pre-wrap text-sm leading-relaxed">
                 {problem.description}
@@ -243,6 +270,10 @@ export default function WorkspacePage() {
                 </div>
               )}
             </div>
+            )}
+            {activeTab === "submissions" && (
+              <SubmissionsPanel submissions={submissions} loading={loadingSubmissions} />
+            )}
           </div>
         </div>
 
@@ -343,6 +374,54 @@ export default function WorkspacePage() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function SubmissionsPanel({ submissions, loading }: { submissions: Submission[]; loading: boolean }) {
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-text-secondary">
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        Loading submissions...
+      </div>
+    );
+  }
+
+  if (submissions.length === 0) {
+    return <p className="text-xs text-text-secondary">No submissions yet. Submit your code to see results here.</p>;
+  }
+
+  return (
+    <div className="space-y-2">
+      {submissions.map((s) => (
+        <div
+          key={s.id}
+          className={`rounded-xl border p-3 ${
+            s.status === "passed"
+              ? "border-accent/30 bg-accent/5"
+              : "border-error/30 bg-error/5"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-semibold ${s.status === "passed" ? "text-accent" : "text-error"}`}>
+                {s.status === "passed" ? "Accepted" : "Wrong Answer"}
+              </span>
+              <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-medium text-text-secondary border border-border">
+                {s.language}
+              </span>
+            </div>
+            <span className="text-[10px] text-text-secondary">
+              {new Date(s.created_at).toLocaleString()}
+            </span>
+          </div>
+          <div className="mt-1.5 flex gap-3 text-[11px] text-text-secondary">
+            {s.runtime_ms != null && <span>Runtime: {s.runtime_ms}ms</span>}
+            {s.memory_kb != null && <span>Memory: {s.memory_kb}KB</span>}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
