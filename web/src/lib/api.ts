@@ -58,6 +58,17 @@ export type Submission = {
   created_at: string;
 };
 
+export type SubmissionDetail = {
+  id: string;
+  problem_id: string;
+  language: string;
+  code: string;
+  status: string;
+  runtime_ms: number | null;
+  memory_kb: number | null;
+  created_at: string;
+};
+
 export type InterviewMessage = {
   id: string;
   role: "assistant" | "candidate" | "system";
@@ -242,9 +253,11 @@ export const api = {
     }),
   getSubmissions: (problemId?: string) =>
     request<{ submissions: Submission[] }>(
-      problemId ? `/submissions?problemId=${problemId}` : "/submissions",
+      problemId ? `/submissions?problemId=${encodeURIComponent(problemId)}` : "/submissions",
       { auth: true },
     ),
+  getSubmission: (id: string) =>
+    request<{ submission: SubmissionDetail }>(`/submissions/${encodeURIComponent(id)}`, { auth: true }),
   createAssessment: (opts: { timeLimitMinutes?: number; problemCount?: number; difficultyMix?: string } = {}) =>
     request<{ assessmentId: string; problemCount: number; timeLimitMinutes: number }>("/assessments", {
       method: "POST",

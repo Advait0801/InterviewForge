@@ -4,6 +4,22 @@ import * as path from "path";
 
 type TestCase = { input: string; expectedOutput: string };
 
+const MIN_SUBMIT_CASES = 50;
+
+/** Pad with cyclical repeats so Submit always has at least MIN_SUBMIT_CASES (same I/O, valid grading). */
+function padTestCases(cases: TestCase[]): TestCase[] {
+  if (cases.length === 0) return cases;
+  if (cases.length >= MIN_SUBMIT_CASES) return cases;
+  const out: TestCase[] = [...cases];
+  let i = 0;
+  while (out.length < MIN_SUBMIT_CASES) {
+    const c = cases[i % cases.length];
+    out.push({ input: c.input, expectedOutput: c.expectedOutput });
+    i += 1;
+  }
+  return out;
+}
+
 type LeetCodeProblem = {
   slug: string;
   title: string;
@@ -36,6 +52,7 @@ async function main() {
     const starterCode = tmpl
       ? { python3: tmpl.python3, cpp: tmpl.cpp, c: tmpl.c, java: tmpl.java }
       : {};
+    const testCases = padTestCases(p.testCases);
 
     await query(
       `INSERT INTO problems (slug, title, description, difficulty, test_cases, starter_code)
@@ -46,7 +63,7 @@ async function main() {
          difficulty = EXCLUDED.difficulty,
          test_cases = EXCLUDED.test_cases,
          starter_code = EXCLUDED.starter_code`,
-      [p.slug, p.title, p.description, p.difficulty, JSON.stringify(p.testCases), JSON.stringify(starterCode)]
+      [p.slug, p.title, p.description, p.difficulty, JSON.stringify(testCases), JSON.stringify(starterCode)]
     );
     console.log("Upserted problem:", p.slug);
   }

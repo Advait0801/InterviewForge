@@ -23,6 +23,18 @@ def _arr_to_linked(arr):
         curr = curr.next
     return head
 
+
+def _arr_to_cycle_linked(arr, pos):
+    """Build a linked list from values; tail points to node at index pos if pos >= 0."""
+    if not arr:
+        return None
+    nodes = [ListNode(v) for v in arr]
+    for i in range(len(nodes) - 1):
+        nodes[i].next = nodes[i + 1]
+    if pos is not None and pos >= 0:
+        nodes[-1].next = nodes[pos]
+    return nodes[0]
+
 def _linked_to_arr(node):
     res = []
     while node:
@@ -82,6 +94,8 @@ def _convert_arg(val, t):
         return [_arr_to_linked(x) for x in (val or [])]
     if t == "TreeNode":
         return _arr_to_tree(val)
+    if t == "int[][]":
+        return val
     return val
 
 def _convert_result(val, t):
@@ -161,12 +175,20 @@ if __name__ == "__main__":
                 cls = globals().get(cls_name) or locals().get(cls_name)
                 sol = cls()
                 fn = getattr(sol, fn_name)
+
+                # Linked List Cycle: build cycle from nums + pos; user only receives head
+                if fn_name == "hasCycle" and len(converted) == 2:
+                    head = _arr_to_cycle_linked(converted[0], converted[1])
+                    result = fn(head)
+                    print(json.dumps(result))
+                    continue
+
                 result = fn(*converted)
 
                 if return_type == "void":
                     # In-place modifications: return first mutable arg
                     for i, t in enumerate(arg_types):
-                        if t in ("char[]", "int[]"):
+                        if t in ("char[]", "int[]", "int[][]"):
                             print(json.dumps(converted[i]))
                             break
                     else:

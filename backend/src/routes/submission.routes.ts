@@ -8,6 +8,9 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 
 type TestCase = { input: string; expectedOutput: string };
 
+/** First N cases used for Run; Submit uses full suite. */
+const RUN_CASE_LIMIT = 4;
+
 router.get("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
   const problemId = req.query.problemId as string | undefined;
@@ -52,6 +55,41 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+router.get("/:id", requireAuth, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  const id = typeof req.params.id === "string" ? req.params.id : req.params.id?.[0];
+
+  if (!id || !UUID_REGEX.test(id)) {
+    return res.status(400).json({ error: "Invalid submission id" });
+  }
+
+  try {
+    const result = await query<{
+      id: string;
+      problem_id: string;
+      language: string;
+      code: string;
+      status: string;
+      runtime_ms: number | null;
+      memory_kb: number | null;
+      created_at: string;
+    }>(
+      `SELECT id, problem_id, language, code, status, runtime_ms, memory_kb, created_at
+       FROM submissions WHERE id = $1 AND user_id = $2`,
+      [id, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Submission not found" });
+    }
+
+    return res.json({ submission: result.rows[0] });
+  } catch (err) {
+    console.error("Get submission error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.post("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
   const { problemId, language, code, mode = "submit" } = req.body as {
@@ -79,7 +117,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
 
     const problem = problemResult.rows[0];
     const allTestCases = problem.test_cases || [];
-    const testCases = mode === "run" ? allTestCases.slice(0, 3) : allTestCases;
+    const testCases = mode === "run" ? allTestCases.slice(0, RUN_CASE_LIMIT) : allTestCases;
 
     const runRes = await fetch(`${CODE_RUNNER_URL}/run`, {
       method: "POST",

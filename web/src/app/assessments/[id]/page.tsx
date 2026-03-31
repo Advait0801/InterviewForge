@@ -1,12 +1,22 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api, Assessment, AssessmentProblem, ProblemDetail } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import type { WorkspaceLanguage } from "@/components/code-workspace-editor";
 
-type Language = "python3" | "cpp" | "c" | "java";
+const CodeWorkspaceEditor = dynamic(
+  () =>
+    import("@/components/code-workspace-editor").then((m) => m.CodeWorkspaceEditor),
+  { ssr: false, loading: () => <div className="flex flex-1 items-center justify-center bg-[#0a0e17] text-xs text-text-secondary">Loading editor…</div> },
+);
+
+type Language = WorkspaceLanguage;
+
+const RUN_CASE_LIMIT = 4;
 
 const LANGUAGES: { value: Language; label: string }[] = [
   { value: "python3", label: "Python 3" },
@@ -287,7 +297,7 @@ export default function AssessmentWorkspacePage() {
                   }`}>{activeDetail.difficulty}</span>
                 </div>
                 <div className="whitespace-pre-wrap text-sm leading-relaxed">{activeDetail.description}</div>
-                {activeDetail.test_cases?.slice(0, 3).map((tc, idx) => (
+                {activeDetail.test_cases?.slice(0, RUN_CASE_LIMIT).map((tc, idx) => (
                   <div key={idx} className="mb-3 rounded-xl border border-border bg-surface/60 p-4 mt-4">
                     <p className="mb-1.5 text-xs font-semibold text-text-secondary">Example {idx + 1}:</p>
                     <pre className="mono whitespace-pre-wrap text-xs leading-relaxed">
@@ -309,18 +319,17 @@ export default function AssessmentWorkspacePage() {
         </div>
 
         {/* Right pane — editor + results */}
-        <div className="flex w-full md:w-1/2 flex-col">
-          <div className={`flex flex-col ${activeResult ? "h-3/5" : "flex-1"}`}>
+        <div className="flex w-full min-h-0 flex-1 flex-col md:w-1/2">
+          <div className={`flex min-h-0 flex-col ${activeResult ? "h-3/5" : "flex-1"}`}>
             <div className="flex shrink-0 items-center border-b border-border px-4 py-2">
               <span className="mono text-xs font-medium text-text-secondary">Code</span>
             </div>
-            <textarea
-              className="mono flex-1 resize-none border-none bg-[#0a0e17] p-4 text-sm leading-relaxed text-green-400 outline-none placeholder:text-text-secondary/30 selection:bg-primary/30"
+            <CodeWorkspaceEditor
+              language={language}
               value={activeCode}
-              onChange={(e) => setActiveCode(e.target.value)}
-              placeholder="Write your solution here..."
-              spellCheck={false}
+              onChange={setActiveCode}
               readOnly={!isActive}
+              className="min-h-0 flex-1"
             />
           </div>
 

@@ -317,5 +317,249 @@
     "cpp": "class MedianFinder {\npublic:\n    MedianFinder() {\n        \n    }\n    \n    void addNum(int num) {\n        \n    }\n    \n    double findMedian() {\n        \n    }\n};",
     "c": "#include <stdlib.h>\n\ntypedef struct {\n    \n} MedianFinder;\n\nMedianFinder* medianFinderCreate() {\n    \n}\n\nvoid medianFinderAddNum(MedianFinder* obj, int num) {\n    \n}\n\ndouble medianFinderFindMedian(MedianFinder* obj) {\n    \n}\n\nvoid medianFinderFree(MedianFinder* obj) {\n    \n}",
     "java": "class MedianFinder {\n\n    public MedianFinder() {\n        \n    }\n    \n    public void addNum(int num) {\n        \n    }\n    \n    public double findMedian() {\n        \n    }\n}"
+  },
+  "contains-duplicate": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "containsDuplicate",
+      "params": [{ "name": "nums", "type": "int[]" }],
+      "returnType": "bool"
+    },
+    "python3": "class Solution:\n    def containsDuplicate(self, nums: List[int]) -> bool:\n        pass",
+    "cpp": "class Solution {\npublic:\n    bool containsDuplicate(vector<int>& nums) {\n        \n    }\n};",
+    "c": "#include <stdbool.h>\n\nbool containsDuplicate(int* nums, int numsSize) {\n    \n}",
+    "java": "class Solution {\n    public boolean containsDuplicate(int[] nums) {\n        \n    }\n}"
+  },
+  "valid-palindrome": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "isPalindrome",
+      "params": [{ "name": "s", "type": "string" }],
+      "returnType": "bool"
+    },
+    "python3": "class Solution:\n    def isPalindrome(self, s: str) -> bool:\n        pass",
+    "cpp": "class Solution {\npublic:\n    bool isPalindrome(string s) {\n        \n    }\n};",
+    "c": "#include <stdbool.h>\n\nbool isPalindrome(char* s) {\n    \n}",
+    "java": "class Solution {\n    public boolean isPalindrome(String s) {\n        \n    }\n}"
+  },
+  "maximum-subarray": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "maxSubArray",
+      "params": [{ "name": "nums", "type": "int[]" }],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def maxSubArray(self, nums: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int maxSubArray(vector<int>& nums) {\n        \n    }\n};",
+    "c": "int maxSubArray(int* nums, int numsSize) {\n    \n}",
+    "java": "class Solution {\n    public int maxSubArray(int[] nums) {\n        \n    }\n}"
+  },
+  "climbing-stairs": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "climbStairs",
+      "params": [{ "name": "n", "type": "int" }],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        \n    }\n};",
+    "c": "int climbStairs(int n) {\n    \n}",
+    "java": "class Solution {\n    public int climbStairs(int n) {\n        \n    }\n}"
+  },
+  "linked-list-cycle": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "hasCycle",
+      "params": [{ "name": "head", "type": "ListNode" }],
+      "returnType": "bool"
+    },
+    "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.next = None\nclass Solution:\n    def hasCycle(self, head: Optional[ListNode]) -> bool:\n        pass",
+    "cpp": "class Solution {\npublic:\n    bool hasCycle(ListNode *head) {\n        \n    }\n};",
+    "c": "bool hasCycle(struct ListNode *head) {\n    \n}",
+    "java": "public class Solution {\n    public boolean hasCycle(ListNode head) {\n        \n    }\n}"
+  },
+  "invert-binary-tree": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "invertTree",
+      "params": [{ "name": "root", "type": "TreeNode" }],
+      "returnType": "TreeNode"
+    },
+    "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:\n        pass",
+    "cpp": "class Solution {\npublic:\n    TreeNode* invertTree(TreeNode* root) {\n        \n    }\n};",
+    "c": "struct TreeNode* invertTree(struct TreeNode* root) {\n    \n}",
+    "java": "class Solution {\n    public TreeNode invertTree(TreeNode root) {\n        \n    }\n}"
+  },
+  "container-with-most-water": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "maxArea",
+      "params": [{ "name": "height", "type": "int[]" }],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def maxArea(self, height: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        \n    }\n};",
+    "c": "int maxArea(int* height, int heightSize) {\n    \n}",
+    "java": "class Solution {\n    public int maxArea(int[] height) {\n        \n    }\n}"
+  },
+  "search-in-rotated-sorted-array": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "search",
+      "params": [{ "name": "nums", "type": "int[]" }, { "name": "target", "type": "int" }],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        \n    }\n};",
+    "c": "int search(int* nums, int numsSize, int target) {\n    \n}",
+    "java": "class Solution {\n    public int search(int[] nums, int target) {\n        \n    }\n}"
+  },
+  "group-anagrams": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "groupAnagrams",
+      "params": [{ "name": "strs", "type": "string[]" }],
+      "returnType": "string[][]"
+    },
+    "python3": "class Solution:\n    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:\n        pass",
+    "cpp": "class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        \n    }\n};",
+    "c": "char*** groupAnagrams(char** strs, int strsSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
+    "java": "class Solution {\n    public List<List<String>> groupAnagrams(String[] strs) {\n        \n    }\n}"
+  },
+  "rotate-image": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "rotate",
+      "params": [{ "name": "matrix", "type": "int[][]" }],
+      "returnType": "void"
+    },
+    "python3": "class Solution:\n    def rotate(self, matrix: List[List[int]]) -> None:\n        pass",
+    "cpp": "class Solution {\npublic:\n    void rotate(vector<vector<int>>& matrix) {\n        \n    }\n};",
+    "c": "void rotate(int** matrix, int matrixSize, int* matrixColSize) {\n    \n}",
+    "java": "class Solution {\n    public void rotate(int[][] matrix) {\n        \n    }\n}"
+  },
+  "validate-binary-search-tree": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "isValidBST",
+      "params": [{ "name": "root", "type": "TreeNode" }],
+      "returnType": "bool"
+    },
+    "python3": "class Solution:\n    def isValidBST(self, root: Optional[TreeNode]) -> bool:\n        pass",
+    "cpp": "class Solution {\npublic:\n    bool isValidBST(TreeNode* root) {\n        \n    }\n};",
+    "c": "bool isValidBST(struct TreeNode* root) {\n    \n}",
+    "java": "class Solution {\n    public boolean isValidBST(TreeNode root) {\n        \n    }\n}"
+  },
+  "binary-tree-level-order-traversal": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "levelOrder",
+      "params": [{ "name": "root", "type": "TreeNode" }],
+      "returnType": "int[][]"
+    },
+    "python3": "class Solution:\n    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:\n        pass",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        \n    }\n};",
+    "c": "int** levelOrder(struct TreeNode* root, int* returnSize, int** returnColumnSizes) {\n    \n}",
+    "java": "class Solution {\n    public List<List<Integer>> levelOrder(TreeNode root) {\n        \n    }\n}"
+  },
+  "rotting-oranges": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "orangesRotting",
+      "params": [{ "name": "grid", "type": "int[][]" }],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def orangesRotting(self, grid: List[List[int]]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int orangesRotting(vector<vector<int>>& grid) {\n        \n    }\n};",
+    "c": "int orangesRotting(int** grid, int gridSize, int* gridColSize) {\n    \n}",
+    "java": "class Solution {\n    public int orangesRotting(int[][] grid) {\n        \n    }\n}"
+  },
+  "word-break": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "wordBreak",
+      "params": [{ "name": "s", "type": "string" }, { "name": "wordDict", "type": "string[]" }],
+      "returnType": "bool"
+    },
+    "python3": "class Solution:\n    def wordBreak(self, s: str, wordDict: List[str]) -> bool:\n        pass",
+    "cpp": "class Solution {\npublic:\n    bool wordBreak(string s, vector<string>& wordDict) {\n        \n    }\n};",
+    "c": "bool wordBreak(char* s, char** wordDict, int wordDictSize) {\n    \n}",
+    "java": "class Solution {\n    public boolean wordBreak(String s, List<String> wordDict) {\n        \n    }\n}"
+  },
+  "longest-valid-parentheses": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "longestValidParentheses",
+      "params": [{ "name": "s", "type": "string" }],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def longestValidParentheses(self, s: str) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int longestValidParentheses(string s) {\n        \n    }\n};",
+    "c": "int longestValidParentheses(char* s) {\n    \n}",
+    "java": "class Solution {\n    public int longestValidParentheses(String s) {\n        \n    }\n}"
+  },
+  "minimum-window-substring": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "minWindow",
+      "params": [{ "name": "s", "type": "string" }, { "name": "t", "type": "string" }],
+      "returnType": "string"
+    },
+    "python3": "class Solution:\n    def minWindow(self, s: str, t: str) -> str:\n        pass",
+    "cpp": "class Solution {\npublic:\n    string minWindow(string s, string t) {\n        \n    }\n};",
+    "c": "char* minWindow(char* s, char* t) {\n    \n}",
+    "java": "class Solution {\n    public String minWindow(String s, String t) {\n        \n    }\n}"
+  },
+  "edit-distance": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "minDistance",
+      "params": [{ "name": "word1", "type": "string" }, { "name": "word2", "type": "string" }],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def minDistance(self, word1: str, word2: str) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int minDistance(string word1, string word2) {\n        \n    }\n};",
+    "c": "int minDistance(char* word1, char* word2) {\n    \n}",
+    "java": "class Solution {\n    public int minDistance(String word1, String word2) {\n        \n    }\n}"
+  },
+  "largest-rectangle-in-histogram": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "largestRectangleArea",
+      "params": [{ "name": "heights", "type": "int[]" }],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def largestRectangleArea(self, heights: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int largestRectangleArea(vector<int>& heights) {\n        \n    }\n};",
+    "c": "int largestRectangleArea(int* heights, int heightsSize) {\n    \n}",
+    "java": "class Solution {\n    public int largestRectangleArea(int[] heights) {\n        \n    }\n}"
+  },
+  "n-queens": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "solveNQueens",
+      "params": [{ "name": "n", "type": "int" }],
+      "returnType": "string[][]"
+    },
+    "python3": "class Solution:\n    def solveNQueens(self, n: int) -> List[List[str]]:\n        pass",
+    "cpp": "class Solution {\npublic:\n    vector<vector<string>> solveNQueens(int n) {\n        \n    }\n};",
+    "c": "char*** solveNQueens(int n, int* returnSize, int** returnColumnSizes) {\n    \n}",
+    "java": "class Solution {\n    public List<List<String>> solveNQueens(int n) {\n        \n    }\n}"
+  },
+  "maximum-profit-in-job-scheduling": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "jobScheduling",
+      "params": [
+        { "name": "startTime", "type": "int[]" },
+        { "name": "endTime", "type": "int[]" },
+        { "name": "profit", "type": "int[]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def jobScheduling(self, startTime: List[int], endTime: List[int], profit: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {\n        \n    }\n};",
+    "c": "int jobScheduling(int* startTime, int startTimeSize, int* endTime, int* profit) {\n    \n}",
+    "java": "class Solution {\n    public int jobScheduling(int[] startTime, int[] endTime, int[] profit) {\n        \n    }\n}"
   }
 }
