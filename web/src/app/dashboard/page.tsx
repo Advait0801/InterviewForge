@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
+import { ActivityHeatmap } from "@/components/ui/activity-heatmap";
 import { api } from "@/lib/api";
 
 const fadeUp = {
@@ -18,10 +19,13 @@ const fadeUp = {
   }),
 };
 
-const statCards = [
-  { key: "problemsAttempted" as const, label: "Problems Attempted", icon: "💻", gradient: "from-primary/20 to-secondary/10", border: "border-primary/20", suffix: "" },
-  { key: "interviewsStarted" as const, label: "Interviews Started", icon: "🎙️", gradient: "from-accent/20 to-secondary/10", border: "border-accent/20", suffix: "" },
-  { key: "bestStreak" as const, label: "Best Streak", icon: "🔥", gradient: "from-warning/20 to-error/10", border: "border-warning/20", suffix: "d" },
+type StatKey = "problemsAttempted" | "interviewsStarted" | "bestStreak" | "currentStreak";
+
+const statCards: Array<{ key: StatKey; label: string; icon: string; gradient: string; border: string; suffix: string }> = [
+  { key: "problemsAttempted", label: "Problems Attempted", icon: "💻", gradient: "from-primary/20 to-secondary/10", border: "border-primary/20", suffix: "" },
+  { key: "interviewsStarted", label: "Interviews Started", icon: "🎙️", gradient: "from-accent/20 to-secondary/10", border: "border-accent/20", suffix: "" },
+  { key: "currentStreak", label: "Current Streak", icon: "⚡", gradient: "from-secondary/20 to-primary/10", border: "border-secondary/20", suffix: "d" },
+  { key: "bestStreak", label: "Best Streak", icon: "🔥", gradient: "from-warning/20 to-error/10", border: "border-warning/20", suffix: "d" },
 ];
 
 const modes = [
@@ -69,6 +73,26 @@ const actionModes = [
       </svg>
     ),
   },
+  {
+    title: "Leaderboard",
+    description: "See how you rank against other users globally.",
+    href: "/leaderboard",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-warning">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+      </svg>
+    ),
+  },
+  {
+    title: "Analytics",
+    description: "Track your progress with charts and insights.",
+    href: "/analytics",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+        <path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>
+      </svg>
+    ),
+  },
 ];
 
 const tips = [
@@ -80,7 +104,13 @@ const tips = [
 
 export default function DashboardPage() {
   const [userName, setUserName] = useState<string | null>(null);
-  const [stats, setStats] = useState({ problemsAttempted: 0, interviewsStarted: 0, bestStreak: 0 });
+  const [stats, setStats] = useState<Record<StatKey, number>>({
+    problemsAttempted: 0,
+    interviewsStarted: 0,
+    bestStreak: 0,
+    currentStreak: 0,
+  });
+  const [activityMap, setActivityMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     api
@@ -92,7 +122,16 @@ export default function DashboardPage() {
       });
     api
       .userStats()
-      .then((res) => setStats(res))
+      .then((res) =>
+        setStats((prev) => ({ ...prev, problemsAttempted: res.problemsAttempted, interviewsStarted: res.interviewsStarted, bestStreak: res.bestStreak })),
+      )
+      .catch(() => {});
+    api
+      .getUserActivity()
+      .then((res) => {
+        setStats((prev) => ({ ...prev, currentStreak: res.currentStreak, bestStreak: res.bestStreak }));
+        setActivityMap(res.activityMap);
+      })
       .catch(() => {});
   }, []);
 
@@ -109,7 +148,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Quick stats */}
-          <motion.div variants={fadeUp} custom={1} className="grid gap-4 sm:grid-cols-3">
+          <motion.div variants={fadeUp} custom={1} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {statCards.map((s) => (
               <div
                 key={s.label}
@@ -126,8 +165,16 @@ export default function DashboardPage() {
             ))}
           </motion.div>
 
-          {/* Action cards (balanced 2x2 on desktop) */}
-          <motion.div variants={fadeUp} custom={2} className="grid gap-5 md:grid-cols-2">
+          {/* Activity heatmap */}
+          <motion.div variants={fadeUp} custom={2}>
+            <Card>
+              <h2 className="mb-3 text-sm font-semibold text-text-secondary">Activity</h2>
+              <ActivityHeatmap activityMap={activityMap} />
+            </Card>
+          </motion.div>
+
+          {/* Action cards (balanced 2x2 on desktop) + quick links */}
+          <motion.div variants={fadeUp} custom={3} className="grid gap-5 md:grid-cols-2">
             {actionModes.map((m) => (
               <Link href={m.href} key={m.title} className="h-full">
                 <Card className="h-full group hover:scale-[1.01] transition-transform duration-300 hover:border-primary/40">
@@ -146,7 +193,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Tips */}
-          <motion.div variants={fadeUp} custom={3}>
+          <motion.div variants={fadeUp} custom={4}>
             <h2 className="mb-3 text-lg font-semibold text-text-secondary">Interview Tips</h2>
             <Card>
               <ul className="space-y-2.5">

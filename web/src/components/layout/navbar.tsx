@@ -6,7 +6,9 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Logo } from "@/components/ui/logo";
+import { Avatar } from "@/components/ui/avatar";
 import { getToken, clearToken } from "@/lib/auth";
+import { api } from "@/lib/api";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
@@ -15,15 +17,26 @@ const navLinks = [
   { href: "/interview", label: "Interview" },
   { href: "/system-design", label: "System Design" },
   { href: "/assessments", label: "OA" },
+  { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/analytics", label: "Analytics" },
 ];
 
 export function Navbar() {
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
-    queueMicrotask(() => setIsAuthed(Boolean(getToken())));
+    const token = getToken();
+    queueMicrotask(() => setIsAuthed(Boolean(token)));
+    if (token) {
+      api.me().then((r) => {
+        setAvatarUrl(r.user.avatar_url);
+        setUserName(r.user.name ?? r.user.username);
+      }).catch(() => {});
+    }
   }, []);
   
   useEffect(() => {
@@ -69,13 +82,8 @@ export function Navbar() {
           <div className="ml-2 h-5 w-px bg-border" />
           <ThemeToggle />
           {isAuthed === true && (
-            <Link
-              href="/settings"
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                pathname === "/settings" ? "text-primary" : "text-text-primary/70 hover:text-text-primary"
-              }`}
-            >
-              Settings
+            <Link href="/settings" className="ml-1 flex-shrink-0" title="Settings">
+              <Avatar src={avatarUrl} name={userName} size="sm" />
             </Link>
           )}
           {isAuthed === true ? (

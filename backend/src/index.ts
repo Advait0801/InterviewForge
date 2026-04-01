@@ -11,6 +11,7 @@ import problemBookmarksRoutes from "./routes/problemBookmarks.routes";
 import submissionRoutes from "./routes/submission.routes";
 import interviewsRoutes from "./routes/interviews.routes";
 import assessmentsRoutes from "./routes/assessments.routes";
+import leaderboardRoutes from "./routes/leaderboard.routes";
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use("/api/problem-bookmarks", problemBookmarksRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/interviews", interviewsRoutes);
 app.use("/api/assessments", assessmentsRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 
 const server = http.createServer(app);
 

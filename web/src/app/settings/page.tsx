@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Protected } from "@/components/auth/protected";
@@ -8,6 +8,7 @@ import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PasswordField } from "@/components/ui/password-field";
+import { Avatar } from "@/components/ui/avatar";
 import { api } from "@/lib/api";
 
 const MIN_LEN = 6;
@@ -32,6 +33,7 @@ export default function SettingsPage() {
     email: string;
     username: string | null;
     name: string | null;
+    avatar_url: string | null;
   } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -39,6 +41,8 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     api
@@ -50,6 +54,48 @@ export default function SettingsPage() {
         toast.error(msg);
       });
   }, []);
+
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500_000) {
+      toast.error("Image must be under 500KB");
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("Only JPEG, PNG, or WebP images are allowed");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUri = reader.result as string;
+      setAvatarUploading(true);
+      try {
+        const res = await api.uploadAvatar(dataUri);
+        setUser((prev) => (prev ? { ...prev, avatar_url: res.avatar_url } : prev));
+        toast.success("Avatar updated");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Upload failed");
+      } finally {
+        setAvatarUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleAvatarRemove = async () => {
+    setAvatarUploading(true);
+    try {
+      await api.removeAvatar();
+      setUser((prev) => (prev ? { ...prev, avatar_url: null } : prev));
+      toast.success("Avatar removed");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to remove avatar");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const validatePasswordForm = (): FieldErrors | null => {
     const errors: FieldErrors = {};
@@ -112,18 +158,55 @@ export default function SettingsPage() {
                   </div>
                 ) : null}
                 {user ? (
-                  <dl className="space-y-4 text-sm">
-                    {[
-                      { label: "Username", value: user.username ?? "—" },
-                      { label: "Email", value: user.email },
-                      { label: "Full name", value: user.name ?? "—" },
-                    ].map((field) => (
-                      <div key={field.label}>
-                        <dt className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-1">{field.label}</dt>
-                        <dd className="rounded-xl border border-border bg-background/60 px-4 py-2.5 text-text-primary">{field.value}</dd>
+                  <>
+                    <div className="flex items-center gap-4 mb-6 pb-5 border-b border-border">
+                      <Avatar src={user.avatar_url} name={user.name ?? user.username} size="xl" />
+                      <div className="flex flex-col gap-2">
+                        <p className="text-xs text-text-secondary">Profile picture</p>
+                        <div className="flex gap-2">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            onChange={handleAvatarSelect}
+                          />
+                          <Button
+                            type="button"
+                            className="!px-3 !py-1.5 text-sm"
+                            disabled={avatarUploading}
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            {avatarUploading ? "Uploading…" : "Upload"}
+                          </Button>
+                          {user.avatar_url && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="!px-3 !py-1.5 text-sm"
+                              disabled={avatarUploading}
+                              onClick={handleAvatarRemove}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-text-secondary">JPEG, PNG, or WebP. Max 500KB.</p>
                       </div>
-                    ))}
-                  </dl>
+                    </div>
+                    <dl className="space-y-4 text-sm">
+                      {[
+                        { label: "Username", value: user.username ?? "—" },
+                        { label: "Email", value: user.email },
+                        { label: "Full name", value: user.name ?? "—" },
+                      ].map((field) => (
+                        <div key={field.label}>
+                          <dt className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-1">{field.label}</dt>
+                          <dd className="rounded-xl border border-border bg-background/60 px-4 py-2.5 text-text-primary">{field.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </>
                 ) : null}
               </Card>
             </motion.div>

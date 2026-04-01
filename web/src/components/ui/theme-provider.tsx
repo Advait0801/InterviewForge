@@ -7,6 +7,7 @@ type Theme = "dark" | "light";
 
 type ThemeContextValue = {
   theme: Theme;
+  mounted: boolean;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 };
@@ -14,15 +15,21 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "dark";
-    const stored = localStorage.getItem("if-theme");
-    return stored === "light" ? "light" : "dark";
-  });
+  const [theme, setThemeState] = useState<Theme>("dark");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    const stored = localStorage.getItem("if-theme");
+    const initial: Theme = stored === "light" ? "light" : "dark";
+    setThemeState(initial);
+    document.documentElement.classList.toggle("dark", initial === "dark");
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+  }, [theme, mounted]);
 
   const setTheme = (nextTheme: Theme) => {
     setThemeState(nextTheme);
@@ -32,7 +39,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, mounted, setTheme, toggleTheme }}>
       {children}
       <Toaster theme={theme} richColors closeButton position="top-center" />
     </ThemeContext.Provider>

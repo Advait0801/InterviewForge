@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { PageShell } from "@/components/layout/page-shell";
+import { ActivityHeatmap } from "@/components/ui/activity-heatmap";
+import { Avatar } from "@/components/ui/avatar";
 import { api, PublicProfile } from "@/lib/api";
 
 export default function PublicProfilePage() {
@@ -41,9 +43,12 @@ export default function PublicProfilePage() {
   return (
     <PageShell>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{data.profile.name || data.profile.username}</h1>
-          <p className="mt-1 text-sm text-text-secondary">@{data.profile.username}</p>
+        <div className="flex items-center gap-4">
+          <Avatar src={data.profile.avatar_url} name={data.profile.name ?? data.profile.username} size="lg" />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{data.profile.name || data.profile.username}</h1>
+            <p className="mt-1 text-sm text-text-secondary">@{data.profile.username}</p>
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -51,6 +56,12 @@ export default function PublicProfilePage() {
           <Stat label="Attempted" value={data.stats.problemsAttempted} />
           <Stat label="Acceptance" value={`${data.stats.acceptanceRate}%`} />
           <Stat label="Interviews" value={data.stats.interviewsStarted} />
+        </div>
+
+        {/* Activity heatmap */}
+        <div className="rounded-xl border border-border bg-surface/50 p-4">
+          <h2 className="mb-3 text-lg font-semibold">Activity</h2>
+          <ActivityHeatmap activityMap={data.activityMap ?? {}} />
         </div>
 
         <div className="rounded-xl border border-border bg-surface/50 p-4">

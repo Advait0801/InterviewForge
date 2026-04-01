@@ -95,18 +95,46 @@ export default function ProblemsPage() {
             <p className="mt-1 text-text-secondary">Sharpen your skills with algorithm challenges</p>
           </motion.div>
 
-          <motion.div variants={fadeUp} custom={1} className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1 max-w-lg">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <Input
-                className="pl-9"
-                placeholder="Search problems..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
+          {/* Filters row */}
+          <motion.div variants={fadeUp} custom={1} className="mb-6 flex flex-col gap-4">
+            {/* Search + dropdowns */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative flex-1 max-w-md">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <Input
+                  className="pl-9"
+                  placeholder="Search problems..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+
+              <select
+                value={solvedFilter}
+                onChange={(e) => setSolvedFilter(e.target.value as "all" | "solved" | "unsolved")}
+                className="rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-text-primary transition focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
+              >
+                <option value="all">All Status</option>
+                <option value="solved">Solved</option>
+                <option value="unsolved">Unsolved</option>
+              </select>
+
+              <select
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                className="rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-text-primary transition focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 max-w-[200px]"
+              >
+                {topics.map((t) => (
+                  <option key={t} value={t}>
+                    {t === "all" ? "All Topics" : t}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* Difficulty pills */}
             <div className="flex flex-wrap gap-2">
               {(["all", "easy", "medium", "hard"] as const).map((d) => {
                 const isActive = difficulty === d;
@@ -132,43 +160,6 @@ export default function ProblemsPage() {
                 );
               })}
             </div>
-          </motion.div>
-
-          <motion.div variants={fadeUp} custom={2} className="mb-6 flex flex-wrap gap-2">
-            {(["all", "solved", "unsolved"] as const).map((state) => {
-              const isActive = solvedFilter === state;
-              return (
-                <button
-                  key={state}
-                  onClick={() => setSolvedFilter(state)}
-                  className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-text-secondary hover:border-border-hover hover:text-text-primary"
-                  }`}
-                  type="button"
-                >
-                  {state.charAt(0).toUpperCase() + state.slice(1)}
-                </button>
-              );
-            })}
-            {topics.map((t) => {
-              const isActive = topic === t;
-              return (
-                <button
-                  key={t}
-                  onClick={() => setTopic(t)}
-                  className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? "border-secondary bg-secondary/10 text-secondary"
-                      : "border-border text-text-secondary hover:border-border-hover hover:text-text-primary"
-                  }`}
-                  type="button"
-                >
-                  {t === "all" ? "All Topics" : t}
-                </button>
-              );
-            })}
           </motion.div>
 
           <div className="space-y-3">

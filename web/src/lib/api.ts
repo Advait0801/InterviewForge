@@ -77,6 +77,7 @@ export type PublicProfile = {
   profile: {
     username: string;
     name: string | null;
+    avatar_url: string | null;
     createdAt: string;
   };
   stats: {
@@ -92,6 +93,36 @@ export type PublicProfile = {
     status: string | null;
     created_at: string;
   }>;
+  activityMap: Record<string, number>;
+};
+
+export type LeaderboardEntry = {
+  rank: number;
+  username: string;
+  name: string | null;
+  avatar_url: string | null;
+  solved: number;
+  acceptanceRate: number;
+};
+
+export type LeaderboardResponse = {
+  leaderboard: LeaderboardEntry[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type ActivityResponse = {
+  currentStreak: number;
+  bestStreak: number;
+  activityMap: Record<string, number>;
+};
+
+export type AnalyticsResponse = {
+  solvedOverTime: Array<{ day: string; count: number }>;
+  difficultyDistribution: Record<string, number>;
+  topicStrengths: Array<{ topic: string; count: number }>;
+  acceptanceTrend: Array<{ week: string; rate: number }>;
 };
 
 export type SubmissionDetail = {
@@ -219,7 +250,7 @@ export const api = {
       body: { token, newPassword },
     }),
   me: () =>
-    request<{ user: { id: string; email: string; username: string | null; name: string | null } }>("/users/me", {
+    request<{ user: { id: string; email: string; username: string | null; name: string | null; avatar_url: string | null } }>("/users/me", {
       auth: true,
     }),
   changePassword: (currentPassword: string, newPassword: string) =>
@@ -371,4 +402,21 @@ export const api = {
     }),
   getPublicProfile: (username: string) =>
     request<PublicProfile>(`/users/${encodeURIComponent(username)}`),
+  getLeaderboard: (page = 1, limit = 20) =>
+    request<LeaderboardResponse>(`/leaderboard?page=${page}&limit=${limit}`),
+  getUserActivity: () =>
+    request<ActivityResponse>("/users/activity", { auth: true }),
+  getUserAnalytics: () =>
+    request<AnalyticsResponse>("/users/analytics", { auth: true }),
+  uploadAvatar: (dataUri: string) =>
+    request<{ ok: boolean; avatar_url: string }>("/users/avatar", {
+      method: "POST",
+      auth: true,
+      body: { avatar: dataUri },
+    }),
+  removeAvatar: () =>
+    request<{ ok: boolean }>("/users/avatar", {
+      method: "DELETE",
+      auth: true,
+    }),
 };
