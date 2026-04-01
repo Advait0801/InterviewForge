@@ -57,7 +57,8 @@ const modes = [
   },
 ];
 
-const extraModes = [
+const actionModes = [
+  ...modes,
   {
     title: "Online Assessment",
     description: "Timed multi-problem coding tests with scoring report.",
@@ -125,12 +126,12 @@ export default function DashboardPage() {
             ))}
           </motion.div>
 
-          {/* Mode cards */}
+          {/* Action cards (balanced 2x2 on desktop) */}
           <motion.div variants={fadeUp} custom={2} className="grid gap-5 md:grid-cols-2">
-            {modes.map((m) => (
-              <Link href={m.href} key={m.title}>
+            {actionModes.map((m) => (
+              <Link href={m.href} key={m.title} className="h-full">
                 <Card className="h-full group hover:scale-[1.01] transition-transform duration-300 hover:border-primary/40">
-                  <div className="flex items-start gap-4">
+                  <div className="flex min-h-[92px] items-start gap-4">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface-hover border border-border group-hover:border-primary/30 transition-colors">
                       {m.icon}
                     </div>
@@ -144,27 +145,8 @@ export default function DashboardPage() {
             ))}
           </motion.div>
 
-          {/* More modes */}
-          <motion.div variants={fadeUp} custom={3} className="grid gap-5 md:grid-cols-2">
-            {extraModes.map((m) => (
-              <Link href={m.href} key={m.title}>
-                <Card className="h-full group hover:scale-[1.01] transition-transform duration-300 hover:border-warning/40">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface-hover border border-border group-hover:border-warning/30 transition-colors">
-                      {m.icon}
-                    </div>
-                    <div>
-                      <h2 className="mb-1.5 text-xl font-semibold group-hover:text-warning transition-colors">{m.title}</h2>
-                      <p className="text-sm text-text-secondary leading-relaxed">{m.description}</p>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </motion.div>
-
           {/* Tips */}
-          <motion.div variants={fadeUp} custom={4}>
+          <motion.div variants={fadeUp} custom={3}>
             <h2 className="mb-3 text-lg font-semibold text-text-secondary">Interview Tips</h2>
             <Card>
               <ul className="space-y-2.5">

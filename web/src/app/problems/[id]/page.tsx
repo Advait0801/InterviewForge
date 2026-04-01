@@ -81,7 +81,7 @@ export default function WorkspacePage() {
   const [runResult, setRunResult] = useState<RunResponse | null>(null);
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"description" | "submissions">("description");
+  const [activeTab, setActiveTab] = useState<"description" | "submissions" | "hints" | "editorial">("description");
   const [resultTab, setResultTab] = useState<"result" | "testcases">("testcases");
   const [showResults, setShowResults] = useState(false);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -89,6 +89,7 @@ export default function WorkspacePage() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [submissionDetail, setSubmissionDetail] = useState<SubmissionDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [savingBookmark, setSavingBookmark] = useState(false);
 
   const prevStarterRef = useRef<string>("");
 
@@ -102,14 +103,14 @@ export default function WorkspacePage() {
     setLanguage(preferredLang);
 
     api
-      .getProblem(params.id)
+      .getProblem(params.id, true)
       .then(async (res) => {
         setProblem(res.problem);
         const starter = res.problem.starter_code?.[preferredLang] || "";
         prevStarterRef.current = starter;
 
         try {
-          const subRes = await api.getSubmissions(params.id);
+          const subRes = await api.getSubmissions({ problemId: params.id });
           const forLang = subRes.submissions.filter((s) => s.language === preferredLang);
           if (forLang.length > 0) {
             const detail = await api.getSubmission(forLang[0].id);
@@ -130,7 +131,7 @@ export default function WorkspacePage() {
     if (!params.id) return;
     setLoadingSubmissions(true);
     try {
-      const res = await api.getSubmissions(params.id);
+      const res = await api.getSubmissions({ problemId: params.id });
       setSubmissions(res.submissions);
     } catch {
       /* silent — non-critical */
@@ -161,7 +162,7 @@ export default function WorkspacePage() {
 
     if (code === oldStarter || code === "") {
       api
-        .getSubmissions(problem.id)
+        .getSubmissions({ problemId: problem.id })
         .then(async (res) => {
           setSubmissions(res.submissions);
           const forLang = res.submissions.filter((s) => s.language === newLang);
@@ -210,6 +211,9 @@ export default function WorkspacePage() {
     try {
       const res = await api.submitCode(problem.id, language, code);
       setRunResult({ ...res, mode: "submit" });
+      if (res.passed) {
+        setProblem((prev) => (prev ? { ...prev, is_solved: true } : prev));
+      }
       saveLanguage(language);
       fetchSubmissions();
     } catch (err) {
@@ -309,9 +313,37 @@ export default function WorkspacePage() {
           <div className="h-5 w-px bg-border" />
           <h1 className="text-sm font-semibold">{problem.title}</h1>
           <DifficultyBadge d={problem.difficulty} />
+          {problem.is_solved ? (
+            <span className="inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+              Solved
+            </span>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={async () => {
+              if (savingBookmark) return;
+              setSavingBookmark(true);
+              try {
+                if (problem.is_bookmarked) {
+                  await api.removeBookmark(problem.id);
+                } else {
+                  await api.addBookmark(problem.id);
+                }
+                setProblem((prev) => (prev ? { ...prev, is_bookmarked: !prev.is_bookmarked } : prev));
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : "Could not update bookmark");
+              } finally {
+                setSavingBookmark(false);
+              }
+            }}
+            disabled={savingBookmark}
+            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition hover:border-warning/50 hover:text-warning disabled:opacity-50"
+          >
+            {problem.is_bookmarked ? "Bookmarked" : "Bookmark"}
+          </button>
           <select
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value as Language)}
@@ -369,6 +401,26 @@ export default function WorkspacePage() {
             >
               Submissions
             </button>
+            <button
+              onClick={() => setActiveTab("hints")}
+              className={`px-4 py-2.5 text-xs font-medium transition-all ${
+                activeTab === "hints"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
+            >
+              Hints
+            </button>
+            <button
+              onClick={() => setActiveTab("editorial")}
+              className={`px-4 py-2.5 text-xs font-medium transition-all ${
+                activeTab === "editorial"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
+            >
+              Editorial
+            </button>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-5">
             {activeTab === "description" && (
@@ -401,6 +453,16 @@ export default function WorkspacePage() {
                 loading={loadingSubmissions}
                 onOpenDetail={openSubmissionDetail}
               />
+            )}
+            {activeTab === "hints" && (
+              <div className="text-sm leading-relaxed text-text-primary whitespace-pre-wrap">
+                {problem.hints?.trim() ? problem.hints : "No hints available for this problem yet."}
+              </div>
+            )}
+            {activeTab === "editorial" && (
+              <div className="text-sm leading-relaxed text-text-primary whitespace-pre-wrap">
+                {problem.editorial?.trim() ? problem.editorial : "No editorial available for this problem yet."}
+              </div>
             )}
           </div>
         </div>

@@ -29,10 +29,13 @@ export default function ProblemsPage() {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [query, setQuery] = useState("");
   const [difficulty, setDifficulty] = useState<"all" | "easy" | "medium" | "hard">("all");
+  const [topic, setTopic] = useState("all");
+  const [solvedFilter, setSolvedFilter] = useState<"all" | "solved" | "unsolved">("all");
+  const [savingBookmarkId, setSavingBookmarkId] = useState<string | null>(null);
 
   useEffect(() => {
     api
-      .listProblems()
+      .listProblems({ auth: true })
       .then((res) => setProblems(res.problems))
       .catch((err) => {
         toast.error(err instanceof Error ? err.message : "Could not load problems");
@@ -40,17 +43,48 @@ export default function ProblemsPage() {
       });
   }, []);
 
+  const topics = useMemo(() => {
+    const allTopics = new Set<string>();
+    for (const p of problems) {
+      for (const t of p.topics ?? []) allTopics.add(t);
+    }
+    return ["all", ...Array.from(allTopics).sort((a, b) => a.localeCompare(b))];
+  }, [problems]);
+
   const filtered = useMemo(() => {
     const DIFF_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
     return problems
       .filter((p) => {
         const matchDiff = difficulty === "all" || p.difficulty === difficulty;
+        const matchTopic = topic === "all" || (p.topics ?? []).includes(topic);
+        const isSolved = Boolean(p.is_solved);
+        const matchSolved =
+          solvedFilter === "all" || (solvedFilter === "solved" ? isSolved : !isSolved);
         const q = query.trim().toLowerCase();
         const matchQuery = !q || p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
-        return matchDiff && matchQuery;
+        return matchDiff && matchTopic && matchSolved && matchQuery;
       })
       .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
-  }, [problems, query, difficulty]);
+  }, [problems, query, difficulty, topic, solvedFilter]);
+
+  const toggleBookmark = async (problemId: string, bookmarked: boolean) => {
+    if (savingBookmarkId) return;
+    setSavingBookmarkId(problemId);
+    try {
+      if (bookmarked) {
+        await api.removeBookmark(problemId);
+      } else {
+        await api.addBookmark(problemId);
+      }
+      setProblems((prev) =>
+        prev.map((p) => (p.id === problemId ? { ...p, is_bookmarked: !bookmarked } : p))
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not update bookmark");
+    } finally {
+      setSavingBookmarkId(null);
+    }
+  };
 
   return (
     <Protected>
@@ -61,7 +95,7 @@ export default function ProblemsPage() {
             <p className="mt-1 text-text-secondary">Sharpen your skills with algorithm challenges</p>
           </motion.div>
 
-          <motion.div variants={fadeUp} custom={1} className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <motion.div variants={fadeUp} custom={1} className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1 max-w-lg">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -100,28 +134,98 @@ export default function ProblemsPage() {
             </div>
           </motion.div>
 
+          <motion.div variants={fadeUp} custom={2} className="mb-6 flex flex-wrap gap-2">
+            {(["all", "solved", "unsolved"] as const).map((state) => {
+              const isActive = solvedFilter === state;
+              return (
+                <button
+                  key={state}
+                  onClick={() => setSolvedFilter(state)}
+                  className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-text-secondary hover:border-border-hover hover:text-text-primary"
+                  }`}
+                  type="button"
+                >
+                  {state.charAt(0).toUpperCase() + state.slice(1)}
+                </button>
+              );
+            })}
+            {topics.map((t) => {
+              const isActive = topic === t;
+              return (
+                <button
+                  key={t}
+                  onClick={() => setTopic(t)}
+                  className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
+                    isActive
+                      ? "border-secondary bg-secondary/10 text-secondary"
+                      : "border-border text-text-secondary hover:border-border-hover hover:text-text-primary"
+                  }`}
+                  type="button"
+                >
+                  {t === "all" ? "All Topics" : t}
+                </button>
+              );
+            })}
+          </motion.div>
+
           <div className="space-y-3">
             {filtered.map((p, i) => (
-              <motion.div key={p.id} variants={fadeUp} custom={i + 2}>
+              <motion.div key={p.id} variants={fadeUp} custom={i + 3}>
                 <Link href={`/problems/${p.id}`}>
                   <div
                     className={`rounded-2xl border border-border ${difficultyAccent[p.difficulty] || ""} border-l-4 bg-surface/80 backdrop-blur-sm p-5 transition-all duration-300 hover:border-border-hover hover:shadow-lg hover:shadow-glow-primary hover:translate-x-1 group`}
                   >
                     <div className="mb-2 flex items-center justify-between">
-                      <h2 className="text-lg font-semibold group-hover:text-primary transition-colors">{p.title}</h2>
-                      <Badge
-                        tone={p.difficulty === "easy" ? "success" : p.difficulty === "medium" ? "warning" : "danger"}
-                      >
-                        {p.difficulty}
-                      </Badge>
+                      <h2 className="text-lg font-semibold group-hover:text-primary transition-colors">
+                        {p.title}
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        {p.is_solved ? (
+                          <span className="inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
+                            Solved
+                          </span>
+                        ) : null}
+                        <Badge
+                          tone={p.difficulty === "easy" ? "success" : p.difficulty === "medium" ? "warning" : "danger"}
+                        >
+                          {p.difficulty}
+                        </Badge>
+                        <button
+                          type="button"
+                          aria-label={p.is_bookmarked ? "Remove bookmark" : "Add bookmark"}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleBookmark(p.id, Boolean(p.is_bookmarked));
+                          }}
+                          disabled={savingBookmarkId === p.id}
+                          className="rounded-md p-1 text-text-secondary transition hover:bg-surface-hover hover:text-warning disabled:opacity-50"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill={p.is_bookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.7">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                     <p className="text-sm text-text-secondary line-clamp-2 leading-relaxed">{p.description}</p>
+                    {(p.topics ?? []).length > 0 ? (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {(p.topics ?? []).slice(0, 3).map((t) => (
+                          <span key={t} className="rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] text-text-secondary">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </Link>
               </motion.div>
             ))}
             {filtered.length === 0 && problems.length > 0 && (
-              <motion.p variants={fadeUp} custom={2} className="py-12 text-center text-text-secondary">
+              <motion.p variants={fadeUp} custom={3} className="py-12 text-center text-text-secondary">
                 No problems match your filters.
               </motion.p>
             )}

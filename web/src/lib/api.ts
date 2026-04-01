@@ -3,7 +3,7 @@ import { getToken } from "./auth";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
 type RequestOptions = {
-  method?: "GET" | "POST";
+  method?: "GET" | "POST" | "DELETE";
   body?: unknown;
   auth?: boolean;
 };
@@ -40,11 +40,17 @@ export type Problem = {
   title: string;
   description: string;
   difficulty: "easy" | "medium" | "hard";
+  topics?: string[];
+  is_solved?: boolean;
+  is_bookmarked?: boolean;
 };
 
 export type ProblemDetail = Problem & {
   test_cases: Array<{ input: string; expectedOutput: string }>;
   starter_code: Record<string, string>;
+  hints?: string | null;
+  editorial?: string | null;
+  companies?: string[];
 };
 
 export type Submission = {
@@ -56,6 +62,36 @@ export type Submission = {
   runtime_ms: number | null;
   memory_kb: number | null;
   created_at: string;
+};
+
+export type UserStats = {
+  problemsAttempted: number;
+  problemsSolved: number;
+  interviewsStarted: number;
+  bestStreak: number;
+  submissionsCount: number;
+  acceptanceRate: number;
+};
+
+export type PublicProfile = {
+  profile: {
+    username: string;
+    name: string | null;
+    createdAt: string;
+  };
+  stats: {
+    problemsAttempted: number;
+    problemsSolved: number;
+    interviewsStarted: number;
+    submissionsCount: number;
+    acceptanceRate: number;
+  };
+  recentActivity: Array<{
+    type: "submission" | "interview";
+    title: string;
+    status: string | null;
+    created_at: string;
+  }>;
 };
 
 export type SubmissionDetail = {
@@ -192,8 +228,27 @@ export const api = {
       auth: true,
       body: { currentPassword, newPassword },
     }),
-  listProblems: () => request<{ problems: Problem[] }>("/problems"),
-  getProblem: (id: string) => request<{ problem: ProblemDetail }>(`/problems/${id}`),
+  listProblems: (opts?: {
+    difficulty?: "all" | "easy" | "medium" | "hard";
+    topic?: string;
+    search?: string;
+    solved?: "all" | "solved" | "unsolved";
+    auth?: boolean;
+  }) => {
+    const params = new URLSearchParams();
+    if (opts?.difficulty && opts.difficulty !== "all") params.set("difficulty", opts.difficulty);
+    if (opts?.topic && opts.topic !== "all") params.set("topic", opts.topic);
+    if (opts?.search) params.set("search", opts.search);
+    if (opts?.solved && opts.solved !== "all") params.set("solved", opts.solved);
+    const query = params.toString();
+    return request<{ problems: Problem[] }>(`/problems${query ? `?${query}` : ""}`, { auth: opts?.auth ?? false });
+  },
+  getProblem: (id: string, auth = false) => request<{ problem: ProblemDetail }>(`/problems/${id}`, { auth }),
+  listBookmarks: () => request<{ bookmarks: Array<{ problem_id: string }> }>("/problem-bookmarks", { auth: true }),
+  addBookmark: (problemId: string) =>
+    request<{ ok: boolean }>(`/problem-bookmarks/${encodeURIComponent(problemId)}`, { method: "POST", auth: true }),
+  removeBookmark: (problemId: string) =>
+    request<{ ok: boolean }>(`/problem-bookmarks/${encodeURIComponent(problemId)}`, { method: "DELETE", auth: true }),
   runCode: (problemId: string, language: string, code: string) =>
     request<{
       mode: "run";
@@ -261,11 +316,25 @@ export const api = {
       auth: true,
       body: { prompt, explanation, company },
     }),
-  getSubmissions: (problemId?: string) =>
-    request<{ submissions: Submission[] }>(
-      problemId ? `/submissions?problemId=${encodeURIComponent(problemId)}` : "/submissions",
+  getSubmissions: (opts?: {
+    problemId?: string;
+    status?: "passed" | "failed";
+    language?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const params = new URLSearchParams();
+    if (opts?.problemId) params.set("problemId", opts.problemId);
+    if (opts?.status) params.set("status", opts.status);
+    if (opts?.language) params.set("language", opts.language);
+    if (opts?.limit != null) params.set("limit", String(opts.limit));
+    if (opts?.offset != null) params.set("offset", String(opts.offset));
+    const query = params.toString();
+    return request<{ submissions: Submission[]; total?: number; limit?: number; offset?: number }>(
+      `/submissions${query ? `?${query}` : ""}`,
       { auth: true },
-    ),
+    );
+  },
   getSubmission: (id: string) =>
     request<{ submission: SubmissionDetail }>(`/submissions/${encodeURIComponent(id)}`, { auth: true }),
   createAssessment: (opts: { timeLimitMinutes?: number; problemCount?: number; difficultyMix?: string } = {}) =>
@@ -296,7 +365,9 @@ export const api = {
   getInterviewReport: (id: string) =>
     request<InterviewReport>(`/interviews/${id}/report`, { auth: true }),
   userStats: () =>
-    request<{ problemsAttempted: number; interviewsStarted: number; bestStreak: number }>("/users/stats", {
+    request<UserStats>("/users/stats", {
       auth: true,
     }),
+  getPublicProfile: (username: string) =>
+    request<PublicProfile>(`/users/${encodeURIComponent(username)}`),
 };

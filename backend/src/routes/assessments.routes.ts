@@ -143,6 +143,14 @@ router.get("/:id", requireAuth, async (req: AuthRequest, res) => {
     );
 
     const assessment = assessmentResult.rows[0];
+    if (problemsResult.rows.length === 0) {
+      return res.status(500).json({ error: "Assessment has no assigned problems. Please create a new assessment." });
+    }
+    if (problemsResult.rows.length !== assessment.problem_count) {
+      return res.status(500).json({
+        error: `Assessment problem mismatch: expected ${assessment.problem_count}, found ${problemsResult.rows.length}`,
+      });
+    }
     const elapsed = Date.now() - new Date(assessment.started_at).getTime();
     const remainingMs = Math.max(0, assessment.time_limit_minutes * 60 * 1000 - elapsed);
 
@@ -168,6 +176,12 @@ router.post("/:id/solve", requireAuth, async (req: AuthRequest, res) => {
   if (!problemId || !submissionId) {
     return res.status(400).json({ error: "problemId and submissionId are required" });
   }
+  if (!UUID_REGEX.test(problemId)) {
+    return res.status(400).json({ error: "Invalid problemId" });
+  }
+  if (!UUID_REGEX.test(submissionId)) {
+    return res.status(400).json({ error: "Invalid submissionId" });
+  }
 
   try {
     const assessmentResult = await query<AssessmentRow>(
@@ -182,11 +196,14 @@ router.post("/:id/solve", requireAuth, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: "Assessment is no longer active" });
     }
 
-    await query(
+    const updateRes = await query(
       `UPDATE assessment_problems SET submission_id = $1
        WHERE assessment_id = $2 AND problem_id = $3`,
       [submissionId, id, problemId]
     );
+    if (updateRes.rowCount === 0) {
+      return res.status(404).json({ error: "Problem is not part of this assessment" });
+    }
 
     return res.json({ ok: true });
   } catch (err) {

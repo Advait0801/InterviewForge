@@ -14,9 +14,18 @@ const RUN_CASE_LIMIT = 4;
 router.get("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
   const problemId = req.query.problemId as string | undefined;
+  const status = req.query.status as string | undefined;
+  const language = req.query.language as string | undefined;
+  const parsedLimit = Number(req.query.limit ?? 50);
+  const parsedOffset = Number(req.query.offset ?? 0);
+  const limit = Number.isFinite(parsedLimit) ? Math.max(1, Math.min(parsedLimit, 200)) : 50;
+  const offset = Number.isFinite(parsedOffset) ? Math.max(0, parsedOffset) : 0;
 
   if (problemId && !UUID_REGEX.test(problemId)) {
     return res.status(400).json({ error: "Invalid problemId" });
+  }
+  if (status && !["passed", "failed"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status filter" });
   }
 
   try {
@@ -24,9 +33,29 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
     const params: (string | number)[] = [userId];
 
     if (problemId) {
-      conditions.push(`s.problem_id = $2`);
       params.push(problemId);
+      conditions.push(`s.problem_id = $${params.length}`);
     }
+    if (status) {
+      params.push(status);
+      conditions.push(`s.status = $${params.length}`);
+    }
+    if (language) {
+      params.push(language);
+      conditions.push(`s.language = $${params.length}`);
+    }
+
+    params.push(limit);
+    const limitIdx = params.length;
+    params.push(offset);
+    const offsetIdx = params.length;
+
+    const totalResult = await query<{ count: string }>(
+      `SELECT COUNT(*) AS count
+       FROM submissions s
+       WHERE ${conditions.join(" AND ")}`,
+      params.slice(0, offsetIdx - 2)
+    );
 
     const result = await query<{
       id: string;
@@ -44,11 +73,17 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
        JOIN problems p ON p.id = s.problem_id
        WHERE ${conditions.join(" AND ")}
        ORDER BY s.created_at DESC
-       LIMIT 50`,
+       LIMIT $${limitIdx}
+       OFFSET $${offsetIdx}`,
       params
     );
 
-    return res.json({ submissions: result.rows });
+    return res.json({
+      submissions: result.rows,
+      total: parseInt(totalResult.rows[0]?.count ?? "0", 10),
+      limit,
+      offset,
+    });
   } catch (err) {
     console.error("List submissions error", err);
     return res.status(500).json({ error: "Internal server error" });

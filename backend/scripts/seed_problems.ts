@@ -55,15 +55,26 @@ async function main() {
     const testCases = padTestCases(p.testCases);
 
     await query(
-      `INSERT INTO problems (slug, title, description, difficulty, test_cases, starter_code)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO problems (slug, title, description, difficulty, test_cases, starter_code, topics, companies)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        ON CONFLICT (slug) DO UPDATE SET
          title = EXCLUDED.title,
          description = EXCLUDED.description,
          difficulty = EXCLUDED.difficulty,
          test_cases = EXCLUDED.test_cases,
-         starter_code = EXCLUDED.starter_code`,
-      [p.slug, p.title, p.description, p.difficulty, JSON.stringify(testCases), JSON.stringify(starterCode)]
+         starter_code = EXCLUDED.starter_code,
+         topics = EXCLUDED.topics,
+         companies = EXCLUDED.companies`,
+      [
+        p.slug,
+        p.title,
+        p.description,
+        p.difficulty,
+        JSON.stringify(testCases),
+        JSON.stringify(starterCode),
+        p.topics,
+        p.companies,
+      ]
     );
     console.log("Upserted problem:", p.slug);
   }

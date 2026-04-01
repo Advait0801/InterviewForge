@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
@@ -34,10 +35,10 @@ const fadeUp = {
 type Company = "amazon" | "google" | "meta";
 type Difficulty = "easy" | "medium" | "hard";
 
-const COMPANIES: { value: Company; label: string; focus: string; color: string; icon: string }[] = [
-  { value: "amazon", label: "Amazon", focus: "Leadership principles, system design, and behavioral depth.", color: "border-warning hover:border-warning/70 hover:shadow-warning/10", icon: "🛒" },
-  { value: "google", label: "Google", focus: "Algorithms, problem solving, and analytical thinking.", color: "border-secondary hover:border-secondary/70 hover:shadow-secondary/10", icon: "🔍" },
-  { value: "meta", label: "Meta", focus: "Practical coding, system scalability, and move-fast culture.", color: "border-primary hover:border-primary/70 hover:shadow-primary/10", icon: "🌐" },
+const COMPANIES: { value: Company; label: string; focus: string; color: string; logoSrc: string }[] = [
+  { value: "amazon", label: "Amazon", focus: "Leadership principles, system design, and behavioral depth.", color: "border-warning hover:border-warning/70 hover:shadow-warning/10", logoSrc: "/logos/amazon.svg" },
+  { value: "google", label: "Google", focus: "Algorithms, problem solving, and analytical thinking.", color: "border-secondary hover:border-secondary/70 hover:shadow-secondary/10", logoSrc: "/logos/google.svg" },
+  { value: "meta", label: "Meta", focus: "Practical coding, system scalability, and move-fast culture.", color: "border-primary hover:border-primary/70 hover:shadow-primary/10", logoSrc: "/logos/meta.svg" },
 ];
 
 const DIFFICULTIES: { value: Difficulty; label: string }[] = [
@@ -203,7 +204,9 @@ export default function InterviewPage() {
                           : "border-border bg-surface/60 hover:scale-[1.01]"
                       }`}
                     >
-                      <span className="text-2xl">{c.icon}</span>
+                      <div className="inline-flex h-10 items-center">
+                        <Image src={c.logoSrc} alt={`${c.label} logo`} width={120} height={36} className="h-8 w-auto object-contain" />
+                      </div>
                       <p className="mt-2 mb-1 text-lg font-bold">{c.label}</p>
                       <p className="text-sm text-text-secondary leading-relaxed">{c.focus}</p>
                     </button>

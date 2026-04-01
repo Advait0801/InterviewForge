@@ -49,6 +49,8 @@ export default function AssessmentWorkspacePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submittingAll, setSubmittingAll] = useState(false);
   const [runResult, setRunResult] = useState<Record<string, { passed: boolean; results: Array<{ passed: boolean; actualOutput?: string; error?: string }>; runtimeMs?: number }>>({});
+  const [loadingProblems, setLoadingProblems] = useState(true);
+  const [problemLoadError, setProblemLoadError] = useState<string | null>(null);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const remainingRef = useRef(0);
@@ -58,24 +60,60 @@ export default function AssessmentWorkspacePage() {
       router.push("/login");
       return;
     }
-    api.getAssessment(params.id).then((res) => {
+    setLoadingProblems(true);
+    setProblemLoadError(null);
+    api.getAssessment(params.id).then(async (res) => {
       setAssessment(res.assessment);
       setProblems(res.problems);
       setRemainingMs(res.remainingMs);
       remainingRef.current = res.remainingMs;
 
-      res.problems.forEach((p) => {
-        api.getProblem(p.problem_id).then((d) => {
-          setProblemDetails((prev) => ({ ...prev, [p.problem_id]: d.problem }));
-          setCodes((prev) => {
-            if (prev[p.problem_id]) return prev;
-            const starter = d.problem.starter_code?.python3 || "";
-            return { ...prev, [p.problem_id]: starter };
-          });
-        }).catch(() => {});
-      });
+      if (res.problems.length === 0) {
+        setProblemLoadError("No problems assigned to this assessment.");
+        setLoadingProblems(false);
+        return;
+      }
+
+      const detailResults = await Promise.allSettled(
+        res.problems.map((p) => api.getProblem(p.problem_id, true).then((d) => ({ problemId: p.problem_id, problem: d.problem })))
+      );
+
+      const loaded: Record<string, ProblemDetail> = {};
+      const starterCodes: Record<string, string> = {};
+      let failed = 0;
+
+      for (const result of detailResults) {
+        if (result.status === "fulfilled") {
+          loaded[result.value.problemId] = result.value.problem;
+          starterCodes[result.value.problemId] = result.value.problem.starter_code?.python3 || "";
+        } else {
+          failed += 1;
+        }
+      }
+
+      setProblemDetails((prev) => ({ ...prev, ...loaded }));
+      setCodes((prev) => ({ ...starterCodes, ...prev }));
+
+      const firstLoadedIdx = res.problems.findIndex((p) => Boolean(loaded[p.problem_id]));
+      if (firstLoadedIdx >= 0) {
+        setActiveProblemIdx(firstLoadedIdx);
+      } else {
+        setProblemLoadError("Failed to load problem details for this assessment.");
+      }
+
+      if (failed > 0 && failed < res.problems.length) {
+        toast.error(`Some problems failed to load (${failed}/${res.problems.length}).`);
+      }
+      if (failed === res.problems.length) {
+        setProblemLoadError("Failed to load problem details for this assessment.");
+      }
+
+      setLoadingProblems(false);
     }).catch((err) => {
-      toast.error(err instanceof Error ? err.message : "Failed to load assessment");
+      const message = err instanceof Error ? err.message : "Failed to load assessment";
+      toast.error(message);
+      setProblemLoadError(message);
+      setLoadingProblems(false);
     });
   }, [params.id, router]);
 
@@ -309,10 +347,18 @@ export default function AssessmentWorkspacePage() {
                   </div>
                 ))}
               </div>
-            ) : (
+            ) : loadingProblems ? (
               <div className="flex items-center gap-2 text-sm text-text-secondary">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 Loading problem...
+              </div>
+            ) : problemLoadError ? (
+              <div className="rounded-xl border border-error/30 bg-error/5 p-4 text-sm text-error">
+                {problemLoadError}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border bg-surface/60 p-4 text-sm text-text-secondary">
+                Problem details unavailable for this question.
               </div>
             )}
           </div>

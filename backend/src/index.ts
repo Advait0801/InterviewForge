@@ -7,6 +7,7 @@ import { Server } from "socket.io";
 import authRoutes from "./routes/auth.routes";
 import usersRoutes from "./routes/users.routes";
 import problemsRoutes from "./routes/problems.routes";
+import problemBookmarksRoutes from "./routes/problemBookmarks.routes";
 import submissionRoutes from "./routes/submission.routes";
 import interviewsRoutes from "./routes/interviews.routes";
 import assessmentsRoutes from "./routes/assessments.routes";
@@ -48,6 +49,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/problems", problemsRoutes);
+app.use("/api/problem-bookmarks", problemBookmarksRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/interviews", interviewsRoutes);
 app.use("/api/assessments", assessmentsRoutes);
