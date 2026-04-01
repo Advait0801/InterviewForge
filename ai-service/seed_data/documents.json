@@ -40,6 +40,16 @@
     "metadata": { "company": "meta", "stage": "behavioral", "type": "interview_guide" }
   },
   {
+    "source": "apple_behavioral",
+    "text": "Apple Behavioral Interview Guide\n\nApple behavioral interviews focus on ownership, collaboration across disciplines, and product quality. Interviewers expect concise and concrete examples.\n\nCommon dimensions:\n- Ownership and accountability under ambiguity\n- Collaboration with design/product/hardware teams\n- Judgment under changing constraints\n- Focus on user impact and execution quality\n\nSample prompts:\n- Tell me about a time you made a high-impact product decision with incomplete information.\n- Describe a disagreement with a cross-functional partner and how you resolved it.\n- Share a case where you raised quality standards under timeline pressure.",
+    "metadata": { "company": "apple", "stage": "behavioral", "type": "interview_guide" }
+  },
+  {
+    "source": "apple_system_design",
+    "text": "Apple System Design Interview Patterns\n\nApple system design interviews emphasize reliability, performance, and user experience quality at scale.\n\nCommon topics:\n- Design a high-reliability notification delivery system\n- Design a media sync and storage service\n- Design a secure messaging backend\n\nEvaluation focus:\n- Latency and responsiveness for user-facing features\n- Data consistency and offline-sync behavior\n- Privacy/security constraints and trade-offs\n- Operability: observability, rollback strategy, failure containment",
+    "metadata": { "company": "apple", "stage": "system_design", "type": "interview_guide" }
+  },
+  {
     "source": "distributed_systems_fundamentals",
     "text": "Distributed Systems Fundamentals for Interviews\n\nCore concepts every candidate should know:\n\nCAP Theorem:\n- Consistency: Every read returns the most recent write.\n- Availability: Every request receives a response.\n- Partition Tolerance: System continues despite network failures.\n- In practice, you choose between CP or AP.\n\nConsistency Models:\n- Strong consistency (linearizability)\n- Eventual consistency\n- Causal consistency\n- Read-your-writes consistency\n\nScaling Patterns:\n- Horizontal scaling (add more machines)\n- Vertical scaling (bigger machines)\n- Database sharding (hash-based, range-based, geographic)\n- Read replicas for read-heavy workloads\n- Caching layers (Redis, Memcached, CDN)\n\nReliability Patterns:\n- Replication (leader-follower, multi-leader, leaderless)\n- Circuit breakers for cascading failure prevention\n- Bulkhead pattern for fault isolation\n- Retry with exponential backoff\n- Health checks and heartbeats\n\nData Storage:\n- SQL: ACID guarantees, complex queries, joins\n- NoSQL: Flexibility, horizontal scaling, various models (document, key-value, column-family, graph)\n- Time-series databases for metrics\n- Message queues (Kafka, RabbitMQ, SQS) for async processing",
     "metadata": { "stage": "system_design", "type": "fundamentals" }

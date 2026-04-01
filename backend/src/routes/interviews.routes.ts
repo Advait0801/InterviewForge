@@ -131,7 +131,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
 
   const normalizedCompany = normalizeCompany(company);
   if (!normalizedCompany) {
-    return res.status(400).json({ error: "company must be one of: amazon, google, meta" });
+    return res.status(400).json({ error: "company must be one of: amazon, google, meta, apple" });
   }
 
   const startingStage: InterviewStage = "behavioral";

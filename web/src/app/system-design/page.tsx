@@ -60,7 +60,7 @@ const RUBRIC_LABELS: Record<string, string> = {
   communication: "Communication",
 };
 
-type Company = "none" | "amazon" | "google" | "meta";
+type Company = "none" | "amazon" | "google" | "meta" | "apple";
 
 /* ── node layout: group by type into layers ── */
 
@@ -270,7 +270,7 @@ export default function SystemDesignPage() {
               <motion.div variants={fadeUp} custom={2}>
                 <h2 className="mb-3 text-lg font-semibold">Company Context <span className="text-sm font-normal text-text-secondary">(optional)</span></h2>
                 <div className="flex flex-wrap gap-2">
-                  {(["none", "amazon", "google", "meta"] as const).map((c) => (
+                  {(["none", "amazon", "google", "meta", "apple"] as const).map((c) => (
                     <button
                       key={c}
                       type="button"

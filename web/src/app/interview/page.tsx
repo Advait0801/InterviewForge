@@ -32,13 +32,14 @@ const fadeUp = {
   }),
 };
 
-type Company = "amazon" | "google" | "meta";
+type Company = "amazon" | "google" | "meta" | "apple";
 type Difficulty = "easy" | "medium" | "hard";
 
 const COMPANIES: { value: Company; label: string; focus: string; color: string; logoSrc: string }[] = [
   { value: "amazon", label: "Amazon", focus: "Leadership principles, system design, and behavioral depth.", color: "border-warning hover:border-warning/70 hover:shadow-warning/10", logoSrc: "/logos/amazon.svg" },
   { value: "google", label: "Google", focus: "Algorithms, problem solving, and analytical thinking.", color: "border-secondary hover:border-secondary/70 hover:shadow-secondary/10", logoSrc: "/logos/google.svg" },
   { value: "meta", label: "Meta", focus: "Practical coding, system scalability, and move-fast culture.", color: "border-primary hover:border-primary/70 hover:shadow-primary/10", logoSrc: "/logos/meta.svg" },
+  { value: "apple", label: "Apple", focus: "Product quality, fundamentals, and performance-focused execution.", color: "border-border-hover hover:border-border hover:shadow-surface-hover/30", logoSrc: "/logos/apple.svg" },
 ];
 
 const DIFFICULTIES: { value: Difficulty; label: string }[] = [
@@ -192,7 +193,7 @@ export default function InterviewPage() {
               {/* Company selector */}
               <motion.div variants={fadeUp} custom={1}>
                 <h2 className="mb-3 text-lg font-semibold">Select Company</h2>
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {COMPANIES.map((c) => (
                     <button
                       key={c.value}

@@ -184,11 +184,15 @@ function buildJsonInput(testCases: TestCase[], meta: ProblemMeta): string {
     const parsed = parseTestInput(tc.input, meta);
 
     if (parsed.isDesign) {
+      const methodSpecs = Object.fromEntries(
+        (meta.methods || []).map((m) => [m.name, { param_types: m.params.map((p) => p.type), return_type: m.returnType }])
+      );
       return JSON.stringify({
         design: true,
         className: meta.className,
         ops: parsed.ops,
         args: parsed.opArgs,
+        method_specs: methodSpecs,
       });
     }
 

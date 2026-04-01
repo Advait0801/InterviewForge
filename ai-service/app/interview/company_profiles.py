@@ -57,11 +57,26 @@ COMPANY_PROFILES: Dict[str, CompanyProfile] = {
             "core_cs": "practical systems knowledge and performance trade-offs",
         },
     ),
+    "apple": CompanyProfile(
+        key="apple",
+        name="Apple",
+        style=(
+            "Emphasize product quality, crisp communication, and practical engineering judgment. "
+            "Probe deeply on fundamentals, performance, and user-experience trade-offs."
+        ),
+        focus_areas=["product quality", "performance", "fundamentals", "execution"],
+        stage_topics={
+            "behavioral": "ownership, cross-functional collaboration, and product impact",
+            "coding": "clean implementation, correctness, and complexity trade-offs",
+            "system_design": "reliable user-facing systems with latency and quality focus",
+            "core_cs": "strong fundamentals in systems, memory, and concurrency",
+        },
+    ),
 }
 
 
 def get_company_profile(company: str) -> CompanyProfile:
     normalized = company.strip().lower()
     if normalized not in COMPANY_PROFILES:
-        raise ValueError("company must be one of: amazon, google, meta")
+        raise ValueError("company must be one of: amazon, google, meta, apple")
     return COMPANY_PROFILES[normalized]

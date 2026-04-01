@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { PageShell } from "@/components/layout/page-shell";
@@ -57,11 +57,7 @@ const features = [
 ];
 
 export default function Home() {
-  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    setIsAuthed(Boolean(getToken()));
-  }, []);
+  const [isAuthed] = useState<boolean>(() => Boolean(getToken()));
 
   return (
     <PageShell>

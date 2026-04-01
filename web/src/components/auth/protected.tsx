@@ -6,26 +6,15 @@ import { isAuthenticated } from "@/lib/auth";
 
 export function Protected({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [status, setStatus] = useState<"loading" | "ok" | "redirect">("loading");
+  const [isAuthed] = useState<boolean>(() => isAuthenticated());
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      setStatus("ok");
-    } else {
-      setStatus("redirect");
+    if (!isAuthed) {
       router.replace("/login");
     }
-  }, [router]);
+  }, [isAuthed, router]);
 
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (status === "redirect") {
+  if (!isAuthed) {
     return null;
   }
 

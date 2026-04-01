@@ -1,6 +1,6 @@
 export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export const COMPANIES = ["amazon", "google", "meta"] as const;
+export const COMPANIES = ["amazon", "google", "meta", "apple"] as const;
 export type Company = (typeof COMPANIES)[number];
 
 export const INTERVIEW_STAGES = ["behavioral", "coding", "system_design", "core_cs"] as const;
