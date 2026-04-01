@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { SocketBridge } from "@/components/socket-bridge";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,7 +29,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetBrainsMono.variable} bg-background text-text-primary antialiased`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <SocketBridge />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -27,7 +27,7 @@ router.post("/change-password", requireAuth, async (req: AuthRequest, res) => {
 
   try {
     const userId = req.user!.id;
-    const result = await query<{ password_hash: string }>(
+    const result = await query<{ password_hash: string | null }>(
       "SELECT password_hash FROM users WHERE id = $1",
       [userId]
     );
@@ -36,7 +36,14 @@ router.post("/change-password", requireAuth, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const ok = await verifyPassword(currentPassword, result.rows[0].password_hash);
+    const hash = result.rows[0].password_hash;
+    if (!hash) {
+      return res.status(400).json({
+        error: "No password is set for this account. Use Forgot password with your email to create one.",
+      });
+    }
+
+    const ok = await verifyPassword(currentPassword, hash);
     if (!ok) {
       return res.status(401).json({ error: "Current password is incorrect" });
     }

@@ -16,6 +16,7 @@
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "socket.io-client": "^4.8.3",
     "sonner": "^2.0.7"
   },
   "devDependencies": {
@@ -27,5 +28,13 @@
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "lightningcss-darwin-arm64": "1.31.1",
+    "lightningcss-darwin-x64": "1.31.1",
+    "lightningcss-linux-arm64-gnu": "1.31.1",
+    "lightningcss-linux-arm64-musl": "1.31.1",
+    "lightningcss-linux-x64-gnu": "1.31.1",
+    "lightningcss-linux-x64-musl": "1.31.1"
   }
 }

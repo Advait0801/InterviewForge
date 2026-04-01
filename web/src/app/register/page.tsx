@@ -65,7 +65,7 @@ export default function RegisterPage() {
     try {
       const res = await api.register(username, email, password, fullName || undefined);
       setToken(res.token);
-      toast.success("Account created");
+      toast.success("Account created — verify your email (link is logged in the backend console in dev).");
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");

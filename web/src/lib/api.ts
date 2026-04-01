@@ -172,6 +172,16 @@ export const api = {
       method: "POST",
       body: { identifier, password },
     }),
+  forgotPassword: (email: string) =>
+    request<{ ok: boolean }>("/auth/forgot-password", {
+      method: "POST",
+      body: { email },
+    }),
+  resetPassword: (token: string, newPassword: string) =>
+    request<{ ok: boolean }>("/auth/reset-password", {
+      method: "POST",
+      body: { token, newPassword },
+    }),
   me: () =>
     request<{ user: { id: string; email: string; username: string | null; name: string | null } }>("/users/me", {
       auth: true,

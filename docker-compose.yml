@@ -50,6 +50,8 @@ services:
       - interviewforge-web-node-modules:/app/node_modules
       - interviewforge-web-next-build:/app/.next
     env_file: ./web/.env
+    # Reinstall deps into the named volume so native modules match this image (glibc vs musl).
+    command: sh -c "npm install && npm run dev"
 
   postgres:
     image: postgres:16-alpine
