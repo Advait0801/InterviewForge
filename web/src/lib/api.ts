@@ -254,6 +254,7 @@ export const api = {
       mode: "run";
       passed: boolean;
       results: Array<{ passed: boolean; actualOutput?: string; error?: string }>;
+      testCases?: Array<{ input: string; expectedOutput: string }>;
       runtimeMs?: number;
     }>("/submissions", {
       method: "POST",

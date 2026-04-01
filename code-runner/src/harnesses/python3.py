@@ -37,7 +37,9 @@ def _arr_to_cycle_linked(arr, pos):
 
 def _linked_to_arr(node):
     res = []
-    while node:
+    seen = set()
+    while node and id(node) not in seen:
+        seen.add(id(node))
         res.append(node.val)
         node = node.next
     return res
@@ -99,9 +101,9 @@ def _convert_arg(val, t):
     return val
 
 def _convert_result(val, t):
-    if isinstance(val, ListNode):
+    if t == "ListNode" or isinstance(val, ListNode):
         return _linked_to_arr(val)
-    if isinstance(val, TreeNode):
+    if t == "TreeNode" or isinstance(val, TreeNode):
         return _tree_to_arr(val)
     return val
 

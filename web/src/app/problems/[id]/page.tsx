@@ -26,8 +26,8 @@ const LANGUAGES: { value: Language; label: string }[] = [
 const LANG_KEY = "if-preferred-lang";
 const VALID_LANGS = new Set<string>(["python3", "cpp", "c", "java"]);
 
-/** Matches backend RUN_CASE_LIMIT */
-const RUN_CASE_LIMIT = 4;
+/** Number of example cases shown in the problem description. */
+const EXAMPLE_CASE_COUNT = 4;
 
 /** Show at most this many passed rows expanded on submit (rest collapsed). */
 const SUBMIT_EXPAND_PASSED_CAP = 8;
@@ -52,6 +52,7 @@ type RunResponse = {
   mode: "run" | "submit";
   passed: boolean;
   results: CaseResult[];
+  testCases?: Array<{ input: string; expectedOutput: string }>;
   runtimeMs?: number;
   submissionId?: string;
   status?: string;
@@ -223,8 +224,7 @@ export default function WorkspacePage() {
     }
   };
 
-  const exampleCases = problem?.test_cases?.slice(0, RUN_CASE_LIMIT) ?? [];
-  const runCaseInputs = problem?.test_cases?.slice(0, RUN_CASE_LIMIT) ?? [];
+  const exampleCases = problem?.test_cases?.slice(0, EXAMPLE_CASE_COUNT) ?? [];
   const fullTestCases = problem?.test_cases ?? [];
 
   if (!problem) {
@@ -521,7 +521,6 @@ export default function WorkspacePage() {
                   <ResultPanel
                     result={runResult}
                     loading={running || submitting}
-                    runCaseInputs={runCaseInputs}
                     submitCaseInputs={fullTestCases}
                     expandPassedCap={SUBMIT_EXPAND_PASSED_CAP}
                   />
@@ -617,13 +616,11 @@ function SubmissionsPanel({
 function ResultPanel({
   result,
   loading,
-  runCaseInputs,
   submitCaseInputs,
   expandPassedCap,
 }: {
   result: RunResponse | null;
   loading: boolean;
-  runCaseInputs: Array<{ input: string; expectedOutput: string }>;
   submitCaseInputs: Array<{ input: string; expectedOutput: string }>;
   expandPassedCap: number;
 }) {
@@ -645,7 +642,7 @@ function ResultPanel({
   const passedCount = result.results.filter((r) => r.passed).length;
   const totalCount = result.results.length;
   const isAccepted = result.passed;
-  const cases = result.mode === "run" ? runCaseInputs : submitCaseInputs;
+  const cases = result.mode === "run" ? (result.testCases ?? []) : submitCaseInputs;
 
   const failedIndices: number[] = [];
   const passedIndices: number[] = [];

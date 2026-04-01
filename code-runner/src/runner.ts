@@ -26,19 +26,19 @@ function getCmd(lang: SupportedLanguage): string[] {
       return [
         "sh",
         "-c",
-        "g++ -std=c++17 -O2 -o /tmp/sol /home/runner/solution.cpp 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1",
+        "g++ -std=c++17 -O2 -w -o /tmp/sol /home/runner/solution.cpp 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1",
       ];
     case "java":
       return [
         "sh",
         "-c",
-        "cp /home/runner/Main.java /tmp/ && cd /tmp && javac Main.java 2>&1 && java -cp /tmp Main < /home/runner/input.txt 2>&1",
+        "cp /home/runner/Main.java /tmp/ && cd /tmp && javac -Xlint:none Main.java 2>&1 && java -cp /tmp Main < /home/runner/input.txt 2>&1",
       ];
     case "c":
       return [
         "sh",
         "-c",
-        "gcc -O2 -o /tmp/sol /home/runner/solution.c -lm 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1",
+        "gcc -O2 -w -o /tmp/sol /home/runner/solution.c -lm 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1",
       ];
   }
 }
@@ -103,10 +103,12 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
     const runtimeMs = Date.now() - startTime;
     const rawOutput = await readContainerLogs(container);
 
-    const lines = rawOutput
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
+    // Preserve 1:1 testcase/output alignment. Dropping empty lines can
+    // shift results and produce false passes on later cases.
+    const lines = rawOutput.split(/\r?\n/).map((l) => l.trim());
+    if (lines.length > 0 && lines[lines.length - 1] === "") {
+      lines.pop();
+    }
 
     if (waitResult.StatusCode !== 0 && lines.length === 0) {
       return {
@@ -115,6 +117,20 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
           passed: false,
           error: rawOutput.substring(0, 500) || "Runtime Error (non-zero exit)",
         })),
+        runtimeMs,
+      };
+    }
+
+    if (lines.length !== req.testCases.length) {
+      const mismatchError = `Output count mismatch: got ${lines.length} lines for ${req.testCases.length} test cases`;
+      const results = req.testCases.map((_, idx) => ({
+        passed: false,
+        actualOutput: idx < lines.length ? lines[idx] : "",
+        error: mismatchError,
+      }));
+      return {
+        passed: false,
+        results,
         runtimeMs,
       };
     }

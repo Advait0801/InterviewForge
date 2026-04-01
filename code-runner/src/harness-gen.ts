@@ -495,19 +495,21 @@ function javaPrintResult(expr: string, t: string): string {
   }
 }
 
-const JAVA_PARSE_HELPERS = `
-    static class ListNode {
-        int val;
-        ListNode next;
-        ListNode(int v) { this.val = v; }
-    }
-    static class TreeNode {
-        int val;
-        TreeNode left;
-        TreeNode right;
-        TreeNode(int v) { this.val = v; }
-    }
+const JAVA_DS_TYPES = `
+class ListNode {
+    int val;
+    ListNode next;
+    ListNode(int v) { this.val = v; }
+}
+class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode(int v) { this.val = v; }
+}
+`;
 
+const JAVA_PARSE_HELPERS = `
     static int[] _parseIntArr(String s) {
         if (s.equals("[]")) return new int[0];
         s = s.substring(1, s.length()-1);
@@ -714,6 +716,7 @@ function generateJava(
     const code = `import java.util.*;
 import java.io.*;
 
+${JAVA_DS_TYPES}
 ${userCode}
 
 public class Main {
@@ -755,6 +758,7 @@ public class Main {
   const code = `import java.util.*;
 import java.io.*;
 
+${JAVA_DS_TYPES}
 ${userCode}
 
 public class Main {
@@ -1124,7 +1128,10 @@ ${userCode}
 
 int main() {
     char _sep[8];
-    while (!feof(stdin)) {
+    while (1) {
+        int _ch = fgetc(stdin);
+        if (_ch == EOF) break;
+        ungetc(_ch, stdin);
 ${readArgs}
 ${callAndPrint}
         if(!fgets(_sep,8,stdin)) break; // read "---" separator

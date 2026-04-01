@@ -8,7 +8,7 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 
 type TestCase = { input: string; expectedOutput: string };
 
-/** First N cases used for Run; Submit uses full suite. */
+/** Max example cases sent for Run; Submit uses the full suite. */
 const RUN_CASE_LIMIT = 4;
 
 router.get("/", requireAuth, async (req: AuthRequest, res) => {
@@ -178,6 +178,7 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
         mode: "run",
         passed: runResult.passed,
         results: runResult.results,
+        testCases,
         runtimeMs: runResult.runtimeMs,
       });
     }
