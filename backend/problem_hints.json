@@ -1,0 +1,212 @@
+{
+  "two-sum": [
+    "Try using extra memory to speed up lookup: map each value to its index as you scan.",
+    "For each index i, the complement you need is target minus nums[i]. Have you seen it already?",
+    "A hash map from number to index lets you test the complement in O(1) time per element."
+  ],
+  "reverse-string": [
+    "Two pointers: one at the start, one at the end; swap and move inward.",
+    "You can do this in place with O(1) extra space if the string is mutable.",
+    "Stop when the left index meets or crosses the right index."
+  ],
+  "valid-parentheses": [
+    "Track opening symbols in order; a closing symbol must match the most recent unmatched opener.",
+    "A stack naturally models last-opened-first-closed structure.",
+    "If the stack is empty when you need to pop, or non-empty at the end, the string is invalid."
+  ],
+  "best-time-to-buy-and-sell-stock": [
+    "For each day as a sell day, the best buy is the minimum price seen before that day.",
+    "One pass: keep running minimum price and best profit so far.",
+    "You only need one transaction, so compare every price against the min so far."
+  ],
+  "merge-two-sorted-lists": [
+    "Compare heads of both lists repeatedly and append the smaller node.",
+    "A dummy head node simplifies appending without special cases.",
+    "When one list empties, attach the remainder of the other list."
+  ],
+  "missing-number": [
+    "The sum 0..n is n(n+1)/2; subtract the sum of the array to find the missing value.",
+    "XOR every index and every value; duplicates cancel and the missing number remains.",
+    "Sorting or a boolean array works but uses more time or space."
+  ],
+  "contains-duplicate": [
+    "A set records values you have seen; duplicate if insert fails.",
+    "Sorting adjacent equal elements also reveals duplicates.",
+    "Prefer O(n) time with a hash set when memory allows."
+  ],
+  "valid-palindrome": [
+    "Filter to alphanumeric characters, then compare from both ends.",
+    "Two pointers skipping non-alphanumeric characters.",
+    "Compare case-insensitively after normalizing each character."
+  ],
+  "maximum-subarray": [
+    "Kadane: extend a segment while its sum helps; reset when sum drops below zero.",
+    "At each position, best ending here is max(nums[i], prevSum + nums[i]).",
+    "Track global maximum across all ending positions."
+  ],
+  "climbing-stairs": [
+    "Ways to step n equals ways to (n-1) plus ways to (n-2).",
+    "This is the Fibonacci sequence with base cases for n=1 and n=2.",
+    "Iterative DP uses O(1) space; matrix exponentiation is possible for huge n."
+  ],
+  "linked-list-cycle": [
+    "Slow and fast pointers: if there is a cycle, fast will eventually meet slow.",
+    "If fast reaches null, there is no cycle.",
+    "Move fast two steps per iteration and slow one step."
+  ],
+  "invert-binary-tree": [
+    "Swap left and right children at each node, then recurse (or use a queue).",
+    "Post-order or level-order both work.",
+    "Handle null children explicitly when swapping."
+  ],
+  "longest-substring-without-repeating-characters": [
+    "Sliding window: expand when the character is new, shrink from the left when it repeats.",
+    "A map stores last index of each character in the current window.",
+    "Update max length whenever the window is valid."
+  ],
+  "3sum": [
+    "Sort first, then fix one index and use two pointers for the rest.",
+    "Skip duplicate values after sorting to avoid duplicate triplets.",
+    "Target for two-sum becomes zero minus the fixed element."
+  ],
+  "product-of-array-except-self": [
+    "Prefix products of all elements to the left, suffix products to the right.",
+    "Answer at i is prefix[i-1] times suffix[i+1].",
+    "Can do O(1) extra space by output array as prefix storage, then multiply by suffix pass."
+  ],
+  "number-of-islands": [
+    "DFS or BFS from each unvisited land cell; mark visited cells as water or use a visited set.",
+    "Each flood-fill counts one island.",
+    "Boundary check: stay inside the grid."
+  ],
+  "course-schedule": [
+    "Cycle in a directed graph means impossible schedule; topological sort detects it.",
+    "Compute indegree; repeatedly remove nodes with indegree zero.",
+    "If you process all n nodes, no cycle; otherwise a cycle exists."
+  ],
+  "coin-change": [
+    "DP: minCoins(amount) = 1 + min over coins of minCoins(amount - coin).",
+    "Base case: amount zero needs zero coins; unreachable amounts stay infinity.",
+    "Bottom-up iteration avoids stack depth issues."
+  ],
+  "top-k-frequent-elements": [
+    "Count frequencies with a hash map, then bucket by frequency or use a heap.",
+    "Bucket sort: index is frequency; list of numbers with that count.",
+    "Min-heap of size k on (frequency, value) pairs also works."
+  ],
+  "lowest-common-ancestor-of-a-binary-search-tree": [
+    "If both values are smaller than root, LCA is in the left subtree.",
+    "If both are larger, LCA is in the right subtree.",
+    "Otherwise the current node splits them and is the LCA."
+  ],
+  "implement-trie-prefix-tree": [
+    "Each node holds a map of char to child node and an end-of-word flag.",
+    "Insert walks or creates path; search follows path; prefix checks same path exists.",
+    "26 children or a map scales to any alphabet size."
+  ],
+  "container-with-most-water": [
+    "Two pointers at both ends; area is width times min of the two heights.",
+    "Move the pointer with the smaller height inward to possibly increase area.",
+    "Greedy works because shorter side limits the area."
+  ],
+  "search-in-rotated-sorted-array": [
+    "Binary search: at least one half is normally sorted.",
+    "Compare mid with target and endpoints to decide which half is safe.",
+    "Handle duplicates by shrinking bounds when nums[left] equals nums[mid]."
+  ],
+  "group-anagrams": [
+    "Sort characters of each string to get a canonical key, or count letters.",
+    "Hash map from key to list of strings.",
+    "Counting array of length 26 works for lowercase English letters."
+  ],
+  "rotate-image": [
+    "Transpose the matrix, then reverse each row (or reverse layers in place).",
+    "Rotate four cells at a time in layers from outside to inside.",
+    "In-place requires O(1) extra space."
+  ],
+  "validate-binary-search-tree": [
+    "Each node must lie within (min, max) bounds inherited from ancestors.",
+    "Inorder traversal of a valid BST yields strictly increasing values.",
+    "Pass allowed min and max down the recursion."
+  ],
+  "binary-tree-level-order-traversal": [
+    "BFS with a queue; process level by level using level size.",
+    "Alternate: DFS with depth index appending to lists.",
+    "Track current level count before dequeuing children."
+  ],
+  "rotting-oranges": [
+    "Multi-source BFS from all rotten cells at minute zero.",
+    "Each round spreads to fresh neighbors in four directions.",
+    "If fresh remain after BFS completes, return -1."
+  ],
+  "word-break": [
+    "DP: canBreak[i] means s[0..i) is segmentable using dictionary words.",
+    "Try every word from dictionary as suffix ending at i.",
+    "Memoization on substring also works but may be slower."
+  ],
+  "task-scheduler": [
+    "Count the most frequent task; it drives minimum idle slots between batches.",
+    "Arrange the max frequency block first, then fill gaps.",
+    "Formula uses counts and cooldown n; also consider greedy simulation."
+  ],
+  "trapping-rain-water": [
+    "Two pointers from left and right; track max left and max right heights.",
+    "Water at a position is limited by the shorter side of the two maxes.",
+    "Move the pointer with the smaller max inward."
+  ],
+  "merge-k-sorted-lists": [
+    "Min-heap of (value, list index, node) or divide-and-conquer pairwise merge.",
+    "Compare k heads at each step with a heap for O(n log k) time.",
+    "Repeated merge of two lists works but can be less efficient."
+  ],
+  "word-search-ii": [
+    "Build a trie from words; DFS from each cell, prune when prefix not in trie.",
+    "Mark cells visited during DFS, backtrack after.",
+    "Remove words from trie when found to avoid duplicate work."
+  ],
+  "median-of-two-sorted-arrays": [
+    "Binary search the partition in the shorter array so left halves have equal total length.",
+    "Ensure max of left halves is less than or equal to min of right halves.",
+    "Handle odd total length by taking max of left or min of right halves."
+  ],
+  "longest-valid-parentheses": [
+    "Stack stores indices; push -1 as base for length calculation.",
+    "On ')', pop and compute length if stack non-empty, else push current index.",
+    "DP: dp[i] length ending at i also works."
+  ],
+  "minimum-window-substring": [
+    "Sliding window with two pointers; expand until valid, shrink from left while valid.",
+    "Count needed characters vs current window counts.",
+    "Track best window when all required frequencies are met."
+  ],
+  "edit-distance": [
+    "DP[i][j] = cost to convert first i chars of word1 to first j of word2.",
+    "Transitions: match, insert, delete, replace.",
+    "Space can be reduced to two rows."
+  ],
+  "largest-rectangle-in-histogram": [
+    "Monotonic stack of indices with increasing heights.",
+    "When a shorter bar appears, pop and compute area with popped height as minimum.",
+    "Append zero at end to flush the stack."
+  ],
+  "n-queens": [
+    "Backtrack row by row; place queen if column and diagonals are free.",
+    "Track occupied columns and two diagonal directions.",
+    "Try each column in the current row and recurse."
+  ],
+  "maximum-profit-in-job-scheduling": [
+    "Sort jobs by end time; binary search previous non-overlapping job.",
+    "DP[i] = max profit using first i jobs: skip or take job i.",
+    "Taking job i adds its profit to DP at the last compatible index."
+  ],
+  "serialize-and-deserialize-binary-tree": [
+    "Preorder with null markers for missing children, joined by delimiter.",
+    "Or level-order BFS with queue and nulls for absent nodes.",
+    "Deserialize rebuilds tree using the same traversal order."
+  ],
+  "find-median-from-data-stream": [
+    "Two heaps: max-heap for lower half, min-heap for upper half.",
+    "Keep sizes balanced so median is top of larger heap or average of both tops.",
+    "Insert pushes into appropriate heap then rebalances."
+  ]
+}

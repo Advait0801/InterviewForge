@@ -29,6 +29,7 @@ type LeetCodeProblem = {
   topics: string[];
   companies: string[];
   testCases: TestCase[];
+  hints?: string[];
 };
 
 type StarterEntry = {
@@ -44,6 +45,11 @@ async function main() {
   const raw = fs.readFileSync(filePath, "utf-8");
   const problems = JSON.parse(raw) as LeetCodeProblem[];
 
+  const hintsPath = path.join(__dirname, "..", "problem_hints.json");
+  const hintsMap = fs.existsSync(hintsPath)
+    ? (JSON.parse(fs.readFileSync(hintsPath, "utf-8")) as Record<string, string[]>)
+    : {};
+
   const templatesPath = path.join(__dirname, "..", "starter_templates.json");
   const templates = JSON.parse(fs.readFileSync(templatesPath, "utf-8")) as Record<string, StarterEntry>;
 
@@ -53,10 +59,13 @@ async function main() {
       ? { python3: tmpl.python3, cpp: tmpl.cpp, c: tmpl.c, java: tmpl.java }
       : {};
     const testCases = padTestCases(p.testCases);
+    const hintList = p.hints?.length ? p.hints : hintsMap[p.slug];
+    const hintsJson =
+      hintList && hintList.length > 0 ? JSON.stringify(hintList) : null;
 
     await query(
-      `INSERT INTO problems (slug, title, description, difficulty, test_cases, starter_code, topics, companies)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO problems (slug, title, description, difficulty, test_cases, starter_code, topics, companies, hints)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        ON CONFLICT (slug) DO UPDATE SET
          title = EXCLUDED.title,
          description = EXCLUDED.description,
@@ -64,7 +73,8 @@ async function main() {
          test_cases = EXCLUDED.test_cases,
          starter_code = EXCLUDED.starter_code,
          topics = EXCLUDED.topics,
-         companies = EXCLUDED.companies`,
+         companies = EXCLUDED.companies,
+         hints = EXCLUDED.hints`,
       [
         p.slug,
         p.title,
@@ -74,6 +84,7 @@ async function main() {
         JSON.stringify(starterCode),
         p.topics,
         p.companies,
+        hintsJson,
       ]
     );
     console.log("Upserted problem:", p.slug);

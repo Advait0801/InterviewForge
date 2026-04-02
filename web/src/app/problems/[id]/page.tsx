@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api, CodeReview, ProblemDetail, Submission, SubmissionDetail } from "@/lib/api";
@@ -31,6 +31,67 @@ const EXAMPLE_CASE_COUNT = 4;
 
 /** Show at most this many passed rows expanded on submit (rest collapsed). */
 const SUBMIT_EXPAND_PASSED_CAP = 8;
+
+const CONSOLE_SPLIT_STORAGE_KEY = "if-console-split-ratio";
+
+/** Parse hints from DB: JSON array string or legacy newline-separated blocks. */
+function parseProblemHints(raw: string | null | undefined): string[] {
+  if (!raw?.trim()) return [];
+  const t = raw.trim();
+  if (t.startsWith("[")) {
+    try {
+      const j = JSON.parse(t) as unknown;
+      if (Array.isArray(j)) return j.map(String).filter(Boolean);
+    } catch {
+      /* fall through */
+    }
+  }
+  return t
+    .split(/\n---\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function ProgressiveHints({ hints }: { hints: string[] }) {
+  const [revealed, setRevealed] = useState(0);
+  const hintKey = hints.length ? hints.map((h) => h.slice(0, 24)).join("|") : "";
+  useEffect(() => {
+    setRevealed(0);
+  }, [hintKey]);
+
+  if (hints.length === 0) {
+    return <p className="text-sm text-text-secondary">No hints available for this problem yet.</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {hints.slice(0, revealed).map((h, i) => (
+        <div key={i} className="rounded-xl border border-border bg-surface/60 p-4">
+          <p className="mb-1 text-[11px] font-semibold text-text-secondary">Hint {i + 1}</p>
+          <p className="text-sm leading-relaxed text-text-primary whitespace-pre-wrap">{h}</p>
+        </div>
+      ))}
+      {revealed < hints.length && (
+        <button
+          type="button"
+          onClick={() => setRevealed((r) => r + 1)}
+          className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
+        >
+          {revealed === 0 ? "Show hint 1" : `Show hint ${revealed + 1}`}
+        </button>
+      )}
+      {revealed === hints.length && hints.length > 1 && (
+        <button
+          type="button"
+          onClick={() => setRevealed(0)}
+          className="text-xs font-medium text-text-secondary hover:text-primary"
+        >
+          Reset hints
+        </button>
+      )}
+    </div>
+  );
+}
 
 function getSavedLanguage(): Language {
   if (typeof window === "undefined") return "python3";
@@ -134,7 +195,9 @@ export default function WorkspacePage() {
   const [runResult, setRunResult] = useState<RunResponse | null>(null);
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<"description" | "submissions" | "hints" | "editorial">("description");
+  const [activeTab, setActiveTab] = useState<
+    "description" | "submissions" | "hints" | "editorial" | "aireview"
+  >("description");
   const [resultTab, setResultTab] = useState<"result" | "testcases">("testcases");
   const [showResults, setShowResults] = useState(false);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -152,6 +215,27 @@ export default function WorkspacePage() {
   const [modalAiReviewOpen, setModalAiReviewOpen] = useState(false);
 
   const prevStarterRef = useRef<string>("");
+  const rightPaneRef = useRef<HTMLDivElement>(null);
+  const [bottomPanelRatio, setBottomPanelRatio] = useState(0.38);
+
+  const submissionIdForReview = useMemo(
+    () => lastSubmissionId ?? submissions[0]?.id ?? null,
+    [lastSubmissionId, submissions],
+  );
+  const canAiReview = Boolean(submissionIdForReview);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const s = localStorage.getItem(CONSOLE_SPLIT_STORAGE_KEY);
+      if (s) {
+        const n = parseFloat(s);
+        if (!Number.isNaN(n) && n >= 0.15 && n <= 0.88) setBottomPanelRatio(n);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     if (!params.id) return;
@@ -171,6 +255,7 @@ export default function WorkspacePage() {
 
         try {
           const subRes = await api.getSubmissions({ problemId: params.id });
+          setSubmissions(subRes.submissions);
           const forLang = subRes.submissions.filter((s) => s.language === preferredLang);
           if (forLang.length > 0) {
             const detail = await api.getSubmission(forLang[0].id);
@@ -199,6 +284,38 @@ export default function WorkspacePage() {
       setLoadingSubmissions(false);
     }
   };
+
+  const handleConsoleResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const pane = rightPaneRef.current;
+      if (!pane) return;
+      const rect = pane.getBoundingClientRect();
+      const startY = e.clientY;
+      const startRatio = bottomPanelRatio;
+      const H = rect.height;
+      let last = startRatio;
+      const onMove = (ev: MouseEvent) => {
+        const dy = ev.clientY - startY;
+        // Invert so dragging the handle up grows the editor / shrinks console (matches LeetCode-style expectation).
+        const next = Math.min(0.88, Math.max(0.15, startRatio - dy / H));
+        last = next;
+        setBottomPanelRatio(next);
+      };
+      const onUp = () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        try {
+          localStorage.setItem(CONSOLE_SPLIT_STORAGE_KEY, String(last));
+        } catch {
+          /* ignore */
+        }
+      };
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    },
+    [bottomPanelRatio],
+  );
 
   const openSubmissionDetail = useCallback(async (id: string) => {
     setDetailId(id);
@@ -520,6 +637,23 @@ export default function WorkspacePage() {
             >
               Editorial
             </button>
+            <button
+              type="button"
+              disabled={!canAiReview}
+              onClick={() => {
+                if (canAiReview) setActiveTab("aireview");
+              }}
+              title={!canAiReview ? "Submit your solution to unlock AI Review" : undefined}
+              className={`px-4 py-2.5 text-xs font-medium transition-all ${
+                activeTab === "aireview"
+                  ? "border-b-2 border-primary text-primary"
+                  : canAiReview
+                    ? "text-text-secondary hover:text-text-primary"
+                    : "cursor-not-allowed text-text-secondary/50"
+              }`}
+            >
+              AI Review
+            </button>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-5">
             {activeTab === "description" && (
@@ -554,8 +688,60 @@ export default function WorkspacePage() {
               />
             )}
             {activeTab === "hints" && (
-              <div className="text-sm leading-relaxed text-text-primary whitespace-pre-wrap">
-                {problem.hints?.trim() ? problem.hints : "No hints available for this problem yet."}
+              <ProgressiveHints key={problem.id} hints={parseProblemHints(problem.hints)} />
+            )}
+            {activeTab === "aireview" && (
+              <div className="space-y-4">
+                {!canAiReview ? (
+                  <p className="text-sm text-text-secondary">
+                    Submit your solution at least once (accepted or not) to unlock AI Review for your latest submission.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-xs text-text-secondary">
+                      Reviews your most recent submission for this problem. Generate a fresh analysis below.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={aiReviewLoading}
+                        onClick={async () => {
+                          if (!submissionIdForReview) return;
+                          setAiReviewOpen(true);
+                          setAiReviewLoading(true);
+                          setAiReview(null);
+                          try {
+                            const r = await api.reviewSubmission(submissionIdForReview);
+                            setAiReview(r.review);
+                          } catch (err) {
+                            toast.error(err instanceof Error ? err.message : "AI review failed");
+                          } finally {
+                            setAiReviewLoading(false);
+                          }
+                        }}
+                        className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 disabled:opacity-50"
+                      >
+                        {aiReviewLoading ? "Generating…" : "Generate AI Review"}
+                      </button>
+                      {aiReview && (
+                        <button
+                          type="button"
+                          onClick={() => setAiReviewOpen((o) => !o)}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          {aiReviewOpen ? "Hide feedback" : "Show feedback"}
+                        </button>
+                      )}
+                    </div>
+                    {aiReviewOpen && aiReviewLoading && (
+                      <div className="flex items-center gap-2 text-xs text-text-secondary">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        Analyzing your code…
+                      </div>
+                    )}
+                    {aiReviewOpen && !aiReviewLoading && aiReview && <CodeReviewPanel review={aiReview} />}
+                  </>
+                )}
               </div>
             )}
             {activeTab === "editorial" && (
@@ -566,138 +752,119 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        {/* Right pane — editor + results */}
-        <div className="flex w-full min-h-0 flex-1 flex-col md:w-1/2">
-          <div className={`flex min-h-0 flex-col ${showResults ? "h-3/5" : "flex-1"}`}>
-            <div className="flex shrink-0 items-center border-b border-border px-4 py-2">
-              <span className="mono text-xs font-medium text-text-secondary">Code</span>
-            </div>
-            <CodeWorkspaceEditor
-              language={language}
-              value={code}
-              onChange={setCode}
-              className="min-h-0 flex-1"
-            />
-          </div>
-
-          {showResults && (
-            <div className="flex h-2/5 min-h-0 flex-col border-t border-border">
-              <div className="flex shrink-0 items-center justify-between border-b border-border">
-                <div className="flex">
-                  <button
-                    onClick={() => setResultTab("result")}
-                    className={`px-4 py-2.5 text-xs font-medium transition-all ${
-                      resultTab === "result"
-                        ? "border-b-2 border-primary text-primary"
-                        : "text-text-secondary hover:text-text-primary"
-                    }`}
-                  >
-                    Result
-                  </button>
-                  <button
-                    onClick={() => setResultTab("testcases")}
-                    className={`px-4 py-2.5 text-xs font-medium transition-all ${
-                      resultTab === "testcases"
-                        ? "border-b-2 border-primary text-primary"
-                        : "text-text-secondary hover:text-text-primary"
-                    }`}
-                  >
-                    Test Cases
-                  </button>
+        {/* Right pane — editor + results (resizable when console open) */}
+        <div ref={rightPaneRef} className="flex w-full min-h-0 flex-1 flex-col md:w-1/2">
+          {!showResults ? (
+            <>
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div className="flex shrink-0 items-center border-b border-border px-4 py-2">
+                  <span className="mono text-xs font-medium text-text-secondary">Code</span>
                 </div>
+                <CodeWorkspaceEditor
+                  language={language}
+                  value={code}
+                  onChange={setCode}
+                  className="min-h-0 flex-1"
+                />
+              </div>
+              <div className="flex shrink-0 items-center justify-between border-t border-border px-4 py-2.5">
                 <button
-                  onClick={() => setShowResults(false)}
-                  className="mr-3 rounded-lg p-1.5 text-text-secondary transition hover:bg-surface-hover hover:text-text-primary"
+                  type="button"
+                  onClick={() => {
+                    setShowResults(true);
+                    setResultTab("testcases");
+                  }}
+                  className="text-xs font-medium text-text-secondary transition hover:text-text-primary"
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
+                  Console
                 </button>
               </div>
+            </>
+          ) : (
+            <>
+              <div
+                className="flex min-h-0 flex-col overflow-hidden"
+                style={{ flex: `${1 - bottomPanelRatio} 1 0px`, minHeight: 100 }}
+              >
+                <div className="flex shrink-0 items-center border-b border-border px-4 py-2">
+                  <span className="mono text-xs font-medium text-text-secondary">Code</span>
+                </div>
+                <CodeWorkspaceEditor
+                  language={language}
+                  value={code}
+                  onChange={setCode}
+                  className="min-h-0 flex-1"
+                />
+              </div>
+              <div
+                role="separator"
+                aria-orientation="horizontal"
+                aria-label="Resize editor and console panels"
+                onMouseDown={handleConsoleResizeStart}
+                className="h-1.5 shrink-0 cursor-row-resize border-y border-border bg-border/50 hover:bg-primary/25"
+              />
+              <div
+                className="flex min-h-0 flex-col border-t border-border"
+                style={{ flex: `${bottomPanelRatio} 1 0px`, minHeight: 80 }}
+              >
+                <div className="flex shrink-0 items-center justify-between border-b border-border">
+                  <div className="flex">
+                    <button
+                      type="button"
+                      onClick={() => setResultTab("result")}
+                      className={`px-4 py-2.5 text-xs font-medium transition-all ${
+                        resultTab === "result"
+                          ? "border-b-2 border-primary text-primary"
+                          : "text-text-secondary hover:text-text-primary"
+                      }`}
+                    >
+                      Result
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setResultTab("testcases")}
+                      className={`px-4 py-2.5 text-xs font-medium transition-all ${
+                        resultTab === "testcases"
+                          ? "border-b-2 border-primary text-primary"
+                          : "text-text-secondary hover:text-text-primary"
+                      }`}
+                    >
+                      Test Cases
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowResults(false)}
+                    className="mr-3 rounded-lg p-1.5 text-text-secondary transition hover:bg-surface-hover hover:text-text-primary"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto p-4">
-                {resultTab === "result" && (
-                  <div className="space-y-3">
+                <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                  {resultTab === "result" && (
                     <ResultPanel
                       result={runResult}
                       loading={running || submitting}
                       submitCaseInputs={fullTestCases}
                       expandPassedCap={SUBMIT_EXPAND_PASSED_CAP}
                     />
-                    {runResult?.mode === "submit" && lastSubmissionId && !running && !submitting && (
-                      <div className="rounded-xl border border-border bg-surface/40 p-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <button
-                            type="button"
-                            disabled={aiReviewLoading}
-                            onClick={async () => {
-                              setAiReviewOpen(true);
-                              setAiReviewLoading(true);
-                              setAiReview(null);
-                              try {
-                                const r = await api.reviewSubmission(lastSubmissionId);
-                                setAiReview(r.review);
-                              } catch (e) {
-                                toast.error(e instanceof Error ? e.message : "AI review failed");
-                              } finally {
-                                setAiReviewLoading(false);
-                              }
-                            }}
-                            className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 disabled:opacity-50"
-                          >
-                            {aiReviewLoading ? "Generating…" : "AI Review"}
-                          </button>
-                          {aiReview && (
-                            <button
-                              type="button"
-                              onClick={() => setAiReviewOpen((o) => !o)}
-                              className="text-xs font-medium text-primary hover:underline"
-                            >
-                              {aiReviewOpen ? "Hide feedback" : "Show feedback"}
-                            </button>
-                          )}
+                  )}
+                  {resultTab === "testcases" && (
+                    <div className="space-y-2">
+                      {exampleCases.map((tc, idx) => (
+                        <div key={idx} className="rounded-xl border border-border bg-surface/60 p-3">
+                          <p className="mb-1 text-xs font-semibold text-text-secondary">Case {idx + 1}</p>
+                          <pre className="mono whitespace-pre-wrap text-xs text-text-primary">{tc.input}</pre>
                         </div>
-                        {aiReviewOpen && aiReviewLoading && (
-                          <div className="mt-2 flex items-center gap-2 text-xs text-text-secondary">
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                            Analyzing your code…
-                          </div>
-                        )}
-                        {aiReviewOpen && !aiReviewLoading && aiReview && (
-                          <div className="mt-3">
-                            <CodeReviewPanel review={aiReview} />
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {resultTab === "testcases" && (
-                  <div className="space-y-2">
-                    {exampleCases.map((tc, idx) => (
-                      <div key={idx} className="rounded-xl border border-border bg-surface/60 p-3">
-                        <p className="mb-1 text-xs font-semibold text-text-secondary">Case {idx + 1}</p>
-                        <pre className="mono whitespace-pre-wrap text-xs text-text-primary">{tc.input}</pre>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-
-          {!showResults && (
-            <div className="flex shrink-0 items-center justify-between border-t border-border px-4 py-2.5">
-              <button
-                onClick={() => {
-                  setShowResults(true);
-                  setResultTab("testcases");
-                }}
-                className="text-xs font-medium text-text-secondary transition hover:text-text-primary"
-              >
-                Console
-              </button>
-            </div>
+            </>
           )}
         </div>
       </div>
