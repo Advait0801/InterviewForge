@@ -12,6 +12,7 @@ import submissionRoutes from "./routes/submission.routes";
 import interviewsRoutes from "./routes/interviews.routes";
 import assessmentsRoutes from "./routes/assessments.routes";
 import leaderboardRoutes from "./routes/leaderboard.routes";
+import learningPathsRoutes from "./routes/learningPaths.routes";
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use("/api/submissions", submissionRoutes);
 app.use("/api/interviews", interviewsRoutes);
 app.use("/api/assessments", assessmentsRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/learning-paths", learningPathsRoutes);
 
 const server = http.createServer(app);
 

@@ -13,10 +13,10 @@ import { api } from "@/lib/api";
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/problems", label: "Practice" },
-  { href: "/submissions", label: "Submissions" },
   { href: "/interview", label: "Interview" },
   { href: "/system-design", label: "System Design" },
   { href: "/assessments", label: "OA" },
+  { href: "/paths", label: "Paths" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/analytics", label: "Analytics" },
 ];

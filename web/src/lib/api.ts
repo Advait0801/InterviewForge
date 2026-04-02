@@ -219,6 +219,39 @@ export type AssessmentProblem = {
   submission_status: string | null;
 };
 
+export type LearningPathSummary = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  topic: string;
+  difficultyLevel: string;
+  problemCount: number;
+  completedCount: number;
+};
+
+export type PathProblemItem = {
+  problemId: string;
+  position: number;
+  title: string;
+  slug: string;
+  difficulty: string;
+  isCompleted: boolean;
+};
+
+export type LearningPathDetailResponse = {
+  path: {
+    slug: string;
+    title: string;
+    description: string;
+    topic: string;
+    difficultyLevel: string;
+    problemCount: number;
+    completedCount: number;
+  };
+  problems: PathProblemItem[];
+};
+
 export type SystemDesignAnalysis = {
   summary: string;
   nodes: SystemDesignNode[];
@@ -417,6 +450,15 @@ export const api = {
   removeAvatar: () =>
     request<{ ok: boolean }>("/users/avatar", {
       method: "DELETE",
+      auth: true,
+    }),
+  getLearningPaths: (auth = false) =>
+    request<{ paths: LearningPathSummary[] }>("/learning-paths", { auth }),
+  getLearningPath: (slug: string, auth = false) =>
+    request<LearningPathDetailResponse>(`/learning-paths/${encodeURIComponent(slug)}`, { auth }),
+  completePathProblem: (slug: string, problemId: string) =>
+    request<{ ok: boolean }>(`/learning-paths/${encodeURIComponent(slug)}/complete/${encodeURIComponent(problemId)}`, {
+      method: "POST",
       auth: true,
     }),
 };

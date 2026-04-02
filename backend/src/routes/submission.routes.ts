@@ -192,6 +192,17 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
       [userId, problemId, language, code, status, runResult.runtimeMs ?? null, runResult.memoryKb ?? null]
     );
 
+    if (status === "passed") {
+      await query(
+        `INSERT INTO user_path_progress (user_id, path_id, problem_id)
+         SELECT $1, lpp.path_id, lpp.problem_id
+         FROM learning_path_problems lpp
+         WHERE lpp.problem_id = $2
+         ON CONFLICT (user_id, path_id, problem_id) DO NOTHING`,
+        [userId, problemId]
+      );
+    }
+
     return res.status(201).json({
       mode: "submit",
       submissionId: insertResult.rows[0].id,
