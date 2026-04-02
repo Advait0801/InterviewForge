@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { api, ProblemDetail, Submission, SubmissionDetail } from "@/lib/api";
+import { api, CodeReview, ProblemDetail, Submission, SubmissionDetail } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import type { WorkspaceLanguage } from "@/components/code-workspace-editor";
 
@@ -72,6 +72,58 @@ function DifficultyBadge({ d }: { d: string }) {
   );
 }
 
+function CodeReviewPanel({ review }: { review: CodeReview }) {
+  const score = Math.min(10, Math.max(1, review.qualityScore ?? 5));
+  return (
+    <div className="space-y-3 text-sm">
+      <p className="text-text-secondary leading-relaxed">{review.summary}</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+          Time: {review.timeComplexity}
+        </span>
+        <span className="rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-0.5 text-[11px] font-semibold text-secondary">
+          Space: {review.spaceComplexity}
+        </span>
+        <span className="text-[11px] font-medium text-text-secondary">Quality</span>
+        <div className="h-2 w-24 overflow-hidden rounded-full bg-border">
+          <div className="h-full rounded-full bg-gradient-to-r from-accent to-primary" style={{ width: `${score * 10}%` }} />
+        </div>
+        <span className="text-xs font-bold text-text-primary">{score}/10</span>
+      </div>
+      {review.strengths?.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-semibold text-accent">Strengths</p>
+          <ul className="list-inside list-disc space-y-0.5 text-xs text-text-secondary">
+            {review.strengths.map((x, i) => (
+              <li key={i}>{x}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {review.issues?.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-semibold text-error">Issues</p>
+          <ul className="list-inside list-disc space-y-0.5 text-xs text-text-secondary">
+            {review.issues.map((x, i) => (
+              <li key={i}>{x}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {review.optimizations?.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-semibold text-primary">Optimizations</p>
+          <ul className="list-inside list-disc space-y-0.5 text-xs text-text-secondary">
+            {review.optimizations.map((x, i) => (
+              <li key={i}>{x}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function WorkspacePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -91,6 +143,13 @@ export default function WorkspacePage() {
   const [submissionDetail, setSubmissionDetail] = useState<SubmissionDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [savingBookmark, setSavingBookmark] = useState(false);
+  const [lastSubmissionId, setLastSubmissionId] = useState<string | null>(null);
+  const [aiReview, setAiReview] = useState<CodeReview | null>(null);
+  const [aiReviewLoading, setAiReviewLoading] = useState(false);
+  const [aiReviewOpen, setAiReviewOpen] = useState(false);
+  const [modalAiReview, setModalAiReview] = useState<CodeReview | null>(null);
+  const [modalAiReviewLoading, setModalAiReviewLoading] = useState(false);
+  const [modalAiReviewOpen, setModalAiReviewOpen] = useState(false);
 
   const prevStarterRef = useRef<string>("");
 
@@ -144,6 +203,8 @@ export default function WorkspacePage() {
   const openSubmissionDetail = useCallback(async (id: string) => {
     setDetailId(id);
     setSubmissionDetail(null);
+    setModalAiReview(null);
+    setModalAiReviewOpen(false);
     setLoadingDetail(true);
     try {
       const res = await api.getSubmission(id);
@@ -212,6 +273,9 @@ export default function WorkspacePage() {
     try {
       const res = await api.submitCode(problem.id, language, code);
       setRunResult({ ...res, mode: "submit" });
+      setLastSubmissionId(res.submissionId);
+      setAiReview(null);
+      setAiReviewOpen(false);
       if (res.passed) {
         setProblem((prev) => (prev ? { ...prev, is_solved: true } : prev));
       }
@@ -255,6 +319,8 @@ export default function WorkspacePage() {
                 onClick={() => {
                   setDetailId(null);
                   setSubmissionDetail(null);
+                  setModalAiReview(null);
+                  setModalAiReviewOpen(false);
                 }}
                 className="rounded-lg p-2 text-text-secondary hover:bg-surface-hover hover:text-text-primary"
               >
@@ -263,7 +329,7 @@ export default function WorkspacePage() {
                 </svg>
               </button>
             </div>
-            <div className="flex shrink-0 gap-2 border-b border-border px-4 py-2">
+            <div className="flex shrink-0 flex-wrap gap-2 border-b border-border px-4 py-2">
               <button
                 type="button"
                 disabled={!submissionDetail}
@@ -280,7 +346,40 @@ export default function WorkspacePage() {
               >
                 Load into editor
               </button>
+              <button
+                type="button"
+                disabled={!submissionDetail || modalAiReviewLoading}
+                onClick={async () => {
+                  if (!submissionDetail) return;
+                  setModalAiReview(null);
+                  setModalAiReviewOpen(true);
+                  setModalAiReviewLoading(true);
+                  try {
+                    const r = await api.reviewSubmission(submissionDetail.id);
+                    setModalAiReview(r.review);
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "AI review failed");
+                    setModalAiReviewOpen(false);
+                  } finally {
+                    setModalAiReviewLoading(false);
+                  }
+                }}
+                className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 disabled:opacity-50"
+              >
+                {modalAiReviewLoading ? "Reviewing…" : "AI Review"}
+              </button>
             </div>
+            {modalAiReviewOpen && (
+              <div className="max-h-[40vh] shrink-0 overflow-y-auto border-b border-border px-4 py-3">
+                {modalAiReviewLoading && (
+                  <div className="flex items-center gap-2 text-xs text-text-secondary">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    Generating review…
+                  </div>
+                )}
+                {!modalAiReviewLoading && modalAiReview && <CodeReviewPanel review={modalAiReview} />}
+              </div>
+            )}
             <div className="min-h-0 flex-1 overflow-hidden p-2" style={{ height: "min(60vh, 480px)" }}>
               {loadingDetail || !submissionDetail ? (
                 <div className="flex h-full min-h-[280px] items-center justify-center text-sm text-text-secondary">Loading…</div>
@@ -518,12 +617,60 @@ export default function WorkspacePage() {
 
               <div className="min-h-0 flex-1 overflow-y-auto p-4">
                 {resultTab === "result" && (
-                  <ResultPanel
-                    result={runResult}
-                    loading={running || submitting}
-                    submitCaseInputs={fullTestCases}
-                    expandPassedCap={SUBMIT_EXPAND_PASSED_CAP}
-                  />
+                  <div className="space-y-3">
+                    <ResultPanel
+                      result={runResult}
+                      loading={running || submitting}
+                      submitCaseInputs={fullTestCases}
+                      expandPassedCap={SUBMIT_EXPAND_PASSED_CAP}
+                    />
+                    {runResult?.mode === "submit" && lastSubmissionId && !running && !submitting && (
+                      <div className="rounded-xl border border-border bg-surface/40 p-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={aiReviewLoading}
+                            onClick={async () => {
+                              setAiReviewOpen(true);
+                              setAiReviewLoading(true);
+                              setAiReview(null);
+                              try {
+                                const r = await api.reviewSubmission(lastSubmissionId);
+                                setAiReview(r.review);
+                              } catch (e) {
+                                toast.error(e instanceof Error ? e.message : "AI review failed");
+                              } finally {
+                                setAiReviewLoading(false);
+                              }
+                            }}
+                            className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 disabled:opacity-50"
+                          >
+                            {aiReviewLoading ? "Generating…" : "AI Review"}
+                          </button>
+                          {aiReview && (
+                            <button
+                              type="button"
+                              onClick={() => setAiReviewOpen((o) => !o)}
+                              className="text-xs font-medium text-primary hover:underline"
+                            >
+                              {aiReviewOpen ? "Hide feedback" : "Show feedback"}
+                            </button>
+                          )}
+                        </div>
+                        {aiReviewOpen && aiReviewLoading && (
+                          <div className="mt-2 flex items-center gap-2 text-xs text-text-secondary">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                            Analyzing your code…
+                          </div>
+                        )}
+                        {aiReviewOpen && !aiReviewLoading && aiReview && (
+                          <div className="mt-3">
+                            <CodeReviewPanel review={aiReview} />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
                 {resultTab === "testcases" && (
                   <div className="space-y-2">

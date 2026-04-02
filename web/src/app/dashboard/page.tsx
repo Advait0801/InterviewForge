@@ -8,7 +8,7 @@ import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
 import { ActivityHeatmap } from "@/components/ui/activity-heatmap";
-import { api } from "@/lib/api";
+import { api, type RecommendedProblemCard, type RevisitProblemCard } from "@/lib/api";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -121,6 +121,14 @@ export default function DashboardPage() {
     currentStreak: 0,
   });
   const [activityMap, setActivityMap] = useState<Record<string, number>>({});
+  const [recs, setRecs] = useState<{
+    recommended: RecommendedProblemCard[];
+    revisit: RevisitProblemCard[];
+    focusAreas: string[];
+    reasoning: string;
+    difficultySuggestion: string;
+  } | null>(null);
+  const [recsLoading, setRecsLoading] = useState(false);
 
   useEffect(() => {
     api
@@ -143,6 +151,14 @@ export default function DashboardPage() {
         setActivityMap(res.activityMap);
       })
       .catch(() => {});
+    setRecsLoading(true);
+    api
+      .getRecommendations()
+      .then(setRecs)
+      .catch(() => {
+        /* optional feature */
+      })
+      .finally(() => setRecsLoading(false));
   }, []);
 
   return (
@@ -183,8 +199,139 @@ export default function DashboardPage() {
             </Card>
           </motion.div>
 
+          {/* Recommended + revisit */}
+          <motion.div variants={fadeUp} custom={3} className="space-y-8">
+            <Card>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-text-secondary">Recommended for you</h2>
+                {recs?.reasoning ? (
+                  <span
+                    className="inline-flex cursor-help items-center gap-1 rounded-full border border-border bg-surface-hover px-2 py-0.5 text-[11px] text-text-secondary"
+                    title={recs.reasoning}
+                  >
+                    Why?
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                  </span>
+                ) : null}
+              </div>
+              {recsLoading && (
+                <div className="flex items-center gap-2 text-sm text-text-secondary">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Loading recommendations…
+                </div>
+              )}
+              {!recsLoading && recs && (!recs.recommended.length && !recs.revisit.length) && (
+                <p className="text-sm text-text-secondary">Solve a few problems to unlock personalized recommendations.</p>
+              )}
+              {!recsLoading && recs && recs.recommended.length > 0 && (
+                <div className="-mx-1 flex gap-3 overflow-x-auto pb-2 px-1">
+                  {recs.recommended.map((p) => (
+                    <Link
+                      key={p.id}
+                      href={`/problems/${p.id}`}
+                      className="min-w-[220px] flex-shrink-0 rounded-xl border border-border bg-surface/60 p-4 transition hover:border-primary/40 hover:bg-surface-hover"
+                    >
+                      <p className="line-clamp-2 text-sm font-semibold text-text-primary">{p.title}</p>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                            p.difficulty === "easy"
+                              ? "border-accent/30 bg-accent/10 text-accent"
+                              : p.difficulty === "medium"
+                                ? "border-warning/30 bg-warning/10 text-warning"
+                                : "border-error/30 bg-error/10 text-error"
+                          }`}
+                        >
+                          {p.difficulty}
+                        </span>
+                        {(p.topics ?? []).slice(0, 2).map((t) => (
+                          <span key={t} className="rounded-full border border-border px-2 py-0.5 text-[10px] text-text-secondary">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+              {recs?.reasoning ? (
+                <p className="mt-3 text-xs leading-relaxed text-text-secondary md:hidden">{recs.reasoning}</p>
+              ) : null}
+              {recs?.difficultySuggestion ? (
+                <p className="mt-2 text-xs text-text-secondary">
+                  <span className="font-semibold text-text-primary">Difficulty hint:</span> {recs.difficultySuggestion}
+                </p>
+              ) : null}
+              {recs?.focusAreas?.length ? (
+                <div className="mt-3">
+                  <p className="mb-1 text-[11px] font-semibold text-text-secondary">Focus areas</p>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {recs.focusAreas.map((f) => (
+                      <li key={f} className="rounded-md bg-primary/10 px-2 py-0.5 text-[11px] text-primary">
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </Card>
+
+            <Card>
+              <h2 className="mb-4 text-sm font-semibold text-text-secondary">Problems to revisit</h2>
+              <p className="mb-3 text-xs text-text-secondary">
+                Spaced repetition: problems you struggled with and haven&apos;t touched in 3+ days.
+              </p>
+              {recsLoading && (
+                <div className="flex items-center gap-2 text-sm text-text-secondary">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Loading…
+                </div>
+              )}
+              {!recsLoading && recs && recs.revisit.length === 0 && (
+                <p className="text-sm text-text-secondary">Nothing to revisit yet — keep practicing.</p>
+              )}
+              {!recsLoading && recs && recs.revisit.length > 0 && (
+                <div className="-mx-1 flex gap-3 overflow-x-auto pb-2 px-1">
+                  {recs.revisit.map((p) => {
+                    const last = new Date(p.lastAttemptedAt);
+                    const days = Math.floor((Date.now() - last.getTime()) / (86400 * 1000));
+                    return (
+                      <Link
+                        key={p.id}
+                        href={`/problems/${p.id}`}
+                        className="min-w-[220px] flex-shrink-0 rounded-xl border border-border bg-surface/60 p-4 transition hover:border-warning/40 hover:bg-surface-hover"
+                      >
+                        <p className="line-clamp-2 text-sm font-semibold text-text-primary">{p.title}</p>
+                        <p className="mt-2 text-[11px] text-text-secondary">
+                          Last attempt {days} day{days === 1 ? "" : "s"} ago
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          <span
+                            className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                              p.difficulty === "easy"
+                                ? "border-accent/30 bg-accent/10 text-accent"
+                                : p.difficulty === "medium"
+                                  ? "border-warning/30 bg-warning/10 text-warning"
+                                  : "border-error/30 bg-error/10 text-error"
+                            }`}
+                          >
+                            {p.difficulty}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </Card>
+          </motion.div>
+
           {/* Action cards (balanced 2x2 on desktop) + quick links */}
-          <motion.div variants={fadeUp} custom={3} className="grid gap-5 md:grid-cols-2">
+          <motion.div variants={fadeUp} custom={4} className="grid gap-5 md:grid-cols-2">
             {actionModes.map((m) => (
               <Link href={m.href} key={m.title} className="h-full">
                 <Card className="h-full group hover:scale-[1.01] transition-transform duration-300 hover:border-primary/40">
@@ -203,7 +350,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Tips */}
-          <motion.div variants={fadeUp} custom={4}>
+          <motion.div variants={fadeUp} custom={5}>
             <h2 className="mb-3 text-lg font-semibold text-text-secondary">Interview Tips</h2>
             <Card>
               <ul className="space-y-2.5">

@@ -335,3 +335,65 @@ def system_design_analysis_chain(provider: Optional[str] = None):
         )),
     ]).partial(format_instructions=parser.get_format_instructions())
     return prompt | _get_llm(provider) | parser
+
+
+class CodeReviewOutput(BaseModel):
+    timeComplexity: str = Field(description="Big-O time complexity of the solution (e.g. O(n)).")
+    spaceComplexity: str = Field(description="Big-O auxiliary space complexity.")
+    qualityScore: int = Field(ge=1, le=10, description="Code quality score from 1 to 10.")
+    strengths: List[str] = Field(description="What the code does well.")
+    issues: List[str] = Field(description="Bugs, style issues, or correctness concerns.")
+    optimizations: List[str] = Field(description="Concrete optimization or refactor suggestions.")
+    summary: str = Field(description="One short paragraph summarizing the review.")
+
+
+def code_review_chain(provider: Optional[str] = None):
+    parser = JsonOutputParser(pydantic_object=CodeReviewOutput)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "You are InterviewForge, an expert coding interview reviewer. "
+            "Analyze the candidate's code against the problem statement. "
+            "Estimate time and space complexity for their approach (not necessarily optimal). "
+            "Be constructive: note strengths, issues, and optimizations. "
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", (
+            "## Problem title\n{problem_title}\n\n"
+            "## Difficulty\n{problem_difficulty}\n\n"
+            "## Problem description\n{problem_description}\n\n"
+            "## Language\n{language}\n\n"
+            "## Code\n```\n{code}\n```"
+        )),
+    ]).partial(format_instructions=parser.get_format_instructions())
+    return prompt | _get_llm(provider) | parser
+
+
+class RecommendationOutput(BaseModel):
+    recommendedTopics: List[str] = Field(
+        description="2-5 DSA or topic areas the user should prioritize next (e.g. binary search, graphs)."
+    )
+    reasoning: str = Field(description="Brief explanation of why these topics fit this user.")
+    focusAreas: List[str] = Field(description="Specific skills or patterns to drill.")
+    difficultySuggestion: str = Field(
+        description="Suggested next difficulty band: easy, medium, or hard, with one sentence rationale."
+    )
+
+
+def recommendation_chain(provider: Optional[str] = None):
+    parser = JsonOutputParser(pydantic_object=RecommendationOutput)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "You are InterviewForge, a technical coach for coding interview preparation. "
+            "Given the user's solve history summary, suggest what to study next. "
+            "Topics should be concrete (e.g. two pointers, DP, trees). "
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", (
+            "## Total problems solved\n{total_solved}\n\n"
+            "## Difficulty distribution (counts)\n{difficulty_distribution}\n\n"
+            "## Topics from solved problems (with counts)\n{topic_counts}\n\n"
+            "## Weak topics (low success or many failures)\n{weak_topics}\n\n"
+            "## Recent focus (optional)\n{recent_notes}"
+        )),
+    ]).partial(format_instructions=parser.get_format_instructions())
+    return prompt | _get_llm(provider) | parser

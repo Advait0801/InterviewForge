@@ -252,6 +252,36 @@ export type LearningPathDetailResponse = {
   problems: PathProblemItem[];
 };
 
+export type CodeReview = {
+  timeComplexity: string;
+  spaceComplexity: string;
+  qualityScore: number;
+  strengths: string[];
+  issues: string[];
+  optimizations: string[];
+  summary: string;
+};
+
+export type RecommendedProblemCard = {
+  id: string;
+  slug: string;
+  title: string;
+  difficulty: string;
+  topics?: string[];
+};
+
+export type RevisitProblemCard = RecommendedProblemCard & {
+  lastAttemptedAt: string;
+};
+
+export type RecommendationsResponse = {
+  recommended: RecommendedProblemCard[];
+  revisit: RevisitProblemCard[];
+  focusAreas: string[];
+  reasoning: string;
+  difficultySuggestion: string;
+};
+
 export type SystemDesignAnalysis = {
   summary: string;
   nodes: SystemDesignNode[];
@@ -461,4 +491,10 @@ export const api = {
       method: "POST",
       auth: true,
     }),
+  reviewSubmission: (submissionId: string) =>
+    request<{ review: CodeReview }>(`/submissions/${encodeURIComponent(submissionId)}/review`, {
+      method: "POST",
+      auth: true,
+    }),
+  getRecommendations: () => request<RecommendationsResponse>("/recommendations", { auth: true }),
 };

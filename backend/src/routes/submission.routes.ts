@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
+import { AIServiceError, reviewCode } from "../services/ai.service";
 
 const router = Router();
 const CODE_RUNNER_URL = process.env.CODE_RUNNER_URL || "http://code-runner:5000";
@@ -86,6 +87,55 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
     });
   } catch (err) {
     console.error("List submissions error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/:id/review", requireAuth, async (req: AuthRequest, res) => {
+  const userId = req.user!.id;
+  const id = typeof req.params.id === "string" ? req.params.id : req.params.id?.[0];
+
+  if (!id || !UUID_REGEX.test(id)) {
+    return res.status(400).json({ error: "Invalid submission id" });
+  }
+
+  try {
+    const row = await query<{
+      code: string;
+      language: string;
+      title: string;
+      description: string;
+      difficulty: string;
+    }>(
+      `SELECT s.code, s.language, p.title, p.description, p.difficulty
+       FROM submissions s
+       JOIN problems p ON p.id = s.problem_id
+       WHERE s.id = $1 AND s.user_id = $2`,
+      [id, userId]
+    );
+
+    if (row.rows.length === 0) {
+      return res.status(404).json({ error: "Submission not found" });
+    }
+
+    const s = row.rows[0];
+    const review = await reviewCode({
+      code: s.code,
+      language: s.language,
+      problem_title: s.title,
+      problem_description: s.description,
+      problem_difficulty: s.difficulty,
+    });
+
+    return res.json({ review });
+  } catch (err) {
+    if (err instanceof AIServiceError) {
+      return res.status(err.statusCode >= 500 ? 503 : err.statusCode).json({
+        error: err.message,
+        details: err.details,
+      });
+    }
+    console.error("AI review error", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

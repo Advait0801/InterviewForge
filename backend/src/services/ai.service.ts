@@ -193,3 +193,40 @@ export async function analyzeSystemDesign(params: {
 }): Promise<SystemDesignAnalysis> {
   return postJson<SystemDesignAnalysis>("/api/system-design/analyze", params);
 }
+
+export interface CodeReviewResult {
+  timeComplexity: string;
+  spaceComplexity: string;
+  qualityScore: number;
+  strengths: string[];
+  issues: string[];
+  optimizations: string[];
+  summary: string;
+}
+
+export async function reviewCode(params: {
+  code: string;
+  language: string;
+  problem_title: string;
+  problem_description: string;
+  problem_difficulty: string;
+}): Promise<CodeReviewResult> {
+  return postJson<CodeReviewResult>("/api/code-review/review", params);
+}
+
+export interface RecommendationAIResult {
+  recommendedTopics: string[];
+  reasoning: string;
+  focusAreas: string[];
+  difficultySuggestion: string;
+}
+
+export async function recommendTopics(params: {
+  total_solved: number;
+  difficulty_distribution: Record<string, number>;
+  topic_counts: Record<string, number>;
+  weak_topics: string[];
+  recent_notes?: string | null;
+}): Promise<RecommendationAIResult> {
+  return postJson<RecommendationAIResult>("/api/recommendations/recommend", params);
+}
