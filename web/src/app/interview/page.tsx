@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { StatusPill } from "@/components/ui/status-pill";
 import { toast } from "sonner";
 import { api, InterviewMessage, InterviewReport, VoiceEvaluation } from "@/lib/api";
+import { downloadInterviewPdf } from "@/lib/interviewPdf";
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   let binary = "";
@@ -137,6 +138,7 @@ export default function InterviewPage() {
       setMessages(detail.messages);
       setCurrentStage(detail.session.current_stage);
       setSessionStatus(detail.session.status);
+      toast.success("Interview started");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to start interview";
       toast.error(msg);
@@ -492,6 +494,7 @@ export default function InterviewPage() {
                             try {
                               const r = await api.getInterviewReport(sessionId);
                               setReport(r);
+                              toast.success("Report ready");
                             } catch (err) {
                               toast.error(err instanceof Error ? err.message : "Failed to generate report");
                             } finally {
@@ -522,7 +525,13 @@ export default function InterviewPage() {
                         </Button>
                       </div>
                     </div>
-                    {report && <InterviewReportCard report={report} />}
+                    {report && (
+                      <InterviewReportCard
+                        report={report}
+                        messages={messages}
+                        companyLabel={COMPANIES.find((c) => c.value === selectedCompany)?.label ?? selectedCompany}
+                      />
+                    )}
                   </div>
                 )}
 
@@ -610,15 +619,38 @@ const STAGE_LABELS: Record<string, string> = {
   core_cs: "Core CS",
 };
 
-function InterviewReportCard({ report }: { report: InterviewReport }) {
+function InterviewReportCard({
+  report,
+  messages,
+  companyLabel,
+}: {
+  report: InterviewReport;
+  messages: InterviewMessage[];
+  companyLabel: string;
+}) {
   const overallColor = report.overallScore >= 7 ? "text-accent" : report.overallScore >= 4 ? "text-warning" : "text-error";
   return (
     <div className="rounded-xl border border-primary/30 bg-surface/80 p-6 space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-bold">Interview Report</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-text-secondary">Overall:</span>
           <span className={`text-2xl font-bold ${overallColor}`}>{report.overallScore}/10</span>
+          <Button
+            type="button"
+            variant="ghost"
+            className="min-h-11 touch-manipulation"
+            onClick={() => {
+              try {
+                downloadInterviewPdf({ report, messages, companyLabel });
+                toast.success("PDF downloaded");
+              } catch {
+                toast.error("Could not build PDF");
+              }
+            }}
+          >
+            Download PDF
+          </Button>
         </div>
       </div>
 

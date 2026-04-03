@@ -395,6 +395,9 @@ export default function WorkspacePage() {
       setAiReviewOpen(false);
       if (res.passed) {
         setProblem((prev) => (prev ? { ...prev, is_solved: true } : prev));
+        toast.success("All tests passed");
+      } else {
+        toast.success("Submission recorded");
       }
       saveLanguage(language);
       fetchSubmissions();

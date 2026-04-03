@@ -26,6 +26,7 @@ def health():
 def root():
     return {"message": "InterviewForge AI Service"}
 
+
 app.include_router(rag_router)
 app.include_router(interview_router)
 app.include_router(speech_router)

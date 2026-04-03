@@ -25,8 +25,26 @@ const difficultyAccent: Record<string, string> = {
   hard: "border-l-error",
 };
 
+function ProblemListSkeleton() {
+  return (
+    <div className="space-y-3" aria-hidden>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div
+          key={i}
+          className="animate-pulse rounded-2xl border border-border bg-surface/60 p-5"
+        >
+          <div className="mb-3 h-5 w-2/3 rounded bg-border" />
+          <div className="mb-2 h-3 w-full rounded bg-border/80" />
+          <div className="h-3 w-4/5 rounded bg-border/80" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ProblemsPage() {
   const [problems, setProblems] = useState<Problem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [difficulty, setDifficulty] = useState<"all" | "easy" | "medium" | "hard">("all");
   const [topic, setTopic] = useState("all");
@@ -34,13 +52,15 @@ export default function ProblemsPage() {
   const [savingBookmarkId, setSavingBookmarkId] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     api
       .listProblems({ auth: true })
       .then((res) => setProblems(res.problems))
       .catch((err) => {
         toast.error(err instanceof Error ? err.message : "Could not load problems");
         setProblems([]);
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const topics = useMemo(() => {
@@ -79,6 +99,7 @@ export default function ProblemsPage() {
       setProblems((prev) =>
         prev.map((p) => (p.id === problemId ? { ...p, is_bookmarked: !bookmarked } : p))
       );
+      toast.success(bookmarked ? "Bookmark removed" : "Saved to bookmarks");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not update bookmark");
     } finally {
@@ -162,6 +183,9 @@ export default function ProblemsPage() {
             </div>
           </motion.div>
 
+          {loading ? (
+            <ProblemListSkeleton />
+          ) : (
           <div className="space-y-3">
             {filtered.map((p, i) => (
               <motion.div key={p.id} variants={fadeUp} custom={i + 3}>
@@ -221,6 +245,7 @@ export default function ProblemsPage() {
               </motion.p>
             )}
           </div>
+          )}
         </motion.div>
       </PageShell>
     </Protected>
