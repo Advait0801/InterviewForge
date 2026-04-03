@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.core import config
-from app.interview.company_profiles import get_company_profile
+from app.interview.company_profiles import get_company_profile, get_difficulty_calibration
 from app.interview.orchestrator import (
     build_context_from_hits,
     get_company_style,
@@ -189,12 +189,14 @@ async def next_question(req: NextQuestionRequest):
         raise HTTPException(status_code=503, detail=f"RAG backend unavailable (Chroma down?): {e}")
 
     context = build_context_from_hits(retrieved["hits"])
+    calibration_text = get_difficulty_calibration(req.company, req.difficulty)
     try:
         result = await invoke_with_fallback(structured_question_chain, {
             "company": req.company,
             "company_style": _safe_company_style(req.company),
             "stage": req.stage,
             "difficulty": req.difficulty,
+            "difficulty_calibration": calibration_text or "Use default expectations for this difficulty.",
             "context": context,
         })
     except Exception as exc:

@@ -48,6 +48,38 @@ const DIFFICULTIES: { value: Difficulty; label: string }[] = [
   { value: "hard", label: "Hard" },
 ];
 
+/** Mirrors ai-service company_profiles focus_areas for lobby chips. */
+const COMPANY_FOCUS_CHIPS: Record<Company, string[]> = {
+  amazon: ["ownership", "customer obsession", "trade-offs", "scalability"],
+  google: ["algorithms", "data structures", "clarity", "decomposition"],
+  meta: ["execution", "scalability", "practicality", "product sense"],
+  apple: ["product quality", "performance", "fundamentals", "execution"],
+};
+
+/** Short calibration lines per company + difficulty (aligned with backend difficulty_calibration). */
+const DIFFICULTY_CALIBRATION_NOTES: Record<Company, Record<Difficulty, string>> = {
+  amazon: {
+    easy: "Expect SDE-style depth: clear STAR stories, basic data structures, simple trade-offs.",
+    medium: "Expect SDE-II depth: stronger LPs, medium algorithms, scalable system sketches.",
+    hard: "Expect senior depth: ambiguous ownership stories, hard algorithms, large-scale design.",
+  },
+  google: {
+    easy: "L3-style: solid fundamentals, optimize from brute force, clear complexity talk.",
+    medium: "L4-style: harder patterns, rigorous reasoning, back-of-envelope system design.",
+    hard: "L5+-style: subtle optimizations, ambiguous constraints, deep distributed trade-offs.",
+  },
+  meta: {
+    easy: "E3-style: ship working code fast, impact-focused stories, high-level system intuition.",
+    medium: "E4-style: time pressure, graph/social patterns, real-time scale in design.",
+    hard: "E5+-style: ambiguous product-scale problems, consistency vs latency under load.",
+  },
+  apple: {
+    easy: "Strong fundamentals: readable code, ownership examples, reliability in design.",
+    medium: "Higher quality bar: performance-aware coding, nuanced trade-offs, latency-focused design.",
+    hard: "Senior bar: concurrency/memory depth, privacy and trust, ambiguous quality vs schedule.",
+  },
+};
+
 const STAGES = [
   { key: "behavioral", label: "Behavioral", description: "Situational and leadership questions" },
   { key: "coding", label: "Coding", description: "Algorithm and data structure problems" },
@@ -215,8 +247,25 @@ export default function InterviewPage() {
                 </div>
               </motion.div>
 
-              {/* Difficulty selector */}
+              {/* Focus chips for selected company */}
               <motion.div variants={fadeUp} custom={2}>
+                <h2 className="mb-3 text-lg font-semibold">
+                  Focus for {COMPANIES.find((c) => c.value === selectedCompany)?.label ?? "company"}
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {COMPANY_FOCUS_CHIPS[selectedCompany].map((chip) => (
+                    <span
+                      key={chip}
+                      className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                    >
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Difficulty selector */}
+              <motion.div variants={fadeUp} custom={3}>
                 <h2 className="mb-3 text-lg font-semibold">Difficulty</h2>
                 <div className="flex flex-wrap gap-3">
                   {DIFFICULTIES.map((d) => {
@@ -241,10 +290,13 @@ export default function InterviewPage() {
                     );
                   })}
                 </div>
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-text-secondary">
+                  {DIFFICULTY_CALIBRATION_NOTES[selectedCompany][selectedDifficulty]}
+                </p>
               </motion.div>
 
               {/* Stages overview */}
-              <motion.div variants={fadeUp} custom={3}>
+              <motion.div variants={fadeUp} custom={4}>
                 <h2 className="mb-3 text-lg font-semibold">Interview Stages</h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {STAGES.map((s, i) => (
@@ -260,7 +312,7 @@ export default function InterviewPage() {
               </motion.div>
 
               {/* Start button */}
-              <motion.div variants={fadeUp} custom={4} className="flex items-center gap-4">
+              <motion.div variants={fadeUp} custom={5} className="flex items-center gap-4">
                 <Button onClick={startSession} disabled={starting}>
                   {starting ? "Starting..." : "Start Interview"}
                 </Button>
@@ -268,7 +320,7 @@ export default function InterviewPage() {
               </motion.div>
 
               {/* Tips */}
-              <motion.div variants={fadeUp} custom={5}>
+              <motion.div variants={fadeUp} custom={6}>
                 <Card className="border-dashed">
                   <h3 className="mb-3 font-semibold text-text-secondary">Tips</h3>
                   <ul className="space-y-2 text-sm text-text-secondary">

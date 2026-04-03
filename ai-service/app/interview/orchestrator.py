@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from app.interview.company_profiles import CompanyProfile, get_company_profile
+from app.interview.company_profiles import CompanyProfile, get_company_profile, get_difficulty_calibration
 from app.rag.service import RAGService
 
 
@@ -13,10 +13,13 @@ def build_retrieval_query(
 ) -> str:
     profile = get_company_profile(company)
     topic = profile.stage_topics.get(stage, stage)
+    calibration = get_difficulty_calibration(company, difficulty)
     query = (
         f"{profile.name} {stage} interview. Topic: {topic}. "
         f"Difficulty: {difficulty}. Focus areas: {', '.join(profile.focus_areas)}."
     )
+    if calibration:
+        query += f" Calibration: {calibration}"
     if previous_answer:
         query += f" Candidate previously said: {previous_answer}"
     return query

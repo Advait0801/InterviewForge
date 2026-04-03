@@ -229,6 +229,7 @@ def structured_question_chain(provider: Optional[str] = None):
             "## Company style\n{company_style}\n\n"
             "## Stage\n{stage}\n\n"
             "## Difficulty\n{difficulty}\n\n"
+            "## Difficulty calibration (bar for this level)\n{difficulty_calibration}\n\n"
             "## Retrieved context\n{context}"
         )),
     ]).partial(format_instructions=parser.get_format_instructions())

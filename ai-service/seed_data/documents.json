@@ -58,5 +58,115 @@
     "source": "core_cs_fundamentals",
     "text": "Core Computer Science Interview Topics\n\nOperating Systems:\n- Process vs Thread: Processes have isolated memory; threads share memory within a process.\n- Concurrency: Mutexes, semaphores, deadlock conditions (mutual exclusion, hold-and-wait, no preemption, circular wait).\n- Memory management: Virtual memory, paging, page faults, TLB.\n- Scheduling: Round-robin, priority, multilevel feedback queue.\n\nNetworking:\n- TCP vs UDP: TCP is reliable and ordered; UDP is faster but unreliable.\n- HTTP/HTTPS: Request-response protocol, TLS handshake, status codes.\n- DNS resolution: Recursive vs iterative lookup.\n- Load balancing: Round-robin, least connections, IP hash, L4 vs L7.\n\nDatabase Internals:\n- B-Tree indexing: Balanced tree for range queries.\n- LSM Trees: Write-optimized, used in LevelDB/RocksDB.\n- ACID properties: Atomicity, Consistency, Isolation, Durability.\n- Transaction isolation levels: Read uncommitted, read committed, repeatable read, serializable.\n- Query optimization: Explain plans, index selection, join strategies.\n\nSecurity:\n- Authentication vs Authorization\n- OAuth 2.0 and JWT\n- SQL injection prevention\n- XSS and CSRF protection\n- Encryption at rest and in transit",
     "metadata": { "stage": "core_cs", "type": "fundamentals" }
+  },
+  {
+    "source": "amazon_coding_lp_walkthrough",
+    "text": "Amazon Coding Interview: Leadership-Aligned Problem Solving\n\nAmazon coding rounds still test DSA, but interviewers often listen for ownership and customer impact in how you explain trade-offs.\n\nWhat to demonstrate:\n- State assumptions and clarify constraints before coding.\n- Start with a working approach, then optimize; narrate why a better complexity matters for scale or cost.\n- Call out edge cases: empty input, overflow, concurrent access if relevant.\n- Tie solutions to operational concerns when natural (retries, idempotency, monitoring).\n\nCommon follow-ups:\n- How would this behave at Amazon scale (regional traffic, Dynamo-style patterns)?\n- What would you instrument in production?\n- How does frugality affect your design (fewer round trips, cheaper storage)?",
+    "metadata": { "company": "amazon", "stage": "coding", "type": "interview_guide" }
+  },
+  {
+    "source": "amazon_core_cs_large_scale_storage",
+    "text": "Amazon-Style Core CS: Large-Scale Storage and Durability\n\nCandidates are often probed on how data is stored durably and retrieved quickly across AZs.\n\nKey ideas:\n- Object storage vs block storage; when to use S3-style patterns vs EBS.\n- Erasure coding vs replication for cost and durability trade-offs.\n- Read-after-write consistency vs eventual listing in distributed stores.\n- Leader election and quorum writes for strongly consistent metadata.\n- Compaction in LSM stores and its impact on tail latency.\n\nBe ready to sketch how a write path flows: client -> load balancer -> partition owner -> replication -> acknowledgment.",
+    "metadata": { "company": "amazon", "stage": "core_cs", "type": "interview_guide" }
+  },
+  {
+    "source": "google_behavioral_ambiguity",
+    "text": "Google Behavioral: Ambiguity, Conflict, and Cross-Functional Work\n\nExpand on scenarios where requirements were unclear or teams disagreed.\n\nThemes:\n- How you structured discovery when goals were fuzzy.\n- Data or user research you used to reduce ambiguity.\n- Resolving technical disagreements with docs, prototypes, or experiments.\n- Escalation: when you pulled in leadership vs when you drove alignment yourself.\n\nUse clear STAR structure; quantify outcomes (latency improved, incidents reduced, adoption grew).",
+    "metadata": { "company": "google", "stage": "behavioral", "type": "interview_guide" }
+  },
+  {
+    "source": "google_core_cs_distributed_theory",
+    "text": "Google Core CS: Distributed Systems Theory for Interviews\n\nBeyond APIs, expect questions on theoretical underpinnings.\n\nConsensus: roles of leaders and followers; why Raft is easier to reason about than Paxos in practice for many systems.\nClocks: logical clocks vs vector clocks for ordering events.\nIdempotency: why at-least-once delivery plus idempotent handlers gives effective exactly-once behavior.\nBackpressure: signaling producers to slow when consumers lag.\n\nRelating theory to products: Bigtable-style row keys and locality; Spanner-style TrueTime and external consistency.",
+    "metadata": { "company": "google", "stage": "core_cs", "type": "interview_guide" }
+  },
+  {
+    "source": "meta_behavioral_shipping",
+    "text": "Meta Behavioral: Shipping Fast, Iterating, and Stakeholder Alignment\n\nMeta values velocity with accountability.\n\nPrepare stories on:\n- Cutting scope to hit a deadline without sacrificing critical quality.\n- Postmortems: blameless culture and action items that stuck.\n- Working with PM/design when metrics conflicted with engineering concerns.\n- Mobile or growth experiments: feature flags, ramp percentages, guardrails.\n\nEmphasize measurable impact: DAU, retention, latency percentiles, error budgets.",
+    "metadata": { "company": "meta", "stage": "behavioral", "type": "interview_guide" }
+  },
+  {
+    "source": "meta_core_cs_caching_scale",
+    "text": "Meta Core CS: Caching and Fan-Out at Scale\n\nTopics that often appear for Meta-scale systems:\n\nCaching layers: browser, CDN, edge, application, distributed cache. Cache invalidation strategies: TTL, versioned keys, pub/sub invalidation.\nFan-out on write vs read for feeds: trade-offs for celebrity posts.\nHot keys: sharding, in-memory overlays, request coalescing.\nGraph locality: storing adjacency for low-latency reads in social workloads.\n\nBe ready to reason about p99 latency under load spikes.",
+    "metadata": { "company": "meta", "stage": "core_cs", "type": "interview_guide" }
+  },
+  {
+    "source": "apple_coding_clean_performance",
+    "text": "Apple Coding: Clean Implementation and Performance Trade-offs\n\nApple interviewers often reward readable code and careful handling of resources.\n\nPatterns:\n- Prefer clear data structures over clever one-liners.\n- Discuss time vs space for battery- or thermally constrained clients when relevant.\n- Memory: ARC-style thinking, avoiding retain cycles in async code.\n- Testing: unit tests for pure logic; consider property-based tests for parsers.\n\nFollow-ups may probe how you would profile CPU vs allocations on device.",
+    "metadata": { "company": "apple", "stage": "coding", "type": "interview_guide" }
+  },
+  {
+    "source": "apple_core_cs_memory_concurrency",
+    "text": "Apple Core CS: Memory, Concurrency, and Real-Time Constraints\n\nExpect fundamentals tied to client and systems quality.\n\nMemory: stack vs heap, alignment, cache lines and false sharing.\nConcurrency: actors vs locks; deadlock avoidance; priority inversion on embedded-style systems.\nScheduling: QoS classes; when work should move off the main thread.\nReal-time audio/video: bounded queues, backpressure, drop policies.\n\nLink answers to user-visible symptoms: jank, frame drops, audio glitches.",
+    "metadata": { "company": "apple", "stage": "core_cs", "type": "interview_guide" }
+  },
+  {
+    "source": "fundamentals_rest_api_design",
+    "text": "REST and HTTP API Design for System Design Interviews\n\nResources vs actions: nouns in paths; use HTTP verbs meaningfully.\nIdempotency: PUT and DELETE idempotent; POST may not be; use idempotency keys for payments.\nVersioning: URL vs header; deprecation policy.\nPagination: cursor vs offset; consistency when data changes during iteration.\nErrors: stable error codes, machine-readable bodies, correlation IDs.\nRate limiting: token bucket vs leaky bucket; returning Retry-After headers.",
+    "metadata": { "stage": "system_design", "type": "fundamentals" }
+  },
+  {
+    "source": "fundamentals_caching_strategies",
+    "text": "Caching Strategies Interview Guide\n\nCache-aside: application loads on miss, then populates cache.\nRead-through / write-through: cache cooperates with DB for consistency.\nWrite-behind: async writes for throughput at the cost of complexity.\nTTL selection: balancing staleness vs load on origin.\nCache stampede: probabilistic early expiration, locks, or single-flight.\n\nCDN caching: cache keys, vary headers, purge APIs.",
+    "metadata": { "stage": "system_design", "type": "fundamentals" }
+  },
+  {
+    "source": "fundamentals_database_sharding",
+    "text": "Database Sharding Patterns\n\nWhen single-node DB limits are hit, shard by a key (user id, tenant id).\n\nStrategies:\n- Hash-based: even spread; range queries harder.\n- Range-based: better for range scans; risk of hot ranges.\n- Directory-based: lookup service maps keys to shards; flexible rebalancing.\n\nChallenges: cross-shard joins, transactions, schema changes, rebalancing without downtime.\n\nSecondary indexes: per-shard vs global index service.",
+    "metadata": { "stage": "system_design", "type": "fundamentals" }
+  },
+  {
+    "source": "fundamentals_message_queues",
+    "text": "Message Queues and Event-Driven Architecture\n\nUse cases: decouple producers and consumers, absorb spikes, async workflows.\n\nDelivery semantics: at-most-once, at-least-once, exactly-once (often via idempotent consumers).\nOrdering: single partition per key vs total order costs.\nDead-letter queues: poison messages and replay strategies.\nKafka vs RabbitMQ vs cloud queues: throughput, ordering, ops model.\nSagas: coordinating distributed transactions via choreography or orchestration.",
+    "metadata": { "stage": "system_design", "type": "fundamentals" }
+  },
+  {
+    "source": "fundamentals_kubernetes_basics",
+    "text": "Kubernetes Basics for Interviews\n\nPods: smallest deployable unit; shared network namespace.\nDeployments: desired replicas, rolling updates, rollbacks.\nServices: ClusterIP, NodePort, LoadBalancer; kube-proxy behavior.\nConfigMaps and Secrets: mounting and rotation considerations.\nHealth: liveness vs readiness probes; how they affect routing.\nResource requests and limits: scheduling vs OOM.\n\nConnect to system design: how you would run stateless vs stateful workloads.",
+    "metadata": { "stage": "system_design", "type": "fundamentals" }
+  },
+  {
+    "source": "fundamentals_observability",
+    "text": "Observability: Metrics, Logs, and Traces\n\nThree pillars: metrics (aggregated numbers), logs (discrete events), traces (request paths).\n\nRED metrics for services: Rate, Errors, Duration.\nUSE for resources: Utilization, Saturation, Errors.\nStructured logging: JSON fields, trace IDs for correlation.\nDistributed tracing: spans, parent-child relationships, sampling trade-offs.\nSLOs and error budgets: tying reliability targets to engineering decisions.\n\nAlerting: avoid noisy alerts; use multi-window burn rates for serious pages.",
+    "metadata": { "stage": "system_design", "type": "fundamentals" }
+  },
+  {
+    "source": "amazon_system_design_peak_events",
+    "text": "Amazon System Design: Peak Events and Cost\n\nPrime Day-style traffic requires planning beyond steady-state QPS.\n\nTopics:\n- Pre-warming capacity and autoscaling policies.\n- Feature flags to shed non-critical work under load.\n- Multi-AZ and failover drills.\n- Cost per request: caching, batching, choice of instance family.\n- Vendor and multi-region failover for critical dependencies.",
+    "metadata": { "company": "amazon", "stage": "system_design", "type": "interview_guide" }
+  },
+  {
+    "source": "google_coding_communication",
+    "text": "Google Coding: Communication and Proof Rigor\n\nInterviewers expect you to verbalize invariants, loop conditions, and termination.\n\nTips:\n- Write a short example walk-through before coding.\n- After coding, trace a non-trivial example.\n- State time and space complexity with derivation.\n- If stuck, propose brute force, then identify the bottleneck.\n- For graph problems, state whether the graph is directed, weighted, and if negative edges matter.",
+    "metadata": { "company": "google", "stage": "coding", "type": "interview_guide" }
+  },
+  {
+    "source": "meta_system_design_realtime",
+    "text": "Meta System Design: Real-Time and Presence\n\nDesigns often include presence (online/offline), typing indicators, or live counts.\n\nApproaches:\n- WebSockets or long polling for client updates.\n- Ephemeral state in memory with gossip or a dedicated presence service.\n- Rate limiting fan-out for popular rooms.\n- Merging updates to reduce client churn.\n\nConsistency: last-write-wins vs CRDTs for certain counters.",
+    "metadata": { "company": "meta", "stage": "system_design", "type": "interview_guide" }
+  },
+  {
+    "source": "apple_system_design_privacy",
+    "text": "Apple System Design: Privacy and On-Device Processing\n\nExpect emphasis on data minimization and user control.\n\nTopics:\n- Differential privacy for telemetry aggregates.\n- On-device ML vs server-side: latency and privacy trade-offs.\n- End-to-end encryption: key distribution, recovery, multi-device sync challenges.\n- App Transport Security and certificate pinning concepts.\n- Regional data residency requirements.",
+    "metadata": { "company": "apple", "stage": "system_design", "type": "interview_guide" }
+  },
+  {
+    "source": "google_core_cs_networking_deep",
+    "text": "Google Core CS: Networking Deep Dives\n\nBeyond TCP vs UDP:\n- QUIC over UDP: connection migration, reduced head-of-line blocking.\n- TLS 1.3 handshake vs 1.2; forward secrecy.\n- DNS: caching layers, TTL, EDNS client subnet.\n- Anycast vs unicast for global routing.\n- HTTP/2 multiplexing and server push (historical).\n\nRelate to designing APIs and debugging production latency.",
+    "metadata": { "company": "google", "stage": "core_cs", "type": "interview_guide" }
+  },
+  {
+    "source": "meta_coding_graph_social",
+    "text": "Meta Coding: Graph and Social-Graph Patterns\n\nProblems often mirror friend lists, recommendations, or feeds.\n\nTechniques:\n- BFS for shortest path in unweighted graphs.\n- Union-find for connectivity and cycle detection in undirected graphs.\n- Topological sort for prerequisites and course schedules.\n- Bi-directional BFS for shortest path in large graphs.\n- Min-heap for Dijkstra when edges are weighted.\n\nDiscuss scale: when in-memory graph is infeasible, approximate or shard by user region.",
+    "metadata": { "company": "meta", "stage": "coding", "type": "interview_guide" }
+  },
+  {
+    "source": "apple_behavioral_quality_bar",
+    "text": "Apple Behavioral: Raising the Quality Bar\n\nStories where you refused to ship substandard work or invested in test infrastructure.\n\nAngles:\n- Balancing polish with deadlines; what you cut vs what you protected.\n- Working with QA and design on release criteria.\n- Incidents: root cause, permanent fix vs hotfix, preventing recurrence.\n- Accessibility or localization: concrete improvements you drove.",
+    "metadata": { "company": "apple", "stage": "behavioral", "type": "interview_guide" }
+  },
+  {
+    "source": "fundamentals_security_interview",
+    "text": "Security Topics for System Design and Core CS\n\nAuthentication: sessions vs JWT; refresh token rotation.\nAuthorization: RBAC, ABAC, policy engines.\nSecrets: rotation, KMS, avoiding secrets in code.\nOWASP top risks: injection, XSS, CSRF, SSRF.\nData at rest and in transit encryption.\nThreat modeling: STRIDE at a high level.\n\nEnough depth to discuss in design of public APIs and internal services.",
+    "metadata": { "stage": "core_cs", "type": "fundamentals" }
   }
 ]
