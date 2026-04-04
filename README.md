@@ -1,4 +1,4 @@
-# 🛠️ InterviewForge
+# 💻 InterviewForge
 
 <div align="center">
 
@@ -150,7 +150,7 @@ On the coding side, solve problems in a **Monaco editor** with code execution in
 |---|---|
 | **Code runner** | Node.js service using Docker Engine API |
 | **Sandboxes** | Per-language images (`docker/python`, `docker/c`, `docker/cpp`, `docker/java`) |
-| **Database** | PostgreSQL 16 — 11 migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks |
+| **Database** | PostgreSQL 16 — 10 migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks |
 | **Vector store** | ChromaDB 0.5.5 |
 | **Orchestration** | Docker Compose (6 services) |
 
@@ -164,8 +164,8 @@ InterviewForge/
 │   └── src/app/            # App Router pages (dashboard, problems, interview, etc.)
 ├── backend/                # Express API server
 │   ├── src/routes/         # Auth, problems, submissions, interviews, assessments, etc.
-│   ├── sql_migrations/     # 001_init.sql through 011_drop_contests_tables.sql
-│   └── scripts/            # seed_problems.ts
+│   ├── sql_migrations/     # 001_init.sql through 010_learning_paths.sql
+│   └── scripts/            # seed_problems.ts, seed_learning_paths.ts
 ├── ai-service/             # FastAPI AI backend
 │   ├── app/api/            # RAG, interview, code-review, speech, recommendations
 │   ├── app/interview/      # Company profiles, orchestrator
@@ -176,7 +176,8 @@ InterviewForge/
 ├── code-runner/            # Sandbox orchestration service
 ├── docker/                 # Sandbox Dockerfiles (python, c, cpp, java)
 ├── docs/                   # smoke-test.md
-└── docker-compose.yml      # Full local stack
+├── docker-compose.yml      # Local development stack
+└── docker-compose.prod.yml # Production stack (AWS)
 ```
 
 ---
@@ -218,10 +219,10 @@ docker compose up --build
 ### Database setup
 
 ```bash
-# Apply migrations (run each in order)
-docker compose exec -T postgres psql -U postgres -d interviewforge \
-  -f - < backend/sql_migrations/001_init.sql
-# Repeat for 002, 003, ... through 011
+# Apply all migrations in order
+for f in $(ls backend/sql_migrations/*.sql | sort); do
+  docker compose exec -T postgres psql -U postgres -d interviewforge -f - < "$f"
+done
 
 # Seed coding problems
 docker compose exec backend npx ts-node scripts/seed_problems.ts
@@ -254,13 +255,81 @@ The **dashboard** shows solve stats, current streak, and an activity heatmap. **
 
 ---
 
+## ☁️ AWS Deployment
+
+InterviewForge is deployed on AWS Free Tier with the following setup:
+
+### Infrastructure
+
+| Resource | Spec |
+|----------|------|
+| **EC2** | `t3.micro` (1 vCPU, 1 GB RAM + 2 GB swap), Amazon Linux 2023, 30 GB gp3 |
+| **RDS** | `db.t3.micro`, PostgreSQL 16, 20 GB gp2 (private subnet) |
+| **Networking** | Elastic IP, Nginx reverse proxy, security groups restricting DB access to EC2 only |
+
+### Production stack
+
+The production setup uses `docker-compose.prod.yml` with multi-stage `Dockerfile.prod` files for each service:
+
+- **Compiled builds** — TypeScript compiled to JS, Next.js pre-built, no hot-reload
+- **Multi-stage images** — dev dependencies stripped from final images
+- **Memory limits** — backend 200m, ai-service 300m, code-runner 150m, web 250m, chromadb 200m
+- **Restart policies** — `unless-stopped` on all containers
+- **Localhost-bound ports** — Nginx handles all public traffic on port 80
+
+### Deploy from scratch
+
+```bash
+# SSH into EC2
+ssh -i interviewforge-key.pem ec2-user@<ELASTIC_IP>
+
+# Clone and configure
+git clone <repo-url> ~/InterviewForge && cd ~/InterviewForge
+# Create .env files for each service (backend, ai-service, code-runner, web)
+
+# Build sandbox images
+docker build -t interviewforge-python-sandbox:latest docker/sandboxes/python-sandbox/
+docker build -t interviewforge-c-sandbox:latest docker/sandboxes/c-sandbox/
+docker build -t interviewforge-cpp-sandbox:latest docker/sandboxes/cpp-sandbox/
+docker build -t interviewforge-java-sandbox:latest docker/sandboxes/java-sandbox/
+
+# Start all services
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Run migrations against RDS
+for f in $(ls backend/sql_migrations/*.sql | sort); do
+  PGPASSWORD='<pass>' psql -h <RDS_ENDPOINT> -U postgres -d interviewforge -f "$f"
+done
+
+# Seed data
+docker compose -f docker-compose.prod.yml exec backend sh -c \
+  "npm install -g ts-node typescript @types/node && \
+   ln -s /app/dist /app/src 2>/dev/null; \
+   ts-node --skip-project --compiler-options '{\"module\":\"commonjs\"}' scripts/seed_problems.ts"
+```
+
+### Update after code changes
+
+```bash
+cd ~/InterviewForge && git pull origin main
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+---
+
 ## 🚧 Roadmap
 
-- [ ] Production Docker Compose with RDS support
-- [ ] CI/CD pipeline (lint, typecheck, build)
+- [x] Production Docker Compose with multi-stage builds
+- [x] AWS deployment (EC2 + RDS + Nginx)
+- [ ] HTTPS via Let's Encrypt (requires domain)
+- [ ] CI/CD pipeline (lint, typecheck, build, deploy)
 - [ ] More company interview profiles and RAG corpora
 - [ ] Horizontal scaling for code-runner and ai-service
+- [ ] WebSocket reconnection and offline resilience
 - [ ] Mobile responsive improvements
+- [ ] User profile customization and social features
+- [ ] Interview session replay and sharing
+- [ ] Collaborative mock interviews (peer-to-peer)
 
 ---
 
