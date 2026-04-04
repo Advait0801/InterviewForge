@@ -1,0 +1,18 @@
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/package*.json ./
+RUN npm ci --omit=dev
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/leetcode_problems.json ./
+COPY --from=builder /app/problem_hints.json ./
+COPY --from=builder /app/starter_templates.json ./
+COPY --from=builder /app/scripts ./scripts
+EXPOSE 4000
+CMD ["node", "dist/index.js"]

@@ -1,0 +1,70 @@
+name: interviewforge
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    image: interviewforge-backend:latest
+    container_name: interviewforge-backend
+    ports:
+      - "127.0.0.1:4000:4000"
+    env_file: ./backend/.env
+    mem_limit: 200m
+    restart: unless-stopped
+    depends_on:
+      - code-runner
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile.prod
+    image: interviewforge-ai:latest
+    container_name: interviewforge-ai
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file: ./ai-service/.env
+    mem_limit: 300m
+    restart: unless-stopped
+    depends_on:
+      - chromadb
+
+  code-runner:
+    build:
+      context: ./code-runner
+      dockerfile: Dockerfile.prod
+    image: interviewforge-code-runner:latest
+    container_name: interviewforge-code-runner
+    ports:
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file: ./code-runner/.env
+    mem_limit: 150m
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.prod
+    image: interviewforge-web:latest
+    container_name: interviewforge-web
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file: ./web/.env
+    mem_limit: 250m
+    restart: unless-stopped
+
+  chromadb:
+    image: chromadb/chroma:0.5.5
+    container_name: interviewforge-chroma
+    ports:
+      - "127.0.0.1:8001:8000"
+    volumes:
+      - interviewforge-chromadata:/chroma/chroma
+    mem_limit: 200m
+    restart: unless-stopped
+
+volumes:
+  interviewforge-chromadata:
+    name: interviewforge-chromadata
