@@ -2,13 +2,15 @@
 
 <div align="center">
 
-**AI-powered mock interview platform — practice coding, system design, behavioral rounds, and timed assessments like the real thing**
+**AI-powered mock interview platform — practice coding, system design, behavioral rounds, and timed assessments like the real thing. Available on web and iOS.**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)](https://nodejs.org)
-[![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com)
+[![Swift](https://img.shields.io/badge/Swift-6.3-F05138?logo=swift&logoColor=white)](https://developer.apple.com/swift/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![SwiftUI](https://img.shields.io/badge/SwiftUI-iOS_17+-007AFF?logo=apple&logoColor=white)](https://developer.apple.com/xcode/swiftui/)
+[![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![ChromaDB](https://img.shields.io/badge/Chroma-0.5.5-7C3AED)](https://www.trychroma.com)
@@ -24,7 +26,9 @@
 
 **InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (Amazon, Google, Meta, Apple), choose a difficulty, and work through **behavioral → coding → system design → core CS** rounds — all powered by **RAG-backed LLM question generation**, with real-time evaluation and follow-ups.
 
-On the coding side, solve problems in a **Monaco editor** with code execution in **isolated Docker sandboxes** (Python, C, C++, Java). Get **AI code reviews**, track progress with **analytics & leaderboards**, follow **learning paths**, and take **timed assessments**.
+On the coding side, solve problems in a **Monaco editor** (web) or **CodeMirror editor** (iOS) with code execution in **isolated Docker sandboxes** (Python, C, C++, Java). Get **AI code reviews**, track progress with **analytics & leaderboards**, follow **learning paths**, and take **timed assessments**.
+
+The platform ships as both a **Next.js web app** and a **native SwiftUI iOS app** — both powered by the same Express + FastAPI backend.
 
 ### ✨ Key Highlights
 
@@ -36,7 +40,8 @@ On the coding side, solve problems in a **Monaco editor** with code execution in
 - 🏆 **Leaderboard & analytics** — Global rankings, topic radar, difficulty distribution, acceptance trends
 - 📋 **Timed assessments** — Multi-problem flows with countdown timer and scoring
 - 🗺️ **Learning paths** — Curated problem sequences by topic with progress tracking
-- 🏗️ **System design** — AI-analyzed architecture explanations rendered as React Flow diagrams
+- 🏗️ **System design** — AI-analyzed architecture explanations rendered as React Flow diagrams (web) and interactive graph views (iOS)
+- 📱 **Native iOS app** — Full-featured SwiftUI client with CodeMirror editor, voice recording, Swift Charts analytics, and Keychain-based auth
 
 ---
 
@@ -71,6 +76,18 @@ On the coding side, solve problems in a **Monaco editor** with code execution in
 - Timed assessment mode with scoring
 - Dark mode, responsive layouts, loading skeletons, error boundaries
 
+### iOS app
+
+- Native SwiftUI app targeting iOS 17+ with full feature parity
+- MVVM architecture with async/await networking layer
+- JWT authentication with iOS Keychain storage
+- CodeMirror code editor via WKWebView with Swift ↔ JS bridge
+- Voice recording via AVFoundation for interview speech evaluation
+- Interactive system design diagrams rendered in WKWebView
+- Swift Charts for analytics (solved trends, difficulty distribution, topic breakdown)
+- Dark mode, haptic feedback, pull-to-refresh, skeleton loading states
+- PhotosPicker for avatar upload, ShareLink for PDF report sharing
+
 ---
 
 ## 🏗️ Architecture
@@ -82,18 +99,18 @@ On the coding side, solve problems in a **Monaco editor** with code execution in
 │   :3000        │      /api/*        │  :4000           │        │                │
 │                │                    │                  │        └────────────────┘
 └───────┬────────┘                    └────────┬─────────┘
-        │                                      │
-        │                                      │  HTTP
-        │                                      ▼
-        │                            ┌──────────────────┐        ┌────────────────┐
-        │                            │                  │        │                │
-        │                            │  FastAPI         │ ◄────► │  ChromaDB      │
-        │                            │  ai-service      │        │  (RAG vectors) │
-        │                            │  :8000           │        │                │
-        │                            └────────┬─────────┘        └────────────────┘
-        │                                     │
-        │                                     │  Gemini / OpenAI
-        │                                     ▼
+        │                              ▲       │
+        │                    REST      │       │  HTTP
+        │               ┌─────────────┘│       ▼
+        │               │              │┌──────────────────┐        ┌────────────────┐
+        │  ┌────────────────┐          ││                  │        │                │
+        │  │                │          ││  FastAPI         │ ◄────► │  ChromaDB      │
+        │  │  iOS App       │          ││  ai-service      │        │  (RAG vectors) │
+        │  │  (SwiftUI)     │──────────┘│  :8000           │        │                │
+        │  │                │           └────────┬─────────┘        └────────────────┘
+        │  └────────────────┘                    │
+        │                                        │  Gemini / OpenAI
+        │                                        ▼
         │                            ┌──────────────────┐
         │          code submit       │                  │        ┌────────────────┐
         └──────────────────────────► │  code-runner     │ ─────► │  Docker        │
@@ -104,7 +121,7 @@ On the coding side, solve problems in a **Monaco editor** with code execution in
 
 ### 🔄 Data flow
 
-1. **Auth** — Client → Express (bcrypt + JWT) → PostgreSQL `users`
+1. **Auth** — Client (web or iOS) → Express (bcrypt + JWT) → PostgreSQL `users`
 2. **Code submit** — Client → Express → code-runner → ephemeral Docker container → test results → response
 3. **Interview question** — Express → FastAPI → Chroma retrieval + LLM chain → structured question → stored in `interview_messages`
 4. **RAG pipeline** — Seed documents → chunking → embeddings → Chroma → filtered retrieval by company + stage + difficulty calibration
@@ -113,7 +130,7 @@ On the coding side, solve problems in a **Monaco editor** with code execution in
 
 ## 🛠️ Tech Stack
 
-### Frontend
+### Frontend (Web)
 
 | | |
 |---|---|
@@ -124,6 +141,20 @@ On the coding side, solve problems in a **Monaco editor** with code execution in
 | **Charts** | Recharts |
 | **Realtime** | Socket.IO client |
 | **Utilities** | Sonner (toasts), jsPDF (report export) |
+
+### iOS App
+
+| | |
+|---|---|
+| **Language** | Swift 6.3 |
+| **UI** | SwiftUI (iOS 17+), MVVM architecture |
+| **Code editor** | CodeMirror 6 via WKWebView with Swift ↔ JS bridge |
+| **Charts** | Swift Charts |
+| **Voice** | AVFoundation (AVAudioRecorder) |
+| **Diagrams** | WKWebView with vis.js graph renderer |
+| **Auth storage** | iOS Keychain |
+| **Networking** | URLSession with async/await |
+| **Utilities** | PhotosPicker (avatar), ShareLink (PDF export) |
 
 ### Backend (Node.js)
 
@@ -162,6 +193,14 @@ On the coding side, solve problems in a **Monaco editor** with code execution in
 InterviewForge/
 ├── web/                    # Next.js frontend
 │   └── src/app/            # App Router pages (dashboard, problems, interview, etc.)
+├── ios/                    # SwiftUI iOS app
+│   └── InterviewForge/
+│       ├── App/            # App entry point, ContentView, TabView root
+│       ├── Models/         # Codable structs matching API responses
+│       ├── Services/       # APIService, AuthManager, KeychainHelper
+│       ├── ViewModels/     # ObservableObject VMs per feature
+│       ├── Views/          # Auth, Dashboard, Problems, Interview, etc.
+│       └── WebView/        # CodeMirror editor + diagram renderer (WKWebView)
 ├── backend/                # Express API server
 │   ├── src/routes/         # Auth, problems, submissions, interviews, assessments, etc.
 │   ├── sql_migrations/     # 001_init.sql through 010_learning_paths.sql
@@ -215,6 +254,18 @@ docker compose up --build
 | Backend API | http://localhost:4000 |
 | AI service | http://localhost:8000 |
 | Code runner | http://localhost:5050 |
+
+### iOS app
+
+```bash
+# Open in Xcode
+open ios/InterviewForge/InterviewForge.xcodeproj
+
+# Or from the command line
+cd ios/InterviewForge && xcodebuild -scheme InterviewForge -destination 'platform=iOS Simulator,name=iPhone 16'
+```
+
+> The iOS app connects to the same backend. Update the `baseURL` in `APIService.swift` to point to your machine's local IP (e.g. `http://192.168.x.x:4000/api`) when running on a simulator or device, since `localhost` from the simulator maps to the simulator itself.
 
 ### Database setup
 
@@ -321,12 +372,12 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 - [x] Production Docker Compose with multi-stage builds
 - [x] AWS deployment (EC2 + RDS + Nginx)
+- [x] Native iOS app (SwiftUI, full feature parity with web)
 - [ ] HTTPS via Let's Encrypt (requires domain)
 - [ ] CI/CD pipeline (lint, typecheck, build, deploy)
 - [ ] More company interview profiles and RAG corpora
 - [ ] Horizontal scaling for code-runner and ai-service
 - [ ] WebSocket reconnection and offline resilience
-- [ ] Mobile responsive improvements
 - [ ] User profile customization and social features
 - [ ] Interview session replay and sharing
 - [ ] Collaborative mock interviews (peer-to-peer)
@@ -345,7 +396,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 <div align="center">
 
-**Built with ❤️ using TypeScript, Python, Next.js, Express, FastAPI, and Docker**
+**Built with ❤️ using TypeScript, Python, Swift, Next.js, SwiftUI, Express, FastAPI, and Docker**
 
 ⭐ Star this repo if you find it helpful!
 
