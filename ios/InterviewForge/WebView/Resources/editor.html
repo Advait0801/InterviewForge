@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Code Editor</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, 'SF Mono', 'Menlo', monospace;
+    background: var(--bg);
+    color: var(--fg);
+  }
+  :root {
+    --bg: #1e1e2e;
+    --fg: #cdd6f4;
+    --gutter: #45475a;
+    --gutter-fg: #6c7086;
+    --selection: #45475a;
+    --cursor: #f5e0dc;
+    --keyword: #cba6f7;
+    --string: #a6e3a1;
+    --comment: #6c7086;
+    --number: #fab387;
+    --function: #89b4fa;
+    --type: #f9e2af;
+    --line-highlight: rgba(255,255,255,0.04);
+  }
+  body.light {
+    --bg: #ffffff;
+    --fg: #1e1e2e;
+    --gutter: #e6e9ef;
+    --gutter-fg: #8c8fa1;
+    --selection: #dce0e8;
+    --cursor: #1e1e2e;
+    --keyword: #8839ef;
+    --string: #40a02b;
+    --comment: #9ca0b0;
+    --number: #fe640b;
+    --function: #1e66f5;
+    --type: #df8e1d;
+    --line-highlight: rgba(0,0,0,0.03);
+  }
+  #editor {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    font-size: 14px;
+    line-height: 1.6;
+    tab-size: 4;
+    padding: 0;
+    counter-reset: line;
+    white-space: pre;
+    outline: none;
+    caret-color: var(--cursor);
+    color: var(--fg);
+    background: var(--bg);
+  }
+  #editor-wrapper {
+    display: flex;
+    height: 100%;
+    background: var(--bg);
+  }
+  #gutter {
+    padding: 12px 8px 12px 12px;
+    text-align: right;
+    color: var(--gutter-fg);
+    background: var(--gutter);
+    font-size: 13px;
+    line-height: 1.6;
+    user-select: none;
+    min-width: 42px;
+    overflow: hidden;
+  }
+  #textarea {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    tab-size: 4;
+    background: var(--bg);
+    color: var(--fg);
+    caret-color: var(--cursor);
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-text-fill-color: var(--fg);
+  }
+  #textarea::selection {
+    background: var(--selection);
+  }
+  #highlighted {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    padding: 12px;
+    font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre;
+    overflow: hidden;
+    color: transparent;
+  }
+  .kw { color: var(--keyword); }
+  .str { color: var(--string); }
+  .cmt { color: var(--comment); font-style: italic; }
+  .num { color: var(--number); }
+  .fn { color: var(--function); }
+  .typ { color: var(--type); }
+</style>
+</head>
+<body>
+  <div id="editor-wrapper">
+    <div id="gutter"></div>
+    <textarea id="textarea" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"></textarea>
+  </div>
+
+<script>
+  const textarea = document.getElementById('textarea');
+  const gutter = document.getElementById('gutter');
+  let currentLanguage = 'python';
+
+  // Syntax patterns per language
+  const patterns = {
+    python: [
+      [/\b(def|class|if|elif|else|for|while|return|import|from|as|try|except|finally|with|raise|pass|break|continue|and|or|not|in|is|lambda|yield|True|False|None|self|print|range|len|int|str|float|list|dict|set|tuple)\b/g, 'kw'],
+      [/("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, 'str'],
+      [/#.*/g, 'cmt'],
+      [/\b\d+\.?\d*\b/g, 'num'],
+    ],
+    java: [
+      [/\b(public|private|protected|static|final|abstract|class|interface|extends|implements|new|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|throws|void|int|long|double|float|boolean|char|String|byte|short|import|package|this|super|null|true|false|System|out|println)\b/g, 'kw'],
+      [/("(?:[^"\\]|\\.)*")/g, 'str'],
+      [/(\/\/.*|\/\*[\s\S]*?\*\/)/g, 'cmt'],
+      [/\b\d+\.?\d*[fFdDlL]?\b/g, 'num'],
+    ],
+    c: [
+      [/\b(int|char|float|double|void|long|short|unsigned|signed|struct|typedef|enum|union|return|if|else|for|while|do|switch|case|break|continue|sizeof|static|const|extern|include|define|NULL|printf|scanf|malloc|free|stdin|stdout|stderr)\b/g, 'kw'],
+      [/("(?:[^"\\]|\\.)*")/g, 'str'],
+      [/(\/\/.*|\/\*[\s\S]*?\*\/)/g, 'cmt'],
+      [/\b\d+\.?\d*[fFlL]?\b/g, 'num'],
+      [/#\w+/g, 'kw'],
+    ],
+    cpp: [
+      [/\b(int|char|float|double|void|long|short|unsigned|signed|bool|class|struct|public|private|protected|virtual|override|template|typename|namespace|using|new|delete|return|if|else|for|while|do|switch|case|break|continue|sizeof|static|const|auto|nullptr|true|false|string|vector|map|set|cout|cin|endl|include|std)\b/g, 'kw'],
+      [/("(?:[^"\\]|\\.)*")/g, 'str'],
+      [/(\/\/.*|\/\*[\s\S]*?\*\/)/g, 'cmt'],
+      [/\b\d+\.?\d*[fFlL]?\b/g, 'num'],
+      [/#\w+/g, 'kw'],
+    ],
+  };
+
+  function highlight(code, lang) {
+    let html = escapeHtml(code);
+    const langPatterns = patterns[lang] || patterns.python;
+    for (const [regex, cls] of langPatterns) {
+      html = html.replace(regex, (match) => `<span class="${cls}">${match}</span>`);
+    }
+    return html;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function updateGutter() {
+    const lines = textarea.value.split('\n').length;
+    let html = '';
+    for (let i = 1; i <= lines; i++) {
+      html += i + '\n';
+    }
+    gutter.textContent = html;
+  }
+
+  function syncScroll() {
+    gutter.scrollTop = textarea.scrollTop;
+  }
+
+  textarea.addEventListener('input', () => {
+    updateGutter();
+    notifySwift();
+  });
+  textarea.addEventListener('scroll', syncScroll);
+
+  // Handle Tab key
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      textarea.value = textarea.value.substring(0, start) + '    ' + textarea.value.substring(end);
+      textarea.selectionStart = textarea.selectionEnd = start + 4;
+      updateGutter();
+      notifySwift();
+    }
+  });
+
+  function notifySwift() {
+    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.codeChanged) {
+      window.webkit.messageHandlers.codeChanged.postMessage(textarea.value);
+    }
+  }
+
+  // API called from Swift
+  window.editorAPI = {
+    setCode(code) {
+      textarea.value = code;
+      updateGutter();
+    },
+    getCode() {
+      return textarea.value;
+    },
+    setLanguage(lang) {
+      currentLanguage = lang;
+    },
+    setTheme(theme) {
+      if (theme === 'light') {
+        document.body.classList.add('light');
+      } else {
+        document.body.classList.remove('light');
+      }
+    }
+  };
+
+  // Initialize
+  updateGutter();
+</script>
+</body>
+</html>
