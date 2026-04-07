@@ -5,6 +5,7 @@
 //  Created by Advait Naik on 4/5/26.
 //
 
+import Foundation
 import SwiftUI
 
 @Observable
@@ -22,7 +23,8 @@ final class AuthManager {
             return
         }
         do {
-            currentUser = try await api.request(path: "/users/me", auth: true)
+            let me: MeResponse = try await api.request(path: "/users/me", auth: true)
+            currentUser = me.user
             isAuthenticated = true
         } catch {
             KeychainHelper.delete(for: "jwt_token")
@@ -35,7 +37,8 @@ final class AuthManager {
         let body = LoginRequest(email: email, password: password)
         let response: AuthResponse = try await api.request(method: "POST", path: "/auth/login", body: body)
         KeychainHelper.saveString(response.token, for: "jwt_token")
-        currentUser = try await api.request(path: "/users/me", auth: true)
+        let me: MeResponse = try await api.request(path: "/users/me", auth: true)
+        currentUser = me.user
         isAuthenticated = true
     }
 
@@ -43,8 +46,17 @@ final class AuthManager {
         let body = RegisterRequest(name: name, username: username, email: email, password: password)
         let response: AuthResponse = try await api.request(method: "POST", path: "/auth/register", body: body)
         KeychainHelper.saveString(response.token, for: "jwt_token")
-        currentUser = try await api.request(path: "/users/me", auth: true)
+        let me: MeResponse = try await api.request(path: "/users/me", auth: true)
+        currentUser = me.user
         isAuthenticated = true
+    }
+
+    func refreshUser() async {
+        guard isAuthenticated else { return }
+        do {
+            let me: MeResponse = try await api.request(path: "/users/me", auth: true)
+            currentUser = me.user
+        } catch { /* ignore */ }
     }
 
     func forgotPassword(email: String) async throws {

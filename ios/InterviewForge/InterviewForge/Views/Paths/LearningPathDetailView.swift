@@ -23,17 +23,19 @@ struct LearningPathDetailView: View {
                     title: "Error",
                     subtitle: error,
                     actionTitle: "Retry"
-                ) { Task { await vm.load(slug: slug) } }
+                ) {
+                    Task { await vm.load(slug: slug) }
+                }
             }
         }
-        .navigationTitle(vm.detail?.title ?? "Path")
+        .navigationTitle(vm.detail?.path.title ?? "Path")
         .navigationBarTitleDisplayMode(.inline)
         .task { await vm.load(slug: slug) }
     }
 
-    private func pathContent(_ detail: LearningPathDetail) -> some View {
+    private func pathContent(_ detail: PathDetailAPIResponse) -> some View {
         List {
-            if let desc = detail.description {
+            if let desc = detail.path.description {
                 Section {
                     Text(desc)
                         .font(.subheadline)
@@ -42,37 +44,36 @@ struct LearningPathDetailView: View {
             }
 
             Section("Problems") {
-                ForEach(Array((detail.problems ?? []).enumerated()), id: \.element.id) { index, problem in
-                    HStack(spacing: 12) {
-                        // Order number
-                        Text("\(index + 1)")
-                            .font(.caption.weight(.bold).monospacedDigit())
-                            .frame(width: 24, height: 24)
-                            .background(IFTheme.accent.opacity(0.12))
-                            .foregroundStyle(IFTheme.accent)
-                            .clipShape(Circle())
+                ForEach(detail.problems) { item in
+                    NavigationLink(value: item.problemId) {
+                        HStack(spacing: 12) {
+                            Text("\((item.position ?? 0) + 1)")
+                                .font(.caption.weight(.bold).monospacedDigit())
+                                .frame(width: 24, height: 24)
+                                .background(IFTheme.accent.opacity(0.12))
+                                .foregroundStyle(IFTheme.accent)
+                                .clipShape(Circle())
 
-                        // Completion indicator
-                        Image(systemName: problem.isCompleted == true ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(problem.isCompleted == true ? .green : .secondary.opacity(0.4))
+                            Image(systemName: item.isCompleted == true ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(item.isCompleted == true ? .green : .secondary.opacity(0.4))
 
-                        // Problem info
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(problem.title)
-                                .font(.subheadline.weight(.medium))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.title)
+                                    .font(.subheadline.weight(.medium))
+                            }
+
+                            Spacer()
+
+                            if let diff = item.difficulty {
+                                DifficultyBadge(difficulty: diff)
+                            }
                         }
-
-                        Spacer()
-
-                        if let diff = problem.difficulty {
-                            DifficultyBadge(difficulty: diff)
-                        }
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
                     .swipeActions(edge: .trailing) {
-                        if problem.isCompleted != true {
+                        if item.isCompleted != true {
                             Button("Complete") {
-                                Task { await vm.markComplete(slug: slug, problemId: problem.id) }
+                                Task { await vm.markComplete(slug: slug, problemId: item.problemId) }
                             }
                             .tint(.green)
                         }
@@ -81,6 +82,10 @@ struct LearningPathDetailView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .navigationDestination(for: String.self) { problemId in
+            ProblemDetailView(problemId: problemId)
+        }
         .refreshable { await vm.load(slug: slug) }
     }
 }
+

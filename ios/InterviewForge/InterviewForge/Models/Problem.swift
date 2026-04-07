@@ -7,6 +7,14 @@
 
 import Foundation
 
+struct ProblemsListResponse: Decodable, Sendable {
+    let problems: [Problem]
+}
+
+struct ProblemDetailResponse: Decodable, Sendable {
+    let problem: Problem
+}
+
 struct Problem: Decodable, Identifiable, Sendable {
     let id: String
     let slug: String?

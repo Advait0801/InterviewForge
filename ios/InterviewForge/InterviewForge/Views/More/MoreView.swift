@@ -26,7 +26,13 @@ struct MoreView: View {
                 }
 
                 NavigationLink {
-                    AnalyticsPlaceholderView()
+                    SystemDesignView()
+                } label: {
+                    Label("System Design", systemImage: "square.split.2x2")
+                }
+
+                NavigationLink {
+                    AnalyticsView()
                 } label: {
                     Label("Analytics", systemImage: "chart.bar.fill")
                 }
@@ -41,7 +47,7 @@ struct MoreView: View {
 
                 if let user = auth.currentUser {
                     NavigationLink {
-                        ProfilePlaceholderView(username: user.username)
+                        PublicProfileView(username: user.username)
                     } label: {
                         Label("Public Profile", systemImage: "person.crop.circle")
                     }
@@ -58,41 +64,5 @@ struct MoreView: View {
             }
         }
         .navigationTitle("More")
-    }
-}
-
-// MARK: - Placeholder views for Day 5 features
-
-private struct AnalyticsPlaceholderView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "chart.bar.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(IFTheme.accentGradient)
-            Text("Analytics")
-                .font(.title2.bold())
-            Text("Charts and insights coming soon")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .navigationTitle("Analytics")
-    }
-}
-
-private struct ProfilePlaceholderView: View {
-    let username: String
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "person.crop.circle")
-                .font(.system(size: 48))
-                .foregroundStyle(IFTheme.accentGradient)
-            Text("@\(username)")
-                .font(.title2.bold())
-            Text("Public profile view coming soon")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .navigationTitle("Profile")
     }
 }

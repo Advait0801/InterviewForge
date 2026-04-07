@@ -9,12 +9,16 @@
 /* Begin PBXBuildFile section */
 		8528C6C62F838B3A00A902D2 /* editor.html in Resources */ = {isa = PBXBuildFile; fileRef = 8528C6C22F838B3A00A902D2 /* editor.html */; };
 		8528C6C72F838B3A00A902D2 /* CodeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8528C6C42F838B3A00A902D2 /* CodeEditorView.swift */; };
+		8574F5602F84CB3100A24935 /* DiagramWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8574F55F2F84CB3100A24935 /* DiagramWebView.swift */; };
+		8574F5622F84CB5D00A24935 /* diagram.html in Resources */ = {isa = PBXBuildFile; fileRef = 8574F5612F84CB5600A24935 /* diagram.html */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		8528C6C22F838B3A00A902D2 /* editor.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = editor.html; sourceTree = "<group>"; };
 		8528C6C42F838B3A00A902D2 /* CodeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeEditorView.swift; sourceTree = "<group>"; };
 		85613C962F831FC600C5D29D /* InterviewForge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InterviewForge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8574F55F2F84CB3100A24935 /* DiagramWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramWebView.swift; sourceTree = "<group>"; };
+		8574F5612F84CB5600A24935 /* diagram.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = diagram.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -39,6 +43,7 @@
 		8528C6C32F838B3A00A902D2 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8574F5612F84CB5600A24935 /* diagram.html */,
 				8528C6C22F838B3A00A902D2 /* editor.html */,
 			);
 			path = Resources;
@@ -49,6 +54,7 @@
 			children = (
 				8528C6C32F838B3A00A902D2 /* Resources */,
 				8528C6C42F838B3A00A902D2 /* CodeEditorView.swift */,
+				8574F55F2F84CB3100A24935 /* DiagramWebView.swift */,
 			);
 			path = WebView;
 			sourceTree = "<group>";
@@ -134,6 +140,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8574F5622F84CB5D00A24935 /* diagram.html in Resources */,
 				8528C6C62F838B3A00A902D2 /* editor.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -145,6 +152,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8574F5602F84CB3100A24935 /* DiagramWebView.swift in Sources */,
 				8528C6C72F838B3A00A902D2 /* CodeEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

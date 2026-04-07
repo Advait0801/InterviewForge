@@ -15,12 +15,17 @@ final class LeaderboardViewModel {
     var error: String?
     var page = 1
     let limit = 25
+    var hasMore = true
 
     private let api = APIService.shared
 
     func load(reset: Bool = false) async {
         guard !isLoading else { return }
-        if reset { page = 1 }
+        if reset {
+            page = 1
+            hasMore = true
+        }
+        guard hasMore else { return }
         isLoading = true
         error = nil
         defer { isLoading = false }
@@ -30,14 +35,17 @@ final class LeaderboardViewModel {
                 URLQueryItem(name: "page", value: "\(page)"),
                 URLQueryItem(name: "limit", value: "\(limit)")
             ]
-            let response: LeaderboardResponse = try await api.request(
+            let response: LeaderboardAPIResponse = try await api.request(
                 path: "/leaderboard",
                 queryItems: queryItems
             )
             if reset {
-                entries = response.entries ?? []
+                entries = response.leaderboard
             } else {
-                entries.append(contentsOf: response.entries ?? [])
+                entries.append(contentsOf: response.leaderboard)
+            }
+            if response.leaderboard.count < limit {
+                hasMore = false
             }
         } catch {
             self.error = error.localizedDescription

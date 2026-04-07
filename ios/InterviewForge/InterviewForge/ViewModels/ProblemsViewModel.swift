@@ -46,14 +46,15 @@ final class ProblemsViewModel {
             if let solved = showSolvedFilter {
                 queryItems.append(.init(name: "solved", value: solved))
             }
-            problems = try await api.request(path: "/problems", queryItems: queryItems.isEmpty ? nil : queryItems, auth: true)
+            let wrapped: ProblemsListResponse = try await api.request(path: "/problems", queryItems: queryItems.isEmpty ? nil : queryItems, auth: true)
+            problems = wrapped.problems
         } catch {
             self.error = error.localizedDescription
         }
 
         do {
-            let ids: [BookmarkEntry] = try await api.request(path: "/problem-bookmarks", auth: true)
-            bookmarkedIds = Set(ids.map(\.problemId))
+            let wrapped: BookmarksListResponse = try await api.request(path: "/problem-bookmarks", auth: true)
+            bookmarkedIds = Set(wrapped.bookmarks.map(\.problemId))
         } catch { /* non-critical */ }
     }
 
@@ -79,6 +80,10 @@ final class ProblemsViewModel {
             }
         }
     }
+}
+
+private struct BookmarksListResponse: Decodable {
+    let bookmarks: [BookmarkEntry]
 }
 
 private struct BookmarkEntry: Decodable {

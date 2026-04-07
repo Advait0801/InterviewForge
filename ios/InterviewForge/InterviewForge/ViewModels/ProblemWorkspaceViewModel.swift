@@ -16,6 +16,8 @@ final class ProblemWorkspaceViewModel {
     var isLoading = true
     var error: String?
 
+    var assessmentId: String?
+
     // Run/Submit
     var isRunning = false
     var isSubmitting = false
@@ -41,7 +43,8 @@ final class ProblemWorkspaceViewModel {
         error = nil
         defer { isLoading = false }
         do {
-            problem = try await api.request(path: "/problems/\(id)", auth: true)
+            let wrapped: ProblemDetailResponse = try await api.request(path: "/problems/\(id)", auth: true)
+            problem = wrapped.problem
             if let starterCode = problem?.starterCode, let starter = starterCode[selectedLanguage] {
                 code = starter
             }
@@ -81,11 +84,21 @@ final class ProblemWorkspaceViewModel {
         defer { isSubmitting = false }
         do {
             let body = SubmitRequest(problemId: problemId, language: selectedLanguage, code: code, mode: "submit")
-            submitResults = try await api.request(method: "POST", path: "/submissions", body: body, auth: true)
+            let response: SubmitResponse = try await api.request(method: "POST", path: "/submissions", body: body, auth: true)
+            submitResults = response
             await loadSubmissions()
+
+            if let aid = assessmentId, let sid = response.submissionId {
+                try await linkAssessmentSubmission(assessmentId: aid, problemId: problemId, submissionId: sid)
+            }
         } catch {
             runError = error.localizedDescription
         }
+    }
+
+    private func linkAssessmentSubmission(assessmentId: String, problemId: String, submissionId: String) async throws {
+        let body = LinkAssessmentSolveRequest(problemId: problemId, submissionId: submissionId)
+        try await api.requestVoid(method: "POST", path: "/assessments/\(assessmentId)/solve", body: body, auth: true)
     }
 
     func loadSubmissions() async {
@@ -94,7 +107,8 @@ final class ProblemWorkspaceViewModel {
         defer { isLoadingSubmissions = false }
         do {
             let qi = [URLQueryItem(name: "problemId", value: problemId)]
-            submissions = try await api.request(path: "/submissions", queryItems: qi, auth: true)
+            let list: SubmissionsListResponse = try await api.request(path: "/submissions", queryItems: qi, auth: true)
+            submissions = list.submissions
         } catch { /* non-critical */ }
     }
 
@@ -104,7 +118,8 @@ final class ProblemWorkspaceViewModel {
         reviewError = nil
         defer { isReviewing = false }
         do {
-            codeReview = try await api.request(method: "POST", path: "/submissions/\(submissionId)/review", auth: true)
+            let wrapped: CodeReviewResponse = try await api.request(method: "POST", path: "/submissions/\(submissionId)/review", auth: true)
+            codeReview = wrapped.review
         } catch {
             reviewError = error.localizedDescription
         }

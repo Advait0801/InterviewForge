@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Diagram</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; background:#1e1e2e; overflow:hidden; }
+  body.light { background:#f5f5f7; }
+  svg { width:100%; height:100%; display:block; }
+  .node { fill:#45475a; stroke:#89b4fa; stroke-width:2; }
+  .node text { fill:#cdd6f4; font: 12px -apple-system, sans-serif; text-anchor:middle; }
+  body.light .node { fill:#e6e9ef; stroke:#1e66f5; }
+  body.light .node text { fill:#1e1e2e; }
+  .edge { stroke:#6c7086; stroke-width:1.5; fill:none; marker-end:url(#arrow); }
+  body.light .edge { stroke:#8c8fa1; }
+</style>
+</head>
+<body>
+<svg id="svg"></svg>
+<script>
+function render(data) {
+  const svg = document.getElementById('svg');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const w = svg.clientWidth || 300;
+  const h = svg.clientHeight || 200;
+  svg.setAttribute('viewBox', '0 0 '+w+' '+h);
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML = '<marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#6c7086"/></marker>';
+  svg.appendChild(defs);
+  const nodes = data.nodes || [];
+  const edges = data.edges || [];
+  const n = Math.max(nodes.length, 1);
+  const positions = {};
+  nodes.forEach((node, i) => {
+    const angle = (2 * Math.PI * i) / n - Math.PI/2;
+    const cx = w/2 + (w/2 - 60) * Math.cos(angle);
+    const cy = h/2 + (h/2 - 50) * Math.sin(angle);
+    positions[node.id] = { x: cx, y: cy };
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('class','node');
+    rect.setAttribute('x', cx - 50);
+    rect.setAttribute('y', cy - 18);
+    rect.setAttribute('width', 100);
+    rect.setAttribute('height', 36);
+    rect.setAttribute('rx', 8);
+    g.appendChild(rect);
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x', cx);
+    t.setAttribute('y', cy + 4);
+    t.textContent = (node.label || node.id || '').slice(0, 18);
+    g.appendChild(t);
+    svg.appendChild(g);
+  });
+  edges.forEach(e => {
+    const a = positions[e.source];
+    const b = positions[e.target];
+    if (!a || !b) return;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2 - 20;
+    path.setAttribute('d', `M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`);
+    path.setAttribute('class','edge');
+    svg.insertBefore(path, svg.firstChild.nextSibling);
+  });
+}
+window.diagramAPI = {
+  setData(jsonStr) {
+    try {
+      const data = JSON.parse(jsonStr);
+      render(data);
+    } catch (e) {}
+  },
+  setTheme(t) {
+    if (t === 'light') document.body.classList.add('light');
+    else document.body.classList.remove('light');
+  }
+};
+</script>
+</body></html>
