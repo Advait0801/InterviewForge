@@ -7,6 +7,54 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-04
+
+### D-012 — Benchmark is saturated; Phase 4 must move before Phases 2 and 3
+**Finding:** the Phase 1 baseline scores hit_rate 1.000, MRR 1.000, nDCG 0.987 and
+normalised precision 0.983 — with *and* without the metadata filter. Retrieval sits at
+~98% of the achievable ceiling.
+**Why:** 34 documents across 16 well-separated company × stage topics means nearly every
+query has one obviously-correct document and no competitors. Dense embeddings win
+trivially. The benchmark measures the corpus, not the retriever.
+**Consequence:** Phases 2 (index-side) and 3 (query-side) **cannot show measurable
+improvement** here. ~1.3% nDCG headroom is below the noise floor. Reranking, hybrid
+search and semantic chunking all target failure modes this corpus does not exhibit.
+**Decided:** reorder — run **Phase 4 (corpus expansion + hybrid ingestion) before
+Phases 2 and 3**, then re-baseline on the larger corpus and only then measure retrieval
+techniques. This reverses the sequencing constraint in D-009, which assumed the corpus was
+adequate and only worried about company changes shifting the baseline. The deeper problem
+is that a 34-document corpus cannot support retrieval benchmarking at all.
+**Kept:** the index-side/query-side split from D-009 still holds; only the order relative
+to Phase 4 changes.
+
+### D-013 — Embedding provider switched to Gemini; OpenAI model config was stale
+**Finding:** `text-embedding-004` (the configured Gemini default) returns 404 — retired.
+The OpenAI key in `ai-service/.env` was also returning 401 at the time.
+**Decided:** default `EMBEDDING_PROVIDER` is now `gemini` and `GEMINI_EMBEDDING_MODEL` is
+`gemini-embedding-001` (3072-dim, verified working). The Chroma collection was dropped and
+rebuilt, because changing embedding model changes vector dimensionality and a collection
+cannot hold both.
+**Note:** the OpenAI key was later replaced and now works for both embeddings and chat, so
+provider fallback is functional again. Embeddings stay on Gemini — flipping back would
+require another full re-index for no measured benefit.
+**Operational gotcha recorded:** `docker compose restart` does **not** reload `env_file`;
+only `up -d --force-recreate` does. Cost ~20 minutes of false diagnosis.
+
+### D-014 — Judge calibration is asserted as ordering, not absolute scores
+**Decided:** the monotonicity check asserts weak < mediocre < strong for the same question,
+plus a minimum weak-to-strong spread of 3 points. It does not assert that a strong answer
+scores 8.
+**Why:** absolute scores drift with prompt and model changes and would make the test
+brittle for no benefit. The ordinal claim is the one that must hold — if it breaks, the
+scoring is not measuring quality.
+**Found a real fixture bug on the first run:** the judge scored the "weak" and "mediocre"
+Amazon behavioural answers identically (3 and 3). On inspection the judge was right and the
+fixture was wrong — the mediocre answer had the candidate handing the problem to the owning
+team, which fails the *ownership* competency being tested, so it was not mid-tier at all.
+Rewritten; now 3 / 6 / 9.
+**CI:** live runs record responses to `app/eval/fixtures/monotonicity.json`; CI replays them,
+so the ordering assertion runs on every push with no API spend.
+
 ## 2026-09-03
 
 ### D-011 — Phase 0 complete: 143 tests across three services
@@ -168,6 +216,8 @@ Things observed in the code that need a call made on them.
 | F-07 | Email verification and password reset generate valid tokens, but emails are only `console.log`ed — no SMTP | `backend/src/routes/auth.routes.ts` |
 | F-08 | RAG corpus is 34 hand-written documents — the weakest point in the project's strongest story | `ai-service/seed_data/documents.json` |
 | F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed). Still no generated contract between Express/FastAPI and `web/` | `web/src/lib/api.ts` |
+| F-16 | `EmbeddingService` has no fallback on *error*: if the configured provider returns 401/404 the call raises rather than trying the other provider, unlike `invoke_with_fallback` for LLM calls | `ai-service/app/rag/embeddings.py` |
+| F-17 | Retrieval metrics are identical with and without the company/stage metadata filter, so the filter currently buys nothing measurable on this corpus. Re-test after Phase 4 expands it | `ai-service/app/interview/orchestrator.py` |
 | F-14 | 4 pre-existing `react-hooks` lint errors in `web/`: `setState` called synchronously in effects (theme-provider, paths/[slug], problems/[id]) and `Date.now()` called during render (dashboard "days ago" label). CI lint for `web` is `continue-on-error` until fixed | `web/src/` |
 | F-15 | `UUID_REGEX` is defined independently in at least 3 route files instead of being imported from `interview-state.service.ts`, which already exports it | `backend/src/routes/` |
 | F-11 | `problems.companies[]` contains both `Facebook` (3) and `Meta` (12) as separate tags for the same company | `backend/leetcode_problems.json` |

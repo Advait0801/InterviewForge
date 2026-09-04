@@ -12,7 +12,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 # Models
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite-preview")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "text-embedding-004")
+GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
 OPENAI_EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
 
 # Provider strategy
@@ -21,7 +21,7 @@ LLM_PROVIDER_ORDER = [
     for provider in os.getenv("LLM_PROVIDER_ORDER", "gemini,openai").split(",")
     if provider.strip()
 ]
-EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "openai").strip().lower()
+EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "gemini").strip().lower()
 
 # RAG defaults
 RAG_TOP_K = int(os.getenv("RAG_TOP_K", "5"))

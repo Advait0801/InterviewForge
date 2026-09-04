@@ -1,0 +1,629 @@
+{
+  "generated_at": "2026-09-04T02:22:05.979589+00:00",
+  "k": 5,
+  "filtered": true,
+  "config": {
+    "chunk_size": 1200,
+    "chunk_overlap": 200,
+    "embedding_provider": "gemini",
+    "collection": "interviewforge_docs"
+  },
+  "query_count": 30,
+  "overall": {
+    "precision_at_k": 0.2600000000000001,
+    "precision_norm": 0.9833333333333333,
+    "recall_at_k": 0.9833333333333333,
+    "hit_rate": 1.0,
+    "mrr": 1.0,
+    "ndcg_at_k": 0.9871049064255153
+  },
+  "by_kind": {
+    "natural": {
+      "precision_at_k": 0.24615384615384628,
+      "precision_norm": 0.9807692307692307,
+      "recall_at_k": 0.9807692307692307,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.9851210458755946
+    },
+    "synthetic": {
+      "precision_at_k": 0.35,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    }
+  },
+  "per_query": [
+    {
+      "id": "amz-beh-1",
+      "kind": "synthetic",
+      "company": "amazon",
+      "stage": "behavioral",
+      "expected": [
+        "amazon_behavioral"
+      ],
+      "retrieved": [
+        "amazon_behavioral"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "amz-beh-2",
+      "kind": "natural",
+      "company": "amazon",
+      "stage": "behavioral",
+      "expected": [
+        "amazon_behavioral"
+      ],
+      "retrieved": [
+        "amazon_behavioral"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "amz-sd-1",
+      "kind": "natural",
+      "company": "amazon",
+      "stage": "system_design",
+      "expected": [
+        "amazon_system_design_peak_events",
+        "amazon_system_design"
+      ],
+      "retrieved": [
+        "amazon_system_design_peak_events",
+        "amazon_system_design"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "amz-sd-2",
+      "kind": "synthetic",
+      "company": "amazon",
+      "stage": "system_design",
+      "expected": [
+        "amazon_system_design",
+        "amazon_system_design_peak_events"
+      ],
+      "retrieved": [
+        "amazon_system_design",
+        "amazon_system_design_peak_events"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "amz-cod-1",
+      "kind": "natural",
+      "company": "amazon",
+      "stage": "coding",
+      "expected": [
+        "amazon_coding_lp_walkthrough"
+      ],
+      "retrieved": [
+        "amazon_coding_lp_walkthrough"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "amz-cs-1",
+      "kind": "natural",
+      "company": "amazon",
+      "stage": "core_cs",
+      "expected": [
+        "amazon_core_cs_large_scale_storage"
+      ],
+      "retrieved": [
+        "amazon_core_cs_large_scale_storage"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-cod-1",
+      "kind": "synthetic",
+      "company": "google",
+      "stage": "coding",
+      "expected": [
+        "google_algorithms",
+        "google_coding_communication"
+      ],
+      "retrieved": [
+        "google_coding_communication",
+        "google_algorithms"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-cod-2",
+      "kind": "natural",
+      "company": "google",
+      "stage": "coding",
+      "expected": [
+        "google_algorithms"
+      ],
+      "retrieved": [
+        "google_algorithms",
+        "google_coding_communication"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-cod-3",
+      "kind": "natural",
+      "company": "google",
+      "stage": "coding",
+      "expected": [
+        "google_coding_communication"
+      ],
+      "retrieved": [
+        "google_coding_communication",
+        "google_algorithms"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-sd-1",
+      "kind": "natural",
+      "company": "google",
+      "stage": "system_design",
+      "expected": [
+        "google_system_design"
+      ],
+      "retrieved": [
+        "google_system_design"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-beh-1",
+      "kind": "natural",
+      "company": "google",
+      "stage": "behavioral",
+      "expected": [
+        "google_behavioral_ambiguity",
+        "google_behavioral"
+      ],
+      "retrieved": [
+        "google_behavioral_ambiguity",
+        "google_behavioral"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-cs-1",
+      "kind": "natural",
+      "company": "google",
+      "stage": "core_cs",
+      "expected": [
+        "google_core_cs_distributed_theory",
+        "distributed_systems_fundamentals"
+      ],
+      "retrieved": [
+        "google_core_cs_distributed_theory",
+        "google_core_cs_networking_deep"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 0.5,
+      "recall_at_k": 0.5,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.6131471927654584
+    },
+    {
+      "id": "goo-cs-2",
+      "kind": "natural",
+      "company": "google",
+      "stage": "core_cs",
+      "expected": [
+        "google_core_cs_networking_deep"
+      ],
+      "retrieved": [
+        "google_core_cs_networking_deep",
+        "google_core_cs_distributed_theory"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "met-cod-1",
+      "kind": "synthetic",
+      "company": "meta",
+      "stage": "coding",
+      "expected": [
+        "meta_coding",
+        "meta_coding_graph_social"
+      ],
+      "retrieved": [
+        "meta_coding",
+        "meta_coding_graph_social"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "met-cod-2",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "coding",
+      "expected": [
+        "meta_coding_graph_social"
+      ],
+      "retrieved": [
+        "meta_coding_graph_social",
+        "meta_coding"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "met-sd-1",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "system_design",
+      "expected": [
+        "meta_system_design_realtime"
+      ],
+      "retrieved": [
+        "meta_system_design_realtime",
+        "meta_system_design"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "met-sd-2",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "system_design",
+      "expected": [
+        "meta_system_design",
+        "meta_system_design_realtime"
+      ],
+      "retrieved": [
+        "meta_system_design",
+        "meta_system_design_realtime"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "met-beh-1",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "behavioral",
+      "expected": [
+        "meta_behavioral_shipping",
+        "meta_behavioral"
+      ],
+      "retrieved": [
+        "meta_behavioral_shipping",
+        "meta_behavioral"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "met-cs-1",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "core_cs",
+      "expected": [
+        "meta_core_cs_caching_scale"
+      ],
+      "retrieved": [
+        "meta_core_cs_caching_scale"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "app-beh-1",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "behavioral",
+      "expected": [
+        "apple_behavioral_quality_bar",
+        "apple_behavioral"
+      ],
+      "retrieved": [
+        "apple_behavioral_quality_bar",
+        "apple_behavioral"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "app-sd-1",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "system_design",
+      "expected": [
+        "apple_system_design_privacy",
+        "apple_system_design"
+      ],
+      "retrieved": [
+        "apple_system_design_privacy",
+        "apple_system_design"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "app-cod-1",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "coding",
+      "expected": [
+        "apple_coding_clean_performance"
+      ],
+      "retrieved": [
+        "apple_coding_clean_performance"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "app-cs-1",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "core_cs",
+      "expected": [
+        "apple_core_cs_memory_concurrency"
+      ],
+      "retrieved": [
+        "apple_core_cs_memory_concurrency"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "app-cs-2",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "core_cs",
+      "expected": [
+        "apple_core_cs_memory_concurrency"
+      ],
+      "retrieved": [
+        "apple_core_cs_memory_concurrency"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-1",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_database_sharding"
+      ],
+      "retrieved": [
+        "fundamentals_database_sharding",
+        "distributed_systems_fundamentals",
+        "fundamentals_caching_strategies",
+        "fundamentals_message_queues",
+        "meta_system_design_realtime"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-2",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_caching_strategies"
+      ],
+      "retrieved": [
+        "fundamentals_caching_strategies",
+        "distributed_systems_fundamentals",
+        "fundamentals_message_queues",
+        "fundamentals_rest_api_design",
+        "meta_system_design_realtime"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-3",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_message_queues"
+      ],
+      "retrieved": [
+        "fundamentals_message_queues",
+        "distributed_systems_fundamentals",
+        "amazon_system_design_peak_events",
+        "meta_system_design_realtime",
+        "fundamentals_rest_api_design"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-4",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_rest_api_design"
+      ],
+      "retrieved": [
+        "fundamentals_rest_api_design",
+        "fundamentals_observability",
+        "amazon_system_design",
+        "distributed_systems_fundamentals",
+        "fundamentals_caching_strategies"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-5",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_observability"
+      ],
+      "retrieved": [
+        "fundamentals_observability",
+        "fundamentals_message_queues",
+        "distributed_systems_fundamentals",
+        "amazon_system_design_peak_events",
+        "fundamentals_kubernetes_basics"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-cs-1",
+      "kind": "natural",
+      "company": null,
+      "stage": "core_cs",
+      "expected": [
+        "fundamentals_security_interview"
+      ],
+      "retrieved": [
+        "fundamentals_security_interview",
+        "core_cs_fundamentals",
+        "google_core_cs_networking_deep",
+        "meta_core_cs_caching_scale",
+        "google_core_cs_distributed_theory"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    }
+  ]
+}

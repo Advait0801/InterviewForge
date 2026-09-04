@@ -79,6 +79,7 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Test
-        # These tests mock Chroma and the LLM providers, so no services and no
+        # These tests mock Chroma and the LLM providers, and the judge
+        # calibration check replays recorded responses, so no services and no
         # API keys are required. If this step ever needs a key, that's a bug.
         run: python -m pytest

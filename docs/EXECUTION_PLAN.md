@@ -4,7 +4,9 @@ The single source of truth for what gets built and in what order. Phases 0–5 a
 committed scope; everything considered but not scheduled is parked with its rationale at
 the bottom, so nothing is lost.
 
-**Status:** Phase 0 complete (3 iterations). Awaiting approval to begin Phase 1.
+**Status:** Phase 1 complete (3 iterations). **Phase order changed — see D-012:** the
+baseline showed the benchmark is saturated, so Phase 4 (corpus expansion) now runs before
+Phases 2 and 3. Awaiting approval.
 
 ---
 
@@ -496,10 +498,10 @@ praises it, everybody notices its absence.
 | Phase | Status | Iterations | Commit |
 |---|---|---|---|
 | 0 — Test & CI foundation | ✅ Complete | 3 | `3068f5f` |
-| 1 — Measurement spine | ⬜ Not started | — | — |
-| 2 — Index-side retrieval | ⬜ Not started | — | — |
+| 1 — Measurement spine | ✅ Complete | 3 | `b957e02` |
+| 4 — Hybrid ingestion + companies | ⬜ Next (moved up, D-012) | — | — |
 | 3 — Query-side retrieval | ⬜ Not started | — | — |
-| 4 — Hybrid ingestion + companies | ⬜ Not started | — | — |
+| 2 — Index-side retrieval | ⬜ Not started (after Phase 4) | — | — |
 | 5 — Resume-grounded interviews | ⬜ Not started | — | — |
 | 6 — Hardening & credibility | ⬜ Not started | — | — |
 | 7 — Content depth | ⬜ Not started | — | — |
