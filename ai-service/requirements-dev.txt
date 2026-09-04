@@ -1,0 +1,4 @@
+# Test-only dependencies. Kept out of requirements.txt so production images
+# (Dockerfile.prod) stay lean; the dev image installs both.
+-r requirements.txt
+pytest==8.3.3

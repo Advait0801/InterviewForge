@@ -4,7 +4,7 @@ The single source of truth for what gets built and in what order. Phases 0–5 a
 committed scope; everything considered but not scheduled is parked with its rationale at
 the bottom, so nothing is lost.
 
-**Status:** not started. Awaiting approval to begin Phase 0.
+**Status:** Phase 0 complete (3 iterations). Awaiting approval to begin Phase 1.
 
 ---
 
@@ -495,7 +495,7 @@ praises it, everybody notices its absence.
 
 | Phase | Status | Iterations | Commit |
 |---|---|---|---|
-| 0 — Test & CI foundation | ⬜ Not started | — | — |
+| 0 — Test & CI foundation | ✅ Complete | 3 | `3068f5f` |
 | 1 — Measurement spine | ⬜ Not started | — | — |
 | 2 — Index-side retrieval | ⬜ Not started | — | — |
 | 3 — Query-side retrieval | ⬜ Not started | — | — |

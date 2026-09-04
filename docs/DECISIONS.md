@@ -9,6 +9,27 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-03
 
+### D-011 — Phase 0 complete: 143 tests across three services
+**Decided:** Vitest for `backend/` and `code-runner/`, pytest for `ai-service/`, and a
+GitHub Actions matrix running lint → test → build on every push.
+**Why these targets:** the first tests went to pure-logic, high-consequence code —
+`compareOutputs` (decides whether every submission passes), the interview stage machine,
+UUID validation (the input-validation boundary), and password/JWT handling. No route
+handler tests yet: those need a database and belong with the repository layer refactor.
+**Verified by mutation, not by passing:** each suite was proven to *fail* when the code
+under it was deliberately broken — float tolerance 1e-4 → 1e-12 caught by code-runner,
+the one-follow-up-per-stage rule caught by backend, and the RAG unfiltered-retry fallback
+caught by ai-service. A test that cannot fail is not a test.
+**Two real defects found and fixed:** test files were compiling into `backend/dist` and
+`code-runner/dist`, which would have shipped test code (and a `vitest` import) into
+production builds. `tsconfig.json` now excludes them.
+**Kept prod lean:** pytest went into a new `requirements-dev.txt` used only by the dev
+Dockerfile; `Dockerfile.prod` still installs `requirements.txt` alone.
+**Honest gap:** `web/` lint is `continue-on-error` because of 4 pre-existing react-hooks
+errors (F-14). Refactoring working UI did not belong in the commit that establishes CI,
+but the failures are visible in CI output rather than suppressed.
+
+
 ### D-010 — Problem of the Day deferred
 **Decided:** POTD removed from Phase 7. Phase 7 is now problem-set expansion (42 → ~150)
 plus company-filtered practice only.
@@ -147,6 +168,8 @@ Things observed in the code that need a call made on them.
 | F-07 | Email verification and password reset generate valid tokens, but emails are only `console.log`ed — no SMTP | `backend/src/routes/auth.routes.ts` |
 | F-08 | RAG corpus is 34 hand-written documents — the weakest point in the project's strongest story | `ai-service/seed_data/documents.json` |
 | F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed). Still no generated contract between Express/FastAPI and `web/` | `web/src/lib/api.ts` |
+| F-14 | 4 pre-existing `react-hooks` lint errors in `web/`: `setState` called synchronously in effects (theme-provider, paths/[slug], problems/[id]) and `Date.now()` called during render (dashboard "days ago" label). CI lint for `web` is `continue-on-error` until fixed | `web/src/` |
+| F-15 | `UUID_REGEX` is defined independently in at least 3 route files instead of being imported from `interview-state.service.ts`, which already exports it | `backend/src/routes/` |
 | F-11 | `problems.companies[]` contains both `Facebook` (3) and `Meta` (12) as separate tags for the same company | `backend/leetcode_problems.json` |
 | F-12 | Only 42 problems seeded (12 easy / 18 medium / 12 hard) — thin for a practice platform | `backend/leetcode_problems.json` |
 | F-13 | Problems are tagged with 13 companies but only 4 have interview profiles; Microsoft has 38 tagged problems and no profile | `ai-service/app/interview/company_profiles.py` |
