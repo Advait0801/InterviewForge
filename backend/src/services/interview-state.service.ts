@@ -1,6 +1,20 @@
 export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export const COMPANIES = ["amazon", "google", "meta", "apple"] as const;
+// Must stay in sync with ai-service/app/interview/company_profiles.py.
+// A company accepted here but missing a profile there produces a 500 at
+// question-generation time, so the lists are asserted equal in tests.
+export const COMPANIES = [
+  "amazon",
+  "google",
+  "meta",
+  "apple",
+  "microsoft",
+  "uber",
+  "bloomberg",
+  "adobe",
+  "linkedin",
+  "airbnb",
+] as const;
 export type Company = (typeof COMPANIES)[number];
 
 export const INTERVIEW_STAGES = ["behavioral", "coding", "system_design", "core_cs"] as const;

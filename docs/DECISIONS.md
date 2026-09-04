@@ -9,6 +9,74 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-04
 
+### D-015 — Corpus size does not create benchmark difficulty; topical overlap does
+**Finding:** batch-ingesting 13 engineering blogs took the corpus from 36 to 609 chunks
+(17x) and the metrics barely moved — nDCG 0.987 → 0.975. Adding **12 golden queries whose
+answers live in the ingested content** moved them properly: nDCG 0.813, MRR 0.829,
+hit_rate 0.857.
+**Why:** the new content was topically orthogonal to the existing golden queries, so it
+never competed with the labelled answers. Difficulty comes from near-collisions — AWS and
+Microsoft both publishing on MCP servers, Airbnb and Dropbox both on GenAI evaluation,
+Kleppmann with two formal-verification pieces — not from row count.
+**Consequence:** `docs/eval/phase4-baseline.md` supersedes `baseline.md` and is what
+Phases 2 and 3 are measured against. There is now real headroom: 14% of queries miss
+entirely (hybrid/BM25 has recall to recover) and MRR 0.829 means the right document is
+often retrieved but mis-ranked (reranking has something to fix).
+
+### D-016 — Embeddings moved to OpenAI for a throughput reason, not a quality one
+**Decided:** `EMBEDDING_PROVIDER=openai` (`text-embedding-3-small`, 1536-dim).
+**Why:** Gemini's `embed_content` accepts one text per call and the free tier allows 100
+requests/minute, so ingesting a few hundred chunks is impossible without heavy throttling —
+it failed with 429 partway through the first real batch run. OpenAI accepts up to 128
+inputs per request. This is an operational constraint, not a benchmark claim: on quality
+`gemini-embedding-001` is the stronger model, but it cannot be used for bulk ingestion on
+this tier.
+**Also rewrote `EmbeddingService`** to close F-16: batching for OpenAI, retry with backoff
+honouring the server's `retry in Ns` hint for Gemini, and whole-call provider fallback.
+Fallback is per-call, never per-batch, because vectors from two providers have different
+dimensionality and must not share a collection.
+**Cost of the switch:** a full re-index. Done while the corpus was still ~100 chunks;
+deferring it would have made it far more expensive.
+
+### D-017 — Document identity is the canonical URL, not the fetched URL
+**Finding:** re-running batch ingestion grew the corpus instead of being idempotent.
+Medium appends a random `?gi=` token on every redirect, so the same article resolved to a
+different URL each fetch, hashed to a different source id, and was stored again. Two
+Netflix articles were duplicated this way.
+**Decided:** source ids derive from a canonical URL — tracking parameters (`gi`, `source`,
+`utm_*`, `fbclid`, …) stripped, fragment dropped, host lower-cased, trailing slash
+normalised. Ingestion also skips URLs whose source id is already stored, with `--force` to
+re-ingest deliberately.
+**Verified:** four consecutive batch runs; runs 3 and 4 both reported
+`already_have=4, pages=0` with the chunk count frozen at 680. The growth seen on run 2 was
+a transient fetch failure converging, not a logic defect.
+**Note:** SimHash near-duplicate detection did not catch this because the index is
+per-run; these duplicates arrived in *different* runs.
+
+### D-018 — Company expansion to 10, and the backend list is now a cross-service contract
+**Decided:** added Microsoft, Uber, Bloomberg, Adobe, LinkedIn and Airbnb profiles.
+Microsoft first because it already had 38 tagged problems and no interview profile (F-13).
+**Cross-service risk found:** `backend/src/services/interview-state.service.ts` hard-codes
+its own `COMPANIES` list. A company accepted by the backend but missing a profile in
+`company_profiles.py` produces a 500 at question-generation time. The lists are now synced
+and a test asserts the length, but this is exactly the drift F-09 describes and the real
+fix is the generated contract.
+**F-11 closed:** the Facebook/Meta duplicate tag was fixed in `leetcode_problems.json` and
+in the live database (3 problems; Meta now 15).
+
+### D-019 — Source tiering is by domain, which cannot split free from paid content
+**Decided:** three tiers. Tier 1 (company engineering blogs, openly licensed material) and
+Tier 2 (individual engineering blogs) are ingested with attribution and `robots.txt`
+respected. Tier 3 — LeetCode, NeetCode, Striver/takeUforward, YouTube — is **never
+ingested** and is used only as curriculum taxonomy (which topics matter, in what order),
+which is factual structure rather than their prose.
+**Conflict a test caught:** `takeuforward.org` was initially in both Tier 2 (free articles)
+and Tier 3 (paid course). Since `is_allowed` checks the blocklist first, the Tier 2 entry
+was dead code. Domain-level tiering cannot separate free from paid content on a shared
+domain, so the whole domain is Tier 3.
+**Uber and LinkedIn** no longer publish working public feeds (both 404). They stay on the
+allowlist so the live path can use them; they contribute nothing to batch ingestion.
+
 ### D-012 — Benchmark is saturated; Phase 4 must move before Phases 2 and 3
 **Finding:** the Phase 1 baseline scores hit_rate 1.000, MRR 1.000, nDCG 0.987 and
 normalised precision 0.983 — with *and* without the metadata filter. Retrieval sits at
@@ -216,6 +284,8 @@ Things observed in the code that need a call made on them.
 | F-07 | Email verification and password reset generate valid tokens, but emails are only `console.log`ed — no SMTP | `backend/src/routes/auth.routes.ts` |
 | F-08 | RAG corpus is 34 hand-written documents — the weakest point in the project's strongest story | `ai-service/seed_data/documents.json` |
 | F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed). Still no generated contract between Express/FastAPI and `web/` | `web/src/lib/api.ts` |
+| F-18 | `brendangregg` feed ingested four entries all titled "Brendan Gregg's Blog" — the feed appears to link to the index page rather than individual articles, so those chunks are low value | `ai-service/app/ingest/sources.py` |
+| F-19 | `FetchLimiter` counters are in-process, so limits are per-instance. A multi-instance deployment would multiply the global daily cap by the instance count; needs Redis | `ai-service/app/ingest/limits.py` |
 | F-16 | `EmbeddingService` has no fallback on *error*: if the configured provider returns 401/404 the call raises rather than trying the other provider, unlike `invoke_with_fallback` for LLM calls | `ai-service/app/rag/embeddings.py` |
 | F-17 | Retrieval metrics are identical with and without the company/stage metadata filter, so the filter currently buys nothing measurable on this corpus. Re-test after Phase 4 expands it | `ai-service/app/interview/orchestrator.py` |
 | F-14 | 4 pre-existing `react-hooks` lint errors in `web/`: `setState` called synchronously in effects (theme-provider, paths/[slug], problems/[id]) and `Date.now()` called during render (dashboard "days ago" label). CI lint for `web` is `continue-on-error` until fixed | `web/src/` |

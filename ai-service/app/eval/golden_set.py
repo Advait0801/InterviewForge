@@ -236,6 +236,109 @@ GOLDEN_SET: List[GoldenQuery] = [
         company=None, stage="core_cs", difficulty="medium",
         relevant_sources=["fundamentals_security_interview"],
     ),
+
+    # ---------- Ingested engineering-blog content (Phase 4) ----------
+    # These are the queries that actually make the benchmark hard. The 34 seed
+    # documents cover 16 well-separated topics with no competition, so they
+    # saturate every metric. The blog corpus has genuine near-collisions --
+    # AWS and Microsoft both write about MCP servers, Airbnb and Dropbox both
+    # about GenAI evaluation -- which is what retrieval has to discriminate.
+    GoldenQuery(
+        id="blog-flink",
+        query="autoscaling Apache Flink streaming jobs",
+        company=None, stage="system_design", difficulty="hard",
+        relevant_sources=['batch::netflix_tech::d541eecfda7d0718264dbf08019c1b3f'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-graph",
+        query="building a real-time distributed graph database for queries",
+        company=None, stage="system_design", difficulty="hard",
+        relevant_sources=['batch::netflix_tech::690793a27e30486963070a66d0c60d04'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-zstd",
+        query="using Zstandard compression to reduce cache storage costs",
+        company=None, stage="system_design", difficulty="medium",
+        relevant_sources=['batch::cloudflare_blog::3358acf7c004013790a780c46c93c215'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-rdma",
+        query="RDMA transport over ethernet for AI training clusters",
+        company=None, stage="core_cs", difficulty="hard",
+        relevant_sources=['batch::meta_eng::d2835f9807e2ac5c50126ae8a28ea50b'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-mtia",
+        query="custom training chip with built-in network interfaces",
+        company=None, stage="core_cs", difficulty="hard",
+        relevant_sources=['batch::meta_eng::e10619a31890878acd7ca80c9ca7f63b'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-zgw",
+        query="putting a proxy in front of a key value store",
+        company=None, stage="system_design", difficulty="hard",
+        relevant_sources=['batch::meta_eng::61f1aa6da8d63daf439966b5f861c913'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-evals",
+        query="eval driven development for generative AI at scale",
+        company=None, stage="core_cs", difficulty="medium",
+        relevant_sources=['batch::airbnb_eng::ca6079ed8c27b1cd2015464e8f96795b'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-dspy",
+        query="using DSPy to improve AI evaluation responses in chat",
+        company=None, stage="core_cs", difficulty="medium",
+        relevant_sources=['batch::dropbox_tech::f972b7da95a7c6f07fabce6227c0ed50'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-authn",
+        query="redesigning authentication for millions of users",
+        company=None, stage="system_design", difficulty="hard",
+        relevant_sources=['batch::airbnb_eng::80289671873347c21f0b99f464d0cd1b'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-mcp",
+        query="deploying a stateless MCP server following well architected principles",
+        company=None, stage="system_design", difficulty="medium",
+        relevant_sources=['batch::aws_arch::455c459d9a3063bc0e3d01a4bf30675f'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-isabelle",
+        query="verifying distributed systems with Isabelle HOL proof assistant",
+        company=None, stage="core_cs", difficulty="hard",
+        relevant_sources=['batch::martin_kleppmann::60c4c6ce63ff92802b9f6db3a1235883'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
+    GoldenQuery(
+        id="blog-riviera",
+        query="universal content processing platform for large media assets",
+        company=None, stage="system_design", difficulty="hard",
+        relevant_sources=['batch::dropbox_tech::1f9b3059a0a1b2a43f28371371c19b26'],
+        notes="Answer lives in ingested engineering-blog content, where many "
+              "topically adjacent articles compete.",
+    ),
 ]
 
 

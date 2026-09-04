@@ -57,6 +57,33 @@ class RAGService:
 
         return {"ingested": len(ids)}
 
+    def source_exists(self, source: str) -> bool:
+        """Has anything from this source id already been ingested?
+
+        Chunk ids hash the chunk *text*, which makes exact re-ingestion
+        idempotent only if the page is byte-identical. Many sites inject
+        dynamic content (recommendation rails, counters), so the same URL
+        re-fetched yields slightly different text, new chunk ids, and unbounded
+        growth. Source ids are derived from the URL and are therefore stable, so
+        they are the right identity for "have we already got this article?".
+        """
+        try:
+            found = self.collection.get(where={"source": source}, limit=1)
+            return bool(found.get("ids"))
+        except Exception:
+            return False
+
+    def delete_source(self, source: str) -> int:
+        """Remove every chunk belonging to a source id. Returns count removed."""
+        try:
+            found = self.collection.get(where={"source": source})
+            ids = found.get("ids") or []
+            if ids:
+                self.collection.delete(ids=ids)
+            return len(ids)
+        except Exception:
+            return 0
+
     def retrieve(self, query: str, *, top_k: int, where: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         qvec = self.embedder.embed([query])[0]
         result = self.collection.query(

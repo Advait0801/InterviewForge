@@ -21,7 +21,7 @@ LLM_PROVIDER_ORDER = [
     for provider in os.getenv("LLM_PROVIDER_ORDER", "gemini,openai").split(",")
     if provider.strip()
 ]
-EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "gemini").strip().lower()
+EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "openai").strip().lower()
 
 # RAG defaults
 RAG_TOP_K = int(os.getenv("RAG_TOP_K", "5"))

@@ -1,4 +1,8 @@
-# Baseline — retrieval quality
+# Baseline — retrieval quality (SUPERSEDED)
+
+> **Superseded by [`phase4-baseline.md`](phase4-baseline.md).** Kept as the record of
+> what the saturated benchmark looked like, and as the before-half of the comparison.
+
 
 Phase 1 baseline, measured before any Phase 2/3 retrieval changes.
 Reproduce with `docker compose exec ai-service python -m app.eval.run --k 5`.

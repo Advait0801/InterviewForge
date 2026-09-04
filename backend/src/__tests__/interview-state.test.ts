@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  COMPANIES,
   UUID_REGEX,
   INTERVIEW_STAGES,
   isValidCompany,
@@ -39,17 +40,32 @@ describe("UUID_REGEX", () => {
 });
 
 describe("company validation", () => {
-  it.each(["amazon", "google", "meta", "apple"])("accepts %s", (c) => {
+  it.each([
+    "amazon", "google", "meta", "apple", "microsoft",
+    "uber", "bloomberg", "adobe", "linkedin", "airbnb",
+  ])("accepts %s", (c) => {
     expect(isValidCompany(c)).toBe(true);
+  });
+
+  it("exposes all ten supported companies", () => {
+    // Guards against this list drifting from company_profiles.py in ai-service,
+    // where a missing profile raises at question-generation time.
+    expect(COMPANIES).toHaveLength(10);
   });
 
   it("rejects an unknown company", () => {
     expect(isValidCompany("netflix")).toBe(false);
   });
 
+  it("rejects the retired Facebook alias in favour of meta", () => {
+    expect(isValidCompany("facebook")).toBe(false);
+    expect(isValidCompany("meta")).toBe(true);
+  });
+
   it("normalizes case and surrounding whitespace", () => {
     expect(normalizeCompany("  AMAZON ")).toBe("amazon");
     expect(normalizeCompany("Google")).toBe("google");
+    expect(normalizeCompany(" Microsoft ")).toBe("microsoft");
   });
 
   it("returns null rather than throwing on an unknown company", () => {
