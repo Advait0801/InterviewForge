@@ -26,7 +26,7 @@ FastAPI `ai-service`. Do not add LLM calls, prompts, or embedding code to `backe
 | `backend/` | Express 5, TypeScript | 4000 | Auth, sessions, orchestration, all SQL |
 | `ai-service/` | FastAPI, Python | 8000 | RAG, LLM chains, speech, code review, recommendations |
 | `code-runner/` | Node + dockerode | 5000 (5050 host in dev) | Ephemeral Docker sandboxes for user code |
-| `postgres` | PostgreSQL 16 | 5432 | Relational data |
+| `postgres` | PostgreSQL 16 | 5432 (5433 host in dev) | Relational data |
 | `chromadb` | Chroma 0.5.5 | 8000 (8001 host) | RAG vector store |
 
 A native SwiftUI iOS client was removed in Sep 2026 (see `docs/DECISIONS.md` D-007). It
@@ -59,7 +59,9 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   `code-runner/.env`, plus `.env.postgres` at the root. All gitignored.
 - Never put env values statically in `docker-compose.yml` — use `env_file:` only.
 - Services talk over the compose network by hostname (`postgres`, `code-runner`,
-  `ai-service`, `chromadb`), not `localhost`.
+  `ai-service`, `chromadb`), not `localhost`. Host port bindings exist only for tools
+  run from the host, so remapping one (Postgres is on **5433** on the host, see D-024)
+  never affects service-to-service traffic.
 
 **Database**
 - Raw SQL migrations only, numbered, in `backend/sql_migrations/`. No ORM, no

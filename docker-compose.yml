@@ -57,7 +57,10 @@ services:
     image: postgres:16-alpine
     container_name: interviewforge-postgres
     ports:
-      - "5432:5432"
+      # Host 5433 -> container 5432. Services reach Postgres over the compose
+      # network as postgres:5432, so this binding only affects tools run from
+      # the host (psql, GUI clients), which connect on 5433.
+      - "5433:5432"
     env_file: ./.env.postgres
     volumes:
       - interviewforge-pgdata:/var/lib/postgresql/data

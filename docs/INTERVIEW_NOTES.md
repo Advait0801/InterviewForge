@@ -61,7 +61,7 @@ flowchart LR
 | **backend** | Express 5, TS | 4000 | Auth, sessions, orchestration, DB access; calls ai-service + code-runner |
 | **ai-service** | FastAPI, Python | 8000 | RAG, all LLM chains, speech, system-design analysis, code review, recs |
 | **code-runner** | Node + dockerode | 5000 (5050 host in dev) | Spins up sandbox containers to run user code |
-| **postgres** | PostgreSQL 16 | 5432 | All relational data (users, problems, submissions, interviews...) |
+| **postgres** | PostgreSQL 16 | 5432 (5433 host in dev) | All relational data (users, problems, submissions, interviews...) |
 | **chromadb** | Chroma 0.5.5 | 8000 (8001 host) | Vector store for RAG embeddings |
 
 ### The key design rule (say this verbatim)

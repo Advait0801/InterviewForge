@@ -9,6 +9,17 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-05
 
+### D-024 — Postgres host port moved to 5433
+**Decided:** `docker-compose.yml` binds Postgres to host **5433**, not 5432.
+**Why:** another project on the same machine holds 5432 and cannot release it, so the
+container failed to start with "port is already allocated".
+**Why it is safe:** the host binding exists only for tools run from the host (psql, GUI
+clients). Every service reaches Postgres over the compose network as `postgres:5432`, so
+`backend/.env` and `docker-compose.prod.yml` are unchanged — prod does not publish the
+port at all, since it uses RDS.
+**Connect from the host with** `psql -h localhost -p 5433 -U postgres -d interviewforge`.
+Commands in this repo use `docker compose exec postgres psql ...`, which is unaffected.
+
 ### D-020 — Structural chunking kept; contextual retrieval reverted as a net loss
 **Kept — structural chunking.** Split on markdown headings, then paragraphs, falling back
 to character splitting only inside an oversized section, merging sub-floor sections into
