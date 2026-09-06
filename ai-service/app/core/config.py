@@ -27,3 +27,19 @@ EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "openai").strip().lower()
 RAG_TOP_K = int(os.getenv("RAG_TOP_K", "5"))
 CHUNK_SIZE_CHARS = int(os.getenv("CHUNK_SIZE_CHARS", "1200"))
 CHUNK_OVERLAP_CHARS = int(os.getenv("CHUNK_OVERLAP_CHARS", "200"))
+# "character" (flat recursive splitting) or "structural" (headings/paragraphs first).
+CHUNK_STRATEGY = os.getenv("CHUNK_STRATEGY", "structural").strip().lower()
+# Sections shorter than this are merged into their neighbour rather than stored
+# as standalone fragments.
+CHUNK_MIN_CHARS = int(os.getenv("CHUNK_MIN_CHARS", "350"))
+
+# Small-to-big retrieval: embed small chunks for precision, then expand each hit
+# to include its neighbouring chunks from the same document before handing the
+# text to the LLM. 0 disables expansion.
+# 1 measured best: sufficiency 3.38 -> 4.50 at 2.06x context. Window 2 scored
+# *lower* (4.00) on 28% more text -- context dilution, not a monotonic win.
+PARENT_WINDOW = int(os.getenv("PARENT_WINDOW", "1"))
+
+# Contextual retrieval: prepend an LLM-written situating sentence to each chunk
+# before embedding. Costs one cheap LLM call per chunk at index time.
+CONTEXTUAL_RETRIEVAL = os.getenv("CONTEXTUAL_RETRIEVAL", "false").strip().lower() in ("1", "true", "yes")

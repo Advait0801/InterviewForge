@@ -117,9 +117,17 @@ def retrieve_with_live_fallback(
 
 
 def build_context_from_hits(hits: List[Dict[str, Any]]) -> str:
+    """Build the LLM context string from retrieved hits.
+
+    Prefers `parent_text` when small-to-big expansion produced it: the small
+    chunk is what matched, but the wider passage is what actually answers the
+    question.
+    """
     if not hits:
         return "No specific retrieval context available."
-    return "\n\n---\n\n".join([str(hit["text"]) for hit in hits])
+    return "\n\n---\n\n".join(
+        str(hit.get("parent_text") or hit["text"]) for hit in hits
+    )
 
 
 def get_company_style(company: str) -> str:

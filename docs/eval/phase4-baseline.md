@@ -5,6 +5,12 @@ corpus and was saturated. **This is the baseline Phases 2 and 3 are measured aga
 
 Reproduce: `docker compose exec ai-service python -m app.eval.run --k 5 --no-filter`
 
+> **Corpus drift note.** The table below was recorded at 609 chunks. Idempotency testing
+> afterwards took the corpus to 680, which added distractors and moved the numbers to
+> nDCG 0.798 / MRR 0.817 / hit_rate 0.833 / precision_norm 0.810. **That 680-chunk
+> measurement, saved as `phase2-pre.json`, is the frozen reference Phase 2 is measured
+> against** — a baseline is only meaningful if the corpus underneath it is held still.
+
 ## Why this baseline is usable and the old one was not
 
 | Metric | Phase 1 (36 chunks) | Phase 4 (609 chunks) | Headroom gained |

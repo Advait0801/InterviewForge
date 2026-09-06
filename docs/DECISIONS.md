@@ -7,6 +7,61 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-05
+
+### D-020 — Structural chunking kept; contextual retrieval reverted as a net loss
+**Kept — structural chunking.** Split on markdown headings, then paragraphs, falling back
+to character splitting only inside an oversized section, merging sub-floor sections into
+their neighbour. Improved every metric (nDCG 0.771 → 0.826, hit_rate 0.833 → 0.905).
+It matters now and would not have before Phase 4: the seed corpus was 34 single-idea
+documents where character splitting was harmless; ingested articles are 10-30k characters
+spanning several topics.
+**Reverted — contextual retrieval.** Prepending an LLM-written situating sentence per
+chunk made retrieval *worse* on every metric (nDCG -0.061, hit_rate -0.071,
+precision_norm -0.083), well outside the noise band.
+**Why it lost, which is the interesting part:** it is partly a substitute for structural
+chunking, not a complement. Contextual retrieval exists to restore context that chunking
+destroyed — but structural chunking already keeps each section with its heading, so the
+situating information is mostly present. The generated sentence then adds near-boilerplate
+phrasing that dilutes distinctive terms and makes sibling chunks from one document look
+*more* alike. Published wins for the technique are measured against naive fixed-size
+chunking, which is the baseline it repairs.
+**Kept behind `CONTEXTUAL_RETRIEVAL=false`** rather than deleted — worth re-testing if the
+corpus ever contains long unstructured documents without headings.
+
+### D-021 — Small-to-big cannot be scored by the retrieval harness, so it was scored differently
+**Finding:** small-to-big changes the text handed to the LLM, not the ranking. Measured
+delta on every retrieval metric was exactly 0.0000, as predicted before running it.
+**Decided:** measured with an LLM-judged context-sufficiency rubric instead. Window 1
+scored 4.50 vs 3.38 at window 0, at 2.06x context. **Window 2 scored *lower* (4.00) on 28%
+more text** — context dilution, not a monotonic win. Window 1 shipped.
+**Caveat recorded:** sample of 8 queries, single judge pass; direction is clear, magnitude
+is not tightly bounded.
+**General lesson:** a harness measures one thing. Reaching for it to score a technique it
+structurally cannot see produces a confident zero, which is easy to misread as "no effect"
+rather than "wrong instrument".
+
+### D-022 — Index rebuilds are nondeterministic; evaluation is not
+**Finding:** repeated eval runs against one index are bit-identical (three runs, all nDCG
+0.8083). Rebuilding the index from the *same* cached documents is not: two structural
+rebuilds scored 0.8263 and 0.8083, an 0.018 spread, from nondeterminism in Chroma's HNSW
+construction.
+**Consequence:** a single-rebuild difference below roughly ±0.02 is not evidence. Both
+Phase 2 conclusions sit outside that band, but the structural gain is nearer to it than
+the headline numbers suggest. Future phases that rebuild the index should either average
+several rebuilds or restrict claims to effects larger than the noise floor.
+
+### D-023 — A corpus cache makes chunking comparisons honest
+**Decided:** `app/ingest/reindex.py` snapshots the full extracted text of every ingested
+document to disk, and rebuilds Chroma from that cache.
+**Why:** comparing chunking strategies requires re-chunking *identical* source documents.
+Chroma stores chunks, not originals, and re-fetching from feeds returns a different article
+set, which would silently turn a chunking comparison into a corpus comparison.
+**Detail worth keeping:** 6 of 50 documents could no longer be re-fetched (Medium rejects
+the canonicalised URL for some articles), and 3 of those are referenced by golden queries.
+Rather than let them vanish and measure corpus loss as if it were a chunking effect, they
+are reconstructed from their stored chunks by detecting and removing the overlap region.
+
 ## 2026-09-04
 
 ### D-015 — Corpus size does not create benchmark difficulty; topical overlap does
