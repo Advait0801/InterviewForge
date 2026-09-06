@@ -133,11 +133,39 @@ class RAGService:
                 hit["expanded_from"] = len(ordered)
         return hits
 
-    def retrieve(self, query: str, *, top_k: int, where: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def retrieve(
+        self,
+        query: str,
+        *,
+        top_k: int,
+        where: Optional[Dict[str, Any]] = None,
+        stage: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        # Per-stage routing picks the strategy; without a stage (or with routing
+        # off) the global flags apply.
+        use_rerank = config.RERANK_ENABLED
+        use_hybrid = config.HYBRID_ENABLED
+        route_name = None
+        if config.ROUTING_ENABLED and stage:
+            from app.rag.routing import route_for
+
+            route = route_for(stage)
+            use_rerank, use_hybrid, route_name = route.rerank, route.hybrid, route.stage
+
         qvec = self.embedder.embed([query])[0]
+
+        # When a second stage is active, first-stage retrieval must return a
+        # wider candidate set for it to work on: a reranker cannot promote a
+        # document that was never retrieved.
+        fetch_n = top_k
+        if use_rerank:
+            fetch_n = max(fetch_n, config.RERANK_CANDIDATES)
+        if use_hybrid or config.MMR_ENABLED:
+            fetch_n = max(fetch_n, config.HYBRID_CANDIDATES)
+
         result = self.collection.query(
             query_embeddings=[qvec],
-            n_results=top_k,
+            n_results=fetch_n,
             include=["documents", "metadatas", "distances"],
             where=where,
         )
@@ -153,6 +181,34 @@ class RAGService:
                 }
             )
 
+        stages: List[str] = ["dense"]
+
+        if use_hybrid:
+            from app.rag.hybrid import fuse_with_bm25
+
+            hits = fuse_with_bm25(query, hits, k=config.RRF_K)
+            stages.append("hybrid_rrf")
+
+        if config.MMR_ENABLED:
+            from app.rag.mmr import mmr_select
+
+            hits = mmr_select(
+                qvec, hits,
+                keep=max(top_k, config.RERANK_CANDIDATES if use_rerank else top_k),
+                lambda_=config.MMR_LAMBDA,
+            )
+            stages.append("mmr")
+
+        if use_rerank:
+            from app.rag.rerank import rerank
+
+            hits = rerank(query, hits[: config.RERANK_CANDIDATES], keep=top_k)
+            stages.append("rerank")
+
+        hits = hits[:top_k]
         hits = self._expand_to_parent(hits, config.PARENT_WINDOW)
 
-        return {"query": query, "top_k": top_k, "where": where, "hits": hits}
+        return {
+            "query": query, "top_k": top_k, "where": where,
+            "hits": hits, "stages": stages, "route": route_name,
+        }

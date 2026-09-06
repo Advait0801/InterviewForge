@@ -15,8 +15,8 @@ class RecordingRAG:
         self._results = list(results)
         self.calls = []
 
-    def retrieve(self, query, *, top_k, where=None):
-        self.calls.append({"query": query, "top_k": top_k, "where": where})
+    def retrieve(self, query, *, top_k, where=None, stage=None):
+        self.calls.append({"query": query, "top_k": top_k, "where": where, "stage": stage})
         return self._results.pop(0)
 
 

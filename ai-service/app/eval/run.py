@@ -58,7 +58,21 @@ def run_eval(*, k: int, use_filter: bool = True) -> Dict[str, Any]:
 
     for q in GOLDEN_SET:
         where = build_where(q) if use_filter else None
-        result = rag.retrieve(q.query, top_k=k, where=where)
+
+        if config.ROUTING_ENABLED:
+            # Apply the per-stage policy for this query, then restore, so one
+            # query's route cannot leak into the next.
+            from app.rag.routing import route_for
+
+            route = route_for(q.stage)
+            saved = (config.RERANK_ENABLED, config.HYBRID_ENABLED)
+            config.RERANK_ENABLED, config.HYBRID_ENABLED = route.rerank, route.hybrid
+            try:
+                result = rag.retrieve(q.query, top_k=k, where=where)
+            finally:
+                config.RERANK_ENABLED, config.HYBRID_ENABLED = saved
+        else:
+            result = rag.retrieve(q.query, top_k=k, where=where)
         sources = retrieved_sources(result["hits"])
         scores = evaluate_one(sources, q.relevant_sources, k)
         per_query.append(

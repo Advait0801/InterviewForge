@@ -21,9 +21,12 @@ class FakeRAG:
         self.ingested_docs = []
         self.retrieve_calls = 0
 
-    def retrieve(self, query, *, top_k, where=None):
+    def retrieve(self, query, *, top_k, where=None, stage=None):
         self.retrieve_calls += 1
-        return {"query": query, "top_k": top_k, "where": where, "hits": self._hits[:top_k]}
+        return {
+            "query": query, "top_k": top_k, "where": where,
+            "stage": stage, "hits": self._hits[:top_k],
+        }
 
     def ingest_documents(self, docs):
         self.ingested_docs.extend(docs)

@@ -9,6 +9,68 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-05
 
+### D-025 — Reranking is an LLM call, not a cross-encoder, because of the prod memory cap
+**Decided:** second-stage reranking is implemented as a single LLM call over the candidate
+set, not a local cross-encoder.
+**Why:** `docker-compose.prod.yml` caps ai-service at `mem_limit: 300m`. sentence-transformers
+pulls torch plus a resident model far past that ceiling, so a local cross-encoder is
+architecturally incompatible with the current production sizing. The LLM path adds no
+dependency and no resident memory, and reuses the existing provider fallback.
+**Trade-off recorded, not hidden:** a cross-encoder would be faster per query and free at
+inference time. `strategy="cross_encoder"` is the slot to fill if the memory ceiling is
+ever raised.
+**Biggest single lever in the phase:** nDCG 0.8321 → 0.9465 uncapped.
+
+### D-026 — The reranker is capped at 5s, and the first attempt at capping it made things worse
+**Finding:** uncapped reranking had p50 905ms but a **10.1s worst case**, which would stall
+an interview mid-question.
+**Bug worth remembering:** the first timeout implementation wrapped the call in
+`with ThreadPoolExecutor(...)`. `__exit__` calls `shutdown(wait=True)`, so every timed-out
+call was then waited on anyway — measured p50 976ms but max **20.7s**, i.e. the "fix" made
+the tail twice as bad. Corrected with a module-level pool that is never awaited, so the
+future is genuinely abandoned. There is a regression test asserting elapsed < 2s when the
+underlying call sleeps 5s.
+**Timeout chosen: 5s.** Quality is monotonic in the timeout (3s → 0.8959, 5s → 0.9028,
+8s → 0.9208, none → 0.9465), but 8s beats 5s by 0.018, inside the ±0.024 noise band — so
+three extra seconds of worst case buys nothing measurable.
+
+### D-027 — Stacking retrieval techniques is not additive; route instead
+**Finding:** `hybrid + rerank` (nDCG 0.9232) scored **lower** than rerank alone (0.9465),
+with identical precision and hit_rate — the two find the same documents and differ only in
+ordering. They are substitutes: both fix first-stage ranking errors, and applying RRF first
+perturbs the candidate order the reranker then works from.
+**Second occurrence of this pattern** — contextual retrieval and structural chunking were
+substitutes in Phase 2 (D-020). **Stacking individually-good retrieval techniques must
+always be measured, never assumed.**
+**Decided:** ship per-stage routing instead of a global stack. Behavioural and system design
+route to the reranker (discursive, semantic); coding and core CS route to hybrid+BM25
+(named algorithms, precise terminology like RDMA or false sharing). Unknown stages fall
+back to the reranker.
+**Result:** nDCG 0.9009 vs 0.9028 for reranking everywhere — equal within noise — at
+**6.6x lower p50 latency** (268ms vs 1762ms), because half the questions never pay for an
+LLM call.
+
+### D-028 — MMR reverted: the harness cannot measure what it is for
+**Decided:** MMR stays implemented but off (`MMR_ENABLED=false`). Measured −0.013 nDCG:
+inside the noise band, but consistently negative.
+**Why it cannot be judged here:** MMR deliberately trades relevance for diversity, and every
+metric in the harness rewards relevance only. A technique that demotes a
+relevant-but-redundant chunk can only score worse on these instruments. Judging it needs a
+redundancy metric — how much do the k returned chunks overlap — which does not exist yet.
+**Pattern worth noting:** this is the third technique across Phases 2 and 3 that ranking
+metrics structurally cannot see (small-to-big, MMR, and partly routing). A harness measures
+one thing; reaching for it to score something it cannot see returns a confident number that
+is easy to misread as a result.
+
+### D-029 — Noise band widened to ±0.024 after observing restart-induced variance
+**Finding:** the post-Phase-2 index measured nDCG 0.8083 immediately after its rebuild and
+0.8321 after a later container restart — same content, same 721 chunks. Evaluation against
+a fixed index remains bit-identical (verified four times, including across a Chroma
+restart); it is index *construction and reload* that varies.
+**Consequence:** the noise band from D-022 is widened from ±0.02 to **±0.024**, and Phase 3
+used the stable 0.8321 as its reference. Phase 2's conclusion is unaffected — the character
+baseline was 0.7712, below every structural draw.
+
 ### D-024 — Postgres host port moved to 5433
 **Decided:** `docker-compose.yml` binds Postgres to host **5433**, not 5432.
 **Why:** another project on the same machine holds 5432 and cannot release it, so the

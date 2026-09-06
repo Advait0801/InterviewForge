@@ -53,11 +53,11 @@ def retrieve_company_context(
             {"stage": {"$eq": stage}},
         ]
     }
-    retrieved = rag.retrieve(query, top_k=top_k, where=where)
+    retrieved = rag.retrieve(query, top_k=top_k, where=where, stage=stage)
     if not retrieved["hits"]:
         # Nothing matched the company+stage filter; fall back to the whole corpus
         # so the LLM still gets some grounding rather than none.
-        retrieved = rag.retrieve(query, top_k=top_k)
+        retrieved = rag.retrieve(query, top_k=top_k, stage=stage)
     return retrieved
 
 

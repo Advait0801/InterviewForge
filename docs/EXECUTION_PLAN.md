@@ -4,9 +4,8 @@ The single source of truth for what gets built and in what order. Phases 0–5 a
 committed scope; everything considered but not scheduled is parked with its rationale at
 the bottom, so nothing is lost.
 
-**Status:** Phases 0, 1, 4 and 2 complete. Phase 2 kept structural chunking and small-to-big
-and reverted contextual retrieval as a measured net loss (D-020). Awaiting approval for
-Phase 3 (query-side retrieval).
+**Status:** Phases 0, 1, 4, 2 and 3 complete. All retrieval work is done: nDCG 0.7712 →
+0.9009 across Phases 2 and 3. Awaiting approval for Phase 5 (resume-grounded interviews).
 
 ---
 
@@ -500,9 +499,9 @@ praises it, everybody notices its absence.
 | 0 — Test & CI foundation | ✅ Complete | 3 | `3068f5f` |
 | 1 — Measurement spine | ✅ Complete | 3 | `b957e02` |
 | 4 — Hybrid ingestion + companies | ✅ Complete | 4 | `cecc975` |
-| 3 — Query-side retrieval | ⬜ Next | — | — |
+| 3 — Query-side retrieval | ✅ Complete | 5 | `53204fe` |
 | 2 — Index-side retrieval | ✅ Complete | 4 | `6358706` |
-| 5 — Resume-grounded interviews | ⬜ Not started | — | — |
+| 5 — Resume-grounded interviews | ⬜ Next | — | — |
 | 6 — Hardening & credibility | ⬜ Not started | — | — |
 | 7 — Content depth | ⬜ Not started | — | — |
 | Final verification R1 | ⬜ Not started | — | — |

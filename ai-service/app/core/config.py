@@ -43,3 +43,19 @@ PARENT_WINDOW = int(os.getenv("PARENT_WINDOW", "1"))
 # Contextual retrieval: prepend an LLM-written situating sentence to each chunk
 # before embedding. Costs one cheap LLM call per chunk at index time.
 CONTEXTUAL_RETRIEVAL = os.getenv("CONTEXTUAL_RETRIEVAL", "false").strip().lower() in ("1", "true", "yes")
+
+# --- query-side retrieval (Phase 3) -----------------------------------------
+# Second-stage reranking: retrieve RERANK_CANDIDATES cheaply, rerank, keep top_k.
+RERANK_ENABLED = os.getenv("RERANK_ENABLED", "false").strip().lower() in ("1", "true", "yes")
+RERANK_CANDIDATES = int(os.getenv("RERANK_CANDIDATES", "20"))
+# Hybrid dense + BM25 fused with Reciprocal Rank Fusion.
+HYBRID_ENABLED = os.getenv("HYBRID_ENABLED", "false").strip().lower() in ("1", "true", "yes")
+HYBRID_CANDIDATES = int(os.getenv("HYBRID_CANDIDATES", "40"))
+RRF_K = int(os.getenv("RRF_K", "60"))
+# Maximal Marginal Relevance: trade a little relevance for less redundancy.
+MMR_ENABLED = os.getenv("MMR_ENABLED", "false").strip().lower() in ("1", "true", "yes")
+MMR_LAMBDA = float(os.getenv("MMR_LAMBDA", "0.7"))
+# Per-stage routing: pick the retrieval strategy from the interview stage
+# instead of applying one policy everywhere.
+ROUTING_ENABLED = os.getenv("ROUTING_ENABLED", "true").strip().lower() in ("1", "true", "yes")
+RERANK_TIMEOUT_SECONDS = float(os.getenv("RERANK_TIMEOUT_SECONDS", "5.0"))
