@@ -4,8 +4,10 @@ The single source of truth for what gets built and in what order. Phases 0–5 a
 committed scope; everything considered but not scheduled is parked with its rationale at
 the bottom, so nothing is lost.
 
-**Status:** Phases 0, 1, 4, 2 and 3 complete. All retrieval work is done: nDCG 0.7712 →
-0.9009 across Phases 2 and 3. Awaiting approval for Phase 5 (resume-grounded interviews).
+**Status:** Phases 0, 1, 4, 2 and 3 complete and **merged to `main`** (PR #1, `f36b675`).
+All retrieval work is done: nDCG 0.7712 → 0.9009. CI green on all four jobs.
+Awaiting a decision on what comes next — Phase 5 (resume-grounded interviews), Phase 6
+(sandbox hardening), or the demo video from the parked backlog.
 
 ---
 

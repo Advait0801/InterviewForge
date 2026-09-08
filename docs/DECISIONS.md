@@ -7,6 +7,23 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-08
+
+### D-030 — Merged to main; the work is now the default branch
+**Decided:** `feat/platform-v2` merged to `main` via PR #1 (merge commit `f36b675`), with a
+**merge commit rather than a squash**.
+**Why the merge commit:** the nine commit messages carry the reasoning for each phase.
+Squashing would collapse them into one line and discard the most useful part of the history.
+**Why this mattered enough to prioritise over Phase 5:** `main` was 8 commits behind and its
+HEAD was the iOS commit, so anyone opening the public repo saw the pre-everything version —
+4 companies, no evaluation, no retrieval work. Five phases of engineering existed only on a
+side branch. Making finished work visible beat adding more invisible work.
+**Also landed:** README rewritten to lead with the measured result (nDCG 0.771 → 0.901) and
+to state plainly that two techniques were measured and reverted; CI actions bumped off the
+deprecated Node 20 runners; the plan's progress table corrected — the SHAs recorded there
+had been captured *before* `git commit --amend` and pointed at orphaned pre-amend objects.
+**CI verified green** on all four jobs after the merge push.
+
 ## 2026-09-05
 
 ### D-025 — Reranking is an LLM call, not a cross-encoder, because of the prod memory cap
