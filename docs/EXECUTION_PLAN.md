@@ -496,11 +496,11 @@ praises it, everybody notices its absence.
 
 | Phase | Status | Iterations | Commit |
 |---|---|---|---|
-| 0 — Test & CI foundation | ✅ Complete | 3 | `3068f5f` |
-| 1 — Measurement spine | ✅ Complete | 3 | `b957e02` |
-| 4 — Hybrid ingestion + companies | ✅ Complete | 4 | `cecc975` |
-| 3 — Query-side retrieval | ✅ Complete | 5 | `53204fe` |
-| 2 — Index-side retrieval | ✅ Complete | 4 | `6358706` |
+| 0 — Test & CI foundation | ✅ Complete | 3 | `862b936` |
+| 1 — Measurement spine | ✅ Complete | 3 | `2181fc2` |
+| 4 — Hybrid ingestion + companies | ✅ Complete | 4 | `1151141` |
+| 3 — Query-side retrieval | ✅ Complete | 5 | `10efaa2` |
+| 2 — Index-side retrieval | ✅ Complete | 4 | `e04a0de` |
 | 5 — Resume-grounded interviews | ⬜ Next | — | — |
 | 6 — Hardening & credibility | ⬜ Not started | — | — |
 | 7 — Content depth | ⬜ Not started | — | — |

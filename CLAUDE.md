@@ -5,7 +5,8 @@ Guidance for Claude Code when working in this repository.
 ## What this is
 
 **InterviewForge** — an AI-powered mock interview platform. Users pick a company
-(Amazon / Google / Meta / Apple) and a difficulty, then run a full technical loop:
+(10 companies: Amazon, Google, Meta, Apple, Microsoft, Uber, Bloomberg, Adobe, LinkedIn,
+Airbnb) and a difficulty, then run a full technical loop:
 behavioral → coding → system design → core CS, with a RAG-grounded LLM as the
 interviewer. Also includes a LeetCode-style coding engine with sandboxed execution,
 timed assessments, learning paths, analytics, and a leaderboard.
@@ -114,13 +115,14 @@ still accurate and redeployable.
 
 ## Known gaps (don't be surprised by these)
 
-- `backend/src/__tests__/` and `ai-service/tests/` exist but are **empty** — there is
-  no test runner wired up in either service.
-- No CI. Deploys are a manual `git pull` + `docker compose up -d --build` on EC2.
+- ~~Empty test dirs, no CI~~ — fixed in Phase 0. Vitest in `backend/` and `code-runner/`,
+  pytest in `ai-service/`, GitHub Actions in `.github/workflows/ci.yml`. `web/` lint is
+  `continue-on-error` because of 4 pre-existing react-hooks errors (F-14).
 - Socket.IO is scaffolded on both ends but only emits a `hello` — realtime is unused.
 - Email verification / password reset tokens work, but emails are only `console.log`ed.
 - `code-runner` sets `NetworkDisabled` and a 256 MiB memory cap, but still runs
   containers as `root` with no `CapDrop`, `no-new-privileges`, `PidsLimit`, or CPU quota.
+  Scheduled for Phase 6.
 - `memoryKb` on submissions is never measured (always null).
 - README's repo-layout block lists `docs/smoke-test.md`, which never existed.
 
