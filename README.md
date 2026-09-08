@@ -4,6 +4,10 @@
 
 **AI-powered mock interview platform — practice coding, system design, behavioral rounds, and timed assessments like the real thing.**
 
+**Built around a measured RAG pipeline: retrieval quality is evaluated on a golden set, not asserted.**
+
+[![CI](https://github.com/Advait0801/InterviewForge/actions/workflows/ci.yml/badge.svg)](https://github.com/Advait0801/InterviewForge/actions/workflows/ci.yml)
+
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
@@ -22,14 +26,51 @@
 
 ## 📱 Overview
 
-**InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (Amazon, Google, Meta, Apple), choose a difficulty, and work through **behavioral → coding → system design → core CS** rounds — all powered by **RAG-backed LLM question generation**, with real-time evaluation and follow-ups.
+**InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (10 supported, from Amazon and Google to Microsoft, Uber and Bloomberg), choose a difficulty, and work through **behavioral → coding → system design → core CS** rounds — all powered by **RAG-backed LLM question generation**, with real-time evaluation and follow-ups.
 
 On the coding side, solve problems in a **Monaco editor** with code execution in **isolated Docker sandboxes** (Python, C, C++, Java). Get **AI code reviews**, track progress with **analytics & leaderboards**, follow **learning paths**, and take **timed assessments**.
+
+### 📈 Retrieval quality, measured
+
+The RAG pipeline is evaluated against a hand-labelled golden set of 42 queries, so every
+change is a number rather than an opinion. Full method and results in
+[`docs/eval/`](docs/eval/); the reasoning behind each decision is in
+[`docs/DECISIONS.md`](docs/DECISIONS.md).
+
+| Metric | Before | After | |
+|---|---|---|---|
+| nDCG@5 | 0.771 | **0.901** | +0.130 |
+| Hit rate@5 | 0.833 | **0.952** | +0.119 |
+| MRR | 0.782 | **0.917** | +0.135 |
+| p50 latency | 210 ms | **268 ms** | +58 ms |
+
+What produced that, in order of contribution:
+
+- **Per-stage query routing** — behavioural and system-design questions go through an LLM
+  reranker; coding and core-CS questions go through hybrid BM25 + RRF, where precise
+  terminology matters. Equal quality to reranking everything, at **6.6× lower p50 latency**.
+- **Hybrid search with Reciprocal Rank Fusion** — dense retrieval is weak on rare exact
+  tokens; BM25 is not. RRF fuses them on rank alone, so no score normalisation is needed.
+- **Structural chunking** — splits on document structure instead of character counts, so a
+  section is not cut mid-argument.
+- **Small-to-big retrieval** — embeds small chunks for precision, returns the wider passage
+  for context.
+
+**Two techniques were implemented, measured, and reverted** because the numbers said so:
+contextual retrieval (it duplicates what structural chunking already provides) and MMR.
+Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase2.md) and
+[`docs/eval/phase3.md`](docs/eval/phase3.md).
 
 ### ✨ Key Highlights
 
 - 🎙️ **Multi-stage AI interviews** — Company-specific questions, follow-ups, voice evaluation, and downloadable PDF reports
-- 🔍 **Company-aware RAG** — Chroma vector store seeded with interview patterns for Amazon, Google, Meta, and Apple
+- 🔍 **Company-aware RAG** — Chroma vector store covering 10 companies, with retrieval
+  filtered by company and interview stage
+- 📐 **Evaluation harness** — golden-set retrieval metrics (nDCG, MRR, hit rate, recall) plus
+  an LLM-judge calibration test that asserts weak < mediocre < strong answers
+- 🌐 **Self-expanding corpus** — low-confidence retrieval triggers a live web fetch that is
+  cleaned, deduplicated and **written back** to the vector store, so the first user to ask
+  about a thin topic pays the latency and everyone after does not
 - 💻 **Sandboxed code execution** — Run/submit user code in ephemeral Docker containers, never on the host
 - 🔐 **Full auth system** — JWT tokens, bcrypt hashing, email verification, password reset
 - 📊 **Practice ecosystem** — Problem bookmarks, filters, hints, editorials, submission history, streaks, heatmaps
@@ -137,7 +178,8 @@ On the coding side, solve problems in a **Monaco editor** with code execution in
 |---|---|
 | **Framework** | FastAPI, Uvicorn |
 | **LLM** | Gemini 2.5 Flash (primary), GPT-4o-mini (fallback) |
-| **RAG** | LangChain + ChromaDB |
+| **RAG** | LangChain + ChromaDB, hybrid BM25 + RRF, LLM reranking, per-stage routing |
+| **Evaluation** | Golden-set harness (nDCG / MRR / hit rate), LLM-judge calibration, context-sufficiency rubric |
 | **Embeddings** | Google `text-embedding-004` or OpenAI `text-embedding-3-small` |
 
 ### Execution & Data
@@ -225,6 +267,30 @@ docker compose exec backend npx ts-node scripts/seed_problems.ts
 
 # Seed RAG knowledge base
 docker compose exec ai-service python scripts/seed_rag.py
+
+# Expand the corpus from curated engineering-blog feeds
+docker compose exec ai-service python -m app.ingest.batch --limit 4
+```
+
+### Running the evaluation
+
+```bash
+# Retrieval metrics against the 42-query golden set (no LLM calls, so this is free)
+docker compose exec ai-service python -m app.eval.run --k 5 --no-filter
+
+# Judge calibration: asserts weak < mediocre < strong for the same question
+docker compose exec ai-service python -m app.eval.monotonicity --replay app/eval/fixtures/monotonicity.json
+
+# Context sufficiency (uses an LLM judge, so this one costs money)
+docker compose exec ai-service python -m app.eval.sufficiency --window 0 --window 1
+```
+
+### Tests
+
+```bash
+cd backend      && npm test    # Vitest
+cd code-runner  && npm test    # Vitest
+docker compose exec ai-service python -m pytest
 ```
 
 ---
@@ -320,14 +386,31 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 - [x] Production Docker Compose with multi-stage builds
 - [x] AWS deployment (EC2 + RDS + Nginx)
+- [x] CI pipeline (lint, typecheck, test, build) across all four services
+- [x] Test suites — 324 tests in `ai-service`, plus `backend` and `code-runner`
+- [x] RAG evaluation harness with a committed baseline
+- [x] Retrieval quality work: structural chunking, hybrid search, reranking, routing
+- [x] Live corpus ingestion with provenance and write-back caching
+- [x] Expanded from 4 to 10 company interview profiles
+- [ ] Sandbox hardening (drop root, `CapDrop`, `PidsLimit`, CPU quota)
+- [ ] Resume-grounded personalised interviews
 - [ ] HTTPS via Let's Encrypt (requires domain)
-- [ ] CI/CD pipeline (lint, typecheck, build, deploy)
-- [ ] More company interview profiles and RAG corpora
 - [ ] Horizontal scaling for code-runner and ai-service
 - [ ] WebSocket reconnection and offline resilience
 - [ ] User profile customization and social features
 - [ ] Interview session replay and sharing
 - [ ] Collaborative mock interviews (peer-to-peer)
+
+---
+
+## 📚 Documentation
+
+| Doc | What it covers |
+|---|---|
+| [`docs/EXECUTION_PLAN.md`](docs/EXECUTION_PLAN.md) | The phased plan, exit criteria, and the parked backlog |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only log of every non-obvious decision and finding, with the reasoning |
+| [`docs/eval/`](docs/eval/) | Retrieval baselines and per-phase results, including the negative ones |
+| [`docs/INTERVIEW_NOTES.md`](docs/INTERVIEW_NOTES.md) | Deep walkthrough of every subsystem |
 
 ---
 
