@@ -2,13 +2,15 @@
 
 <div align="center">
 
-**AI-powered mock interview platform — practice coding, system design, behavioral rounds, and timed assessments like the real thing. Available on web and iOS.**
+**AI-powered mock interview platform — practice coding, system design, behavioral rounds, and timed assessments like the real thing.**
+
+**Built around a measured RAG pipeline: retrieval quality is evaluated on a golden set, not asserted.**
+
+[![CI](https://github.com/Advait0801/InterviewForge/actions/workflows/ci.yml/badge.svg)](https://github.com/Advait0801/InterviewForge/actions/workflows/ci.yml)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Swift](https://img.shields.io/badge/Swift-6.3-F05138?logo=swift&logoColor=white)](https://developer.apple.com/swift/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
-[![SwiftUI](https://img.shields.io/badge/SwiftUI-iOS_17+-007AFF?logo=apple&logoColor=white)](https://developer.apple.com/xcode/swiftui/)
 [![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -24,24 +26,58 @@
 
 ## 📱 Overview
 
-**InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (Amazon, Google, Meta, Apple), choose a difficulty, and work through **behavioral → coding → system design → core CS** rounds — all powered by **RAG-backed LLM question generation**, with real-time evaluation and follow-ups.
+**InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (10 supported, from Amazon and Google to Microsoft, Uber and Bloomberg), choose a difficulty, and work through **behavioral → coding → system design → core CS** rounds — all powered by **RAG-backed LLM question generation**, with real-time evaluation and follow-ups.
 
-On the coding side, solve problems in a **Monaco editor** (web) or **CodeMirror editor** (iOS) with code execution in **isolated Docker sandboxes** (Python, C, C++, Java). Get **AI code reviews**, track progress with **analytics & leaderboards**, follow **learning paths**, and take **timed assessments**.
+On the coding side, solve problems in a **Monaco editor** with code execution in **isolated Docker sandboxes** (Python, C, C++, Java). Get **AI code reviews**, track progress with **analytics & leaderboards**, follow **learning paths**, and take **timed assessments**.
 
-The platform ships as both a **Next.js web app** and a **native SwiftUI iOS app** — both powered by the same Express + FastAPI backend.
+### 📈 Retrieval quality, measured
+
+The RAG pipeline is evaluated against a hand-labelled golden set of 42 queries, so every
+change is a number rather than an opinion. Full method and results in
+[`docs/eval/`](docs/eval/); the reasoning behind each decision is in
+[`docs/DECISIONS.md`](docs/DECISIONS.md).
+
+| Metric | Before | After | |
+|---|---|---|---|
+| nDCG@5 | 0.771 | **0.901** | +0.130 |
+| Hit rate@5 | 0.833 | **0.952** | +0.119 |
+| MRR | 0.782 | **0.917** | +0.135 |
+| p50 latency | 210 ms | **268 ms** | +58 ms |
+
+What produced that, in order of contribution:
+
+- **Per-stage query routing** — behavioural and system-design questions go through an LLM
+  reranker; coding and core-CS questions go through hybrid BM25 + RRF, where precise
+  terminology matters. Equal quality to reranking everything, at **6.6× lower p50 latency**.
+- **Hybrid search with Reciprocal Rank Fusion** — dense retrieval is weak on rare exact
+  tokens; BM25 is not. RRF fuses them on rank alone, so no score normalisation is needed.
+- **Structural chunking** — splits on document structure instead of character counts, so a
+  section is not cut mid-argument.
+- **Small-to-big retrieval** — embeds small chunks for precision, returns the wider passage
+  for context.
+
+**Two techniques were implemented, measured, and reverted** because the numbers said so:
+contextual retrieval (it duplicates what structural chunking already provides) and MMR.
+Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase2.md) and
+[`docs/eval/phase3.md`](docs/eval/phase3.md).
 
 ### ✨ Key Highlights
 
 - 🎙️ **Multi-stage AI interviews** — Company-specific questions, follow-ups, voice evaluation, and downloadable PDF reports
-- 🔍 **Company-aware RAG** — Chroma vector store seeded with interview patterns for Amazon, Google, Meta, and Apple
+- 🔍 **Company-aware RAG** — Chroma vector store covering 10 companies, with retrieval
+  filtered by company and interview stage
+- 📐 **Evaluation harness** — golden-set retrieval metrics (nDCG, MRR, hit rate, recall) plus
+  an LLM-judge calibration test that asserts weak < mediocre < strong answers
+- 🌐 **Self-expanding corpus** — low-confidence retrieval triggers a live web fetch that is
+  cleaned, deduplicated and **written back** to the vector store, so the first user to ask
+  about a thin topic pays the latency and everyone after does not
 - 💻 **Sandboxed code execution** — Run/submit user code in ephemeral Docker containers, never on the host
 - 🔐 **Full auth system** — JWT tokens, bcrypt hashing, email verification, password reset
 - 📊 **Practice ecosystem** — Problem bookmarks, filters, hints, editorials, submission history, streaks, heatmaps
 - 🏆 **Leaderboard & analytics** — Global rankings, topic radar, difficulty distribution, acceptance trends
 - 📋 **Timed assessments** — Multi-problem flows with countdown timer and scoring
 - 🗺️ **Learning paths** — Curated problem sequences by topic with progress tracking
-- 🏗️ **System design** — AI-analyzed architecture explanations rendered as React Flow diagrams (web) and interactive graph views (iOS)
-- 📱 **Native iOS app** — Full-featured SwiftUI client with CodeMirror editor, voice recording, Swift Charts analytics, and Keychain-based auth
+- 🏗️ **System design** — AI-analyzed architecture explanations rendered as React Flow diagrams
 
 ---
 
@@ -76,18 +112,6 @@ The platform ships as both a **Next.js web app** and a **native SwiftUI iOS app*
 - Timed assessment mode with scoring
 - Dark mode, responsive layouts, loading skeletons, error boundaries
 
-### iOS app
-
-- Native SwiftUI app targeting iOS 17+ with full feature parity
-- MVVM architecture with async/await networking layer
-- JWT authentication with iOS Keychain storage
-- CodeMirror code editor via WKWebView with Swift ↔ JS bridge
-- Voice recording via AVFoundation for interview speech evaluation
-- Interactive system design diagrams rendered in WKWebView
-- Swift Charts for analytics (solved trends, difficulty distribution, topic breakdown)
-- Dark mode, haptic feedback, pull-to-refresh, skeleton loading states
-- PhotosPicker for avatar upload, ShareLink for PDF report sharing
-
 ---
 
 ## 🏗️ Architecture
@@ -98,31 +122,27 @@ The platform ships as both a **Next.js web app** and a **native SwiftUI iOS app*
 │   Next.js      │ ◄────────────────► │  Express backend │ ◄────► │  PostgreSQL    │
 │   :3000        │      /api/*        │  :4000           │        │                │
 │                │                    │                  │        └────────────────┘
-└───────┬────────┘                    └────────┬─────────┘
-        │                              ▲       │
-        │                    REST      │       │  HTTP
-        │               ┌─────────────┘│       ▼
-        │               │              │┌──────────────────┐        ┌────────────────┐
-        │  ┌────────────────┐          ││                  │        │                │
-        │  │                │          ││  FastAPI         │ ◄────► │  ChromaDB      │
-        │  │  iOS App       │          ││  ai-service      │        │  (RAG vectors) │
-        │  │  (SwiftUI)     │──────────┘│  :8000           │        │                │
-        │  │                │           └────────┬─────────┘        └────────────────┘
-        │  └────────────────┘                    │
-        │                                        │  Gemini / OpenAI
-        │                                        ▼
-        │                            ┌──────────────────┐
-        │          code submit       │                  │        ┌────────────────┐
-        └──────────────────────────► │  code-runner     │ ─────► │  Docker        │
-                                     │  :5000           │        │  sandboxes     │
-                                     │                  │        │  (py/c/cpp/java│
-                                     └──────────────────┘        └────────────────┘
+└────────────────┘                    └────────┬─────────┘
+                                   REST │      │ REST
+                          ┌─────────────┘      └──────────────┐
+                          ▼                                   ▼
+              ┌──────────────────┐                  ┌──────────────────┐
+              │                  │  ┌────────────┐  │                  │
+              │  FastAPI         │─►│  ChromaDB  │  │  code-runner     │
+              │  ai-service      │  │ (RAG vecs) │  │  :5000           │
+              │  :8000           │  └────────────┘  │                  │
+              └────────┬─────────┘                  └────────┬─────────┘
+                       │  Gemini / OpenAI                    │  Docker Engine API
+                       ▼                                     ▼
+              ┌──────────────────┐                  ┌──────────────────┐
+              │  LLM +           │                  │  Docker sandboxes│
+              │  embeddings APIs │                  │  (py/c/cpp/java) │
+              └──────────────────┘                  └──────────────────┘
 ```
-
 ### 🔄 Data flow
 
-1. **Auth** — Client (web or iOS) → Express (bcrypt + JWT) → PostgreSQL `users`
-2. **Code submit** — Client → Express → code-runner → ephemeral Docker container → test results → response
+1. **Auth** — Web client → Express (bcrypt + JWT) → PostgreSQL `users`
+2. **Code submit** — Web client → Express → code-runner → ephemeral Docker container → test results → response
 3. **Interview question** — Express → FastAPI → Chroma retrieval + LLM chain → structured question → stored in `interview_messages`
 4. **RAG pipeline** — Seed documents → chunking → embeddings → Chroma → filtered retrieval by company + stage + difficulty calibration
 
@@ -142,20 +162,6 @@ The platform ships as both a **Next.js web app** and a **native SwiftUI iOS app*
 | **Realtime** | Socket.IO client |
 | **Utilities** | Sonner (toasts), jsPDF (report export) |
 
-### iOS App
-
-| | |
-|---|---|
-| **Language** | Swift 6.3 |
-| **UI** | SwiftUI (iOS 17+), MVVM architecture |
-| **Code editor** | CodeMirror 6 via WKWebView with Swift ↔ JS bridge |
-| **Charts** | Swift Charts |
-| **Voice** | AVFoundation (AVAudioRecorder) |
-| **Diagrams** | WKWebView with vis.js graph renderer |
-| **Auth storage** | iOS Keychain |
-| **Networking** | URLSession with async/await |
-| **Utilities** | PhotosPicker (avatar), ShareLink (PDF export) |
-
 ### Backend (Node.js)
 
 | | |
@@ -172,7 +178,8 @@ The platform ships as both a **Next.js web app** and a **native SwiftUI iOS app*
 |---|---|
 | **Framework** | FastAPI, Uvicorn |
 | **LLM** | Gemini 2.5 Flash (primary), GPT-4o-mini (fallback) |
-| **RAG** | LangChain + ChromaDB |
+| **RAG** | LangChain + ChromaDB, hybrid BM25 + RRF, LLM reranking, per-stage routing |
+| **Evaluation** | Golden-set harness (nDCG / MRR / hit rate), LLM-judge calibration, context-sufficiency rubric |
 | **Embeddings** | Google `text-embedding-004` or OpenAI `text-embedding-3-small` |
 
 ### Execution & Data
@@ -193,14 +200,6 @@ The platform ships as both a **Next.js web app** and a **native SwiftUI iOS app*
 InterviewForge/
 ├── web/                    # Next.js frontend
 │   └── src/app/            # App Router pages (dashboard, problems, interview, etc.)
-├── ios/                    # SwiftUI iOS app
-│   └── InterviewForge/
-│       ├── App/            # App entry point, ContentView, TabView root
-│       ├── Models/         # Codable structs matching API responses
-│       ├── Services/       # APIService, AuthManager, KeychainHelper
-│       ├── ViewModels/     # ObservableObject VMs per feature
-│       ├── Views/          # Auth, Dashboard, Problems, Interview, etc.
-│       └── WebView/        # CodeMirror editor + diagram renderer (WKWebView)
 ├── backend/                # Express API server
 │   ├── src/routes/         # Auth, problems, submissions, interviews, assessments, etc.
 │   ├── sql_migrations/     # 001_init.sql through 010_learning_paths.sql
@@ -214,7 +213,7 @@ InterviewForge/
 │   └── scripts/            # seed_rag.py
 ├── code-runner/            # Sandbox orchestration service
 ├── docker/                 # Sandbox Dockerfiles (python, c, cpp, java)
-├── docs/                   # smoke-test.md
+├── docs/                   # EXECUTION_PLAN, DECISIONS, INTERVIEW_NOTES, PROJECT_CONTEXT
 ├── docker-compose.yml      # Local development stack
 └── docker-compose.prod.yml # Production stack (AWS)
 ```
@@ -255,18 +254,6 @@ docker compose up --build
 | AI service | http://localhost:8000 |
 | Code runner | http://localhost:5050 |
 
-### iOS app
-
-```bash
-# Open in Xcode
-open ios/InterviewForge/InterviewForge.xcodeproj
-
-# Or from the command line
-cd ios/InterviewForge && xcodebuild -scheme InterviewForge -destination 'platform=iOS Simulator,name=iPhone 16'
-```
-
-> The iOS app connects to the same backend. Update the `baseURL` in `APIService.swift` to point to your machine's local IP (e.g. `http://192.168.x.x:4000/api`) when running on a simulator or device, since `localhost` from the simulator maps to the simulator itself.
-
 ### Database setup
 
 ```bash
@@ -280,6 +267,30 @@ docker compose exec backend npx ts-node scripts/seed_problems.ts
 
 # Seed RAG knowledge base
 docker compose exec ai-service python scripts/seed_rag.py
+
+# Expand the corpus from curated engineering-blog feeds
+docker compose exec ai-service python -m app.ingest.batch --limit 4
+```
+
+### Running the evaluation
+
+```bash
+# Retrieval metrics against the 42-query golden set (no LLM calls, so this is free)
+docker compose exec ai-service python -m app.eval.run --k 5 --no-filter
+
+# Judge calibration: asserts weak < mediocre < strong for the same question
+docker compose exec ai-service python -m app.eval.monotonicity --replay app/eval/fixtures/monotonicity.json
+
+# Context sufficiency (uses an LLM judge, so this one costs money)
+docker compose exec ai-service python -m app.eval.sufficiency --window 0 --window 1
+```
+
+### Tests
+
+```bash
+cd backend      && npm test    # Vitest
+cd code-runner  && npm test    # Vitest
+docker compose exec ai-service python -m pytest
 ```
 
 ---
@@ -308,7 +319,10 @@ The **dashboard** shows solve stats, current streak, and an activity heatmap. **
 
 ## ☁️ AWS Deployment
 
-InterviewForge is deployed on AWS Free Tier with the following setup:
+InterviewForge **was deployed on AWS Free Tier** with the setup below. The environment
+has since been torn down (free tier expired), so there is no live instance today —
+but `docker-compose.prod.yml` and the `Dockerfile.prod` files are accurate and the
+stack is redeployable as documented.
 
 ### Infrastructure
 
@@ -372,15 +386,31 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 - [x] Production Docker Compose with multi-stage builds
 - [x] AWS deployment (EC2 + RDS + Nginx)
-- [x] Native iOS app (SwiftUI, full feature parity with web)
+- [x] CI pipeline (lint, typecheck, test, build) across all four services
+- [x] Test suites — 324 tests in `ai-service`, plus `backend` and `code-runner`
+- [x] RAG evaluation harness with a committed baseline
+- [x] Retrieval quality work: structural chunking, hybrid search, reranking, routing
+- [x] Live corpus ingestion with provenance and write-back caching
+- [x] Expanded from 4 to 10 company interview profiles
+- [ ] Sandbox hardening (drop root, `CapDrop`, `PidsLimit`, CPU quota)
+- [ ] Resume-grounded personalised interviews
 - [ ] HTTPS via Let's Encrypt (requires domain)
-- [ ] CI/CD pipeline (lint, typecheck, build, deploy)
-- [ ] More company interview profiles and RAG corpora
 - [ ] Horizontal scaling for code-runner and ai-service
 - [ ] WebSocket reconnection and offline resilience
 - [ ] User profile customization and social features
 - [ ] Interview session replay and sharing
 - [ ] Collaborative mock interviews (peer-to-peer)
+
+---
+
+## 📚 Documentation
+
+| Doc | What it covers |
+|---|---|
+| [`docs/EXECUTION_PLAN.md`](docs/EXECUTION_PLAN.md) | The phased plan, exit criteria, and the parked backlog |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only log of every non-obvious decision and finding, with the reasoning |
+| [`docs/eval/`](docs/eval/) | Retrieval baselines and per-phase results, including the negative ones |
+| [`docs/INTERVIEW_NOTES.md`](docs/INTERVIEW_NOTES.md) | Deep walkthrough of every subsystem |
 
 ---
 
@@ -396,7 +426,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 <div align="center">
 
-**Built with ❤️ using TypeScript, Python, Swift, Next.js, SwiftUI, Express, FastAPI, and Docker**
+**Built with ❤️ using TypeScript, Python, Next.js, Express, FastAPI, and Docker**
 
 ⭐ Star this repo if you find it helpful!
 

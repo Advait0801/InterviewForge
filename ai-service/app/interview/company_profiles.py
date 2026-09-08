@@ -129,13 +129,182 @@ COMPANY_PROFILES: Dict[str, CompanyProfile] = {
             ),
         },
     ),
+    "microsoft": CompanyProfile(
+        key="microsoft",
+        name="Microsoft",
+        style=(
+            "Collaborative and growth-mindset oriented. Expects clear communication, "
+            "customer empathy, and pragmatic engineering over cleverness."
+        ),
+        focus_areas=['growth mindset', 'collaboration', 'customer empathy', 'pragmatic design'],
+        stage_topics={
+            "behavioral": "learning from failure and cross-team collaboration",
+            "coding": "clean, well-tested problem solving with clear reasoning",
+            "system_design": "pragmatic distributed systems and cloud-scale services",
+            "core_cs": "operating systems, networking and cloud fundamentals",
+        },
+        difficulty_calibration={
+            "easy": (
+                "SDE I bar: straightforward collaboration stories, core data structures, "
+                "simple service designs with clear component boundaries."
+            ),
+            "medium": (
+                "SDE II bar: cross-team influence, medium algorithms, multi-service designs "
+                "with availability and cost trade-offs on Azure-scale infrastructure."
+            ),
+            "hard": (
+                "Senior/Principal bar: org-level ambiguity, hard algorithmic depth, "
+                "large distributed systems with reliability, migration and tenancy concerns."
+            ),
+        },
+    ),
+    "uber": CompanyProfile(
+        key="uber",
+        name="Uber",
+        style=(
+            "Pragmatic and operations-heavy. Expects reasoning about real-time systems, "
+            "geospatial scale, and what happens when things fail in production."
+        ),
+        focus_areas=['real-time systems', 'reliability', 'geospatial scale', 'operational rigour'],
+        stage_topics={
+            "behavioral": "operating under pressure and production ownership",
+            "coding": "practical algorithms with latency awareness",
+            "system_design": "real-time marketplace, dispatch and geospatial systems",
+            "core_cs": "concurrency, queuing and distributed coordination",
+        },
+        difficulty_calibration={
+            "easy": (
+                "Entry bar: clear incident stories, core data structures, simple request flows."
+            ),
+            "medium": (
+                "L4/L5 bar: matching and dispatch design, latency budgets, "
+                "partial failure handling and backpressure."
+            ),
+            "hard": (
+                "Senior bar: multi-region consistency, surge and hotspot handling, "
+                "degradation strategy under regional failure."
+            ),
+        },
+    ),
+    "bloomberg": CompanyProfile(
+        key="bloomberg",
+        name="Bloomberg",
+        style=(
+            "Rigorous and detail-focused. Expects correctness, precision with data, "
+            "and careful reasoning about latency and financial-grade reliability."
+        ),
+        focus_areas=['correctness', 'low latency', 'data integrity', 'robust engineering'],
+        stage_topics={
+            "behavioral": "attention to detail and handling high-stakes correctness",
+            "coding": "precise algorithms with careful edge-case handling",
+            "system_design": "low-latency data distribution and market data systems",
+            "core_cs": "data structures, memory and networking fundamentals",
+        },
+        difficulty_calibration={
+            "easy": (
+                "Entry bar: careful implementation, core structures, simple pipeline designs."
+            ),
+            "medium": (
+                "Mid bar: performance-sensitive algorithms, streaming data systems, "
+                "consistency and ordering guarantees."
+            ),
+            "hard": (
+                "Senior bar: microsecond-level latency reasoning, fault tolerance in "
+                "financial data paths, correctness under partial failure."
+            ),
+        },
+    ),
+    "adobe": CompanyProfile(
+        key="adobe",
+        name="Adobe",
+        style=(
+            "Product-and-craft oriented. Expects thoughtful API design, performance on "
+            "large media workloads, and empathy for creative users."
+        ),
+        focus_areas=['craft', 'performance', 'API design', 'user empathy'],
+        stage_topics={
+            "behavioral": "craft, quality and cross-functional collaboration",
+            "coding": "algorithmic problem solving with attention to performance",
+            "system_design": "media processing pipelines and large-asset services",
+            "core_cs": "memory, graphics and systems fundamentals",
+        },
+        difficulty_calibration={
+            "easy": (
+                "Entry bar: clean implementation, core structures, simple service designs."
+            ),
+            "medium": (
+                "Mid bar: performance-aware algorithms, asset pipelines, caching and "
+                "storage trade-offs for large binaries."
+            ),
+            "hard": (
+                "Senior bar: distributed media processing at scale, cost and latency "
+                "trade-offs, multi-tenant reliability."
+            ),
+        },
+    ),
+    "linkedin": CompanyProfile(
+        key="linkedin",
+        name="LinkedIn",
+        style=(
+            "Data and graph oriented. Expects reasoning about social graphs, feed "
+            "relevance, and systems that serve personalised content at scale."
+        ),
+        focus_areas=['graph systems', 'relevance', 'data infrastructure', 'scalability'],
+        stage_topics={
+            "behavioral": "collaboration, mentorship and long-term impact",
+            "coding": "graph and data-heavy problem solving",
+            "system_design": "social graph, feed and recommendation infrastructure",
+            "core_cs": "distributed storage, streaming and indexing fundamentals",
+        },
+        difficulty_calibration={
+            "easy": (
+                "Entry bar: clear stories, core structures, simple read paths."
+            ),
+            "medium": (
+                "Mid bar: graph traversal at scale, feed fan-out trade-offs, "
+                "stream processing and near-line systems."
+            ),
+            "hard": (
+                "Senior bar: relevance infrastructure, multi-datacentre consistency, "
+                "cost and freshness trade-offs in large-scale serving."
+            ),
+        },
+    ),
+    "airbnb": CompanyProfile(
+        key="airbnb",
+        name="Airbnb",
+        style=(
+            "Values-driven and product-minded. Expects host and guest empathy, "
+            "clear trade-off articulation, and pragmatic full-stack reasoning."
+        ),
+        focus_areas=['product thinking', 'trust and safety', 'pragmatism', 'clear communication'],
+        stage_topics={
+            "behavioral": "values alignment, belonging and user empathy",
+            "coding": "practical problem solving with product context",
+            "system_design": "marketplace, search and booking systems",
+            "core_cs": "data modelling, consistency and service fundamentals",
+        },
+        difficulty_calibration={
+            "easy": (
+                "Entry bar: clear product reasoning, core structures, simple booking flows."
+            ),
+            "medium": (
+                "Mid bar: search and availability systems, pricing pipelines, "
+                "consistency in a two-sided marketplace."
+            ),
+            "hard": (
+                "Senior bar: global marketplace scale, trust and safety systems, "
+                "double-booking prevention under concurrency."
+            ),
+        },
+    ),
 }
 
 
 def get_company_profile(company: str) -> CompanyProfile:
     normalized = company.strip().lower()
     if normalized not in COMPANY_PROFILES:
-        raise ValueError("company must be one of: amazon, google, meta, apple")
+        raise ValueError("company must be one of: " + ", ".join(sorted(COMPANY_PROFILES)))
     return COMPANY_PROFILES[normalized]
 
 

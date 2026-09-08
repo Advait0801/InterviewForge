@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+# A newer push to the same branch cancels the older run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node:
+    name: ${{ matrix.service }} (node)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [backend, code-runner, web]
+    defaults:
+      run:
+        working-directory: ${{ matrix.service }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ${{ matrix.service }}/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        # Only web has an eslint config today; skip elsewhere rather than fail.
+        #
+        # Non-blocking on purpose: web/ has 4 pre-existing react-hooks errors
+        # (setState-in-effect x3, Date.now() during render in the dashboard).
+        # Fixing them means refactoring working UI, which does not belong in the
+        # commit that establishes CI. Tracked as F-14 -- flip this to blocking
+        # once they are fixed, so lint failures cannot silently accumulate.
+        continue-on-error: true
+        run: |
+          if [ -f eslint.config.mjs ]; then
+            npm run lint --if-present
+          else
+            echo "no eslint config in ${{ matrix.service }}, skipping"
+          fi
+
+      - name: Test
+        # No test script in web yet; --if-present keeps the matrix uniform.
+        run: npm test --if-present
+
+      - name: Build
+        run: npm run build
+        env:
+          # next build needs this present; value is irrelevant at build time.
+          NEXT_PUBLIC_API_URL: http://localhost:4000/api
+
+  python:
+    name: ai-service (python)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai-service
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: ai-service/requirements-dev.txt
+
+      - name: Install
+        run: pip install -r requirements-dev.txt
+
+      - name: Test
+        # These tests mock Chroma and the LLM providers, and the judge
+        # calibration check replays recorded responses, so no services and no
+        # API keys are required. If this step ever needs a key, that's a bug.
+        run: python -m pytest

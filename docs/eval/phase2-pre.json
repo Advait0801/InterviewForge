@@ -1,0 +1,902 @@
+{
+  "generated_at": "2026-09-06T00:59:38.170510+00:00",
+  "k": 5,
+  "filtered": false,
+  "config": {
+    "chunk_size": 1200,
+    "chunk_overlap": 200,
+    "embedding_provider": "openai",
+    "collection": "interviewforge_docs"
+  },
+  "query_count": 42,
+  "overall": {
+    "precision_at_k": 0.20000000000000004,
+    "precision_norm": 0.8095238095238095,
+    "recall_at_k": 0.8095238095238095,
+    "hit_rate": 0.8333333333333334,
+    "mrr": 0.8174603174603173,
+    "ndcg_at_k": 0.7975323828622348
+  },
+  "by_kind": {
+    "natural": {
+      "precision_at_k": 0.18947368421052638,
+      "precision_norm": 0.8026315789473685,
+      "recall_at_k": 0.8026315789473685,
+      "hit_rate": 0.8157894736842105,
+      "mrr": 0.8157894736842105,
+      "ndcg_at_k": 0.8016708446921109
+    },
+    "synthetic": {
+      "precision_at_k": 0.3,
+      "precision_norm": 0.875,
+      "recall_at_k": 0.875,
+      "hit_rate": 1.0,
+      "mrr": 0.8333333333333333,
+      "ndcg_at_k": 0.7582169954784115
+    }
+  },
+  "per_query": [
+    {
+      "id": "amz-beh-1",
+      "kind": "synthetic",
+      "company": "amazon",
+      "stage": "behavioral",
+      "expected": [
+        "amazon_behavioral"
+      ],
+      "retrieved": [
+        "amazon_coding_lp_walkthrough",
+        "apple_behavioral",
+        "amazon_behavioral",
+        "google_behavioral",
+        "amazon_system_design"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 0.3333333333333333,
+      "ndcg_at_k": 0.5
+    },
+    {
+      "id": "amz-beh-2",
+      "kind": "natural",
+      "company": "amazon",
+      "stage": "behavioral",
+      "expected": [
+        "amazon_behavioral"
+      ],
+      "retrieved": [
+        "amazon_behavioral",
+        "amazon_coding_lp_walkthrough",
+        "amazon_system_design",
+        "batch::aws_arch::31b763fcbea2ec8604476a72f73ba24a",
+        "google_behavioral"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "amz-sd-1",
+      "kind": "natural",
+      "company": "amazon",
+      "stage": "system_design",
+      "expected": [
+        "amazon_system_design_peak_events",
+        "amazon_system_design"
+      ],
+      "retrieved": [
+        "amazon_system_design_peak_events",
+        "amazon_system_design",
+        "batch::dropbox_tech::c1a49ce9bd0f47f7d934bccf61649df0",
+        "batch::netflix_tech::c9a84293696c51a4bd2f8806b8beb650",
+        "batch::netflix_tech::690793a27e30486963070a66d0c60d04"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "amz-sd-2",
+      "kind": "synthetic",
+      "company": "amazon",
+      "stage": "system_design",
+      "expected": [
+        "amazon_system_design",
+        "amazon_system_design_peak_events"
+      ],
+      "retrieved": [
+        "amazon_system_design",
+        "amazon_coding_lp_walkthrough",
+        "amazon_system_design_peak_events",
+        "google_system_design",
+        "google_core_cs_distributed_theory"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.9197207891481876
+    },
+    {
+      "id": "amz-cod-1",
+      "kind": "natural",
+      "company": "amazon",
+      "stage": "coding",
+      "expected": [
+        "amazon_coding_lp_walkthrough"
+      ],
+      "retrieved": [
+        "amazon_coding_lp_walkthrough",
+        "apple_coding_clean_performance",
+        "batch::brendangregg::d6776b65a6a9132dc47f74cb2a72aae7",
+        "apple_behavioral_quality_bar",
+        "amazon_system_design"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "amz-cs-1",
+      "kind": "natural",
+      "company": "amazon",
+      "stage": "core_cs",
+      "expected": [
+        "amazon_core_cs_large_scale_storage"
+      ],
+      "retrieved": [
+        "amazon_core_cs_large_scale_storage",
+        "amazon_system_design_peak_events",
+        "amazon_system_design",
+        "batch::dropbox_tech::c1a49ce9bd0f47f7d934bccf61649df0",
+        "batch::aws_arch::31b763fcbea2ec8604476a72f73ba24a"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-cod-1",
+      "kind": "synthetic",
+      "company": "google",
+      "stage": "coding",
+      "expected": [
+        "google_algorithms",
+        "google_coding_communication"
+      ],
+      "retrieved": [
+        "google_algorithms",
+        "google_coding_communication",
+        "amazon_coding_lp_walkthrough",
+        "google_system_design"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-cod-2",
+      "kind": "natural",
+      "company": "google",
+      "stage": "coding",
+      "expected": [
+        "google_algorithms"
+      ],
+      "retrieved": [
+        "google_algorithms",
+        "apple_coding_clean_performance",
+        "meta_coding",
+        "google_coding_communication"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-cod-3",
+      "kind": "natural",
+      "company": "google",
+      "stage": "coding",
+      "expected": [
+        "google_coding_communication"
+      ],
+      "retrieved": [
+        "google_behavioral",
+        "google_algorithms",
+        "google_system_design",
+        "batch::brendangregg::d6776b65a6a9132dc47f74cb2a72aae7"
+      ],
+      "precision_at_k": 0.0,
+      "precision_norm": 0.0,
+      "recall_at_k": 0.0,
+      "hit_rate": 0.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 0.0
+    },
+    {
+      "id": "goo-sd-1",
+      "kind": "natural",
+      "company": "google",
+      "stage": "system_design",
+      "expected": [
+        "google_system_design"
+      ],
+      "retrieved": [
+        "google_system_design",
+        "apple_system_design",
+        "google_algorithms",
+        "batch::netflix_tech::690793a27e30486963070a66d0c60d04",
+        "batch::netflix_tech::c9a84293696c51a4bd2f8806b8beb650"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-beh-1",
+      "kind": "natural",
+      "company": "google",
+      "stage": "behavioral",
+      "expected": [
+        "google_behavioral_ambiguity",
+        "google_behavioral"
+      ],
+      "retrieved": [
+        "google_behavioral",
+        "google_behavioral_ambiguity",
+        "google_algorithms",
+        "google_system_design"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "goo-cs-1",
+      "kind": "natural",
+      "company": "google",
+      "stage": "core_cs",
+      "expected": [
+        "google_core_cs_distributed_theory",
+        "distributed_systems_fundamentals"
+      ],
+      "retrieved": [
+        "batch::meta_eng::c4d795ee1c472a3eb904462ce8605936",
+        "batch::martin_kleppmann::60c4c6ce63ff92802b9f6db3a1235883",
+        "batch::microsoft_devblog::012c73d04c2e0cc4c2b2ed6d7ccf861c",
+        "batch::microsoft_devblog::66e762c52b4fb40c0d9e6b7d96ab914f"
+      ],
+      "precision_at_k": 0.0,
+      "precision_norm": 0.0,
+      "recall_at_k": 0.0,
+      "hit_rate": 0.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 0.0
+    },
+    {
+      "id": "goo-cs-2",
+      "kind": "natural",
+      "company": "google",
+      "stage": "core_cs",
+      "expected": [
+        "google_core_cs_networking_deep"
+      ],
+      "retrieved": [
+        "google_core_cs_networking_deep",
+        "batch::meta_eng::d2835f9807e2ac5c50126ae8a28ea50b",
+        "core_cs_fundamentals"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "met-cod-1",
+      "kind": "synthetic",
+      "company": "meta",
+      "stage": "coding",
+      "expected": [
+        "meta_coding",
+        "meta_coding_graph_social"
+      ],
+      "retrieved": [
+        "meta_coding",
+        "google_algorithms",
+        "apple_coding_clean_performance",
+        "google_coding_communication"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 0.5,
+      "recall_at_k": 0.5,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.6131471927654584
+    },
+    {
+      "id": "met-cod-2",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "coding",
+      "expected": [
+        "meta_coding_graph_social"
+      ],
+      "retrieved": [
+        "meta_coding_graph_social",
+        "batch::netflix_tech::8eb1a6c557caa54f1c32551ccb11b399",
+        "batch::netflix_tech::c9a84293696c51a4bd2f8806b8beb650"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "met-sd-1",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "system_design",
+      "expected": [
+        "meta_system_design_realtime"
+      ],
+      "retrieved": [
+        "fundamentals_observability",
+        "batch::microsoft_devblog::66e762c52b4fb40c0d9e6b7d96ab914f",
+        "batch::netflix_tech::f7bcf2e68e7cc882c7d80983d309d4f6",
+        "batch::netflix_tech::6170e378d729f7c483af934072b979d6",
+        "batch::aws_arch::455c459d9a3063bc0e3d01a4bf30675f"
+      ],
+      "precision_at_k": 0.0,
+      "precision_norm": 0.0,
+      "recall_at_k": 0.0,
+      "hit_rate": 0.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 0.0
+    },
+    {
+      "id": "met-sd-2",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "system_design",
+      "expected": [
+        "meta_system_design",
+        "meta_system_design_realtime"
+      ],
+      "retrieved": [
+        "meta_system_design",
+        "amazon_system_design",
+        "google_system_design",
+        "google_core_cs_distributed_theory",
+        "meta_system_design_realtime"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.8503449055347546
+    },
+    {
+      "id": "met-beh-1",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "behavioral",
+      "expected": [
+        "meta_behavioral_shipping",
+        "meta_behavioral"
+      ],
+      "retrieved": [
+        "meta_behavioral_shipping",
+        "meta_behavioral",
+        "batch::meta_eng::d2835f9807e2ac5c50126ae8a28ea50b",
+        "batch::meta_eng::e10619a31890878acd7ca80c9ca7f63b"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "met-cs-1",
+      "kind": "natural",
+      "company": "meta",
+      "stage": "core_cs",
+      "expected": [
+        "meta_core_cs_caching_scale"
+      ],
+      "retrieved": [
+        "batch::netflix_tech::690793a27e30486963070a66d0c60d04",
+        "batch::netflix_tech::c9a84293696c51a4bd2f8806b8beb650"
+      ],
+      "precision_at_k": 0.0,
+      "precision_norm": 0.0,
+      "recall_at_k": 0.0,
+      "hit_rate": 0.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 0.0
+    },
+    {
+      "id": "app-beh-1",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "behavioral",
+      "expected": [
+        "apple_behavioral_quality_bar",
+        "apple_behavioral"
+      ],
+      "retrieved": [
+        "apple_behavioral",
+        "apple_behavioral_quality_bar",
+        "apple_system_design",
+        "apple_coding_clean_performance",
+        "apple_core_cs_memory_concurrency"
+      ],
+      "precision_at_k": 0.4,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "app-sd-1",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "system_design",
+      "expected": [
+        "apple_system_design_privacy",
+        "apple_system_design"
+      ],
+      "retrieved": [
+        "apple_system_design_privacy",
+        "batch::dropbox_tech::32666d093ba2af855eceec6c920057f2",
+        "batch::martin_kleppmann::17ac1a3f895b9b48feb259b2c4d542c5"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 0.5,
+      "recall_at_k": 0.5,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 0.6131471927654584
+    },
+    {
+      "id": "app-cod-1",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "coding",
+      "expected": [
+        "apple_coding_clean_performance"
+      ],
+      "retrieved": [
+        "batch::airbnb_eng::80289671873347c21f0b99f464d0cd1b",
+        "batch::martin_kleppmann::17ac1a3f895b9b48feb259b2c4d542c5",
+        "batch::microsoft_devblog::fe06a477ca974da7e55cda7c8c58d2b9",
+        "batch::aws_arch::455c459d9a3063bc0e3d01a4bf30675f",
+        "batch::cloudflare_blog::3358acf7c004013790a780c46c93c215"
+      ],
+      "precision_at_k": 0.0,
+      "precision_norm": 0.0,
+      "recall_at_k": 0.0,
+      "hit_rate": 0.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 0.0
+    },
+    {
+      "id": "app-cs-1",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "core_cs",
+      "expected": [
+        "apple_core_cs_memory_concurrency"
+      ],
+      "retrieved": [
+        "batch::netflix_tech::c9a84293696c51a4bd2f8806b8beb650",
+        "batch::netflix_tech::690793a27e30486963070a66d0c60d04",
+        "batch::netflix_tech::8eb1a6c557caa54f1c32551ccb11b399",
+        "fundamentals_caching_strategies"
+      ],
+      "precision_at_k": 0.0,
+      "precision_norm": 0.0,
+      "recall_at_k": 0.0,
+      "hit_rate": 0.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 0.0
+    },
+    {
+      "id": "app-cs-2",
+      "kind": "natural",
+      "company": "apple",
+      "stage": "core_cs",
+      "expected": [
+        "apple_core_cs_memory_concurrency"
+      ],
+      "retrieved": [
+        "apple_core_cs_memory_concurrency",
+        "batch::netflix_tech::c9a84293696c51a4bd2f8806b8beb650",
+        "batch::netflix_tech::8eb1a6c557caa54f1c32551ccb11b399"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-1",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_database_sharding"
+      ],
+      "retrieved": [
+        "fundamentals_database_sharding",
+        "batch::meta_eng::61f1aa6da8d63daf439966b5f861c913",
+        "batch::netflix_tech::c9a84293696c51a4bd2f8806b8beb650",
+        "batch::netflix_tech::690793a27e30486963070a66d0c60d04"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-2",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_caching_strategies"
+      ],
+      "retrieved": [
+        "fundamentals_caching_strategies",
+        "batch::netflix_tech::690793a27e30486963070a66d0c60d04",
+        "batch::netflix_tech::c9a84293696c51a4bd2f8806b8beb650"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-3",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_message_queues"
+      ],
+      "retrieved": [
+        "fundamentals_message_queues",
+        "batch::meta_eng::61f1aa6da8d63daf439966b5f861c913",
+        "batch::meta_eng::d2835f9807e2ac5c50126ae8a28ea50b"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-4",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_rest_api_design"
+      ],
+      "retrieved": [
+        "fundamentals_rest_api_design",
+        "fundamentals_security_interview",
+        "batch::aws_arch::455c459d9a3063bc0e3d01a4bf30675f"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-sd-5",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "fundamentals_observability"
+      ],
+      "retrieved": [
+        "fundamentals_observability",
+        "batch::microsoft_devblog::66e762c52b4fb40c0d9e6b7d96ab914f",
+        "batch::aws_arch::b13ae8eb66af70e2227ed3dee9d88f13",
+        "batch::aws_arch::455c459d9a3063bc0e3d01a4bf30675f"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "fun-cs-1",
+      "kind": "natural",
+      "company": null,
+      "stage": "core_cs",
+      "expected": [
+        "fundamentals_security_interview"
+      ],
+      "retrieved": [
+        "batch::cloudflare_blog::a4a986b959c496e86f16153314d8f74e"
+      ],
+      "precision_at_k": 0.0,
+      "precision_norm": 0.0,
+      "recall_at_k": 0.0,
+      "hit_rate": 0.0,
+      "mrr": 0.0,
+      "ndcg_at_k": 0.0
+    },
+    {
+      "id": "blog-flink",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "batch::netflix_tech::d541eecfda7d0718264dbf08019c1b3f"
+      ],
+      "retrieved": [
+        "batch::netflix_tech::d541eecfda7d0718264dbf08019c1b3f",
+        "batch::netflix_tech::d0a312eee94715a28b21426f18066441"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-graph",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "batch::netflix_tech::690793a27e30486963070a66d0c60d04"
+      ],
+      "retrieved": [
+        "batch::netflix_tech::690793a27e30486963070a66d0c60d04",
+        "batch::netflix_tech::c9a84293696c51a4bd2f8806b8beb650"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-zstd",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "batch::cloudflare_blog::3358acf7c004013790a780c46c93c215"
+      ],
+      "retrieved": [
+        "batch::cloudflare_blog::3358acf7c004013790a780c46c93c215"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-rdma",
+      "kind": "natural",
+      "company": null,
+      "stage": "core_cs",
+      "expected": [
+        "batch::meta_eng::d2835f9807e2ac5c50126ae8a28ea50b"
+      ],
+      "retrieved": [
+        "batch::meta_eng::d2835f9807e2ac5c50126ae8a28ea50b"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-mtia",
+      "kind": "natural",
+      "company": null,
+      "stage": "core_cs",
+      "expected": [
+        "batch::meta_eng::e10619a31890878acd7ca80c9ca7f63b"
+      ],
+      "retrieved": [
+        "batch::meta_eng::e10619a31890878acd7ca80c9ca7f63b"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-zgw",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "batch::meta_eng::61f1aa6da8d63daf439966b5f861c913"
+      ],
+      "retrieved": [
+        "batch::meta_eng::61f1aa6da8d63daf439966b5f861c913",
+        "batch::netflix_tech::8eb1a6c557caa54f1c32551ccb11b399"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-evals",
+      "kind": "natural",
+      "company": null,
+      "stage": "core_cs",
+      "expected": [
+        "batch::airbnb_eng::ca6079ed8c27b1cd2015464e8f96795b"
+      ],
+      "retrieved": [
+        "batch::airbnb_eng::ca6079ed8c27b1cd2015464e8f96795b",
+        "batch::aws_arch::31b763fcbea2ec8604476a72f73ba24a",
+        "batch::brendangregg::f3643b8e8910c4f1fde68a6fae86ec66"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-dspy",
+      "kind": "natural",
+      "company": null,
+      "stage": "core_cs",
+      "expected": [
+        "batch::dropbox_tech::f972b7da95a7c6f07fabce6227c0ed50"
+      ],
+      "retrieved": [
+        "batch::dropbox_tech::f972b7da95a7c6f07fabce6227c0ed50"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-authn",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "batch::airbnb_eng::80289671873347c21f0b99f464d0cd1b"
+      ],
+      "retrieved": [
+        "batch::airbnb_eng::80289671873347c21f0b99f464d0cd1b"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-mcp",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "batch::aws_arch::455c459d9a3063bc0e3d01a4bf30675f"
+      ],
+      "retrieved": [
+        "batch::aws_arch::455c459d9a3063bc0e3d01a4bf30675f"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-isabelle",
+      "kind": "natural",
+      "company": null,
+      "stage": "core_cs",
+      "expected": [
+        "batch::martin_kleppmann::60c4c6ce63ff92802b9f6db3a1235883"
+      ],
+      "retrieved": [
+        "batch::martin_kleppmann::60c4c6ce63ff92802b9f6db3a1235883"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    },
+    {
+      "id": "blog-riviera",
+      "kind": "natural",
+      "company": null,
+      "stage": "system_design",
+      "expected": [
+        "batch::dropbox_tech::1f9b3059a0a1b2a43f28371371c19b26"
+      ],
+      "retrieved": [
+        "batch::dropbox_tech::1f9b3059a0a1b2a43f28371371c19b26",
+        "batch::netflix_tech::cbf07e5e2acdb643dd3cb4b574837fe6",
+        "batch::netflix_tech::f2cea8ea3788bfa85203e257c718e7ae"
+      ],
+      "precision_at_k": 0.2,
+      "precision_norm": 1.0,
+      "recall_at_k": 1.0,
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_k": 1.0
+    }
+  ]
+}

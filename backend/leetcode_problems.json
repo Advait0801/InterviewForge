@@ -1548,7 +1548,7 @@
       "string"
     ],
     "companies": [
-      "Facebook",
+      "Meta",
       "Microsoft",
       "Uber"
     ],
@@ -5730,7 +5730,7 @@
     ],
     "companies": [
       "Amazon",
-      "Facebook",
+      "Meta",
       "Microsoft"
     ],
     "testCases": [
@@ -6390,7 +6390,7 @@
       "Amazon",
       "Microsoft",
       "Google",
-      "Facebook"
+      "Meta"
     ],
     "testCases": [
       {

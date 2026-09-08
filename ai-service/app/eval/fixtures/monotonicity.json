@@ -1,0 +1,187 @@
+{
+  "amz-beh-ownership": {
+    "weak": {
+      "score": 3,
+      "strengths": [
+        "Willingness to assist the team."
+      ],
+      "weaknesses": [
+        "Lacks a specific example or scenario (STAR method).",
+        "Fails to demonstrate 'Ownership' or 'Customer Obsession'.",
+        "No mention of metrics, impact, or the 'why' behind the actions.",
+        "Very vague; does not align with Amazon's leadership principles."
+      ],
+      "suggestions": [
+        "Use the STAR method (Situation, Task, Action, Result) to provide a structured narrative.",
+        "Focus on a specific problem where you identified a gap, took initiative without being asked, and delivered a measurable outcome.",
+        "Highlight how your actions benefited the customer or the business, reflecting Amazon's 'Customer Obsession' principle.",
+        "Explain the trade-offs you made when prioritizing this task outside your remit."
+      ],
+      "shouldAskFollowup": true,
+      "followupFocus": "Specific example of a problem outside your remit, focusing on the decision-making process and the measurable impact of your intervention."
+    },
+    "mediocre": {
+      "score": 6,
+      "strengths": [
+        "Demonstrates a clear bias for action and ownership.",
+        "Showed good judgment by involving the owning team for the rollback rather than acting in isolation.",
+        "Proactive in documenting the incident for future reference."
+      ],
+      "weaknesses": [
+        "Lacks specific metrics (e.g., impact on conversion rates, time-to-resolution, or error percentage).",
+        "Fails to demonstrate 'Customer Obsession' by not explaining the impact on the end user experience.",
+        "Lacks a 'Dive Deep' component; the description of the investigation was very surface-level.",
+        "Missing a 'Deliver Results' reflection or any systemic improvement proposed to prevent recurrence."
+      ],
+      "suggestions": [
+        "Use the STAR (Situation, Task, Action, Result) method to structure the answer.",
+        "Quantify the impact. Instead of 'a noticeable share', use 'it impacted 5% of checkout traffic resulting in approximately $X,000 lost per hour'.",
+        "Focus on the 'Why'. Explain how you prioritized this over your own work and why it was critical for the customer.",
+        "Add a 'Learn and Be Curious' element: Did you implement a new alert or a guardrail to prevent this config issue from happening again?"
+      ],
+      "shouldAskFollowup": true,
+      "followupFocus": "Systemic prevention and leadership impact"
+    },
+    "strong": {
+      "score": 9,
+      "strengths": [
+        "Excellent use of STAR format with clear, quantifiable metrics ($180k recovered, 0.1% error rate).",
+        "Demonstrates strong 'Customer Obsession' by prioritizing the user experience over team boundaries.",
+        "Shows 'Bias for Action' and 'Ownership' by not just fixing the immediate bug, but preventing future occurrences via CI checks.",
+        "Clearly articulated the trade-off analysis regarding the decision to intervene."
+      ],
+      "weaknesses": [
+        "The answer is very strong, but could have slightly expanded on how they communicated with the other team after the fact to ensure cross-team alignment and avoid potential friction."
+      ],
+      "suggestions": [
+        "Consider explicitly mentioning how you maintained healthy relationships with the owning team after stepping into their domain to ensure long-term collaboration.",
+        "Ensure you emphasize the 'why' behind the specific trade-off decision to demonstrate deep technical judgment."
+      ],
+      "shouldAskFollowup": true,
+      "followupFocus": "Cross-team collaboration and conflict resolution regarding domain boundaries."
+    }
+  },
+  "goo-cod-complexity": {
+    "weak": {
+      "score": 3,
+      "strengths": [
+        "Identified the basic requirement of counting elements."
+      ],
+      "weaknesses": [
+        "Lacks algorithmic rigor; sorting is not the optimal approach for this problem.",
+        "Failed to mention data structures like HashMaps or Heaps, which are standard for this interview question.",
+        "Did not provide a specific Big-O complexity analysis.",
+        "Did not address the space complexity implications of the proposed solution."
+      ],
+      "suggestions": [
+        "Discuss using a HashMap to store frequencies followed by a Min-Heap or Quickselect algorithm to find the top k elements.",
+        "Explain the time complexity of the optimal approach: O(N log k) using a heap or O(N) using Bucket Sort.",
+        "Structure the answer by explaining the trade-offs between time and space complexity.",
+        "Always explicitly state the time and space complexity in terms of N (array size) and k."
+      ],
+      "shouldAskFollowup": true,
+      "followupFocus": "Optimal algorithmic design using HashMaps and Heaps to achieve better than O(N log N) time complexity."
+    },
+    "mediocre": {
+      "score": 6,
+      "strengths": [
+        "Correctly identified the frequency counting step using a hash map.",
+        "Correctly identified the O(n) space complexity.",
+        "Accurately analyzed the time complexity of the proposed sorting approach."
+      ],
+      "weaknesses": [
+        "Failed to identify the optimal O(n log k) approach using a Min-Heap.",
+        "Failed to identify the even more optimal O(n) approach using Bucket Sort (or Quickselect/Selection algorithm).",
+        "Lacked consideration for edge cases (e.g., empty input, k > unique elements)."
+      ],
+      "suggestions": [
+        "Mention that while sorting works, you can improve performance by using a Min-Heap of size k to maintain the top elements in O(n log k) time.",
+        "For even better performance, suggest using Bucket Sort to achieve O(n) time complexity since frequencies are bounded by the array length.",
+        "Always discuss constraints and edge cases before jumping to the first solution."
+      ],
+      "shouldAskFollowup": true,
+      "followupFocus": "Optimization techniques: Ask the candidate if they can improve the time complexity beyond O(n log n) using a heap or bucket sort."
+    },
+    "strong": {
+      "score": 9,
+      "strengths": [
+        "Excellent grasp of algorithmic tradeoffs between time and space complexity.",
+        "Clearly identified the optimal O(n) approach using bucket sort.",
+        "Demonstrated good engineering intuition regarding space optimization (min-heap vs. bucket sort).",
+        "Addressed relevant edge cases such as tie-breaking and input constraints."
+      ],
+      "weaknesses": [
+        "Could have explicitly mentioned the trade-off of memory overhead for the bucket sort approach (array of lists) versus the heap approach."
+      ],
+      "suggestions": [
+        "When discussing the bucket sort approach, briefly mention that it uses O(n) space regardless of the number of unique elements, which is a trade-off compared to the heap approach that scales with k.",
+        "Briefly touch upon the implementation detail of the bucket array (array of lists/vectors) to show depth in data structure selection."
+      ],
+      "shouldAskFollowup": true,
+      "followupFocus": "Implementation details of the bucket sort approach and handling potential memory constraints."
+    }
+  },
+  "met-sd-newsfeed": {
+    "weak": {
+      "score": 2,
+      "strengths": [
+        "Identified the core entities (users and posts)."
+      ],
+      "weaknesses": [
+        "Failed to address scalability or performance (the primary concern for a news feed).",
+        "Did not mention data retrieval strategies (e.g., fan-out on write vs. pull on read).",
+        "Ignored caching, indexing, or pagination, which are critical for Meta-scale systems.",
+        "Lacked discussion on the trade-offs between latency and freshness."
+      ],
+      "suggestions": [
+        "Discuss the 'fan-out' problem: How do you efficiently deliver posts to thousands or millions of followers?",
+        "Explain the difference between a 'Push' (fan-out on write) and 'Pull' (on-demand) model and when to use each.",
+        "Mention how you would handle data partitioning (sharding) for users and posts.",
+        "Discuss the role of caching (e.g., Redis) to serve the feed quickly."
+      ],
+      "shouldAskFollowup": true,
+      "followupFocus": "Scaling the feed delivery architecture for high-profile users (celebrities/influencers) vs. regular users."
+    },
+    "mediocre": {
+      "score": 4,
+      "strengths": [
+        "Identified core components: sharding, follow graph, caching, and CDN.",
+        "Correctly identified the need for a pull-based (fan-out on load) approach."
+      ],
+      "weaknesses": [
+        "Lacks discussion on the 'fan-out' problem (Push vs. Pull models).",
+        "Fails to address the 'celebrity problem' (users with millions of followers).",
+        "No mention of pagination or feed consistency.",
+        "Does not discuss data storage choices (SQL vs. NoSQL) based on access patterns."
+      ],
+      "suggestions": [
+        "Discuss the trade-offs between 'pull-on-demand' versus 'push-on-write' (fan-out) strategies.",
+        "Address how to handle high-profile users (celebrities) to prevent latency spikes.",
+        "Explain how to handle pagination and feed ranking/relevance rather than just sorting by timestamp.",
+        "Elaborate on data consistency and how to handle offline users or late-arriving updates."
+      ],
+      "shouldAskFollowup": true,
+      "followupFocus": "Handling the celebrity problem and the trade-offs between Push (fan-out-on-write) and Pull (fan-out-on-load) architectures."
+    },
+    "strong": {
+      "score": 9,
+      "strengths": [
+        "Identified the classic fan-out trade-off (push vs. pull) immediately.",
+        "Proposed a pragmatic 'hybrid' approach for celebrities, which is the industry-standard solution for this scale.",
+        "Addressed read-your-writes consistency requirements.",
+        "Demonstrated good intuition for system capacity and degradation strategies (stale feeds over errors).",
+        "Separated concerns between retrieval and ranking."
+      ],
+      "weaknesses": [
+        "Could have elaborated slightly more on the physical storage technology choice (e.g., Redis for inboxes vs. Cassandra for timeline persistence).",
+        "Did not explicitly mention how to handle the 'cold start' or initial population of the feed for new users."
+      ],
+      "suggestions": [
+        "Mention specific data stores (e.g., Redis for the inbox cache, Cassandra/RocksDB for the persistent store) to ground the design.",
+        "Briefly touch upon how the ranking service interacts with the data retrieval layer (e.g., fetching 500 candidates then re-ranking)."
+      ],
+      "shouldAskFollowup": true,
+      "followupFocus": "Handling 'Celebrity' fan-out bottlenecks and potential cache eviction strategies for the inbox service."
+    }
+  }
+}
