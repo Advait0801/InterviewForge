@@ -9,6 +9,42 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-08
 
+### D-032 — Sandbox hardened; ReadonlyRootfs deliberately excluded (closes F-03)
+**Applied:** containers run as the image's unprivileged `runner` user (the previous
+`User: "root"` override made every other restriction moot), plus `CapDrop: ["ALL"]`,
+`SecurityOpt: ["no-new-privileges"]`, `PidsLimit: 128`, `NanoCpus: 1e9`, and a
+size-bounded tmpfs at `/tmp`.
+**`ReadonlyRootfs` is NOT set, and that is a decision rather than an oversight.** Docker's
+archive API refuses to write into a container whose rootfs is read-only — both before start
+and, tested, after it — so user code cannot be injected at all. The alternatives are env
+vars (bounded by `ARG_MAX`) or an exec with attached stdin, and neither earns its
+complexity here: the container is ephemeral, unprivileged and network-disabled, so a write
+to its filesystem is discarded seconds later. The tmpfs is what actually bounds disk usage.
+**Trap found the hard way:** Docker mounts tmpfs `noexec` by default. C and C++ compiled
+fine and then failed with `/tmp/sol: Permission denied` at run time — a change that looks
+like a hardening win right until half the languages stop working. `exec` is now explicit
+and asserted in a test.
+**Verified adversarially, with before/after proof:** writing to `/etc/passwd` **succeeded**
+under the old root config and is blocked under the new one; `PidsLimit` cut forking at
+exactly 127 children; networking is unreachable. All four languages still pass.
+**Regression-proofed:** the container config is extracted into `buildContainerConfig()` and
+asserted by tests naming the attack each flag prevents — these restrictions are invisible to
+functional tests, so without them, silently dropping a flag would pass CI. Confirmed by
+mutation: re-adding `User: "root"` and switching the tmpfs to `noexec` each fail exactly one
+test.
+
+### D-033 — memoryKb is sampled and approximate, not exact (closes F-05)
+**Decided:** peak memory is sampled by polling container stats during execution and keeping
+the maximum, with page cache subtracted the way `docker stats` does it.
+**Why approximate:** cgroup v2 does not expose `memory_stats.max_usage` through the Docker
+API, so a true high-water mark is not obtainable — only instantaneous `usage`. A spike
+shorter than the sample interval can be missed, and runs shorter than roughly one interval
+report nothing at all rather than a wrong number.
+**Measured:** a 60 MB allocation reports 71.7 MB (the balance is interpreter overhead); a
+93 ms run reports nothing, which is the documented limitation rather than a bug.
+**No backend change needed:** `submission.routes.ts` already persisted
+`runResult.memoryKb`; the column was null only because code-runner never sent it.
+
 ### D-031 — F-14 closed: web lint fixed properly and made blocking
 **Decided:** the four `react-hooks` errors are fixed at the source, not suppressed, and CI
 lint is now **blocking** rather than `continue-on-error`.

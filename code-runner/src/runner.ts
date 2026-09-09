@@ -11,6 +11,20 @@ const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const TIMEOUT_MS = 15_000;
 const MEMORY_LIMIT = 256 * 1024 * 1024;
 
+// Hardening limits. User code is hostile by assumption, so the container gets
+// the minimum it needs to compile and run one program and nothing else.
+const PIDS_LIMIT = 128;               // a fork bomb hits this instead of the host
+const CPU_QUOTA_NANOCPUS = 1e9;       // 1.0 CPU; a spin loop cannot starve the box
+const TMPFS_SIZE_BYTES = 64 * 1024 * 1024;
+
+// Compilers write objects and binaries, and the binary is then executed, so the
+// scratch mount must be writable AND executable. `exec` is explicit because
+// Docker mounts tmpfs with `noexec` by default -- without it C and C++ compile
+// fine and then fail with "Permission denied" when the binary runs, which looks
+// like a hardening win right up until you notice half the languages are broken.
+// mode=1777 gives normal /tmp semantics for the unprivileged runner user.
+const TMPFS_OPTS = `rw,exec,nosuid,nodev,mode=1777,size=${TMPFS_SIZE_BYTES}`;
+
 const LANGUAGE_IMAGES: Record<SupportedLanguage, string> = {
   python3: "interviewforge-python-sandbox:latest",
   c: "interviewforge-c-sandbox:latest",
@@ -23,24 +37,90 @@ function getCmd(lang: SupportedLanguage): string[] {
     case "python3":
       return ["sh", "-c", "python3 -u /home/runner/run.py < /home/runner/input.txt 2>&1"];
     case "cpp":
-      return [
-        "sh",
-        "-c",
-        "g++ -std=c++17 -O2 -w -o /tmp/sol /home/runner/solution.cpp 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1",
-      ];
+      return ["sh", "-c", "g++ -std=c++17 -O2 -w -o /tmp/sol /home/runner/solution.cpp 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1"];
     case "java":
-      return [
-        "sh",
-        "-c",
-        "cp /home/runner/Main.java /tmp/ && cd /tmp && javac -Xlint:none Main.java 2>&1 && java -cp /tmp Main < /home/runner/input.txt 2>&1",
-      ];
+      return ["sh", "-c", "cp /home/runner/Main.java /tmp/ && cd /tmp && javac -Xlint:none Main.java 2>&1 && java -cp /tmp Main < /home/runner/input.txt 2>&1"];
     case "c":
-      return [
-        "sh",
-        "-c",
-        "gcc -O2 -w -o /tmp/sol /home/runner/solution.c -lm 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1",
-      ];
+      return ["sh", "-c", "gcc -O2 -w -o /tmp/sol /home/runner/solution.c -lm 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1"];
   }
+}
+
+/**
+ * Container configuration for a sandbox run, extracted so the security posture
+ * is unit-testable. Silently dropping a flag here is the kind of regression that
+ * would otherwise pass every functional test.
+ */
+export function buildContainerConfig(image: string, cmd: string[]) {
+  return {
+    Image: image,
+    Cmd: cmd,
+    // The sandbox images all define an unprivileged `runner` user; this used to
+    // be overridden with "root", which made every other restriction moot.
+    User: "runner",
+    WorkingDir: "/home/runner",
+    // HOME points at the writable tmpfs; toolchains (javac especially) expect
+    // to be able to write there.
+    Env: ["HOME=/tmp"],
+    NetworkDisabled: true,
+    HostConfig: {
+      Memory: MEMORY_LIMIT,
+      MemorySwap: MEMORY_LIMIT,
+      // Compiling and running a program needs no Linux capabilities at all.
+      CapDrop: ["ALL"],
+      // Stop a setuid binary from regaining privileges.
+      SecurityOpt: ["no-new-privileges"],
+      // ReadonlyRootfs is deliberately NOT set: Docker's archive API refuses to
+      // write into a container with a read-only rootfs, before start and after,
+      // so user code could not be injected at all. The container is ephemeral,
+      // unprivileged and network-disabled, so a write to its filesystem is
+      // discarded seconds later; the tmpfs below is what bounds disk usage.
+      Tmpfs: { "/tmp": TMPFS_OPTS },
+      // A fork bomb hits this instead of the host.
+      PidsLimit: PIDS_LIMIT,
+      // A spin loop cannot starve the box.
+      NanoCpus: CPU_QUOTA_NANOCPUS,
+    },
+  };
+}
+
+const MEMORY_SAMPLE_INTERVAL_MS = 40;
+
+/**
+ * Approximate peak memory, by sampling.
+ *
+ * cgroup v2 does not expose `memory_stats.max_usage` through the Docker API, so
+ * a true high-water mark is not available -- only instantaneous `usage`. This
+ * polls it and keeps the maximum seen, which is an approximation: a spike
+ * shorter than the sample interval can be missed, and very short programs may
+ * only be sampled once or twice. That is still far better than the previous
+ * behaviour of reporting null, as long as it is not mistaken for exact.
+ *
+ * Page cache is subtracted the same way `docker stats` does it, otherwise a
+ * program that reads a large file looks like it allocated one.
+ */
+async function samplePeakMemoryBytes(
+  container: Docker.Container,
+  stop: { done: boolean }
+): Promise<number> {
+  let peak = 0;
+  while (!stop.done) {
+    try {
+      const raw = (await container.stats({ stream: false })) as unknown as {
+        memory_stats?: { usage?: number; stats?: Record<string, number> };
+      };
+      const usage = raw?.memory_stats?.usage;
+      if (typeof usage === "number") {
+        const inactiveFile = raw?.memory_stats?.stats?.inactive_file ?? 0;
+        const effective = Math.max(0, usage - inactiveFile);
+        if (effective > peak) peak = effective;
+      }
+    } catch {
+      // Container gone, or stats unavailable on this platform: keep what we have.
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, MEMORY_SAMPLE_INTERVAL_MS));
+  }
+  return peak;
 }
 
 export async function runCode(req: RunRequest): Promise<RunResult> {
@@ -76,22 +156,17 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
   let container: Docker.Container | null = null;
 
   try {
-    container = await docker.createContainer({
-      Image: image,
-      Cmd: getCmd(req.language),
-      User: "root",
-      WorkingDir: "/home/runner",
-      NetworkDisabled: true,
-      HostConfig: {
-        Memory: MEMORY_LIMIT,
-        MemorySwap: MEMORY_LIMIT,
-      },
-    });
+    container = await docker.createContainer(
+      buildContainerConfig(image, getCmd(req.language))
+    );
 
     await container.putArchive(tarBuffer, { path: "/home/runner" });
 
     const startTime = Date.now();
     await container.start();
+
+    const memoryStop = { done: false };
+    const memorySampler = samplePeakMemoryBytes(container, memoryStop);
 
     const waitResult = await Promise.race([
       container.wait() as Promise<{ StatusCode: number }>,
@@ -101,6 +176,9 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
     ]);
 
     const runtimeMs = Date.now() - startTime;
+    memoryStop.done = true;
+    const peakBytes = await memorySampler;
+    const memoryKb = peakBytes > 0 ? Math.round(peakBytes / 1024) : undefined;
     const rawOutput = await readContainerLogs(container);
 
     // Preserve 1:1 testcase/output alignment. Dropping empty lines can
@@ -159,6 +237,7 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
       passed: results.every((r) => r.passed),
       results,
       runtimeMs,
+      memoryKb,
     };
   } catch (err) {
     if (err instanceof Error && err.message === "TLE") {
