@@ -95,7 +95,18 @@ def rerank(query: str, hits: List[Dict[str, Any]], *, keep: int) -> List[Dict[st
         prompt = RERANK_PROMPT.format(query=query, candidates=candidates, keep=keep)
 
         def _call():
-            return _get_llm(None).invoke(prompt)
+            # Instrumented here rather than relying on invoke_with_fallback:
+            # the reranker deliberately bypasses that wrapper (it needs its own
+            # timeout and must never fail the request), which meant the single
+            # highest-volume LLM path was invisible to cost accounting.
+            from app.core import config as cfg
+            from app.core.observability import timed
+
+            with timed("rerank", "gemini", cfg.GEMINI_MODEL) as call:
+                result = _get_llm(None).invoke(prompt)
+                call.input_tokens = len(prompt) // 4
+                call.output_tokens = len(str(getattr(result, "content", result))) // 4
+                return result
 
         future = _POOL.submit(_call)
         try:

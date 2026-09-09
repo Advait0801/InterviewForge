@@ -7,6 +7,65 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-09
+
+### D-034 — Per-user LLM rate limits (closes F-04)
+**Decided:** a second, much tighter limiter (`llmLimiter`, 40 req/15min) applied only to the
+routes that reach a provider — interview create/answer/report, speech, system-design
+analysis, code review, recommendations — on top of the existing global 500/15min.
+**Why two limits:** 500 requests in a window is generous for reading problems and ruinous
+for code review. Before this, one user could exhaust the entire provider quota for
+everyone, on the owner's own API key.
+**Keyed on user, not IP.** An IP bucket is the wrong unit: everyone behind one NAT shares
+it, while one user on mobile gets a fresh bucket per reconnect. Anonymous requests fall
+back to `ipKeyGenerator`, not raw `req.ip`, because raw IPv6 handling would give every
+address in a /64 its own bucket — free to bypass.
+
+### D-035 — Correlation IDs across services
+**Decided:** every request gets an `x-request-id` (reusing an inbound one when present),
+stored per-request and propagated on outbound calls to ai-service, which adopts it into a
+ContextVar so it reaches every chain without threading through signatures.
+**Why:** one user action fans out across four services. Without a shared id their logs
+cannot be joined, and debugging "the interview failed" means guessing which of three
+ai-service log lines belongs to the request.
+**Inbound ids are length-bounded** — a client-supplied header ends up in logs and in
+downstream requests.
+
+### D-036 — LLM cost and latency accounting, and the path it initially missed
+**Added:** `app/core/observability.py` records model, provider, chain, duration, token
+estimates and cost per call, exposed at `GET /metrics/llm`. `chain_name` defaults to the
+factory's `__name__`, so every existing call site got per-chain attribution without being
+touched.
+**Bug caught by using it:** the first version reported `calls: 0` during a real evaluation
+run. The reranker calls `_get_llm()` directly rather than through `invoke_with_fallback`
+(it needs its own timeout and must never fail the request), so the single highest-volume
+LLM path was invisible to cost accounting. Now instrumented explicitly.
+**Measured:** question generation ≈ **$0.000071/call**; reranking ≈ **$0.000194/call** —
+2.7x more, because it ships 20 candidate excerpts per request. Token counts are estimated
+from character length (~4 chars/token) since LangChain does not surface usage metadata
+uniformly; this is for order-of-magnitude cost, not billing.
+
+### D-037 — Gemini model upgrade evaluated and declined, for a capacity reason
+**Question:** should the primary model move from `gemini-3.1-flash-lite-preview` to a
+newer one? (`gemini-3.6-flash` was suggested; `3.7` and `3.8` also exist.)
+**Measured** with the retrieval harness, provider pinned to Gemini so a 429 could not
+silently fail over to GPT-4o-mini and be labelled as a Gemini result:
+
+| model | nDCG | MRR | 429s |
+|---|---|---|---|
+| `gemini-3.1-flash-lite-preview` | 0.8988 | 0.9167 | none |
+| `gemini-3.8-flash` | 0.8860 | 0.9008 | ~20 retries |
+
+**Conclusion: stay on the lite model, but not because it scored higher.** The −0.0128 delta
+is inside the ±0.024 noise band, so on quality the two are indistinguishable — and the
+3.8-flash run is not even a clean measurement, since rate-limited reranker calls hit the 5s
+timeout and fell back to first-stage ranking. Its *lower* wall time is the tell.
+**The decisive finding is capacity, not quality.** On the free tier the newer flash models
+report `limit: 20` (sometimes 5) requests/minute, while the reranker alone issues ~20 calls
+per evaluation. The lite model sustains that rate; the newer ones cannot.
+**Revisit if** the project moves to a paid tier, where the RPM ceiling disappears and the
+comparison becomes a fair quality question again.
+
 ## 2026-09-08
 
 ### D-032 — Sandbox hardened; ReadonlyRootfs deliberately excluded (closes F-03)

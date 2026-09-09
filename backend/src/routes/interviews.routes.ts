@@ -1,6 +1,7 @@
 import { Response, Router } from "express";
 import { query } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
+import { llmLimiter } from "../middleware/rate-limit.middleware";
 import {
   UUID_REGEX,
   normalizeCompany,
@@ -121,7 +122,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-router.post("/", requireAuth, async (req: AuthRequest, res) => {
+router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
   const { company, difficulty } = req.body as { company?: string; difficulty?: string };
 
@@ -211,7 +212,7 @@ router.get("/:id", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-router.get("/:id/report", requireAuth, async (req: AuthRequest, res) => {
+router.get("/:id/report", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
   const id = getSingleParam(req.params.id);
 
@@ -274,7 +275,7 @@ router.get("/:id/report", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-router.post("/:id/answer", requireAuth, async (req: AuthRequest, res) => {
+router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
   const id = getSingleParam(req.params.id);
   const { answer } = req.body as { answer?: string };
@@ -477,7 +478,7 @@ router.post("/:id/answer", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-router.post("/speech/transcribe", requireAuth, async (req: AuthRequest, res) => {
+router.post("/speech/transcribe", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const { audioBase64, mimeType, filename, language } = req.body as {
     audioBase64?: string;
     mimeType?: string;
@@ -506,7 +507,7 @@ router.post("/speech/transcribe", requireAuth, async (req: AuthRequest, res) => 
   }
 });
 
-router.post("/speech/evaluate-explanation", requireAuth, async (req: AuthRequest, res) => {
+router.post("/speech/evaluate-explanation", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const { audioBase64, mimeType, filename, language, question, context } = req.body as {
     audioBase64?: string;
     mimeType?: string;
@@ -542,7 +543,7 @@ router.post("/speech/evaluate-explanation", requireAuth, async (req: AuthRequest
   }
 });
 
-router.post("/system-design/analyze", requireAuth, async (req: AuthRequest, res) => {
+router.post("/system-design/analyze", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const { prompt, explanation, company } = req.body as {
     prompt?: string;
     explanation?: string;

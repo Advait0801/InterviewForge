@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from app.api.rag import router as rag_router
@@ -11,6 +11,35 @@ from app.api.recommendations import router as recommendations_router
 load_dotenv()
 
 app = FastAPI(title="InterviewForge AI Service", version="1.0.0")
+
+
+@app.middleware("http")
+async def correlation_middleware(request: Request, call_next):
+    """Adopt the backend's request id so logs from both services can be joined."""
+    from app.core.observability import (
+        CORRELATION_HEADER,
+        set_correlation_id,
+    )
+
+    incoming = request.headers.get(CORRELATION_HEADER)
+    set_correlation_id(incoming)
+    response = await call_next(request)
+    if incoming:
+        response.headers[CORRELATION_HEADER] = incoming
+    return response
+
+
+@app.get("/metrics/llm")
+def llm_metrics():
+    """Token, latency and estimated-cost totals for this process.
+
+    In-memory by design: a restart resets them, and a multi-instance deployment
+    would need a real metrics backend. Enough to answer "what does one interview
+    cost" without adding infrastructure.
+    """
+    from app.core.observability import snapshot
+
+    return snapshot()
 
 
 @app.get("/health")

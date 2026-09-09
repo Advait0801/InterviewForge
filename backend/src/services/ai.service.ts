@@ -3,6 +3,11 @@ import {
   InterviewStage,
 } from "./interview-state.service";
 
+import {
+  CORRELATION_HEADER,
+  getCurrentCorrelationId,
+} from "../middleware/correlation.middleware";
+
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://ai-service:8000";
 
 export class AIServiceError extends Error {
@@ -87,17 +92,43 @@ export interface SystemDesignAnalysis {
 
 async function postJson<T>(path: string, payload: unknown): Promise<T> {
   let response: globalThis.Response;
+  const correlationId = getCurrentCorrelationId();
+  const startedAt = Date.now();
   try {
     response = await fetch(`${AI_SERVICE_URL}${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        // Propagate the request id so ai-service logs join to ours.
+        ...(correlationId ? { [CORRELATION_HEADER]: correlationId } : {}),
+      },
       body: JSON.stringify(payload),
     });
   } catch (error) {
+    console.error(
+      JSON.stringify({
+        level: "error",
+        event: "ai_service_unreachable",
+        path,
+        correlationId,
+        durationMs: Date.now() - startedAt,
+      })
+    );
     const message =
       error instanceof Error ? error.message : "AI service request failed before receiving a response";
     throw new AIServiceError(503, `AI service unavailable: ${message}`);
   }
+
+  console.info(
+    JSON.stringify({
+      level: "info",
+      event: "ai_service_call",
+      path,
+      status: response.status,
+      correlationId,
+      durationMs: Date.now() - startedAt,
+    })
+  );
 
   if (!response.ok) {
     const text = await response.text();

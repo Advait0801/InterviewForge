@@ -80,7 +80,7 @@ This is the central architectural decision and the whole repo is organized aroun
 - **ChromaDB** - simple, open-source vector DB. Runs as its own container, talks HTTP. Good enough for this scale and free.
 - **PostgreSQL** - relational data with strong constraints (FKs, unique indexes, JSONB where I need flexibility).
 - **Docker + Docker Compose** - every service containerized, one command to bring the whole stack up; same images promoted to production.
-- **Gemini 2.5 Flash primary / GPT-4o-mini fallback** - Gemini is cheap/fast for the primary path; OpenAI is the automatic fallback when Gemini is rate-limited, and OpenAI also powers Whisper for speech.
+- **Gemini 3.1 Flash Lite primary / GPT-4o-mini fallback** (both configurable via `GEMINI_MODEL` / `OPENAI_MODEL`) - Gemini is cheap/fast for the primary path; OpenAI is the automatic fallback when Gemini is rate-limited, and OpenAI also powers Whisper for speech.
 
 ---
 
