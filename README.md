@@ -247,11 +247,15 @@ docker compose up --build
 
 ### Access
 
+> Host ports are deliberately offset (3001, 8010, 5433) so the stack can run
+> alongside other local projects. Services address each other over the compose
+> network on their container ports, so these mappings affect only the host.
+
 | Service | URL |
 |---------|-----|
-| Web app | http://localhost:3000 |
+| Web app | http://localhost:3001 |
 | Backend API | http://localhost:4000 |
-| AI service | http://localhost:8000 |
+| AI service | http://localhost:8010 |
 | Code runner | http://localhost:5050 |
 
 ### Database setup

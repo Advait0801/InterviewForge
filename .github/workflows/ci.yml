@@ -36,13 +36,8 @@ jobs:
 
       - name: Lint
         # Only web has an eslint config today; skip elsewhere rather than fail.
-        #
-        # Non-blocking on purpose: web/ has 4 pre-existing react-hooks errors
-        # (setState-in-effect x3, Date.now() during render in the dashboard).
-        # Fixing them means refactoring working UI, which does not belong in the
-        # commit that establishes CI. Tracked as F-14 -- flip this to blocking
-        # once they are fixed, so lint failures cannot silently accumulate.
-        continue-on-error: true
+        # Blocking as of F-14 being fixed: lint failures now break the build
+        # rather than accumulating silently behind a green tick.
         run: |
           if [ -f eslint.config.mjs ]; then
             npm run lint --if-present

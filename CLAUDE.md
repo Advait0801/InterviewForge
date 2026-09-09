@@ -23,9 +23,9 @@ FastAPI `ai-service`. Do not add LLM calls, prompts, or embedding code to `backe
 
 | Service | Tech | Port | Responsibility |
 |---|---|---|---|
-| `web/` | Next.js 16 (App Router), React 19, TS, Tailwind 4 | 3000 | UI: Monaco editor, React Flow diagrams, Recharts, PDF export |
+| `web/` | Next.js 16 (App Router), React 19, TS, Tailwind 4 | 3000 (3001 host) | UI: Monaco editor, React Flow diagrams, Recharts, PDF export |
 | `backend/` | Express 5, TypeScript | 4000 | Auth, sessions, orchestration, all SQL |
-| `ai-service/` | FastAPI, Python | 8000 | RAG, LLM chains, speech, code review, recommendations |
+| `ai-service/` | FastAPI, Python | 8000 (8010 host) | RAG, LLM chains, speech, code review, recommendations |
 | `code-runner/` | Node + dockerode | 5000 (5050 host in dev) | Ephemeral Docker sandboxes for user code |
 | `postgres` | PostgreSQL 16 | 5432 (5433 host in dev) | Relational data |
 | `chromadb` | Chroma 0.5.5 | 8000 (8001 host) | RAG vector store |
@@ -61,8 +61,10 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - Never put env values statically in `docker-compose.yml` — use `env_file:` only.
 - Services talk over the compose network by hostname (`postgres`, `code-runner`,
   `ai-service`, `chromadb`), not `localhost`. Host port bindings exist only for tools
-  run from the host, so remapping one (Postgres is on **5433** on the host, see D-024)
-  never affects service-to-service traffic.
+  run from the host, so remapping them never affects service-to-service traffic.
+  This machine runs another project on 3000/8000/5432, so InterviewForge's host
+  bindings are offset: **web 3001, ai-service 8010, postgres 5433** (D-024, D-031).
+  The other project's ports are left alone.
 
 **Database**
 - Raw SQL migrations only, numbered, in `backend/sql_migrations/`. No ORM, no

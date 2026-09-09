@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useNow } from "@/lib/useNow";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
@@ -113,6 +114,7 @@ const tips = [
 ];
 
 export default function DashboardPage() {
+  const now = useNow();
   const [userName, setUserName] = useState<string | null>(null);
   const [stats, setStats] = useState<Record<StatKey, number>>({
     problemsAttempted: 0,
@@ -128,7 +130,9 @@ export default function DashboardPage() {
     reasoning: string;
     difficultySuggestion: string;
   } | null>(null);
-  const [recsLoading, setRecsLoading] = useState(false);
+  // Starts true: the mount effect fetches immediately, so setting it inside the
+  // effect would only cause an extra cascading render.
+  const [recsLoading, setRecsLoading] = useState(true);
 
   useEffect(() => {
     api
@@ -151,7 +155,6 @@ export default function DashboardPage() {
         setActivityMap(res.activityMap);
       })
       .catch(() => {});
-    setRecsLoading(true);
     api
       .getRecommendations()
       .then(setRecs)
@@ -298,7 +301,9 @@ export default function DashboardPage() {
                 <div className="-mx-1 flex gap-3 overflow-x-auto pb-2 px-1">
                   {recs.revisit.map((p) => {
                     const last = new Date(p.lastAttemptedAt);
-                    const days = Math.floor((Date.now() - last.getTime()) / (86400 * 1000));
+                    const days = now
+                      ? Math.floor((now - last.getTime()) / (86400 * 1000))
+                      : 0;
                     return (
                       <Link
                         key={p.id}

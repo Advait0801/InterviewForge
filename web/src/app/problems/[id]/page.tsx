@@ -52,12 +52,11 @@ function parseProblemHints(raw: string | null | undefined): string[] {
     .filter(Boolean);
 }
 
+// Reveal count resets when the hints change. That is done by remounting via a
+// `key` at the call site rather than a setState-in-effect, which is React's
+// documented answer to "reset state when a prop changes".
 function ProgressiveHints({ hints }: { hints: string[] }) {
   const [revealed, setRevealed] = useState(0);
-  const hintKey = hints.length ? hints.map((h) => h.slice(0, 24)).join("|") : "";
-  useEffect(() => {
-    setRevealed(0);
-  }, [hintKey]);
 
   if (hints.length === 0) {
     return <p className="text-sm text-text-secondary">No hints available for this problem yet.</p>;
