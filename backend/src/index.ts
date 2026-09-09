@@ -2,7 +2,12 @@ import http from "http";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import rateLimit from "express-rate-limit";
+import { apiLimiter } from "./middleware/rate-limit.middleware";
+import {
+  correlationId,
+  setCurrentCorrelationId,
+  type CorrelatedRequest,
+} from "./middleware/correlation.middleware";
 import { Server } from "socket.io";
 import authRoutes from "./routes/auth.routes";
 import usersRoutes from "./routes/users.routes";
@@ -29,12 +34,13 @@ app.use(
 );
 app.use(express.json());
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 500,
-  standardHeaders: true,
-  legacyHeaders: false,
+// Before the routes so every downstream call and log line can carry the id.
+app.use(correlationId);
+app.use((req, _res, next) => {
+  setCurrentCorrelationId((req as CorrelatedRequest).correlationId);
+  next();
 });
+
 app.use("/api", apiLimiter);
 
 app.get("/health", (req, res) => {

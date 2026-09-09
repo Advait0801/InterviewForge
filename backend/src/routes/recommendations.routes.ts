@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
+import { llmLimiter } from "../middleware/rate-limit.middleware";
 import { AIServiceError, recommendTopics } from "../services/ai.service";
 
 const router = Router();
@@ -96,7 +97,7 @@ async function fetchRevisitProblems(userId: string, limit: number): Promise<Arra
   return result.rows;
 }
 
-router.get("/", requireAuth, async (req: AuthRequest, res) => {
+router.get("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
 
   try {

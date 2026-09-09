@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
+import { llmLimiter } from "../middleware/rate-limit.middleware";
 import { AIServiceError, reviewCode } from "../services/ai.service";
 
 const router = Router();
@@ -91,7 +92,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-router.post("/:id/review", requireAuth, async (req: AuthRequest, res) => {
+router.post("/:id/review", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
   const id = typeof req.params.id === "string" ? req.params.id : req.params.id?.[0];
 

@@ -6,8 +6,9 @@ the bottom, so nothing is lost.
 
 **Status:** Phases 0, 1, 4, 2 and 3 complete and **merged to `main`** (PR #1, `f36b675`).
 All retrieval work is done: nDCG 0.7712 → 0.9009. CI green on all four jobs.
-Awaiting a decision on what comes next — Phase 5 (resume-grounded interviews), Phase 6
-(sandbox hardening), or the demo video from the parked backlog.
+Phase 6 complete (sandbox hardening, per-user LLM limits, correlation IDs, cost/latency
+observability). Remaining: Phase 5 (resume-grounded interviews), Phase 7 (problem set),
+the demo video, and two verification rounds.
 
 ---
 
@@ -504,7 +505,7 @@ praises it, everybody notices its absence.
 | 3 — Query-side retrieval | ✅ Complete | 5 | `10efaa2` |
 | 2 — Index-side retrieval | ✅ Complete | 4 | `e04a0de` |
 | 5 — Resume-grounded interviews | ⬜ Next | — | — |
-| 6 — Hardening & credibility | ⬜ Not started | — | — |
+| 6 — Hardening & credibility | ✅ Complete | 3 | `cf3c7c9` + `44d9667` |
 | 7 — Content depth | ⬜ Not started | — | — |
 | Final verification R1 | ⬜ Not started | — | — |
 | Final verification R2 | ⬜ Not started | — | — |

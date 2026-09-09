@@ -18,7 +18,7 @@
 [![ChromaDB](https://img.shields.io/badge/Chroma-0.5.5-7C3AED)](https://www.trychroma.com)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
 [![LangChain](https://img.shields.io/badge/LangChain-RAG-EC6227)](https://www.langchain.com)
-[![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
+[![Gemini](https://img.shields.io/badge/Gemini-3.1_Flash_Lite-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
 
 </div>
 
@@ -177,7 +177,7 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 | | |
 |---|---|
 | **Framework** | FastAPI, Uvicorn |
-| **LLM** | Gemini 2.5 Flash (primary), GPT-4o-mini (fallback) |
+| **LLM** | Gemini 3.1 Flash Lite (primary), GPT-4o-mini (fallback), set via `GEMINI_MODEL` / `OPENAI_MODEL` |
 | **RAG** | LangChain + ChromaDB, hybrid BM25 + RRF, LLM reranking, per-stage routing |
 | **Evaluation** | Golden-set harness (nDCG / MRR / hit rate), LLM-judge calibration, context-sufficiency rubric |
 | **Embeddings** | Google `text-embedding-004` or OpenAI `text-embedding-3-small` |

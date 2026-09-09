@@ -69,16 +69,47 @@ def _extract_retry_seconds(exc: Exception) -> int:
     return 60
 
 
+def _model_for(provider: str) -> str:
+    return config.GEMINI_MODEL if provider == "gemini" else config.OPENAI_MODEL
+
+
+def _estimate_tokens(payload: dict, result: object) -> tuple[int, int]:
+    """Rough token counts from character length.
+
+    LangChain does not surface usage metadata uniformly across providers, and
+    adding a tokeniser per provider is not worth it for a cost estimate. ~4
+    characters per token is the usual approximation; this is used for
+    order-of-magnitude cost reporting, not billing.
+    """
+    inp = sum(len(str(v)) for v in payload.values()) // 4
+    out = len(str(result)) // 4
+    return inp, out
+
+
 async def invoke_with_fallback(
     chain_factory: Callable[[Optional[str]], object],
     payload: dict,
+    *,
+    chain_name: Optional[str] = None,
 ) -> T:
+    """Invoke a chain, failing over between providers, with cost/latency recorded.
+
+    `chain_name` defaults to the factory's own name, so every existing call site
+    gets per-chain metrics without being touched -- and a new chain is labelled
+    correctly by default rather than landing in an "unknown" bucket.
+    """
+    from app.core.observability import timed
+
+    label = chain_name or getattr(chain_factory, "__name__", "unknown")
     last_error: Optional[Exception] = None
     providers = _available_providers()
     for idx, provider in enumerate(providers):
         try:
             chain = chain_factory(provider)
-            return await chain.ainvoke(payload)
+            with timed(label, provider, _model_for(provider)) as call:
+                result = await chain.ainvoke(payload)
+                call.input_tokens, call.output_tokens = _estimate_tokens(payload, result)
+            return result
         except Exception as exc:
             last_error = exc
             if provider == "gemini" and _should_fallback(exc):
