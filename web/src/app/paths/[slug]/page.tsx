@@ -30,10 +30,14 @@ export default function LearningPathDetailPage() {
 
   useEffect(() => {
     if (!slug) return;
-    setNotFound(false);
+    // Reset inside the async callbacks rather than synchronously here: a
+    // setState during the effect body triggers an immediate cascading render.
     api
       .getLearningPath(slug, true)
-      .then(setData)
+      .then((result) => {
+        setNotFound(false);
+        setData(result);
+      })
       .catch((err) => {
         const msg = err instanceof Error ? err.message : "Failed to load path";
         if (msg.toLowerCase().includes("not found")) setNotFound(true);

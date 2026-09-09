@@ -9,6 +9,41 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-08
 
+### D-031 — F-14 closed: web lint fixed properly and made blocking
+**Decided:** the four `react-hooks` errors are fixed at the source, not suppressed, and CI
+lint is now **blocking** rather than `continue-on-error`.
+**How each was fixed:**
+- `theme-provider.tsx` — the stored theme is external state, so it is read with
+  `useSyncExternalStore` instead of copied into React state in a mount effect. Removes a
+  cascading render (and the theme flash) on every page load, and adds cross-tab sync.
+  `mounted` uses the same mechanism (`() => true` client, `() => false` server).
+- `problems/[id]` — the reset-on-prop-change effect was deleted. The call site already had
+  `key={problem.id}`, which is React's documented way to reset state on prop change, so the
+  effect was redundant.
+- `paths/[slug]` — `setNotFound(false)` moved out of the synchronous effect body into the
+  promise callbacks.
+- `dashboard` — `Date.now()` during render replaced with a `useNow()` hook built on
+  `useSyncExternalStore`, bucketed to the minute so the snapshot is stable within a render.
+  Fixing that surfaced a second, previously masked error in the same file
+  (`setRecsLoading(true)` in the mount effect), fixed by initialising the state to `true`.
+- `avatar.tsx` — the `<img>` warning is disabled with a reason rather than "fixed":
+  avatars are stored as **base64 data URIs**, which `next/image` cannot optimise, and
+  configuring `remotePatterns` for user-supplied URLs would turn the server into an open
+  image proxy. A plain `<img>` is the correct element.
+**Verified at runtime, not just compiled:** the app was started and the login, home,
+register and problems routes all return 200 with no hydration errors.
+
+### D-031b — Host ports offset to coexist with another local project
+**Finding:** this machine runs a separate RA project (`g2aging`) on ports 3000, 8000 and
+5432. `interviewforge-web` had been silently failing to start on the 3000 conflict.
+**Caught by accident, worth recording:** the readiness check polled
+`http://localhost:3000` and got a 200 — from the *other project's* web container — so it
+reported success while our container was not running at all. A readiness probe that does
+not assert *which* application answered is not a readiness probe.
+**Decided:** InterviewForge's host bindings are offset — web **3001**, ai-service **8010**,
+postgres **5433**. The other project's ports are left exactly as they are; it is not ours
+to move. Container ports are unchanged, so service-to-service traffic is unaffected.
+
 ### D-030 — Merged to main; the work is now the default branch
 **Decided:** `feat/platform-v2` merged to `main` via PR #1 (merge commit `f36b675`), with a
 **merge commit rather than a squash**.

@@ -42,6 +42,12 @@ export function Avatar({ src, name, size = "md", className = "" }: AvatarProps) 
 
   if (src) {
     return (
+      // Avatars are stored as base64 data URIs (see POST /api/users/avatar), not
+      // remote URLs. next/image cannot optimise a data URI and would need
+      // `unoptimized` anyway, and configuring remotePatterns for user-supplied
+      // URLs would turn the server into an open image proxy. A plain <img> is
+      // the correct element here.
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt={name ?? "avatar"}
