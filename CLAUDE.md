@@ -122,10 +122,12 @@ still accurate and redeployable.
   `continue-on-error` because of 4 pre-existing react-hooks errors (F-14).
 - Socket.IO is scaffolded on both ends but only emits a `hello` — realtime is unused.
 - Email verification / password reset tokens work, but emails are only `console.log`ed.
-- `code-runner` sets `NetworkDisabled` and a 256 MiB memory cap, but still runs
-  containers as `root` with no `CapDrop`, `no-new-privileges`, `PidsLimit`, or CPU quota.
-  Scheduled for Phase 6.
-- `memoryKb` on submissions is never measured (always null).
+- ~~Sandbox runs as root with no capability/pid/cpu limits~~ — fixed in Phase 6.
+  Containers now run as the unprivileged `runner` user with `CapDrop: ALL`,
+  `no-new-privileges`, `PidsLimit`, `NanoCpus`, and a size-bounded exec tmpfs.
+  `ReadonlyRootfs` is deliberately not set — see D-032.
+- ~~`memoryKb` always null~~ — now sampled during execution. Absent for runs shorter
+  than roughly one sample interval; approximate rather than exact (D-033).
 - README's repo-layout block lists `docs/smoke-test.md`, which never existed.
 
 ## Related docs
