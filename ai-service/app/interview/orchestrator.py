@@ -133,3 +133,89 @@ def build_context_from_hits(hits: List[Dict[str, Any]]) -> str:
 def get_company_style(company: str) -> str:
     profile: CompanyProfile = get_company_profile(company)
     return profile.style
+
+
+# --- resume-grounded retrieval (Phase 5) ------------------------------------
+
+# What to pull out of a resume for each interview stage. A behavioural question
+# needs the employment history; a system design question needs the projects.
+# Retrieving the whole resume for every stage would hand the model five chunks
+# of skills-list boilerplate and bury the one project worth asking about.
+RESUME_STAGE_QUERIES: Dict[str, str] = {
+    "behavioral": (
+        "ownership, leadership, collaboration and impact in the candidate's roles, "
+        "employers, responsibilities and outcomes"
+    ),
+    "coding": (
+        "programming languages, algorithms, data structures and implementation work "
+        "in the candidate's projects"
+    ),
+    "system_design": (
+        "architecture, scale, infrastructure, databases, distributed systems and "
+        "technical design decisions in the candidate's projects"
+    ),
+    "core_cs": (
+        "operating systems, networking, databases, concurrency and computer science "
+        "fundamentals in the candidate's coursework, projects and skills"
+    ),
+}
+
+
+def build_resume_query(*, company: str, stage: str) -> str:
+    focus = RESUME_STAGE_QUERIES.get(stage, "the candidate's experience, projects and skills")
+    profile = get_company_profile(company)
+    return f"{focus}. Relevant to: {', '.join(profile.focus_areas)}."
+
+
+def retrieve_resume_context(
+    *,
+    store: Any,
+    user_id: Optional[str],
+    company: str,
+    stage: str,
+    top_k: int = 4,
+) -> List[Dict[str, Any]]:
+    """Fetch the candidate's own resume chunks for this stage.
+
+    Returns [] rather than raising for every failure mode -- no user, no resume,
+    Chroma unreachable. A resume is an enhancement to the interview, and losing
+    it must degrade to the ordinary company-grounded question rather than fail
+    the request.
+    """
+    if not user_id:
+        return []
+    try:
+        return store.retrieve(
+            user_id, build_resume_query(company=company, stage=stage), top_k=top_k
+        )
+    except Exception as exc:
+        log.warning("resume retrieval failed, continuing without it: %s", str(exc)[:200])
+        return []
+
+
+def build_resume_context(hits: List[Dict[str, Any]]) -> str:
+    """Render resume hits with their section labels.
+
+    The section name is what lets the model say "your Kafka pipeline project"
+    instead of "something in your resume": without it the chunks are unlabelled
+    prose and the model has to guess whether it is reading a job or a project.
+    """
+    if not hits:
+        return ""
+    blocks = []
+    for hit in hits:
+        section = (hit.get("metadata") or {}).get("section", "resume")
+        blocks.append(f"[{section}]\n{hit.get('text', '')}")
+    return "\n\n---\n\n".join(blocks)
+
+
+def resume_evidence(hits: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Compact, non-sensitive provenance for the API response and the UI."""
+    return [
+        {
+            "section": (hit.get("metadata") or {}).get("section", "resume"),
+            "excerpt": str(hit.get("text", ""))[:180],
+            "distance": hit.get("distance"),
+        }
+        for hit in hits
+    ]

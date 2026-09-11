@@ -19,6 +19,7 @@ import assessmentsRoutes from "./routes/assessments.routes";
 import leaderboardRoutes from "./routes/leaderboard.routes";
 import learningPathsRoutes from "./routes/learningPaths.routes";
 import recommendationsRoutes from "./routes/recommendations.routes";
+import resumesRoutes from "./routes/resumes.routes";
 
 dotenv.config();
 
@@ -32,7 +33,9 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+// Resumes arrive as base64 JSON (the same pattern as avatars), so the body
+// limit has to clear a 5MB PDF plus base64 inflation. Express defaults to 100kb.
+app.use(express.json({ limit: "8mb" }));
 
 // Before the routes so every downstream call and log line can carry the id.
 app.use(correlationId);
@@ -65,6 +68,7 @@ app.use("/api/assessments", assessmentsRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/learning-paths", learningPathsRoutes);
 app.use("/api/recommendations", recommendationsRoutes);
+app.use("/api/resumes", resumesRoutes);
 
 const server = http.createServer(app);
 

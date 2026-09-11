@@ -22,9 +22,26 @@ def test_distant_best_hit_is_not_confident():
     assert not v.confident and "too distant" in v.reason
 
 
-def test_single_good_hit_is_not_enough():
-    v = assess([hit(0.20), hit(1.4), hit(1.5)], company="amazon")
+def test_too_few_good_hits_is_not_confident(monkeypatch):
+    """The good-hits floor is enforced, whatever it is currently tuned to.
+
+    This used to hard-code "one good hit is not enough". Calibration against the
+    real corpus moved MIN_GOOD_HITS to 1 (D-038) -- the company+stage filter
+    often returns only 2-3 hits, so demanding two usable ones fetched for
+    companies that are in fact well covered. The floor still has to work, so the
+    test now exercises the mechanism and lets the tuned value live in one place:
+    test_confidence_thresholds_match_the_calibrated_operating_point.
+    """
+    import app.ingest.confidence as conf
+
+    monkeypatch.setattr(conf, "MIN_GOOD_HITS", 2)
+    v = conf.assess([hit(0.20), hit(1.4), hit(1.5)], company="amazon")
     assert not v.confident and "need" in v.reason
+
+
+def test_one_good_hit_is_enough_at_the_calibrated_floor():
+    v = assess([hit(0.20), hit(1.4), hit(1.5)], company="amazon")
+    assert v.confident
 
 
 def test_missing_company_specific_chunk_is_not_confident():

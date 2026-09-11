@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { Response, Router } from "express";
 import { query } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
@@ -32,6 +33,7 @@ type SessionRow = {
   current_stage: string;
   status: string;
   stage_turn_count: number;
+  resume_grounded: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -71,9 +73,29 @@ function sendAIServiceError(res: Response, err: AIServiceError) {
   });
 }
 
+/**
+ * Whether this user has a resume indexed. Read from Postgres rather than asked
+ * of the AI service: it is one indexed query on the request path, and it means
+ * a user with no resume never causes a cross-service call at all.
+ */
+async function userHasResume(userId: string): Promise<boolean> {
+  try {
+    const result = await query<{ exists: boolean }>(
+      `SELECT EXISTS(SELECT 1 FROM resumes WHERE user_id = $1 AND chunk_count > 0) AS exists`,
+      [userId]
+    );
+    return result.rows[0]?.exists === true;
+  } catch (err) {
+    // Personalisation is additive; never fail an interview because the lookup did.
+    console.error("Resume lookup failed, continuing without grounding", err);
+    return false;
+  }
+}
+
 async function getSessionForUser(sessionId: string, userId: string) {
   return query<SessionRow>(
-    `SELECT id, user_id, company, current_stage, status, stage_turn_count, created_at, updated_at
+    `SELECT id, user_id, company, current_stage, status, stage_turn_count, resume_grounded,
+            created_at, updated_at
      FROM interview_sessions
      WHERE id = $1 AND user_id = $2`,
     [sessionId, userId]
@@ -108,7 +130,8 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
   try {
     const result = await query<SessionRow>(
-      `SELECT id, user_id, company, current_stage, status, stage_turn_count, created_at, updated_at
+      `SELECT id, user_id, company, current_stage, status, stage_turn_count, resume_grounded,
+              created_at, updated_at
        FROM interview_sessions
        WHERE user_id = $1
        ORDER BY created_at DESC
@@ -124,7 +147,11 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
 
 router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
-  const { company, difficulty } = req.body as { company?: string; difficulty?: string };
+  const { company, difficulty, useResume } = req.body as {
+    company?: string;
+    difficulty?: string;
+    useResume?: boolean;
+  };
 
   if (!company) {
     return res.status(400).json({ error: "company is required" });
@@ -138,21 +165,32 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const startingStage: InterviewStage = "behavioral";
   const stageDifficulty = difficulty ?? getDefaultDifficulty(startingStage);
 
+  // Default on: a user who uploaded a resume expects it to be used. `false`
+  // opts out explicitly, for practising a company's generic loop.
+  const wantsResume = useResume !== false;
+  const resumeGrounded = wantsResume && (await userHasResume(userId));
+
+  // Minted here rather than by the database default because the question is
+  // generated before the row exists, and the live-fetch limiter needs a session
+  // key to bound how much one interview can spend. Generating first and
+  // inserting after is deliberate: a failed generation leaves no orphan row.
+  const sessionId = randomUUID();
+
   try {
     const nextQuestion = await generateNextQuestion({
       company: normalizedCompany,
       stage: startingStage,
       difficulty: stageDifficulty,
+      user_id: userId,
+      resume_grounded: resumeGrounded,
+      session_id: sessionId,
     });
 
-    const sessionResult = await query<{ id: string }>(
-      `INSERT INTO interview_sessions (user_id, company, current_stage, status, stage_turn_count)
-       VALUES ($1, $2, $3, 'active', 0)
-       RETURNING id`,
-      [userId, normalizedCompany, startingStage]
+    await query(
+      `INSERT INTO interview_sessions (id, user_id, company, current_stage, status, stage_turn_count, resume_grounded)
+       VALUES ($1, $2, $3, $4, 'active', 0, $5)`,
+      [sessionId, userId, normalizedCompany, startingStage, resumeGrounded]
     );
-
-    const sessionId = sessionResult.rows[0].id;
 
     await insertMessage({
       sessionId,
@@ -166,6 +204,11 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
         reasoningFocus: nextQuestion.reasoningFocus,
         expectedCompetencies: nextQuestion.expectedCompetencies,
         context: nextQuestion.context,
+        resumeGrounded: nextQuestion.resumeGrounded ?? false,
+        groundedIn: nextQuestion.groundedIn ?? null,
+        resumeEvidence: nextQuestion.resumeEvidence ?? [],
+        retrievalConfidence: nextQuestion.retrievalConfidence ?? null,
+        liveIngestion: nextQuestion.liveIngestion ?? null,
       },
     });
 
@@ -175,6 +218,7 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
         company: normalizedCompany,
         currentStage: startingStage,
         status: "active",
+        resumeGrounded: nextQuestion.resumeGrounded ?? false,
       },
       openingQuestion: nextQuestion,
     });
@@ -421,6 +465,12 @@ router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res
       stage: nextStage,
       difficulty: getDefaultDifficulty(nextStage),
       previousAnswer: answer,
+      user_id: userId,
+      // The session's own flag, not a fresh lookup: a resume deleted mid-
+      // interview must stop grounding, and `resume_grounded` with no chunks
+      // degrades to an ordinary question on the AI service side.
+      resume_grounded: session.resume_grounded === true,
+      session_id: id,
     });
 
     await insertMessage({
@@ -451,6 +501,11 @@ router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res
         reasoningFocus: nextQuestion.reasoningFocus,
         expectedCompetencies: nextQuestion.expectedCompetencies,
         context: nextQuestion.context,
+        resumeGrounded: nextQuestion.resumeGrounded ?? false,
+        groundedIn: nextQuestion.groundedIn ?? null,
+        resumeEvidence: nextQuestion.resumeEvidence ?? [],
+        retrievalConfidence: nextQuestion.retrievalConfidence ?? null,
+        liveIngestion: nextQuestion.liveIngestion ?? null,
       },
     });
 

@@ -196,6 +196,19 @@ class StructuredQuestionOutput(BaseModel):
     expectedCompetencies: List[str] = Field(description="Key competencies this question targets.")
 
 
+class ResumeGroundedQuestionOutput(BaseModel):
+    question: str = Field(description="A single interview question for the candidate.")
+    reasoningFocus: str = Field(description="What this question is trying to assess.")
+    expectedCompetencies: List[str] = Field(description="Key competencies this question targets.")
+    groundedIn: str = Field(
+        description=(
+            "The exact detail from the candidate's resume this question refers to -- "
+            "a project name, employer, or technology copied verbatim from the resume "
+            "context. Empty string only if the resume context was unusable."
+        )
+    )
+
+
 class StructuredEvaluationOutput(BaseModel):
     score: int = Field(ge=1, le=10, description="Overall score from 1 to 10.")
     strengths: List[str]
@@ -262,6 +275,48 @@ def structured_question_chain(provider: Optional[str] = None):
             "## Difficulty\n{difficulty}\n\n"
             "## Difficulty calibration (bar for this level)\n{difficulty_calibration}\n\n"
             "## Retrieved context\n{context}"
+        )),
+    ]).partial(format_instructions=parser.get_format_instructions())
+    return prompt | _get_llm(provider) | parser
+
+
+def resume_grounded_question_chain(provider: Optional[str] = None):
+    """Question generation that blends company context with the candidate's resume.
+
+    A separate chain rather than an extra variable on `structured_question_chain`
+    on purpose: that chain is covered by the Phase 1 prompt-regression snapshots
+    and is the one the retrieval evaluation measures. Editing its prompt would
+    invalidate both for a feature that only some sessions use.
+
+    The prompt keeps the two context blocks *labelled and separate*. Merged into
+    one blob, the model reliably confuses "what this company asks about" with
+    "what this candidate did", and starts attributing the company's engineering
+    blog to the candidate.
+    """
+    parser = JsonOutputParser(pydantic_object=ResumeGroundedQuestionOutput)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "You are InterviewForge, an expert technical interviewer. "
+            "Generate one interview question that is specific to THIS candidate, "
+            "asked in the style of the target company.\n"
+            "Rules:\n"
+            "- The question MUST refer to something concrete from the candidate resume "
+            "context: a named project, employer, or technology they actually listed.\n"
+            "- Never invent experience the resume does not contain. If the resume is thin "
+            "on this stage, ask about the closest thing it does contain.\n"
+            "- The company context describes what the company cares about. It is NOT the "
+            "candidate's experience -- never attribute it to them.\n"
+            "- Set groundedIn to the resume detail you used, copied verbatim.\n"
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", (
+            "## Company\n{company}\n\n"
+            "## Company style\n{company_style}\n\n"
+            "## Stage\n{stage}\n\n"
+            "## Difficulty\n{difficulty}\n\n"
+            "## Difficulty calibration (bar for this level)\n{difficulty_calibration}\n\n"
+            "## Company context (what this company probes for -- NOT the candidate)\n{context}\n\n"
+            "## Candidate resume context (the candidate's own experience)\n{resume_context}"
         )),
     ]).partial(format_instructions=parser.get_format_instructions())
     return prompt | _get_llm(provider) | parser
