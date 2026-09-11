@@ -31,12 +31,47 @@ export interface StructuredEvaluation {
   followupFocus: string;
 }
 
+export interface RetrievalConfidence {
+  confident: boolean;
+  reason: string;
+  top_distance: number | null;
+  good_hits: number;
+  company_matched: boolean;
+}
+
+export interface LiveIngestionOutcome {
+  triggered: boolean;
+  reason: string;
+  urls_considered: string[];
+  pages_ingested: number;
+  chunks_written: number;
+  skipped: { url: string; why: string }[];
+  error: string | null;
+}
+
+export interface ResumeEvidence {
+  section: string;
+  excerpt: string;
+  distance: number | null;
+}
+
 export interface StructuredQuestion {
   question: string;
   reasoningFocus: string;
   expectedCompetencies: string[];
   retrievalHits: number;
   context: string;
+  // Present only on resume-grounded questions. `resumeGrounded` reflects what
+  // actually happened, not what was requested: asking for grounding with no
+  // resume indexed yields a normal question with this false.
+  resumeGrounded?: boolean;
+  resumeHits?: number;
+  resumeEvidence?: ResumeEvidence[];
+  groundedIn?: string;
+  // Which retrieval path served this question. `liveIngestion.triggered` is how
+  // the write-back cache is observed from outside the AI service.
+  retrievalConfidence?: RetrievalConfidence | null;
+  liveIngestion?: LiveIngestionOutcome | null;
 }
 
 export interface StructuredFollowup {
@@ -90,19 +125,23 @@ export interface SystemDesignAnalysis {
   rubric: Record<string, VoiceRubricSection>;
 }
 
-async function postJson<T>(path: string, payload: unknown): Promise<T> {
+async function sendJson<T>(
+  method: "POST" | "DELETE",
+  path: string,
+  payload?: unknown
+): Promise<T> {
   let response: globalThis.Response;
   const correlationId = getCurrentCorrelationId();
   const startedAt = Date.now();
   try {
     response = await fetch(`${AI_SERVICE_URL}${path}`, {
-      method: "POST",
+      method,
       headers: {
         "Content-Type": "application/json",
         // Propagate the request id so ai-service logs join to ours.
         ...(correlationId ? { [CORRELATION_HEADER]: correlationId } : {}),
       },
-      body: JSON.stringify(payload),
+      body: payload === undefined ? undefined : JSON.stringify(payload),
     });
   } catch (error) {
     console.error(
@@ -153,13 +192,53 @@ async function postJson<T>(path: string, payload: unknown): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function postJson<T>(path: string, payload: unknown): Promise<T> {
+  return sendJson<T>("POST", path, payload);
+}
+
 export async function generateNextQuestion(params: {
   company: Company;
   stage: InterviewStage;
   difficulty: string;
   previousAnswer?: string | null;
+  // snake_case because the ai-service request model uses it; the rest of this
+  // payload predates that and is left alone rather than renamed on both sides.
+  user_id?: string;
+  resume_grounded?: boolean;
+  session_id?: string;
 }): Promise<StructuredQuestion> {
   return postJson<StructuredQuestion>("/api/interview/next-question", params);
+}
+
+export interface ResumeIngestResult {
+  userId: string;
+  namespace: string;
+  chunkCount: number;
+  sections: string[];
+  pageCount: number;
+  charCount: number;
+  parsedSections: string[];
+}
+
+export interface ResumePurgeResult {
+  namespace: string;
+  deletedChunks: number;
+  namespaceDropped: boolean;
+  remainingChunks: number;
+  verified: boolean;
+}
+
+export async function ingestResume(params: {
+  user_id: string;
+  resume_id: string;
+  content_base64: string;
+  filename: string;
+}): Promise<ResumeIngestResult> {
+  return postJson<ResumeIngestResult>("/api/resume/ingest", params);
+}
+
+export async function deleteResumeVectors(userId: string): Promise<ResumePurgeResult> {
+  return sendJson<ResumePurgeResult>("DELETE", `/api/resume/${encodeURIComponent(userId)}`);
 }
 
 export async function evaluateAnswer(params: {

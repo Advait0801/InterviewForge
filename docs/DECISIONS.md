@@ -7,6 +7,127 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-10
+
+### D-039 — Resume isolation is three layers, and deletion drops the namespace
+**Shipped Phase 5:** resume upload → parse → per-user vector namespace → blended
+retrieval → grounded question generation.
+
+**Isolation is defended three independent ways**, because the failure mode is one
+candidate's resume surfacing in another's interview -- a data breach, not a wrong answer:
+1. **Physical namespace.** Each user's chunks live in their own Chroma collection,
+   `resume_<sha256(user_id)[:32]>`. A query against one collection cannot return another
+   user's chunk however wrong the filter is. The id is hashed because collection names are
+   visible in admin tooling.
+2. **Metadata filter.** Every chunk still carries `user_id` and every query still passes
+   `where={"user_id": {"$eq": ...}}` -- redundant on purpose, since this is the layer that
+   catches a namespacing bug.
+3. **Egress check.** Every hit is verified against the requesting user before return; a
+   mismatch is dropped, logged and counted in `ISOLATION_VIOLATIONS`, surfaced at
+   `GET /metrics/llm`. Fails closed and is observable.
+Each layer is mutation-tested separately: collapsing the namespace fails 7 tests, removing
+the `where` filter fails 1, disabling the egress check fails 1. A suite that only exercises
+all three together could not tell you two of them had stopped working.
+
+**Deletion drops the collection rather than emptying it.** An empty collection still named
+after the user discloses that they once had a resume. `DELETE` re-reads after purging and
+500s if anything remains, so "deleted" is verified rather than claimed.
+
+**A separate `resume_grounded_question_chain`, not a flag on the existing one.**
+`structured_question_chain` is covered by the Phase 1 prompt snapshots and is what the
+retrieval evaluation measures; editing its prompt for a feature only some sessions use
+would invalidate both. The new chain emits `groundedIn` -- the resume detail used, copied
+verbatim -- which is what makes "references real resume content" checkable rather than
+eyeballed. Company and resume context stay in **separate labelled prompt blocks**: merged,
+the model attributes the company's engineering blog to the candidate.
+**Grounding follows the retrieved chunks, not the request flag.** A user who asks for
+grounding but has no resume gets the ordinary chain, never a prompt instructed to cite a
+resume it cannot see.
+
+### D-040 — Three defects the unit tests could not see, found by running it for real
+All three were found by `scripts/verify_resume_isolation.py` against the live stack, and
+all three had green unit tests over the same code.
+
+**1. A rejected upload destroyed the resume the user already had.** The first ordering was
+upsert-the-row → ingest → roll back on failure, and the rollback deleted the row *and*
+purged the namespace. So uploading a scanned PDF wiped a perfectly good existing resume.
+Now nothing is mutated until ingestion succeeds: the row id is reused when one exists (so
+it stays stable across re-uploads) and the insert happens only after the AI service returns.
+**A rejected upload is now a no-op.**
+
+**2. A provider outage mid-re-upload lost the old resume.** `ResumeStore.ingest` purged
+before embedding, so the step that actually fails -- reaching the embedding provider --
+happened after the old data was gone. **Embedding now happens first**; the namespace is
+only replaced once there is something to replace it with. The destructive rollback in the
+ai-service handler was removed for the same reason.
+
+**3. Reading created what it was asked about, and deletion resurrected itself.**
+Read paths used `get_or_create_collection`, so merely asking whether a user had a resume
+materialised an empty collection named after them -- and the `DELETE` handler's verifying
+read-back **re-created the collection it had just dropped**. Deletion reported success
+while the namespace survived. Read paths now use a non-creating lookup that returns `None`.
+Caught only because the end-to-end run audits Chroma's collection list directly; the fake
+modelled `get_or_create` for both paths, so the unit tests were structurally blind to it.
+The fake now models the two lookups distinctly.
+
+**Verified against the live stack: 34/34 checks pass** -- two users ingested with one
+namespace each, neither able to retrieve the other's chunks (asserted by content markers in
+both directions), zero isolation violations, deletion purging every vector *confirmed by
+direct Chroma query*, user B untouched, all five malformed-PDF classes returning actionable
+4xx rather than a crash, and a generated question quoting the candidate's real resume
+("HIPAA-compliant patient messaging app... offline-first sync", `groundedIn` populated).
+
+**Not done:** there is no web UI for upload or deletion -- the feature is exercised through
+the API and the verification script. The exit criteria are isolation and deletion, not a
+clickable demo, so this is recorded rather than rushed.
+
+### D-038 — The Phase 4 live path was never wired in, and its gate was calibrated for the wrong metric
+**Found while starting Phase 5:** `retrieve_with_live_fallback` — the read-through
+write-back cache that is Phase 4's headline mechanism (D-009) — was referenced **only by its
+own tests**. `app/api/interview.py` called plain `retrieve_company_context`, so in the running
+system the confidence gate never ran, no live fetch ever fired, and nothing was ever written
+back. Phase 4's exit criterion "hybrid path verified in both directions" was met by unit tests
+calling the function directly, which is exactly the class of check that cannot see this.
+**Fixed:** `next-question` now calls the hybrid path, and forwards `user_id` and `session_id`
+so the per-user and per-session fetch caps are actually enforceable (they were unreachable
+before, since nothing supplied the ids). The backend mints the session UUID up front rather
+than letting the database default it — the question is generated before the row is inserted,
+so without a client-minted id there is no session key to bound spend with. Generating first
+and inserting after is kept deliberately: a failed generation leaves no orphan session.
+
+**Then the gate turned out to be miscalibrated, which the wiring exposed immediately.**
+Measured across all 40 company/stage pairs, only **3 of 40** passed the confidence check — so
+wiring the path in as-found would have sent ~93% of questions down the expensive live path.
+That is the "too eager" failure mode `confidence.py`'s own docstring warns about.
+**Root cause is a metric mismatch, not a bad threshold.** The collection uses Chroma's default
+`l2` space, and on unit-normalised embeddings that returns *squared* euclidean distance, which
+is exactly `2 * (1 - cosine_similarity)` — verified against hand-computed dot products
+(`chroma_d=0.5796` vs `2*(1-0.7102)=0.5796`), not assumed. The thresholds were written for a
+`[0, 2]` cosine-distance scale, so **every one was a factor of two too strict**.
+**Recalibrated against the corpus rather than doubled by arithmetic.**
+`app/eval/calibrate_confidence.py` sweeps the grid using a non-circular label — the 4
+hand-seeded companies must not fetch, the 6 thin Phase 4 starters should — and optimises
+perfect recall on covered pairs first, since a needless fetch costs money, latency *and*
+unvetted corpus content. Operating point: `MAX_TOP_DISTANCE 0.62 → 0.78`,
+`MAX_GOOD_DISTANCE 0.75 → 0.85`, `MIN_GOOD_HITS 2 → 1`.
+**Result: 16/16 well-covered pairs now pass (zero needless fetches) and 24/24 thin pairs
+trigger the live path** — 18 on distance, 6 because the company+stage filter matched nothing
+and the corpus-wide fallback returned other companies' chunks (`company_matched=False`).
+Perfect separation, and each half has an explained mechanism.
+**`MIN_GOOD_HITS` dropped to 1 on evidence:** the company+stage filter often returns only 2–3
+hits from a 721-chunk corpus, so demanding two usable ones cut covered-pair recall to 56–69%.
+`test_single_good_hit_is_not_enough` encoded the old value and was rewritten to exercise the
+floor mechanism with the number monkeypatched, so the tuned value lives in exactly one place.
+**Regression-proofed at the level the bug lived at.** The new tests drive the HTTP endpoint,
+because a unit test that calls the function directly can never answer "is this connected to
+anything". Confirmed by mutation: reverting `next-question` to plain retrieval fails exactly
+3 of them, and restoring it passes all 6.
+**Not fixed, and worth stating:** live *discovery* currently returns nothing — the Gemini free
+tier is returning 429 RESOURCE_EXHAUSTED for search-grounded calls (consistent with D-037's
+capacity finding). The path degrades safely (`"discovery returned no candidates"`, no
+exception, interview unaffected), but write-back cannot be demonstrated end to end until
+quota is available. The gate and the wiring are verifiable today; the fetch half is not.
+
 ## 2026-09-09
 
 ### D-034 — Per-user LLM rate limits (closes F-04)
@@ -561,6 +682,7 @@ Things observed in the code that need a call made on them.
 | F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed). Still no generated contract between Express/FastAPI and `web/` | `web/src/lib/api.ts` |
 | F-18 | `brendangregg` feed ingested four entries all titled "Brendan Gregg's Blog" — the feed appears to link to the index page rather than individual articles, so those chunks are low value | `ai-service/app/ingest/sources.py` |
 | F-19 | `FetchLimiter` counters are in-process, so limits are per-instance. A multi-instance deployment would multiply the global daily cap by the instance count; needs Redis | `ai-service/app/ingest/limits.py` |
+| F-20 | Live *discovery* depends on Gemini search grounding, which returns 429 on the free tier — the live fetch degrades safely to local context but cannot write back until quota exists (D-038) | `ai-service/app/ingest/live.py` |
 | F-16 | `EmbeddingService` has no fallback on *error*: if the configured provider returns 401/404 the call raises rather than trying the other provider, unlike `invoke_with_fallback` for LLM calls | `ai-service/app/rag/embeddings.py` |
 | F-17 | Retrieval metrics are identical with and without the company/stage metadata filter, so the filter currently buys nothing measurable on this corpus. Re-test after Phase 4 expands it | `ai-service/app/interview/orchestrator.py` |
 | F-14 | 4 pre-existing `react-hooks` lint errors in `web/`: `setState` called synchronously in effects (theme-provider, paths/[slug], problems/[id]) and `Date.now()` called during render (dashboard "days ago" label). CI lint for `web` is `continue-on-error` until fixed | `web/src/` |

@@ -8,8 +8,11 @@ from app.core import config
 from app.interview.company_profiles import get_company_profile, get_difficulty_calibration
 from app.interview.orchestrator import (
     build_context_from_hits,
+    build_resume_context,
     get_company_style,
-    retrieve_company_context,
+    resume_evidence,
+    retrieve_resume_context,
+    retrieve_with_live_fallback,
 )
 from app.llm.chains import (
     evaluation_chain,
@@ -17,15 +20,35 @@ from app.llm.chains import (
     interview_report_chain,
     invoke_with_fallback,
     question_generation_chain,
+    resume_grounded_question_chain,
     structured_evaluation_chain,
     structured_followup_chain,
     structured_question_chain,
 )
 from app.rag.service import RAGService
+from app.resume.store import ResumeStore
 
 router = APIRouter(prefix="/api/interview", tags=["interview"])
 
 _rag_service: Optional[RAGService] = None
+_resume_store: Optional[ResumeStore] = None
+
+
+def _get_resume_store() -> Optional[ResumeStore]:
+    """None rather than an exception when the store cannot be built.
+
+    Resume grounding is additive: if it is unavailable the interview must still
+    run, just without personalisation."""
+    global _resume_store
+    if _resume_store is None:
+        try:
+            _resume_store = ResumeStore()
+        except Exception as exc:
+            import logging
+
+            logging.getLogger(__name__).warning("resume store unavailable: %s", exc)
+            return None
+    return _resume_store
 
 
 def _get_rag_service() -> RAGService:
@@ -65,6 +88,14 @@ class NextQuestionRequest(BaseModel):
     difficulty: str = Field(default="medium", examples=["medium"])
     top_k: Optional[int] = None
     previous_answer: Optional[str] = None
+    # Resume grounding is opt-in per request and requires a user id. Defaulting
+    # it on would read another user's namespace the moment a caller forgot to
+    # pass user_id -- so the two must arrive together or not at all.
+    user_id: Optional[str] = None
+    resume_grounded: bool = False
+    # Scopes the live-fetch limiter's per-session budget. Without it one
+    # interview can spend the whole global daily allowance on its own.
+    session_id: Optional[str] = None
 
 
 class EvaluateAnswerRequest(BaseModel):
@@ -175,13 +206,19 @@ async def next_question(req: NextQuestionRequest):
     rag = _get_rag_service()
     top_k = req.top_k or config.RAG_TOP_K
     try:
-        retrieved = retrieve_company_context(
+        # The hybrid read-through path, not plain retrieval: when local grounding
+        # is weak this fetches, writes back to Chroma and re-retrieves, so the
+        # next person asking the same thing gets the fast path. Every failure
+        # mode inside it degrades to local context rather than raising.
+        retrieved = retrieve_with_live_fallback(
             rag=rag,
             company=req.company,
             stage=req.stage,
             difficulty=req.difficulty,
             top_k=top_k,
             previous_answer=req.previous_answer,
+            user_id=req.user_id,
+            session_id=req.session_id,
         )
     except Exception as e:
         global _rag_service
@@ -190,21 +227,51 @@ async def next_question(req: NextQuestionRequest):
 
     context = build_context_from_hits(retrieved["hits"])
     calibration_text = get_difficulty_calibration(req.company, req.difficulty)
+
+    resume_hits = []
+    if req.resume_grounded and req.user_id:
+        store = _get_resume_store()
+        if store is not None:
+            resume_hits = retrieve_resume_context(
+                store=store,
+                user_id=req.user_id,
+                company=req.company,
+                stage=req.stage,
+            )
+
+    payload = {
+        "company": req.company,
+        "company_style": _safe_company_style(req.company),
+        "stage": req.stage,
+        "difficulty": req.difficulty,
+        "difficulty_calibration": calibration_text or "Use default expectations for this difficulty.",
+        "context": context,
+    }
+
+    # Grounding is decided by whether resume chunks were actually retrieved, not
+    # by the request flag. A user who asked for it but has no resume gets the
+    # ordinary question rather than a prompt told to cite a resume it cannot see.
+    if resume_hits:
+        payload["resume_context"] = build_resume_context(resume_hits)
+        chain = resume_grounded_question_chain
+    else:
+        chain = structured_question_chain
+
     try:
-        result = await invoke_with_fallback(structured_question_chain, {
-            "company": req.company,
-            "company_style": _safe_company_style(req.company),
-            "stage": req.stage,
-            "difficulty": req.difficulty,
-            "difficulty_calibration": calibration_text or "Use default expectations for this difficulty.",
-            "context": context,
-        })
+        result = await invoke_with_fallback(chain, payload)
     except Exception as exc:
         _raise_llm_http_error(exc)
     return {
         **result,
         "retrievalHits": len(retrieved["hits"]),
         "context": context,
+        # Surfaced so the caller can see which path served the question -- a
+        # write-back cache whose hit/miss is invisible cannot be verified.
+        "retrievalConfidence": retrieved.get("confidence"),
+        "liveIngestion": retrieved.get("live"),
+        "resumeGrounded": bool(resume_hits),
+        "resumeHits": len(resume_hits),
+        "resumeEvidence": resume_evidence(resume_hits),
     }
 
 

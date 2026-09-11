@@ -7,6 +7,7 @@ from app.api.speech import router as speech_router
 from app.api.system_design import router as system_design_router
 from app.api.code_review import router as code_review_router
 from app.api.recommendations import router as recommendations_router
+from app.api.resume import router as resume_router
 
 load_dotenv()
 
@@ -38,8 +39,12 @@ def llm_metrics():
     cost" without adding infrastructure.
     """
     from app.core.observability import snapshot
+    from app.resume import store as resume_store
 
-    return snapshot()
+    # Surfaced here rather than in a separate endpoint so a resume isolation
+    # failure shows up on the dashboard that is already being watched. Must
+    # be 0; anything else is a data-leak incident, not a metric.
+    return {**snapshot(), "resumeIsolationViolations": resume_store.ISOLATION_VIOLATIONS}
 
 
 @app.get("/health")
@@ -62,3 +67,4 @@ app.include_router(speech_router)
 app.include_router(system_design_router)
 app.include_router(code_review_router)
 app.include_router(recommendations_router)
+app.include_router(resume_router)

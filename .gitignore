@@ -87,3 +87,8 @@ DerivedData/
 Pods/
 *.playground/
 .build/
+
+# Personal resume working notes -- deliberately untracked. Contains self-assessment
+# and framing intended for a resume, not project documentation.
+RESUME_INTERVIEWFORGE_SUMMARY.md
+RESUME_*.md

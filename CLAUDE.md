@@ -39,12 +39,14 @@ remains in git history at commits `e24baf6` and `b19f09d` if it's ever needed.
 backend/src/routes/          # one file per resource; SQL lives directly in handlers
 backend/src/services/        # ai.service.ts (AI_SERVICE_URL), interview-state.service.ts
 backend/src/db.ts            # single query() helper over a pg Pool
-backend/sql_migrations/      # 001_init.sql … 010_learning_paths.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 011_resumes.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json
 
-ai-service/app/api/          # routers: rag, interview, speech, system_design, code_review, recommendations
+ai-service/app/api/          # routers: rag, interview, speech, system_design, code_review,
+#                              recommendations, resume
 ai-service/app/llm/chains.py # ALL LangChain chains + provider fallback live here
 ai-service/app/rag/          # chroma_client, chunking, embeddings, service
+ai-service/app/resume/       # parser.py (PDF -> sections), store.py (per-user namespaces)
 ai-service/app/interview/    # company_profiles.py, orchestrator.py (retrieval query building)
 ai-service/seed_data/documents.json  # the RAG corpus
 
@@ -85,6 +87,17 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - All calls go through `invoke_with_fallback` (Gemini → OpenAI, with per-provider
   rate-limit cooldowns). Don't call a provider SDK directly from a router.
 
+**Personal data in the vector store (Phase 5)**
+- Resume chunks live in a **per-user Chroma collection**, never the shared corpus.
+  `ResumeStore` takes `user_id` as the first argument of every method and builds the
+  namespace itself — there is no API through which an unscoped operation is expressible.
+- Three isolation layers (namespace, `where` filter, egress check) are deliberate
+  redundancy, not belt-and-braces clutter. Don't remove one because the others cover it.
+- **Read paths must never use `get_or_create_collection`** — that creates an empty
+  namespace for a user who has no resume, and resurrects one after deletion (D-040).
+- Changing any of this means re-running `scripts/verify_resume_isolation.py`; the unit
+  suite alone has already been proven blind to three defects here.
+
 **Code-runner**
 - Languages: python, c, cpp, java. Images: `interviewforge-{lang}-sandbox:latest`.
 - User code runs **only** in an ephemeral container that is removed in a `finally`.
@@ -104,6 +117,9 @@ done
 docker compose exec backend npx ts-node scripts/seed_problems.ts       # seed problems
 docker compose exec backend npx ts-node scripts/seed_learning_paths.ts # seed paths
 docker compose exec ai-service python scripts/seed_rag.py              # seed RAG corpus
+
+python scripts/verify_resume_isolation.py   # Phase 5: cross-user isolation + deletion, live stack
+docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tune the live-fetch gate
 
 cd backend && npm run build     # tsc
 cd web && npm run build         # next build
