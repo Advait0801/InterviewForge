@@ -155,7 +155,13 @@ if __name__ == "__main__":
                                 converted_args.append(_convert_arg(a, t))
                             call_args = converted_args
                     r = method(*call_args)
-                    if r is None:
+                    if r is None and spec.get("return_type") in ("TreeNode", "ListNode"):
+                        # An empty tree/list is a real return value, not "no
+                        # value". Printing null here failed every design case
+                        # whose method legitimately returns an empty structure
+                        # (21 of 50 serialize/deserialize cases).
+                        results.append([])
+                    elif r is None:
                         results.append(None)
                     elif isinstance(r, bool):
                         results.append(r)

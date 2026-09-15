@@ -229,7 +229,7 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
         /* not a JSON error */
       }
 
-      const passed = compareOutputs(actualLine, tc.expectedOutput, meta.unorderedOutput);
+      const passed = compareOutputs(actualLine, tc.expectedOutput, meta.unorderedOutput, meta.unorderedInner);
       return { passed, actualOutput: actualLine };
     });
 

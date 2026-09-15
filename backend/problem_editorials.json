@@ -1,0 +1,1637 @@
+{
+  "two-sum": {
+    "approach": "Scan the array once while remembering every value already seen and where it was. For each element the partner it needs is fully determined (target minus the element), so the question becomes a constant-time lookup instead of a search over the rest of the array.",
+    "steps": [
+      "Create an empty hash map from value to index.",
+      "For each index i, compute need = target - nums[i].",
+      "If need is already in the map, return [map[need], i].",
+      "Otherwise store nums[i] -> i and continue. Checking before inserting stops an element pairing with itself."
+    ],
+    "time": "O(n), one pass with O(1) average lookups",
+    "space": "O(n) for the map"
+  },
+  "reverse-string": {
+    "approach": "Reverse in place with two pointers that start at opposite ends and walk towards each other, swapping as they go. Each character is moved exactly once and no second buffer is needed.",
+    "steps": [
+      "Set left = 0 and right = length - 1.",
+      "While left < right, swap s[left] and s[right].",
+      "Move left forward and right backward.",
+      "Stop when the pointers meet; a middle character in an odd-length string stays put."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "valid-parentheses": {
+    "approach": "Brackets must close in the reverse order they opened, which is exactly what a stack models. Push every opener; every closer must match the opener on top of the stack.",
+    "steps": [
+      "Map each closing bracket to its opening partner.",
+      "For each character: if it is an opener, push it.",
+      "If it is a closer, the stack must be non-empty and its top must be the matching opener; pop it, otherwise return false.",
+      "At the end the string is valid only if the stack is empty (no opener left unclosed)."
+    ],
+    "time": "O(n)",
+    "space": "O(n) for the stack in the worst case"
+  },
+  "best-time-to-buy-and-sell-stock": {
+    "approach": "The best sale on any day uses the cheapest price seen before it. Track that running minimum and the best profit it makes possible in a single left-to-right pass.",
+    "steps": [
+      "Keep minPrice = infinity and best = 0.",
+      "For each price, update best = max(best, price - minPrice).",
+      "Then update minPrice = min(minPrice, price).",
+      "Return best; it stays 0 if prices only fall."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "merge-two-sorted-lists": {
+    "approach": "Like the merge step of merge sort: repeatedly take the smaller head of the two lists and append it to the result. A dummy head node removes the special case for the first element.",
+    "steps": [
+      "Create a dummy node and a tail pointer at it.",
+      "While both lists are non-empty, attach the smaller head to tail and advance that list.",
+      "Advance tail after each attachment.",
+      "Attach whichever list still has nodes (it is already sorted) and return dummy.next."
+    ],
+    "time": "O(n + m)",
+    "space": "O(1), nodes are relinked rather than copied"
+  },
+  "missing-number": {
+    "approach": "The numbers 0..n have a known sum, n(n+1)/2. Subtracting the sum of the array leaves exactly the missing value. XOR of all indices and values works the same way and avoids any overflow concern.",
+    "steps": [
+      "Let n be the array length.",
+      "Compute expected = n * (n + 1) / 2.",
+      "Subtract every element of the array from expected.",
+      "What remains is the missing number."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "contains-duplicate": {
+    "approach": "Walk the array and remember what has been seen in a hash set. The first value that is already in the set proves a duplicate exists.",
+    "steps": [
+      "Create an empty set.",
+      "For each value, return true if it is already in the set.",
+      "Otherwise add it.",
+      "If the loop finishes, every value was distinct: return false."
+    ],
+    "time": "O(n) on average",
+    "space": "O(n)"
+  },
+  "valid-palindrome": {
+    "approach": "Compare characters from both ends inward, skipping anything that is not a letter or digit and comparing case-insensitively. This avoids building a cleaned copy of the string.",
+    "steps": [
+      "Set left = 0 and right = length - 1.",
+      "Advance left past non-alphanumeric characters, and move right back past them.",
+      "If the lowercase forms of s[left] and s[right] differ, return false.",
+      "Move both pointers inward and repeat; return true when they cross."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "maximum-subarray": {
+    "approach": "Kadane's algorithm: the best subarray ending at position i either extends the best one ending at i-1 or starts fresh at i. A negative running sum can only hurt what follows, so it is dropped.",
+    "steps": [
+      "Set current = best = nums[0].",
+      "For each later element x, set current = max(x, current + x).",
+      "Update best = max(best, current).",
+      "Return best. Starting from nums[0] rather than 0 handles all-negative arrays."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "climbing-stairs": {
+    "approach": "To reach step n the last move was either one step (from n-1) or two (from n-2), so ways(n) = ways(n-1) + ways(n-2). That is the Fibonacci recurrence, and only the previous two values are needed.",
+    "steps": [
+      "Handle n <= 2 directly (1 way and 2 ways).",
+      "Keep a = ways(1) = 1 and b = ways(2) = 2.",
+      "For steps 3..n, compute c = a + b, then shift a = b, b = c.",
+      "Return b."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "linked-list-cycle": {
+    "approach": "Floyd's tortoise and hare: move one pointer one node at a time and another two at a time. If there is a cycle the fast pointer eventually laps the slow one; if not, it reaches the end.",
+    "steps": [
+      "Start slow and fast at head.",
+      "While fast and fast.next are not null, move slow one step and fast two steps.",
+      "If they ever point to the same node, return true.",
+      "If fast runs off the end, return false."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "invert-binary-tree": {
+    "approach": "Mirroring a tree means swapping the left and right child of every node. Do that recursively (or with a queue); every node is visited once.",
+    "steps": [
+      "If the node is null, return null.",
+      "Swap its left and right children.",
+      "Recursively invert both children.",
+      "Return the node, which is now the root of the mirrored subtree."
+    ],
+    "time": "O(n)",
+    "space": "O(h) recursion depth, where h is the tree height (O(n) for a skewed tree)"
+  },
+  "longest-substring-without-repeating-characters": {
+    "approach": "Sliding window: grow the window on the right and, whenever the new character already appears inside it, jump the left edge past that earlier occurrence. Storing each character's last index makes the jump O(1).",
+    "steps": [
+      "Keep a map from character to its most recent index, left = 0 and best = 0.",
+      "For each right index, if s[right] was last seen at an index >= left, set left to that index + 1.",
+      "Record s[right] -> right.",
+      "Update best = max(best, right - left + 1)."
+    ],
+    "time": "O(n)",
+    "space": "O(k), where k is the size of the character set"
+  },
+  "3sum": {
+    "approach": "Sort the array, fix the first number, then find pairs summing to its negation with two pointers over the rest. Sorting also makes duplicates adjacent, so they can be skipped to keep triplets unique.",
+    "steps": [
+      "Sort nums.",
+      "For each index i (skipping a value equal to the previous one), set left = i + 1 and right = n - 1.",
+      "While left < right: if the sum is too small move left, if too big move right.",
+      "On a zero sum record the triplet, then move both pointers past equal values.",
+      "Stop early once nums[i] > 0, since no later triplet can sum to zero."
+    ],
+    "time": "O(n^2)",
+    "space": "O(1) extra beyond the output (O(log n) or O(n) for the sort, depending on the language)"
+  },
+  "product-of-array-except-self": {
+    "approach": "The answer at i is (product of everything left of i) times (product of everything right of i). Fill the left products in one pass and multiply in the right products in a second pass, with no division needed.",
+    "steps": [
+      "Create answer with answer[0] = 1; for i from 1, answer[i] = answer[i-1] * nums[i-1].",
+      "Keep a running right product, starting at 1.",
+      "Walk i from n-1 down to 0: answer[i] *= right, then right *= nums[i].",
+      "Return answer."
+    ],
+    "time": "O(n)",
+    "space": "O(1) extra, not counting the output array"
+  },
+  "number-of-islands": {
+    "approach": "Each island is a connected group of land cells. Scan the grid; whenever an unvisited land cell appears, count one island and flood it (DFS or BFS) so none of its cells are counted again.",
+    "steps": [
+      "Loop over every cell.",
+      "When a cell is '1', increment the island count.",
+      "Flood fill from it in four directions, turning each reached '1' into '0' (or marking it visited).",
+      "Continue scanning; return the count."
+    ],
+    "time": "O(m * n)",
+    "space": "O(m * n) in the worst case for the recursion stack or queue"
+  },
+  "course-schedule": {
+    "approach": "Courses and prerequisites form a directed graph, and every course can be finished exactly when that graph has no cycle. Kahn's algorithm (topological sort by in-degree) detects this: if some courses never reach in-degree zero, they sit on a cycle.",
+    "steps": [
+      "Build an adjacency list prereq -> course and count each course's in-degree.",
+      "Queue every course with in-degree 0.",
+      "Pop a course, count it as taken, and decrement the in-degree of each course that depends on it; queue any that reach 0.",
+      "Return true if the number taken equals numCourses."
+    ],
+    "time": "O(V + E), courses plus prerequisite pairs",
+    "space": "O(V + E)"
+  },
+  "coin-change": {
+    "approach": "Bottom-up dynamic programming over amounts: the fewest coins for amount a is one more than the fewest for a - c, minimised over every coin c. Amounts that cannot be made stay at infinity.",
+    "steps": [
+      "Create dp of size amount + 1 filled with infinity, and set dp[0] = 0.",
+      "For each a from 1 to amount and each coin c <= a, set dp[a] = min(dp[a], dp[a - c] + 1).",
+      "If dp[amount] is still infinity, return -1.",
+      "Otherwise return dp[amount]."
+    ],
+    "time": "O(amount * number of coins)",
+    "space": "O(amount)"
+  },
+  "top-k-frequent-elements": {
+    "approach": "Count occurrences, then pick the k largest counts. Bucket sort by frequency does this in linear time, because a frequency can never exceed n.",
+    "steps": [
+      "Count each value with a hash map.",
+      "Create buckets indexed 0..n; put each value into the bucket for its count.",
+      "Walk the buckets from n down to 1, collecting values until k have been gathered.",
+      "Return the collected values. A size-k min-heap is an O(n log k) alternative."
+    ],
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "lowest-common-ancestor-of-a-binary-search-tree": {
+    "approach": "The BST ordering says which side each target lives on. While both targets are smaller than the current node the answer is in the left subtree; while both are larger it is in the right. The first node where they split (or that equals one of them) is the lowest common ancestor.",
+    "steps": [
+      "Start at the root.",
+      "If both p and q are less than the node's value, move left.",
+      "If both are greater, move right.",
+      "Otherwise return the current node."
+    ],
+    "time": "O(h), the height of the tree",
+    "space": "O(1) iteratively"
+  },
+  "implement-trie-prefix-tree": {
+    "approach": "A trie stores strings character by character along a path from the root; shared prefixes share nodes. Each node holds its children and a flag saying whether a whole word ends there.",
+    "steps": [
+      "Each node has a map (or 26-slot array) of children and an isEnd flag.",
+      "insert: walk the word from the root, creating missing children, then set isEnd on the last node.",
+      "search: walk the word; return false on a missing child, else return the last node's isEnd.",
+      "startsWith: walk the prefix; return true if every child exists."
+    ],
+    "time": "O(L) per operation, where L is the word or prefix length",
+    "space": "O(total characters inserted)"
+  },
+  "container-with-most-water": {
+    "approach": "Start with the widest container (both ends) and shrink inward. The shorter wall limits the height, so moving the taller wall can never help; always move the shorter one.",
+    "steps": [
+      "Set left = 0, right = n - 1, best = 0.",
+      "Area is (right - left) * min(height[left], height[right]); update best.",
+      "Move whichever pointer has the smaller height inward.",
+      "Repeat until the pointers meet."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "search-in-rotated-sorted-array": {
+    "approach": "Binary search still works because, at any midpoint, at least one half of a rotated sorted array is fully sorted. Check whether the target lies inside that sorted half's range to decide which way to go.",
+    "steps": [
+      "Set lo = 0, hi = n - 1.",
+      "Compute mid; if nums[mid] == target, return mid.",
+      "If nums[lo] <= nums[mid], the left half is sorted: go left when nums[lo] <= target < nums[mid], else go right.",
+      "Otherwise the right half is sorted: go right when nums[mid] < target <= nums[hi], else go left.",
+      "Return -1 when the range empties."
+    ],
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "group-anagrams": {
+    "approach": "Two words are anagrams exactly when they have the same letter counts. Give every word a canonical key (its sorted letters, or a 26-count tuple) and group words by key in a hash map.",
+    "steps": [
+      "Create a map from key to list of words.",
+      "For each word, build its key by sorting its letters (or counting them).",
+      "Append the word to the list for that key.",
+      "Return the map's lists."
+    ],
+    "time": "O(n * k log k) with sorted keys, or O(n * k) with count keys, where k is the longest word",
+    "space": "O(n * k)"
+  },
+  "rotate-image": {
+    "approach": "A 90-degree clockwise rotation equals a transpose (swap across the main diagonal) followed by reversing each row. Both steps are simple in-place swaps.",
+    "steps": [
+      "Transpose: for every i < j, swap matrix[i][j] with matrix[j][i].",
+      "Reverse each row in place.",
+      "The matrix is now rotated; nothing is returned."
+    ],
+    "time": "O(n^2)",
+    "space": "O(1)"
+  },
+  "validate-binary-search-tree": {
+    "approach": "Every node must lie strictly within bounds set by all of its ancestors, not only its parent. Pass a (low, high) range down the recursion and tighten it at each step.",
+    "steps": [
+      "Call check(root, -infinity, +infinity).",
+      "A null node is valid.",
+      "If node.val <= low or node.val >= high, return false.",
+      "Recurse left with (low, node.val) and right with (node.val, high). An in-order traversal that must be strictly increasing also works."
+    ],
+    "time": "O(n)",
+    "space": "O(h) recursion depth"
+  },
+  "binary-tree-level-order-traversal": {
+    "approach": "Breadth-first search with a queue naturally visits the tree level by level. Take a snapshot of the queue size at the start of each level so its nodes can be grouped together.",
+    "steps": [
+      "If the root is null, return an empty list.",
+      "Put the root in a queue.",
+      "While the queue is non-empty, read size = queue length and pop exactly that many nodes, collecting their values and queueing their children.",
+      "Append that level's list to the result."
+    ],
+    "time": "O(n)",
+    "space": "O(w), the widest level (up to O(n))"
+  },
+  "rotting-oranges": {
+    "approach": "Multi-source BFS: all initially rotten oranges spread at the same time, so start the queue with every one of them. Each BFS layer is one minute.",
+    "steps": [
+      "Queue every rotten orange and count the fresh ones.",
+      "Process the queue one layer at a time; for each rotten cell, rot any fresh neighbour, decrement the fresh count and queue it.",
+      "Increment minutes after each layer that rotted at least one orange.",
+      "Return minutes if fresh reaches 0, otherwise -1."
+    ],
+    "time": "O(m * n)",
+    "space": "O(m * n)"
+  },
+  "word-break": {
+    "approach": "dp[i] says whether the first i characters can be split into dictionary words. The prefix of length i is breakable if some shorter breakable prefix is followed by a dictionary word that ends at i.",
+    "steps": [
+      "Put the dictionary in a hash set; set dp[0] = true.",
+      "For each i from 1 to n, and each j < i with dp[j] true, check whether s[j:i] is in the set.",
+      "If it is, set dp[i] = true and stop checking j.",
+      "Return dp[n]. Limiting j to the longest word length keeps the inner loop short."
+    ],
+    "time": "O(n^2) substring checks (times the cost of hashing a substring)",
+    "space": "O(n) plus the dictionary set"
+  },
+  "task-scheduler": {
+    "approach": "The most frequent task dictates the layout: its copies need n idle-or-other slots between them. That gives (maxCount - 1) * (n + 1) slots plus one final slot per task tied for the maximum. If there are more tasks than that, no idling is needed at all.",
+    "steps": [
+      "Count each task and find maxCount.",
+      "Let ties = number of tasks whose count equals maxCount.",
+      "Compute frame = (maxCount - 1) * (n + 1) + ties.",
+      "Return max(frame, total number of tasks)."
+    ],
+    "time": "O(T), one pass over the tasks",
+    "space": "O(1), at most 26 counters"
+  },
+  "trapping-rain-water": {
+    "approach": "Water above a bar is min(tallest to its left, tallest to its right) minus its height. Two pointers can supply this: whichever side has the lower running maximum is the limiting side, so that side's water is already known.",
+    "steps": [
+      "Set left = 0, right = n - 1 and leftMax = rightMax = 0.",
+      "If height[left] < height[right]: update leftMax, add leftMax - height[left], and move left.",
+      "Otherwise: update rightMax, add rightMax - height[right], and move right.",
+      "Repeat until the pointers meet, then return the total."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "merge-k-sorted-lists": {
+    "approach": "Keep the current head of each list in a min-heap. The overall smallest node is always at the top; pop it, append it to the result, and push its successor.",
+    "steps": [
+      "Push the head of every non-empty list into a min-heap keyed on value.",
+      "Pop the smallest node and append it to a dummy-headed result list.",
+      "If that node has a next node, push it.",
+      "Repeat until the heap is empty. Merging the lists in pairs, divide-and-conquer style, has the same complexity."
+    ],
+    "time": "O(N log k), where N is the total number of nodes",
+    "space": "O(k) for the heap"
+  },
+  "word-search-ii": {
+    "approach": "Searching for each word separately repeats work. Build a trie of all the words and run one DFS from every cell that walks the trie alongside the board, so shared prefixes are explored once.",
+    "steps": [
+      "Insert every word into a trie, storing the full word at its terminal node.",
+      "From each cell, DFS while the path's letters follow trie edges; mark cells visited during the path.",
+      "When a node holds a word, add it to the results and clear it so it is not reported twice.",
+      "Prune trie nodes that have no children left, so later searches stop earlier."
+    ],
+    "time": "O(m * n * 4 * 3^(L-1)) in the worst case, where L is the longest word",
+    "space": "O(total letters in words) for the trie"
+  },
+  "median-of-two-sorted-arrays": {
+    "approach": "Binary search for a partition of the shorter array such that, together with the matching partition of the longer array, everything on the left side is <= everything on the right side. The median then comes from the four values around that cut.",
+    "steps": [
+      "Make A the shorter array; half = (m + n + 1) / 2.",
+      "Binary search i in [0, m]; set j = half - i.",
+      "Let Aleft, Aright, Bleft and Bright be the values beside the cuts, using infinities at the edges.",
+      "If Aleft > Bright, move i left; if Bleft > Aright, move i right.",
+      "Otherwise the median is max(Aleft, Bleft) for odd totals, or the average of that and min(Aright, Bright)."
+    ],
+    "time": "O(log(min(m, n)))",
+    "space": "O(1)"
+  },
+  "longest-valid-parentheses": {
+    "approach": "Use a stack of indices whose bottom element is the index just before the current valid run. Every time a ')' closes something, the run length is the distance back to the new top of the stack.",
+    "steps": [
+      "Push -1 as the initial base.",
+      "For '(' push its index.",
+      "For ')' pop; if the stack is now empty, push this index as the new base. Otherwise the length is i - stack top; update best.",
+      "Return best. Two left-to-right and right-to-left counter passes solve it in O(1) space."
+    ],
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "minimum-window-substring": {
+    "approach": "Sliding window with character counts. Expand right until the window covers every character of t (with multiplicity), then shrink left as far as possible while it still covers, recording the smallest window seen.",
+    "steps": [
+      "Count the characters of t; let required be the number of distinct characters.",
+      "Move right, adding s[right] to the window; when a character's count reaches its need, increment formed.",
+      "While formed == required, record the window if it is the shortest yet, then remove s[left] and move left, decrementing formed if that breaks a need.",
+      "Return the best window, or an empty string if none was found."
+    ],
+    "time": "O(|s| + |t|)",
+    "space": "O(k), the character set size"
+  },
+  "edit-distance": {
+    "approach": "dp[i][j] is the minimum number of edits to turn the first i characters of word1 into the first j characters of word2. The last characters either match (no cost) or cost one insert, delete or replace.",
+    "steps": [
+      "dp[i][0] = i and dp[0][j] = j (delete or insert everything).",
+      "If word1[i-1] == word2[j-1], dp[i][j] = dp[i-1][j-1].",
+      "Otherwise dp[i][j] = 1 + min(dp[i-1][j] (delete), dp[i][j-1] (insert), dp[i-1][j-1] (replace)).",
+      "Return dp[m][n]. Keeping just one row cuts the space."
+    ],
+    "time": "O(m * n)",
+    "space": "O(m * n), or O(min(m, n)) with a rolling row"
+  },
+  "largest-rectangle-in-histogram": {
+    "approach": "For each bar, the widest rectangle at its height stretches until a shorter bar appears on either side. A monotonic increasing stack finds both boundaries: when a shorter bar arrives, every taller bar popped has just found its right edge, and the bar beneath it on the stack is its left edge.",
+    "steps": [
+      "Iterate i from 0 to n, treating position n as height 0 to flush the stack.",
+      "While the stack's top bar is taller than the current height, pop it; its width is i if the stack is empty, else i - stack top - 1.",
+      "Update best with that height times width.",
+      "Push i."
+    ],
+    "time": "O(n), each index is pushed and popped once",
+    "space": "O(n)"
+  },
+  "n-queens": {
+    "approach": "Backtracking, row by row. Place one queen per row, tracking which columns and both diagonal directions are already attacked so each placement is checked in O(1).",
+    "steps": [
+      "Keep sets for used columns, row - col diagonals and row + col anti-diagonals.",
+      "In row r, try every column c that is not attacked; record the queen and mark the three sets.",
+      "Recurse to row r + 1; when r == n, convert the placement into board strings and save it.",
+      "Undo the marks and try the next column."
+    ],
+    "time": "O(n!) in the worst case, far less in practice due to pruning",
+    "space": "O(n) for the sets and recursion, plus the output"
+  },
+  "maximum-profit-in-job-scheduling": {
+    "approach": "Sort jobs by end time. The best profit using the first i jobs either skips job i or takes it plus the best profit from jobs that ended by its start time, which is found with binary search.",
+    "steps": [
+      "Sort the jobs by end time.",
+      "dp[i] is the best profit from the first i jobs; dp[0] = 0.",
+      "For job i, binary search the last job whose end <= its start; call that count k.",
+      "dp[i] = max(dp[i-1], dp[k] + profit[i]); return dp[n]."
+    ],
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "serialize-and-deserialize-binary-tree": {
+    "approach": "Write the tree in preorder with an explicit marker for every null child. Because the nulls are recorded, preorder alone describes the shape exactly, and reading tokens back in the same order rebuilds it.",
+    "steps": [
+      "serialize: preorder DFS, emitting the value or a null marker, joined by commas.",
+      "deserialize: split into tokens and read them with a shared index.",
+      "Build recursively: a null marker returns null; otherwise create a node, then build its left and right subtrees from the following tokens.",
+      "Level-order with nulls is an equally valid format."
+    ],
+    "time": "O(n) for both operations",
+    "space": "O(n) for the string and the recursion"
+  },
+  "find-median-from-data-stream": {
+    "approach": "Keep the smaller half of the numbers in a max-heap and the larger half in a min-heap, with sizes differing by at most one. The median is then at the top of one heap or the average of both tops.",
+    "steps": [
+      "addNum: push onto the max-heap (low), then move low's top to the min-heap (high).",
+      "If high now has more elements than low, move high's top back to low.",
+      "findMedian: if low is larger, return its top; otherwise return the average of both tops."
+    ],
+    "time": "O(log n) per addNum, O(1) per findMedian",
+    "space": "O(n)"
+  },
+  "valid-anagram": {
+    "approach": "Two strings are anagrams exactly when every letter occurs the same number of times in both. Count letters from one string up and the other down; every counter must end at zero.",
+    "steps": [
+      "If the lengths differ, return false.",
+      "Use a 26-slot count array (or a hash map for general characters).",
+      "For each position, increment the count for s[i] and decrement it for t[i].",
+      "Return true only if every count is zero."
+    ],
+    "time": "O(n)",
+    "space": "O(1) for a fixed alphabet"
+  },
+  "reverse-linked-list": {
+    "approach": "Walk the list once and point each node back at its predecessor. Three pointers are enough: the previous node, the current one, and the next one saved before the link is overwritten.",
+    "steps": [
+      "Set prev = null and curr = head.",
+      "Save next = curr.next.",
+      "Set curr.next = prev, then move prev = curr and curr = next.",
+      "When curr is null, prev is the new head."
+    ],
+    "time": "O(n)",
+    "space": "O(1) iteratively (O(n) stack if done recursively)"
+  },
+  "maximum-depth-of-binary-tree": {
+    "approach": "The depth of a tree is one more than the deeper of its two subtrees, and an empty tree has depth 0. A level-order BFS that counts levels gives the same answer.",
+    "steps": [
+      "If the node is null, return 0.",
+      "Recursively compute the depth of the left and right subtrees.",
+      "Return 1 + max(left, right)."
+    ],
+    "time": "O(n)",
+    "space": "O(h) recursion depth"
+  },
+  "same-tree": {
+    "approach": "Two trees are equal if their roots match and their left subtrees and right subtrees are equal. Compare structure and values together in one recursive walk.",
+    "steps": [
+      "If both nodes are null, return true.",
+      "If exactly one is null, or the values differ, return false.",
+      "Return sameTree(p.left, q.left) and sameTree(p.right, q.right)."
+    ],
+    "time": "O(n)",
+    "space": "O(h) recursion depth"
+  },
+  "symmetric-tree": {
+    "approach": "A tree is symmetric when its left subtree mirrors its right subtree. Two subtrees mirror each other if their roots are equal, the outer children mirror each other and the inner children mirror each other. Values alone are not enough; the shape must match too.",
+    "steps": [
+      "Define mirror(a, b): both null means true; one null means false.",
+      "If a.val != b.val, return false.",
+      "Return mirror(a.left, b.right) and mirror(a.right, b.left).",
+      "Answer with mirror(root.left, root.right)."
+    ],
+    "time": "O(n)",
+    "space": "O(h) recursion depth"
+  },
+  "binary-search": {
+    "approach": "Classic binary search on a sorted array: compare with the middle element and discard the half that cannot contain the target.",
+    "steps": [
+      "Set lo = 0, hi = n - 1.",
+      "While lo <= hi, compute mid = lo + (hi - lo) / 2 (this form avoids overflow).",
+      "If nums[mid] == target, return mid; if it is smaller, set lo = mid + 1; otherwise set hi = mid - 1.",
+      "Return -1 when the range is empty."
+    ],
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "ransom-note": {
+    "approach": "Every letter of the note must be covered by a distinct letter of the magazine. Count the magazine's letters, then spend them on the note.",
+    "steps": [
+      "Count each letter in magazine.",
+      "For each letter in ransomNote, decrement its count.",
+      "If a count would go below zero, return false.",
+      "Return true if the whole note was covered."
+    ],
+    "time": "O(m + n)",
+    "space": "O(1), 26 counters"
+  },
+  "majority-element": {
+    "approach": "Boyer-Moore voting: pair off each occurrence of the majority element against a different element. Because it appears more than n/2 times, it is the one left standing.",
+    "steps": [
+      "Set candidate = none and count = 0.",
+      "For each x: if count == 0, set candidate = x.",
+      "Increment count if x == candidate, otherwise decrement it.",
+      "Return candidate (the problem guarantees a majority exists)."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "single-number": {
+    "approach": "XOR has the properties x ^ x = 0 and x ^ 0 = x, and order does not matter. XOR-ing every element cancels each pair and leaves the value that appears once.",
+    "steps": [
+      "Set result = 0.",
+      "XOR every element into result.",
+      "Return result."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "move-zeroes": {
+    "approach": "Keep a write pointer for where the next non-zero belongs. Swapping each non-zero forward keeps the non-zeros in their original order and pushes the zeros to the back in the same pass.",
+    "steps": [
+      "Set write = 0.",
+      "For each read index, if nums[read] != 0, swap nums[write] and nums[read], then increment write.",
+      "Once the loop ends, every position from write onward holds a zero."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "palindrome-number": {
+    "approach": "Negative numbers are never palindromes, and neither is a positive number ending in 0. For everything else, reverse the lower half of the digits and compare it with the upper half; this never builds a number large enough to overflow.",
+    "steps": [
+      "Return false if x < 0, or if x ends in 0 and is not 0.",
+      "While x > reversed, move the last digit of x onto reversed.",
+      "For even digit counts, x == reversed; for odd counts, x == reversed / 10 (the middle digit is ignored).",
+      "Return whether either holds."
+    ],
+    "time": "O(log10 x), the number of digits",
+    "space": "O(1)"
+  },
+  "roman-to-integer": {
+    "approach": "Roman numerals are added left to right, except that a smaller symbol placed before a larger one is subtracted (IV = 5 - 1). Compare each symbol with the next one to decide its sign.",
+    "steps": [
+      "Map each symbol to its value.",
+      "For each index i, look at value(s[i]) and the value of the next symbol, if any.",
+      "If the current value is smaller than the next, subtract it; otherwise add it.",
+      "Return the total."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "longest-common-prefix": {
+    "approach": "Vertical scanning: compare the strings one column at a time. The prefix ends at the first column where some string is too short or has a different character.",
+    "steps": [
+      "Use the first string as the reference.",
+      "For each column i, check every other string.",
+      "If a string has length i or its character differs, return the reference up to i.",
+      "If every column matches, return the whole first string."
+    ],
+    "time": "O(S), the total number of characters",
+    "space": "O(1) extra"
+  },
+  "plus-one": {
+    "approach": "Add one from the last digit and carry leftward. A 9 becomes 0 and passes the carry on; any other digit absorbs it and stops. If every digit was 9, the result is a 1 followed by zeros.",
+    "steps": [
+      "Walk i from the last index to 0.",
+      "If digits[i] < 9, increment it and return the array.",
+      "Otherwise set digits[i] = 0 and continue.",
+      "If the loop finishes, return [1] followed by n zeros."
+    ],
+    "time": "O(n)",
+    "space": "O(1), or O(n) when a new leading digit is needed"
+  },
+  "sqrtx": {
+    "approach": "Binary search for the largest integer m with m * m <= x. Compare with x / m, or use 64-bit arithmetic, so the square cannot overflow.",
+    "steps": [
+      "Handle x < 2 by returning x.",
+      "Search lo = 1, hi = x / 2.",
+      "If mid <= x / mid, record mid as a candidate and search right; otherwise search left.",
+      "Return the last candidate."
+    ],
+    "time": "O(log x)",
+    "space": "O(1)"
+  },
+  "merge-sorted-array": {
+    "approach": "nums1 has empty space at its end, so merge from the back. Placing the largest remaining element into the last free slot never overwrites a value that has not been used yet.",
+    "steps": [
+      "Set i = m - 1, j = n - 1 and write = m + n - 1.",
+      "While j >= 0: if i >= 0 and nums1[i] > nums2[j], write nums1[i] and decrement i; otherwise write nums2[j] and decrement j.",
+      "Decrement write after each placement.",
+      "Leftover nums1 elements are already in place."
+    ],
+    "time": "O(m + n)",
+    "space": "O(1)"
+  },
+  "pascals-triangle": {
+    "approach": "Each row starts and ends with 1, and every inner entry is the sum of the two entries above it. Build the rows one at a time from the previous row.",
+    "steps": [
+      "Start with [[1]].",
+      "For each new row r, create a list of r + 1 ones.",
+      "For 1 <= j < r, set row[j] = prev[j-1] + prev[j].",
+      "Append the row; stop after numRows rows."
+    ],
+    "time": "O(numRows^2)",
+    "space": "O(numRows^2) for the output"
+  },
+  "diameter-of-binary-tree": {
+    "approach": "The longest path either passes through some node, using its left height plus its right height, or lies entirely inside one subtree. One post-order DFS that returns heights can update a global best at every node.",
+    "steps": [
+      "Define height(node): 0 for null.",
+      "Compute L = height(left) and R = height(right).",
+      "Update best = max(best, L + R), a path measured in edges.",
+      "Return 1 + max(L, R); the answer is best."
+    ],
+    "time": "O(n)",
+    "space": "O(h) recursion depth"
+  },
+  "balanced-binary-tree": {
+    "approach": "Compute heights bottom-up and fail fast. If either subtree is unbalanced, or their heights differ by more than one, propagate a sentinel (-1) instead of a height, so each node is visited only once.",
+    "steps": [
+      "Define check(node): return 0 for null.",
+      "Get the left height; if it is -1, return -1. Do the same for the right.",
+      "If |left - right| > 1, return -1.",
+      "Otherwise return 1 + max(left, right); the tree is balanced if check(root) != -1."
+    ],
+    "time": "O(n)",
+    "space": "O(h) recursion depth"
+  },
+  "middle-of-the-linked-list": {
+    "approach": "Move a slow pointer one node and a fast pointer two nodes per step. When fast reaches the end, slow is at the middle; with an even length it lands on the second of the two middle nodes, which is the one required.",
+    "steps": [
+      "Start slow and fast at head.",
+      "While fast and fast.next are not null, advance slow by one and fast by two.",
+      "Return slow."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "palindrome-linked-list": {
+    "approach": "Find the middle with slow and fast pointers, reverse the second half in place, then compare it node by node against the first half.",
+    "steps": [
+      "Use slow and fast pointers to find the middle of the list.",
+      "Reverse the list starting from slow.",
+      "Walk the head and the reversed half together; any value mismatch means false.",
+      "Return true if the reversed half is exhausted without a mismatch. (Optionally reverse it back to restore the input.)"
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "intersection-of-two-arrays": {
+    "approach": "Put one array into a hash set, then keep each element of the other array that is in the set. Removing a value from the set once it has been found keeps the result free of duplicates.",
+    "steps": [
+      "Build a set from nums1.",
+      "For each x in nums2, if x is in the set, add x to the result and remove it from the set.",
+      "Return the result (in any order)."
+    ],
+    "time": "O(m + n)",
+    "space": "O(m)"
+  },
+  "happy-number": {
+    "approach": "Repeatedly replacing a number with the sum of its digits' squares either reaches 1 or falls into a cycle. Detect the cycle with a seen-set or with Floyd's slow and fast pointers.",
+    "steps": [
+      "Define next(n) as the sum of the squares of n's digits.",
+      "Keep a set of numbers already seen.",
+      "While n != 1 and n is not in the set, add n and set n = next(n).",
+      "Return n == 1."
+    ],
+    "time": "O(log n) per step; the sequence quickly drops below a small bound, so the number of steps is small",
+    "space": "O(log n) with a set, or O(1) with Floyd's cycle detection"
+  },
+  "is-subsequence": {
+    "approach": "Greedy two pointers: match each character of s against the earliest possible position in t. Taking the earliest match never hurts later matches.",
+    "steps": [
+      "Set i = 0 for s and scan t with j.",
+      "If s[i] == t[j], increment i.",
+      "Always increment j.",
+      "Return i == len(s)."
+    ],
+    "time": "O(|t|)",
+    "space": "O(1)"
+  },
+  "counting-bits": {
+    "approach": "Reuse earlier answers: i has the same set bits as i >> 1, plus one if its lowest bit is set. So bits[i] = bits[i >> 1] + (i & 1).",
+    "steps": [
+      "Create ans of size n + 1 with ans[0] = 0.",
+      "For i from 1 to n, set ans[i] = ans[i >> 1] + (i & 1).",
+      "Return ans."
+    ],
+    "time": "O(n)",
+    "space": "O(n) for the output"
+  },
+  "fizz-buzz": {
+    "approach": "Simulate directly. Test divisibility by 15 (both 3 and 5) first, then 3, then 5; anything else is the number itself.",
+    "steps": [
+      "Loop i from 1 to n.",
+      "If i % 15 == 0 append \"FizzBuzz\"; else if i % 3 == 0 append \"Fizz\"; else if i % 5 == 0 append \"Buzz\".",
+      "Otherwise append the decimal string of i.",
+      "Return the list."
+    ],
+    "time": "O(n)",
+    "space": "O(n) for the output"
+  },
+  "search-insert-position": {
+    "approach": "This is a lower-bound binary search: find the first index whose value is >= target. That index is both where the target is, if present, and where it would be inserted.",
+    "steps": [
+      "Set lo = 0, hi = n (exclusive).",
+      "While lo < hi: if nums[mid] < target, set lo = mid + 1; otherwise set hi = mid.",
+      "Return lo."
+    ],
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "add-binary": {
+    "approach": "Grade-school addition in base 2: walk both strings from the right, add the two bits and the carry, write the low bit and carry the high bit.",
+    "steps": [
+      "Set i and j to the last indices of a and b, and carry = 0.",
+      "While i >= 0, j >= 0 or carry is non-zero, add the available bits to carry.",
+      "Append carry % 2 to the output and set carry = carry / 2.",
+      "Reverse the collected bits and return them as a string."
+    ],
+    "time": "O(max(m, n))",
+    "space": "O(max(m, n)) for the result"
+  },
+  "binary-tree-inorder-traversal": {
+    "approach": "In-order means left subtree, then the node, then the right subtree. Iteratively, a stack keeps the path of ancestors: go left as far as possible, visit, then turn right.",
+    "steps": [
+      "Set curr = root and start with an empty stack.",
+      "While curr is not null, push it and move to curr.left.",
+      "Pop a node, record its value, and set curr = node.right.",
+      "Repeat while curr is not null or the stack is non-empty."
+    ],
+    "time": "O(n)",
+    "space": "O(h) for the stack"
+  },
+  "flood-fill": {
+    "approach": "DFS or BFS from the starting pixel, recolouring every 4-directionally connected pixel that has the original colour. If the new colour already equals the original, there is nothing to do; this check also prevents infinite recursion.",
+    "steps": [
+      "Let orig = image[sr][sc]; if orig == color, return the image unchanged.",
+      "From (sr, sc), recolour the cell and visit the in-bounds neighbours that still hold orig.",
+      "Recurse, or use a queue, until no such neighbours remain.",
+      "Return the image."
+    ],
+    "time": "O(m * n)",
+    "space": "O(m * n) in the worst case for the stack or queue"
+  },
+  "island-perimeter": {
+    "approach": "Each land cell contributes 4 edges, minus one for every side it shares with another land cell. Counting shared sides only upward and leftward counts each shared edge once, so subtract 2 for each.",
+    "steps": [
+      "For every land cell, add 4.",
+      "If the cell above is land, subtract 2.",
+      "If the cell to the left is land, subtract 2.",
+      "Return the total."
+    ],
+    "time": "O(m * n)",
+    "space": "O(1)"
+  },
+  "add-two-numbers": {
+    "approach": "The digits are stored least-significant first, which is exactly the order addition works in. Walk both lists together, add the digits plus a carry, and build the result list as you go.",
+    "steps": [
+      "Create a dummy head; set carry = 0.",
+      "While either list has nodes or carry is non-zero, add the available digits to carry.",
+      "Append a node with carry % 10, then set carry = carry / 10.",
+      "Advance the lists that have nodes; return dummy.next."
+    ],
+    "time": "O(max(m, n))",
+    "space": "O(max(m, n)) for the result list"
+  },
+  "generate-parentheses": {
+    "approach": "Backtracking that only ever builds valid prefixes: an opening bracket can be added while fewer than n have been used, and a closing bracket only while it would not outnumber the openers.",
+    "steps": [
+      "Recurse with the current string and the counts open and close.",
+      "If the length is 2n, record the string.",
+      "If open < n, recurse with '(' appended.",
+      "If close < open, recurse with ')' appended."
+    ],
+    "time": "O(4^n / sqrt(n)), the nth Catalan number of results, each of length 2n",
+    "space": "O(n) recursion depth, plus the output"
+  },
+  "remove-nth-node-from-end-of-list": {
+    "approach": "Put a gap of n nodes between two pointers. When the leading pointer reaches the last node, the trailing pointer sits just before the node to remove. A dummy head handles removing the first node.",
+    "steps": [
+      "Create dummy -> head and set fast = slow = dummy.",
+      "Move fast forward n times.",
+      "Move both until fast.next is null.",
+      "Set slow.next = slow.next.next and return dummy.next."
+    ],
+    "time": "O(L), one pass",
+    "space": "O(1)"
+  },
+  "search-a-2d-matrix": {
+    "approach": "Each row is sorted and each row starts after the previous one ends, so the matrix read row by row is one sorted array of m * n values. Binary search over that virtual array, mapping an index k to (k / n, k % n).",
+    "steps": [
+      "Set lo = 0, hi = m * n - 1.",
+      "For mid, read matrix[mid / n][mid % n].",
+      "Compare with the target and halve the range as in ordinary binary search.",
+      "Return true on a match, false when the range empties."
+    ],
+    "time": "O(log(m * n))",
+    "space": "O(1)"
+  },
+  "find-minimum-in-rotated-sorted-array": {
+    "approach": "Compare the middle with the rightmost element. If nums[mid] > nums[hi], the rotation point (the minimum) is to the right of mid; otherwise mid itself could be the minimum, so keep it and search left.",
+    "steps": [
+      "Set lo = 0, hi = n - 1.",
+      "While lo < hi: if nums[mid] > nums[hi], set lo = mid + 1; otherwise set hi = mid.",
+      "Return nums[lo]."
+    ],
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "kth-largest-element-in-an-array": {
+    "approach": "Keep a min-heap of the k largest values seen so far; its top is the kth largest. Quickselect finds it in O(n) average time instead, by partitioning around a pivot until the pivot lands at index n - k.",
+    "steps": [
+      "Push each number onto a min-heap.",
+      "Whenever the heap holds more than k items, pop the smallest.",
+      "After all numbers, the heap's top is the answer."
+    ],
+    "time": "O(n log k) with a heap (O(n) average with quickselect)",
+    "space": "O(k)"
+  },
+  "subsets": {
+    "approach": "Every element is either in or out of a subset, giving 2^n subsets. Build them by backtracking through the indices, or start from [[]] and, for each number, add a copy of every existing subset with that number appended.",
+    "steps": [
+      "Start with result = [[]].",
+      "For each number x, extend result with [s + [x] for every s already in result].",
+      "Return result. (Bitmasks from 0 to 2^n - 1 enumerate the same sets.)"
+    ],
+    "time": "O(n * 2^n)",
+    "space": "O(n * 2^n) for the output"
+  },
+  "combination-sum": {
+    "approach": "Backtracking where a candidate may be reused. To avoid producing the same combination in different orders, only allow choices at or after the current index.",
+    "steps": [
+      "Sort the candidates (this enables pruning).",
+      "Recurse with (start, remaining, path).",
+      "If remaining == 0, record the path.",
+      "For i from start, stop once candidates[i] > remaining; otherwise add it and recurse with (i, remaining - candidates[i]), then remove it."
+    ],
+    "time": "O(n^(T/m + 1)) in the worst case, where T is the target and m the smallest candidate",
+    "space": "O(T/m) recursion depth, plus the output"
+  },
+  "letter-combinations-of-a-phone-number": {
+    "approach": "A Cartesian product of the letter groups for each digit. Build it by backtracking, picking one letter per digit, or iteratively by extending every partial string with each letter of the next digit.",
+    "steps": [
+      "If digits is empty, return [].",
+      "Map each digit to its letters (2 -> abc ... 9 -> wxyz).",
+      "Start with [\"\"]; for each digit, replace the list with every prefix + letter.",
+      "Return the list."
+    ],
+    "time": "O(4^n * n)",
+    "space": "O(4^n * n) for the output"
+  },
+  "word-search": {
+    "approach": "DFS from every cell that matches the first letter, following adjacent cells for the next letters. Mark a cell as in use while it is on the current path so it cannot be reused, and unmark it when backtracking.",
+    "steps": [
+      "For each cell, call dfs(r, c, 0).",
+      "dfs fails if the cell is out of bounds, already in use, or holds a different letter from word[i].",
+      "If i is the last index, succeed; otherwise mark the cell and try its four neighbours with i + 1.",
+      "Unmark the cell before returning."
+    ],
+    "time": "O(m * n * 3^L), where L is the word length",
+    "space": "O(L) recursion depth"
+  },
+  "spiral-matrix": {
+    "approach": "Maintain four boundaries (top, bottom, left, right) and peel the matrix layer by layer: right along the top, down the right side, left along the bottom, then up the left side, shrinking a boundary after each edge.",
+    "steps": [
+      "Initialise top = 0, bottom = m - 1, left = 0, right = n - 1.",
+      "Traverse the top row, then top++; traverse the right column, then right--.",
+      "If top <= bottom, traverse the bottom row right to left, then bottom--.",
+      "If left <= right, traverse the left column bottom to top, then left++; repeat while the bounds are valid."
+    ],
+    "time": "O(m * n)",
+    "space": "O(1) extra, beyond the output"
+  },
+  "set-matrix-zeroes": {
+    "approach": "Use the first row and first column as markers for which rows and columns must be zeroed. Two extra booleans remember whether the first row and column were zero themselves, since their cells get overwritten by marks.",
+    "steps": [
+      "Record whether row 0 and column 0 contain a zero.",
+      "For every other cell that is 0, set matrix[i][0] = 0 and matrix[0][j] = 0.",
+      "For every other cell, zero it if its row marker or column marker is 0.",
+      "Finally zero row 0 and/or column 0 if their booleans say so."
+    ],
+    "time": "O(m * n)",
+    "space": "O(1)"
+  },
+  "jump-game": {
+    "approach": "Greedy: track the furthest index reachable so far. If the scan ever reaches an index beyond that, the path is broken; if the reach covers the last index, the answer is yes.",
+    "steps": [
+      "Set reach = 0.",
+      "For each i: if i > reach, return false.",
+      "Update reach = max(reach, i + nums[i]).",
+      "Return true once reach >= n - 1, or after the loop."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "unique-paths": {
+    "approach": "The number of paths to a cell is the number to the cell above plus the number to the cell to its left. One row of DP is enough. Equivalently, the answer is C(m + n - 2, m - 1).",
+    "steps": [
+      "Create row of length n filled with 1 (the top row has one path per cell).",
+      "For each of the remaining m - 1 rows, for j from 1 to n - 1, set row[j] += row[j-1].",
+      "Return row[n-1]."
+    ],
+    "time": "O(m * n)",
+    "space": "O(n)"
+  },
+  "longest-increasing-subsequence": {
+    "approach": "Patience sorting: tails[k] holds the smallest possible tail of a strictly increasing subsequence of length k + 1. Each number either extends the longest one or replaces the first tail that is >= it, found by binary search.",
+    "steps": [
+      "Start with an empty tails array.",
+      "For each x, find the first index where tails[i] >= x (a lower bound, which keeps the sequence strict).",
+      "If there is no such index, append x; otherwise set tails[i] = x.",
+      "Return the length of tails. (An O(n^2) DP over pairs also works.)"
+    ],
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "house-robber": {
+    "approach": "At each house choose between skipping it (keep the best total so far) or robbing it (its value plus the best total two houses back). Only the last two totals are needed.",
+    "steps": [
+      "Set prev2 = 0 (best up to i-2) and prev1 = 0 (best up to i-1).",
+      "For each value x, compute cur = max(prev1, prev2 + x).",
+      "Shift prev2 = prev1 and prev1 = cur.",
+      "Return prev1."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "house-robber-ii": {
+    "approach": "In a circle the first and last houses cannot both be robbed, so solve the straight-line problem twice: once without the last house and once without the first, and take the better result.",
+    "steps": [
+      "If there is one house, return its value.",
+      "Run the linear house-robber DP on nums[0 .. n-2].",
+      "Run it again on nums[1 .. n-1].",
+      "Return the maximum of the two."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "decode-ways": {
+    "approach": "dp[i] is the number of ways to decode the first i characters. The last step used either one digit (valid if it is not '0') or two digits (valid if they form 10 through 26).",
+    "steps": [
+      "dp[0] = 1 (the empty prefix).",
+      "For each i, if s[i-1] != '0', add dp[i-1].",
+      "If i >= 2 and s[i-2..i-1] is between \"10\" and \"26\", add dp[i-2].",
+      "Return dp[n]; two rolling variables are enough."
+    ],
+    "time": "O(n)",
+    "space": "O(1) with rolling variables"
+  },
+  "partition-equal-subset-sum": {
+    "approach": "Two equal halves exist exactly when some subset sums to total / 2. That is a 0/1 knapsack over reachable sums: a boolean array updated from high sums to low, so each number is used at most once.",
+    "steps": [
+      "If the total is odd, return false; set target = total / 2.",
+      "Create can[0..target] with can[0] = true.",
+      "For each number x, for s from target down to x, set can[s] |= can[s - x].",
+      "Return can[target]."
+    ],
+    "time": "O(n * target)",
+    "space": "O(target)"
+  },
+  "longest-common-subsequence": {
+    "approach": "dp[i][j] is the LCS length of the first i characters of text1 and the first j of text2. Matching last characters extend the diagonal value; otherwise drop one character from either string and keep the better result.",
+    "steps": [
+      "Initialise row 0 and column 0 to 0.",
+      "If text1[i-1] == text2[j-1], dp[i][j] = dp[i-1][j-1] + 1.",
+      "Otherwise dp[i][j] = max(dp[i-1][j], dp[i][j-1]).",
+      "Return dp[m][n]."
+    ],
+    "time": "O(m * n)",
+    "space": "O(m * n), or O(min(m, n)) with a rolling row"
+  },
+  "merge-intervals": {
+    "approach": "After sorting by start, overlapping intervals sit next to each other. Sweep once, extending the last merged interval while the next one starts within it.",
+    "steps": [
+      "Sort the intervals by start.",
+      "Push the first interval into the result.",
+      "For each subsequent interval, if its start <= the last result's end, set that end = max(end, its end).",
+      "Otherwise push it as a new interval; return the result."
+    ],
+    "time": "O(n log n)",
+    "space": "O(n) for the output"
+  },
+  "insert-interval": {
+    "approach": "The input is already sorted and non-overlapping, so there are three phases: intervals entirely before the new one, intervals that overlap it (merge them all into it), and intervals entirely after it.",
+    "steps": [
+      "Copy every interval whose end < newInterval's start.",
+      "While intervals start <= newInterval's end, widen newInterval to cover them.",
+      "Append the merged newInterval.",
+      "Copy the remaining intervals."
+    ],
+    "time": "O(n)",
+    "space": "O(n) for the output"
+  },
+  "non-overlapping-intervals": {
+    "approach": "Removing the fewest intervals is the same as keeping the most non-overlapping ones. The classic greedy for that sorts by end time and always keeps the interval that finishes first, which leaves the most room for the rest.",
+    "steps": [
+      "Sort the intervals by end.",
+      "Keep the first interval; set end to its end.",
+      "For each next interval, if start >= end, keep it and update end; otherwise count it as removed.",
+      "Return the removal count."
+    ],
+    "time": "O(n log n)",
+    "space": "O(1) extra beyond the sort"
+  },
+  "daily-temperatures": {
+    "approach": "Keep a stack of indices whose warmer day has not arrived yet; their temperatures are non-increasing from bottom to top. A new, warmer day resolves every cooler index it pops.",
+    "steps": [
+      "Create answer filled with 0 and an empty stack.",
+      "For each day i, while the stack is non-empty and temps[i] > temps[stack top], pop j and set answer[j] = i - j.",
+      "Push i.",
+      "Indices left on the stack keep 0."
+    ],
+    "time": "O(n), each index is pushed and popped once",
+    "space": "O(n)"
+  },
+  "evaluate-reverse-polish-notation": {
+    "approach": "In postfix notation every operator applies to the two most recent operands, so a stack evaluates it directly. Mind the operand order for subtraction and division, and truncate division toward zero.",
+    "steps": [
+      "For each token, if it is a number, push it.",
+      "If it is an operator, pop b, then pop a, and push a op b.",
+      "For '/', truncate toward zero (in Python use int(a / b), not a // b).",
+      "The single value left on the stack is the result."
+    ],
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "binary-tree-right-side-view": {
+    "approach": "The visible node on each level is the last one in a level-order traversal. Equivalently, a DFS that visits right before left records the first node it meets at each new depth.",
+    "steps": [
+      "BFS level by level using the queue size.",
+      "While processing a level, remember the value of its last node.",
+      "Append that value after the level is done.",
+      "Return the collected values."
+    ],
+    "time": "O(n)",
+    "space": "O(w), the widest level"
+  },
+  "kth-smallest-element-in-a-bst": {
+    "approach": "An in-order traversal of a BST yields its values in ascending order, so the kth value visited is the answer. An iterative traversal can stop as soon as it gets there.",
+    "steps": [
+      "Walk left from the root, pushing nodes onto a stack.",
+      "Pop a node and decrement k; if k reaches 0, return its value.",
+      "Move to the popped node's right child and repeat the left walk."
+    ],
+    "time": "O(h + k)",
+    "space": "O(h)"
+  },
+  "construct-binary-tree-from-preorder-and-inorder-traversal": {
+    "approach": "The first preorder value is the root. Its position in the inorder array splits the remaining values into the left subtree (before it) and the right subtree (after it). A value-to-index map makes each split O(1).",
+    "steps": [
+      "Map each inorder value to its index; keep a preorder cursor starting at 0.",
+      "build(lo, hi) over an inorder range: if lo > hi, return null.",
+      "Take preorder[cursor++] as the root and find its inorder index m.",
+      "Set root.left = build(lo, m - 1), then root.right = build(m + 1, hi). The left subtree must be built first, because preorder lists it first."
+    ],
+    "time": "O(n)",
+    "space": "O(n) for the map and recursion"
+  },
+  "count-good-nodes-in-binary-tree": {
+    "approach": "A node is good when no ancestor on its path from the root is larger than it. Carry the maximum value seen along the path during a DFS and compare each node against it.",
+    "steps": [
+      "Call dfs(root, -infinity).",
+      "At a node, count 1 if node.val >= pathMax.",
+      "Recurse into both children with max(pathMax, node.val).",
+      "Return the total."
+    ],
+    "time": "O(n)",
+    "space": "O(h) recursion depth"
+  },
+  "pacific-atlantic-water-flow": {
+    "approach": "Instead of simulating water from every cell, reverse the direction: start from each ocean's border and climb to neighbours of equal or greater height. A cell reachable from both oceans' searches drains into both.",
+    "steps": [
+      "Seed a BFS or DFS from all Pacific border cells (top row, left column) and mark what it reaches.",
+      "Do the same from the Atlantic border cells (bottom row, right column).",
+      "Only move to a neighbour whose height >= the current cell's height.",
+      "Return every cell marked in both sets, in row-major order."
+    ],
+    "time": "O(m * n)",
+    "space": "O(m * n)"
+  },
+  "number-of-provinces": {
+    "approach": "Cities are nodes and the adjacency matrix gives the edges; a province is a connected component. Count components with DFS from every unvisited city, or with union-find.",
+    "steps": [
+      "Keep a visited array.",
+      "For each city not yet visited, increment the count and DFS through every city connected to it.",
+      "In the DFS, follow isConnected[u][v] == 1 to unvisited v.",
+      "Return the count."
+    ],
+    "time": "O(n^2), the matrix is scanned once per city visit",
+    "space": "O(n)"
+  },
+  "gas-station": {
+    "approach": "If total gas >= total cost, a valid start exists (and it is unique). Scan once with a running tank: whenever it goes negative, no station in the current stretch can be the start, so restart from the next station.",
+    "steps": [
+      "Track total = sum(gas - cost), tank = 0 and start = 0.",
+      "For each i, add gas[i] - cost[i] to tank.",
+      "If tank < 0, set start = i + 1 and tank = 0.",
+      "Return start if total >= 0, otherwise -1."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "sort-colors": {
+    "approach": "Dutch national flag partitioning: keep 0s before a low pointer and 2s after a high pointer, and scan the unknown region between them with mid.",
+    "steps": [
+      "Set low = 0, mid = 0, high = n - 1.",
+      "If nums[mid] == 0, swap it with nums[low], then low++ and mid++.",
+      "If nums[mid] == 1, mid++.",
+      "If nums[mid] == 2, swap it with nums[high] and high-- (do not advance mid; the swapped-in value is unchecked). Loop while mid <= high."
+    ],
+    "time": "O(n), one pass",
+    "space": "O(1)"
+  },
+  "find-the-duplicate-number": {
+    "approach": "Treat each value as a pointer to an index: i -> nums[i]. With n + 1 values in 1..n, this functional graph must contain a cycle, and the duplicate is the cycle's entry. Floyd's algorithm finds it without modifying the array.",
+    "steps": [
+      "Start slow = fast = nums[0]; move slow = nums[slow] and fast = nums[nums[fast]] until they meet.",
+      "Reset slow to nums[0].",
+      "Move both one step at a time until they are equal.",
+      "That value is the duplicate."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "longest-consecutive-sequence": {
+    "approach": "Put every number in a hash set. Only begin counting at a number x whose predecessor x - 1 is absent, meaning x starts a run; then count x + 1, x + 2 and so on. Each number is part of just one counted run.",
+    "steps": [
+      "Build a set from nums.",
+      "For each x in the set with x - 1 not in the set, count upward while x + len is in the set.",
+      "Update best with that length.",
+      "Return best."
+    ],
+    "time": "O(n) on average",
+    "space": "O(n)"
+  },
+  "valid-sudoku": {
+    "approach": "Check only the filled cells for conflicts: a digit may appear at most once in each row, each column and each 3x3 box. One pass with three families of sets does it; a cell's box is (r / 3) * 3 + c / 3.",
+    "steps": [
+      "Create 9 sets each for rows, columns and boxes.",
+      "For each non-'.' cell (r, c) holding digit d, compute b = (r / 3) * 3 + c / 3.",
+      "If d is already in rows[r], cols[c] or boxes[b], return false.",
+      "Otherwise add it to all three; return true at the end."
+    ],
+    "time": "O(81), constant for a fixed board",
+    "space": "O(81)"
+  },
+  "subarray-sum-equals-k": {
+    "approach": "A subarray (i, j] sums to k exactly when prefix[j] - prefix[i] = k. While scanning, count how many earlier prefix sums equal the current prefix minus k. Negative numbers rule out a sliding window, but this works for any values.",
+    "steps": [
+      "Create a map counts = {0: 1} for the empty prefix, and set sum = 0.",
+      "For each x, add it to sum.",
+      "Add counts[sum - k] (0 if absent) to the answer.",
+      "Increment counts[sum]."
+    ],
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "maximum-product-subarray": {
+    "approach": "A negative number turns the smallest product into the largest, so track both the maximum and the minimum product of subarrays ending at each position.",
+    "steps": [
+      "Set maxEnd = minEnd = best = nums[0].",
+      "For each later x, compute the candidates x, maxEnd * x and minEnd * x.",
+      "Set maxEnd to the largest candidate and minEnd to the smallest (use the old values for both).",
+      "Update best = max(best, maxEnd) and return it."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "palindromic-substrings": {
+    "approach": "Every palindrome has a centre: a single character (odd length) or a gap between two characters (even length). Expand outward from all 2n - 1 centres and count every expansion that stays a palindrome.",
+    "steps": [
+      "For each centre, set left and right (left == right for odd, right = left + 1 for even).",
+      "While both are in bounds and s[left] == s[right], count one palindrome, then left-- and right++.",
+      "Sum the counts over all centres."
+    ],
+    "time": "O(n^2)",
+    "space": "O(1)"
+  },
+  "coin-change-ii": {
+    "approach": "Count combinations, not orderings. Loop over coins in the outer loop and amounts in the inner loop, so each combination is built in one fixed coin order and counted exactly once.",
+    "steps": [
+      "Create ways[0..amount] with ways[0] = 1.",
+      "For each coin c, for a from c to amount, add ways[a - c] to ways[a].",
+      "Return ways[amount]. Swapping the loops would count permutations instead."
+    ],
+    "time": "O(amount * number of coins)",
+    "space": "O(amount)"
+  },
+  "target-sum": {
+    "approach": "Assigning signs splits the numbers into a plus set P and a minus set N with P - N = target and P + N = total. So P = (total + target) / 2, and the task becomes counting subsets that sum to that value.",
+    "steps": [
+      "If |target| > total or (total + target) is odd, return 0.",
+      "Set s = (total + target) / 2.",
+      "Run a 0/1 subset-count DP: ways[0] = 1; for each x, for v from s down to x, ways[v] += ways[v - x].",
+      "Return ways[s]. Zeros are handled correctly, because each doubles the count."
+    ],
+    "time": "O(n * s)",
+    "space": "O(s)"
+  },
+  "rotate-array": {
+    "approach": "Rotating right by k equals reversing the whole array, then reversing the first k elements and the remaining n - k separately. Reduce k modulo n first.",
+    "steps": [
+      "Set k = k % n.",
+      "Reverse the whole array.",
+      "Reverse indices 0..k-1.",
+      "Reverse indices k..n-1."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "koko-eating-bananas": {
+    "approach": "Whether a speed works is monotone: if speed s finishes within h hours, every faster speed does too. Binary search the smallest workable speed in [1, max(piles)], checking each candidate in O(n).",
+    "steps": [
+      "Set lo = 1, hi = max(piles).",
+      "For mid, compute hours = sum of ceil(p / mid), i.e. (p + mid - 1) / mid.",
+      "If hours <= h, set hi = mid; otherwise set lo = mid + 1.",
+      "Return lo."
+    ],
+    "time": "O(n log M), where M = max(piles)",
+    "space": "O(1)"
+  },
+  "min-stack": {
+    "approach": "Store, alongside each pushed value, the minimum of the stack at that moment. The minimum of the whole stack is then always on top, and popping restores the previous minimum automatically.",
+    "steps": [
+      "push(x): push the pair (x, min(x, current top's min)), or (x, x) if the stack is empty.",
+      "pop(): pop the top pair.",
+      "top(): return the top pair's value.",
+      "getMin(): return the top pair's min."
+    ],
+    "time": "O(1) for every operation",
+    "space": "O(n)"
+  },
+  "lru-cache": {
+    "approach": "Combine a hash map, for O(1) lookup, with a doubly linked list ordered by recency, for O(1) moves and evictions. The map points at list nodes; the most recently used node sits at the front and the least recently used at the back.",
+    "steps": [
+      "Use sentinel head and tail nodes so insertion and removal need no edge cases.",
+      "get(key): if missing, return -1; otherwise move its node to the front and return its value.",
+      "put(key, value): if present, update the value and move the node to the front.",
+      "Otherwise insert a new node at the front; if the size exceeds capacity, remove the node before tail and delete its key from the map."
+    ],
+    "time": "O(1) per get and put",
+    "space": "O(capacity)"
+  },
+  "time-based-key-value-store": {
+    "approach": "For each key, keep its (timestamp, value) pairs in a list. Timestamps arrive in increasing order, so the list stays sorted without extra work, and get is a binary search for the last timestamp <= the query.",
+    "steps": [
+      "set(key, value, t): append (t, value) to the key's list.",
+      "get(key, t): if the key is absent, return \"\".",
+      "Binary search for the rightmost entry with timestamp <= t.",
+      "Return its value, or \"\" if every entry is later than t."
+    ],
+    "time": "O(1) per set, O(log n) per get",
+    "space": "O(total set calls)"
+  },
+  "regular-expression-matching": {
+    "approach": "dp[i][j] says whether the first i characters of s match the first j characters of p. A '*' either matches zero copies of the preceding element (skip both pattern characters) or one more copy (consume a character of s that matches that element).",
+    "steps": [
+      "dp[0][0] = true. For the empty string, dp[0][j] = dp[0][j-2] when p[j-1] == '*'.",
+      "If p[j-1] is a letter or '.', dp[i][j] = dp[i-1][j-1] when it matches s[i-1].",
+      "If p[j-1] == '*': dp[i][j] = dp[i][j-2] (zero copies), or dp[i-1][j] if p[j-2] matches s[i-1] ('.' matches anything).",
+      "Return dp[m][n]."
+    ],
+    "time": "O(m * n)",
+    "space": "O(m * n)"
+  },
+  "wildcard-matching": {
+    "approach": "dp[i][j] says whether the first i characters of s match the first j of p. '?' matches exactly one character; '*' matches an empty sequence (dp[i][j-1]) or absorbs one more character (dp[i-1][j]).",
+    "steps": [
+      "dp[0][0] = true; dp[0][j] stays true only while p[0..j-1] is all '*'.",
+      "If p[j-1] == '*', dp[i][j] = dp[i][j-1] or dp[i-1][j].",
+      "If p[j-1] == '?' or equals s[i-1], dp[i][j] = dp[i-1][j-1].",
+      "Return dp[m][n]. A greedy two-pointer scan that backtracks to the last '*' also works in O(1) space."
+    ],
+    "time": "O(m * n)",
+    "space": "O(m * n), or O(n) with a rolling row"
+  },
+  "first-missing-positive": {
+    "approach": "The answer lies in 1..n+1, so the array itself can serve as the hash table. Cyclically swap each value v in 1..n into index v - 1; afterwards the first index i where nums[i] != i + 1 gives the answer.",
+    "steps": [
+      "For each i, while 1 <= nums[i] <= n and nums[nums[i] - 1] != nums[i], swap nums[i] into its home slot.",
+      "Scan i from 0: return i + 1 at the first nums[i] != i + 1.",
+      "If every slot is correct, return n + 1.",
+      "The nums[nums[i]-1] != nums[i] check stops duplicates from looping forever."
+    ],
+    "time": "O(n), each swap places one value permanently",
+    "space": "O(1)"
+  },
+  "sliding-window-maximum": {
+    "approach": "Keep a deque of indices whose values decrease from front to back. The front is always the window's maximum. A smaller element behind a newer, larger one can never be a maximum again, so it is dropped.",
+    "steps": [
+      "For each index i, pop from the back while nums[back] <= nums[i], then push i.",
+      "If the front index is outside the window (<= i - k), pop it from the front.",
+      "Once i >= k - 1, record nums[front].",
+      "Return the recorded maxima."
+    ],
+    "time": "O(n), each index enters and leaves the deque once",
+    "space": "O(k)"
+  },
+  "word-ladder": {
+    "approach": "Words are nodes, and two words are connected if they differ in exactly one letter. The shortest transformation is a BFS from beginWord. Generating each word's neighbours by trying every letter at every position avoids comparing all pairs.",
+    "steps": [
+      "Put wordList in a set; if endWord is missing, return 0.",
+      "BFS from beginWord with depth 1.",
+      "For each word, try replacing each position with 'a'..'z'; any candidate in the set is a neighbour. Remove it from the set when queued, so it is visited once.",
+      "Return depth + 1 upon reaching endWord, or 0 if the queue empties."
+    ],
+    "time": "O(N * L * 26), where N is the number of words and L the word length (times L to build each candidate string)",
+    "space": "O(N * L)"
+  },
+  "binary-tree-maximum-path-sum": {
+    "approach": "At each node, the best path that turns there is node.val plus the best non-negative downward gain from each side. Only a one-sided gain can be passed up to the parent, since a path cannot fork. Track the global best during a post-order DFS.",
+    "steps": [
+      "Define gain(node): 0 for null.",
+      "Compute L = max(gain(left), 0) and R = max(gain(right), 0).",
+      "Update best = max(best, node.val + L + R).",
+      "Return node.val + max(L, R). Initialise best to -infinity so all-negative trees work."
+    ],
+    "time": "O(n)",
+    "space": "O(h) recursion depth"
+  },
+  "reverse-nodes-in-k-group": {
+    "approach": "Process the list k nodes at a time. First confirm that k nodes remain, then reverse that block in place and reconnect it to the previous block's tail. A final block with fewer than k nodes is left as is.",
+    "steps": [
+      "Create a dummy before head; groupPrev = dummy.",
+      "Find the kth node after groupPrev; if it does not exist, stop.",
+      "Reverse the nodes between groupPrev.next and the kth node, pointing the block's first node at the node after kth.",
+      "Link groupPrev.next to kth (the new block head); set groupPrev to the old first node, which is now the block's tail."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "longest-increasing-path-in-a-matrix": {
+    "approach": "Moving to a strictly larger neighbour can never form a cycle, so the moves form a DAG. DFS with memoisation: the longest path from a cell is 1 plus the longest path from any larger neighbour, and each cell is computed once.",
+    "steps": [
+      "Create memo of the grid's size, initialised to 0.",
+      "dfs(r, c): if memo is set, return it.",
+      "Otherwise take 1 + max(dfs(neighbour)) over in-bounds neighbours with a greater value (1 if there are none), and store it.",
+      "Return the maximum of dfs over all cells."
+    ],
+    "time": "O(m * n)",
+    "space": "O(m * n) for the memo and recursion"
+  },
+  "burst-balloons": {
+    "approach": "Think about the last balloon to burst in an interval rather than the first. If k is the last balloon burst strictly between i and j, its neighbours at that moment are exactly i and j, so the two sides are independent subproblems.",
+    "steps": [
+      "Pad nums with a 1 at each end; let dp[i][j] be the best score for bursting everything strictly between i and j.",
+      "Iterate over interval lengths from short to long.",
+      "dp[i][j] = max over i < k < j of dp[i][k] + dp[k][j] + nums[i] * nums[k] * nums[j].",
+      "Return dp[0][n+1]."
+    ],
+    "time": "O(n^3)",
+    "space": "O(n^2)"
+  },
+  "distinct-subsequences": {
+    "approach": "dp[i][j] is the number of ways the first j characters of t appear as a subsequence of the first i characters of s. The ith character of s is either skipped, or used to match t's jth character when they are equal.",
+    "steps": [
+      "dp[i][0] = 1 for every i (the empty t has one match).",
+      "dp[i][j] = dp[i-1][j] (skip s[i-1]).",
+      "If s[i-1] == t[j-1], add dp[i-1][j-1].",
+      "Return dp[m][n]. One row updated from right to left is enough."
+    ],
+    "time": "O(m * n)",
+    "space": "O(n) with a single row"
+  },
+  "best-time-to-buy-and-sell-stock-iv": {
+    "approach": "Track, for each transaction count t from 1 to k, the best balance while holding a share (buy[t]) and after completing t sales (sell[t]). Each day updates both from the previous transaction's values. If k >= n/2, the limit is irrelevant: just sum every upward move.",
+    "steps": [
+      "If k >= n / 2, return the sum of all positive day-to-day differences.",
+      "Initialise buy[t] = -infinity and sell[t] = 0 for t = 0..k.",
+      "For each price p and t from 1 to k: buy[t] = max(buy[t], sell[t-1] - p) and sell[t] = max(sell[t], buy[t] + p).",
+      "Return sell[k]."
+    ],
+    "time": "O(n * k)",
+    "space": "O(k)"
+  },
+  "candy": {
+    "approach": "Two constraints, two passes. Left to right, give each child one more than its left neighbour if its rating is higher. Right to left, raise each child to one more than its right neighbour where needed. Taking the max keeps both constraints.",
+    "steps": [
+      "Give every child 1 candy.",
+      "For i from 1: if ratings[i] > ratings[i-1], set candy[i] = candy[i-1] + 1.",
+      "For i from n-2 down to 0: if ratings[i] > ratings[i+1], set candy[i] = max(candy[i], candy[i+1] + 1).",
+      "Return the sum."
+    ],
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "basic-calculator": {
+    "approach": "With only + and -, each number contributes with a sign determined by the signs in front of it and of the parentheses around it. Keep a running result and a stack that saves the result and sign in effect when a parenthesis opens.",
+    "steps": [
+      "Scan with result = 0, sign = +1 and number = 0; build multi-digit numbers from consecutive digits.",
+      "On '+' or '-', add sign * number to result, reset number, and set sign.",
+      "On '(', push result and sign, then reset result = 0 and sign = +1.",
+      "On ')', finish the number, then result = poppedResult + poppedSign * result. At the end, add the last number."
+    ],
+    "time": "O(n)",
+    "space": "O(n) for the stack, with deep nesting"
+  },
+  "count-of-smaller-numbers-after-self": {
+    "approach": "Walk from right to left, inserting each value into a Fenwick tree (binary indexed tree) over compressed value ranks. Before inserting nums[i], query how many values with a smaller rank are already present; those are exactly the smaller elements to its right. A merge sort that counts right-to-left moves also works.",
+    "steps": [
+      "Compress the values: sort the distinct values and map each to a 1-based rank.",
+      "For i from n - 1 down to 0, set counts[i] = prefix sum up to rank(nums[i]) - 1.",
+      "Then add 1 at rank(nums[i]).",
+      "Return counts."
+    ],
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "maximal-rectangle": {
+    "approach": "Treat each row as the base of a histogram whose bar heights count consecutive '1's upward. The largest rectangle overall is the largest histogram rectangle over all rows, found with the monotonic-stack method.",
+    "steps": [
+      "Keep heights[] across rows: for each column, height = height + 1 on '1', else 0.",
+      "After updating a row, compute the largest rectangle in that histogram using a monotonic increasing stack.",
+      "Track the maximum over all rows.",
+      "Return it."
+    ],
+    "time": "O(m * n)",
+    "space": "O(n)"
+  },
+  "palindrome-partitioning-ii": {
+    "approach": "cuts[i] is the fewest cuts for the prefix ending at i. Expanding around every centre finds all palindromes; a palindrome s[l..r] means the prefix ending at r needs at most cuts[l-1] + 1 cuts (0 if l == 0).",
+    "steps": [
+      "Initialise cuts[i] = i, the worst case of cutting between every character.",
+      "For each centre (odd and even), expand while s[l] == s[r].",
+      "For each palindrome s[l..r], set cuts[r] = min(cuts[r], l == 0 ? 0 : cuts[l-1] + 1).",
+      "Return cuts[n-1]."
+    ],
+    "time": "O(n^2)",
+    "space": "O(n)"
+  },
+  "minimum-number-of-refueling-stops": {
+    "approach": "Drive as far as the fuel allows, remembering the fuel amounts of every station passed. When the fuel cannot reach the next point, refuel retroactively from the largest station passed, using a max-heap. Taking the largest each time minimises the number of stops.",
+    "steps": [
+      "Treat the target as a final station with 0 fuel; track fuel = startFuel, prev = 0 and stops = 0.",
+      "For each station, subtract (position - prev) from fuel.",
+      "While fuel < 0 and the heap is non-empty, pop the largest fuel amount, add it, and count a stop; if fuel is still < 0, return -1.",
+      "Push the station's fuel and set prev = position; return stops at the end."
+    ],
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "swim-in-rising-water": {
+    "approach": "The answer is the smallest possible maximum elevation along any path from corner to corner. Dijkstra-style search with a min-heap keyed on that path maximum finds it: always extend the frontier cell that can be entered earliest.",
+    "steps": [
+      "Push (grid[0][0], 0, 0) onto a min-heap and mark it visited.",
+      "Pop the smallest (t, r, c); if (r, c) is the bottom-right cell, return t.",
+      "For each unvisited neighbour, push (max(t, its elevation), neighbour) and mark it.",
+      "Binary searching t with a BFS feasibility check is an equivalent alternative."
+    ],
+    "time": "O(n^2 log n)",
+    "space": "O(n^2)"
+  },
+  "cherry-pickup": {
+    "approach": "A trip there and back equals two people walking from the top-left to the bottom-right at the same time. After k steps both are on the diagonal r + c = k, so the state is (k, r1, r2). When they share a cell, its cherries count once.",
+    "steps": [
+      "dp[r1][r2] for the current step k; c1 = k - r1 and c2 = k - r2. Unreachable states and thorns are -infinity.",
+      "Transition from the four combinations of the previous step (each person came from up or left).",
+      "Add grid[r1][c1], plus grid[r2][c2] if the cells differ.",
+      "After step 2n - 2, return max(0, dp[n-1][n-1])."
+    ],
+    "time": "O(n^3)",
+    "space": "O(n^2) with a rolling layer"
+  },
+  "split-array-largest-sum": {
+    "approach": "Binary search on the answer. For a candidate cap, greedily pack numbers into the current subarray until the next one would exceed the cap. If that needs at most k subarrays the cap is feasible, and feasibility is monotone in the cap.",
+    "steps": [
+      "Set lo = max(nums) and hi = sum(nums).",
+      "For mid, count the pieces the greedy packing needs under that cap.",
+      "If pieces <= k, set hi = mid; otherwise set lo = mid + 1.",
+      "Return lo."
+    ],
+    "time": "O(n log(sum))",
+    "space": "O(1)"
+  },
+  "n-queens-ii": {
+    "approach": "The same row-by-row backtracking as N-Queens, but only the number of complete placements is counted. Bitmasks for columns and the two diagonal directions make each step a few bit operations.",
+    "steps": [
+      "Recurse with (row, cols, diag1, diag2) as bitmasks.",
+      "available = ~(cols | diag1 | diag2) & ((1 << n) - 1).",
+      "While available is non-zero, take its lowest set bit, then recurse with cols | bit, (diag1 | bit) << 1 and (diag2 | bit) >> 1.",
+      "Count 1 when row == n."
+    ],
+    "time": "O(n!) in the worst case",
+    "space": "O(n) recursion depth"
+  },
+  "shortest-palindrome": {
+    "approach": "Only characters can be added in front, so keep the longest palindromic prefix of s and prepend the reverse of the rest. The KMP failure function of s + '#' + reverse(s) gives that prefix's length in linear time.",
+    "steps": [
+      "Build t = s + '#' + reverse(s); the separator stops matches from crossing the middle.",
+      "Compute the KMP prefix function of t.",
+      "The last value, L, is the length of the longest palindromic prefix of s.",
+      "Return reverse(s[L:]) + s."
+    ],
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "max-points-on-a-line": {
+    "approach": "Fix each point as an anchor and group every other point by the slope to it. Points sharing a slope with the anchor are collinear with it. Store each slope as a reduced (dy, dx) pair with a normalised sign, so no floating-point error creeps in.",
+    "steps": [
+      "For each anchor i, clear a hash map of slopes.",
+      "For each j > i, compute dy and dx, divide both by gcd(|dy|, |dx|), and normalise the sign (for example, make dx positive, or dy positive when dx is 0).",
+      "Increment that slope's count and track the anchor's largest count.",
+      "The answer is max over anchors of (largest count + 1)."
+    ],
+    "time": "O(n^2 log C), the log factor coming from gcd",
+    "space": "O(n)"
+  },
+  "critical-connections-in-a-network": {
+    "approach": "A critical connection is a bridge. In one DFS (Tarjan's algorithm), record each node's discovery time and the lowest discovery time reachable from its subtree using at most one back edge. Edge u-v is a bridge exactly when low[v] > disc[u].",
+    "steps": [
+      "Build the adjacency list; set disc and low to -1.",
+      "DFS(u, parent): assign disc[u] = low[u] = timer++.",
+      "For each neighbour v other than the parent edge: if unvisited, DFS(v), set low[u] = min(low[u], low[v]), and record [u, v] if low[v] > disc[u]; otherwise set low[u] = min(low[u], disc[v]).",
+      "Return the recorded edges. Use an explicit stack if recursion depth is a concern."
+    ],
+    "time": "O(V + E)",
+    "space": "O(V + E)"
+  },
+  "trapping-rain-water-ii": {
+    "approach": "In 2D the water level is limited by the lowest point of the surrounding wall. Start from the border cells in a min-heap and always expand inward from the lowest wall cell; a lower neighbour fills to that wall height.",
+    "steps": [
+      "Push every border cell with its height onto a min-heap and mark it visited.",
+      "Pop the lowest cell (h, r, c).",
+      "For each unvisited neighbour, add max(0, h - its height) to the water, then push it with height max(h, its height).",
+      "Repeat until the heap is empty."
+    ],
+    "time": "O(m * n log(m * n))",
+    "space": "O(m * n)"
+  },
+  "the-skyline-problem": {
+    "approach": "Sweep the building edges from left to right while a max-heap holds the heights of buildings that cover the current x. A key point is emitted whenever the heap's maximum changes. Buildings that have ended are removed lazily when they reach the top.",
+    "steps": [
+      "Create events: (left, -height, right) for starts and (right, 0, 0) for ends; sort them so that at equal x, taller starts come first.",
+      "For each event, pop heap entries whose right edge <= x.",
+      "For a start event, push (-height, right).",
+      "The current height is the heap top, or 0 if the heap is empty. If it differs from the last emitted height, append [x, height]."
+    ],
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "number-of-digit-one": {
+    "approach": "Count how often 1 appears in each decimal position separately. For the position with place value p, split n into high = n / (10p), the current digit cur = (n / p) % 10, and low = n % p. The count depends only on whether cur is 0, 1, or greater.",
+    "steps": [
+      "For each place value p = 1, 10, 100, ... while p <= n, compute high, cur and low; if cur == 0, add high * p.",
+      "If cur == 1, add high * p + low + 1.",
+      "If cur >= 2, add (high + 1) * p. Use 64-bit arithmetic for p."
+    ],
+    "time": "O(log10 n)",
+    "space": "O(1)"
+  },
+  "integer-to-english-words": {
+    "approach": "English groups digits in threes: Billion, Million, Thousand, then units. Convert each non-zero three-digit chunk with one helper (hundreds, then tens including the irregular 10-19, then ones) and join the chunks with their scale words.",
+    "steps": [
+      "If num == 0, return \"Zero\".",
+      "Define helper(n < 1000): words for n / 100 + \"Hundred\", then for the remainder: below 20 from a lookup table, otherwise a tens word plus a ones word.",
+      "Walk the scales Billion, Million, Thousand and units, taking chunk = num / scale % 1000; skip zero chunks.",
+      "Join the parts with single spaces, avoiding trailing spaces."
+    ],
+    "time": "O(1), the input has at most 10 digits",
+    "space": "O(1)"
+  },
+  "dungeon-game": {
+    "approach": "Plan backwards from the princess. need[r][c] is the minimum health required when entering cell (r, c): enough to cover the cell and still meet the cheaper of the next cells' needs, and never below 1.",
+    "steps": [
+      "Set a sentinel need of 1 just to the right of and just below the bottom-right cell.",
+      "Iterate r from bottom to top and c from right to left.",
+      "need[r][c] = max(1, min(need[r+1][c], need[r][c+1]) - dungeon[r][c]).",
+      "Return need[0][0]. Working forwards fails, because the best path so far need not remain best."
+    ],
+    "time": "O(m * n)",
+    "space": "O(n) with one row"
+  },
+  "best-time-to-buy-and-sell-stock-iii": {
+    "approach": "Four running states capture at most two transactions: the best balance after the first buy, the first sell, the second buy and the second sell. Each state builds on the previous one, and one pass updates all four.",
+    "steps": [
+      "Set buy1 = buy2 = -infinity and sell1 = sell2 = 0.",
+      "For each price p: buy1 = max(buy1, -p) and sell1 = max(sell1, buy1 + p).",
+      "buy2 = max(buy2, sell1 - p) and sell2 = max(sell2, buy2 + p).",
+      "Return sell2."
+    ],
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "lfu-cache": {
+    "approach": "Evict the least frequently used key, breaking ties by least recently used. Keep a map from key to (value, frequency), a map from frequency to an insertion-ordered set of keys (an LRU list per frequency), and the current minimum frequency.",
+    "steps": [
+      "get(key): if missing, return -1. Otherwise move the key from its frequency list to the frequency + 1 list, at the recent end. If the old list was minFreq's and is now empty, increment minFreq.",
+      "put(key, value): if capacity is 0, do nothing. If the key exists, update its value and touch it as in get.",
+      "Otherwise, if the cache is full, evict the oldest key in minFreq's list.",
+      "Insert the new key with frequency 1 and set minFreq = 1."
+    ],
+    "time": "O(1) per get and put",
+    "space": "O(capacity)"
+  }
+}

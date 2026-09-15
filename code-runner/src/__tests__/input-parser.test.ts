@@ -85,7 +85,7 @@ describe("compareOutputs — unordered mode", () => {
   });
 
   it("sorts nested arrays internally", () => {
-    expect(compareOutputs("[[2,1],[4,3]]", "[[1,2],[3,4]]", true)).toBe(true);
+    expect(compareOutputs("[[2,1],[4,3]]", "[[1,2],[3,4]]", true, true)).toBe(true);
   });
 
   it("does not ignore order unless asked", () => {
@@ -184,3 +184,45 @@ describe("parseTestInput — design problems", () => {
     expect(parsed.opArgs).toEqual([[], []]);
   });
 });
+
+describe("single-parameter inputs containing '='", () => {
+  const meta = { className: "Solution", methodName: "reverseString", params: [{ name: "s", type: "char[]" }], returnType: "void" };
+
+  it("does not split on an '=' inside the value", () => {
+    // Regression: 6 of 50 reverse-string cases contained the char "=" and were
+    // parsed from the middle of the array onward.
+    const parsed = parseTestInput('["e", "*", "=", "Q"]', meta);
+    expect(parsed.args).toEqual([["e", "*", "=", "Q"]]);
+  });
+
+  it("still strips a leading name = prefix", () => {
+    const parsed = parseTestInput('s = ["a", "=", "b"]', meta);
+    expect(parsed.args).toEqual([["a", "=", "b"]]);
+  });
+
+  it("handles a string value containing '=' after a prefix", () => {
+    const strMeta = { className: "Solution", methodName: "isValid", params: [{ name: "s", type: "string" }], returnType: "bool" };
+    expect(parseTestInput('s = "a=b"', strMeta).args).toEqual(["a=b"]);
+  });
+});
+
+describe("compareOutputs — order inside each item", () => {
+  const board = '[["..Q.","Q...","...Q",".Q.."],[".Q..","...Q","Q...","..Q."]]';
+
+  it("rejects an n-queens board whose rows are in the wrong order", () => {
+    // Regression: unconditional inner sorting accepted this.
+    const scrambled = '[["Q...","..Q.",".Q..","...Q"],[".Q..","...Q","Q...","..Q."]]';
+    expect(compareOutputs(scrambled, board, true)).toBe(false);
+  });
+
+  it("still accepts boards listed in a different order", () => {
+    const swapped = '[[".Q..","...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]';
+    expect(compareOutputs(swapped, board, true)).toBe(true);
+  });
+
+  it("ignores order inside items only when the problem opts in", () => {
+    expect(compareOutputs("[[2,-1,-1],[1,0,-1]]", "[[-1,-1,2],[-1,0,1]]", true)).toBe(false);
+    expect(compareOutputs("[[2,-1,-1],[1,0,-1]]", "[[-1,-1,2],[-1,0,1]]", true, true)).toBe(true);
+  });
+});
+

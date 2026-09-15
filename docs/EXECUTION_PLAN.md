@@ -8,8 +8,10 @@ the bottom, so nothing is lost.
 All retrieval work is done: nDCG 0.7712 → 0.9009. CI green on all four jobs.
 Phase 6 complete (sandbox hardening, per-user LLM limits, correlation IDs, cost/latency
 observability). Phase 5 complete (resume-grounded interviews: per-user vector namespaces,
-isolation and deletion verified against the live stack). Remaining: Phase 7 (problem set),
-the demo video, and two verification rounds.
+isolation and deletion verified against the live stack). Phase 7 complete (150 problems, all
+verified in four languages; company-filtered practice; curated company tags and an editorial
+per problem; D-042, D-043, D-044). Remaining: the demo
+video and two verification rounds.
 
 ---
 
@@ -507,7 +509,7 @@ praises it, everybody notices its absence.
 | 2 — Index-side retrieval | ✅ Complete | 4 | `e04a0de` |
 | 5 — Resume-grounded interviews | ✅ Complete | 3 | `feat/phase5-resume-grounded` |
 | 6 — Hardening & credibility | ✅ Complete | 3 | `cf3c7c9` + `44d9667` |
-| 7 — Content depth | ⬜ Not started | — | — |
+| 7 — Content depth | ✅ Complete, PR pending | 4 | `feat/phase7-problem-set` |
 | Final verification R1 | ⬜ Not started | — | — |
 | Final verification R2 | ⬜ Not started | — | — |
 

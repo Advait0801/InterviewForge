@@ -41,6 +41,7 @@ export type Problem = {
   description: string;
   difficulty: "easy" | "medium" | "hard";
   topics?: string[];
+  companies?: string[];
   is_solved?: boolean;
   is_bookmarked?: boolean;
 };
@@ -50,7 +51,6 @@ export type ProblemDetail = Problem & {
   starter_code: Record<string, string>;
   hints?: string | null;
   editorial?: string | null;
-  companies?: string[];
 };
 
 export type Submission = {
@@ -327,11 +327,13 @@ export const api = {
     topic?: string;
     search?: string;
     solved?: "all" | "solved" | "unsolved";
+    company?: string;
     auth?: boolean;
   }) => {
     const params = new URLSearchParams();
     if (opts?.difficulty && opts.difficulty !== "all") params.set("difficulty", opts.difficulty);
     if (opts?.topic && opts.topic !== "all") params.set("topic", opts.topic);
+    if (opts?.company && opts.company !== "all") params.set("company", opts.company);
     if (opts?.search) params.set("search", opts.search);
     if (opts?.solved && opts.solved !== "all") params.set("solved", opts.solved);
     const query = params.toString();

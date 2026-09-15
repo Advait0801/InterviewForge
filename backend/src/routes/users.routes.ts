@@ -198,7 +198,8 @@ router.get("/activity", requireAuth, async (req: AuthRequest, res) => {
          )
          SELECT
            COALESCE(MAX(streak), 0) AS best_streak,
-           COALESCE((SELECT streak FROM streaks WHERE last_day >= CURRENT_DATE - 1 ORDER BY last_day DESC LIMIT 1), 0) AS current_streak`,
+           COALESCE((SELECT streak FROM streaks WHERE last_day >= CURRENT_DATE - 1 ORDER BY last_day DESC LIMIT 1), 0) AS current_streak
+         FROM streaks`,
         [userId],
       ),
     ]);

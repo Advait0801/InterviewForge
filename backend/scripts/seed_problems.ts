@@ -32,6 +32,17 @@ type LeetCodeProblem = {
   hints?: string[];
 };
 
+type Editorial = { approach: string; steps: string[]; time: string; space: string };
+
+/**
+ * Plain text with fixed section headings. The problem page recognises these headings and
+ * renders them as sections; anything else still reads correctly as plain text.
+ */
+function formatEditorial(e: Editorial): string {
+  const steps = e.steps.map((s, i) => `${i + 1}. ${s}`).join("\n");
+  return `Approach\n${e.approach}\n\nKey steps\n${steps}\n\nComplexity\nTime: ${e.time}\nSpace: ${e.space}`;
+}
+
 type StarterEntry = {
   meta: Record<string, unknown>;
   python3: string;
@@ -50,6 +61,11 @@ async function main() {
     ? (JSON.parse(fs.readFileSync(hintsPath, "utf-8")) as Record<string, string[]>)
     : {};
 
+  const editorialsPath = path.join(__dirname, "..", "problem_editorials.json");
+  const editorials = fs.existsSync(editorialsPath)
+    ? (JSON.parse(fs.readFileSync(editorialsPath, "utf-8")) as Record<string, Editorial>)
+    : {};
+
   const templatesPath = path.join(__dirname, "..", "starter_templates.json");
   const templates = JSON.parse(fs.readFileSync(templatesPath, "utf-8")) as Record<string, StarterEntry>;
 
@@ -62,10 +78,11 @@ async function main() {
     const hintList = p.hints?.length ? p.hints : hintsMap[p.slug];
     const hintsJson =
       hintList && hintList.length > 0 ? JSON.stringify(hintList) : null;
+    const editorial = editorials[p.slug] ? formatEditorial(editorials[p.slug]) : null;
 
     await query(
-      `INSERT INTO problems (slug, title, description, difficulty, test_cases, starter_code, topics, companies, hints)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO problems (slug, title, description, difficulty, test_cases, starter_code, topics, companies, hints, editorial)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT (slug) DO UPDATE SET
          title = EXCLUDED.title,
          description = EXCLUDED.description,
@@ -74,7 +91,8 @@ async function main() {
          starter_code = EXCLUDED.starter_code,
          topics = EXCLUDED.topics,
          companies = EXCLUDED.companies,
-         hints = EXCLUDED.hints`,
+         hints = EXCLUDED.hints,
+         editorial = EXCLUDED.editorial`,
       [
         p.slug,
         p.title,
@@ -85,6 +103,7 @@ async function main() {
         p.topics,
         p.companies,
         hintsJson,
+        editorial,
       ]
     );
     console.log("Upserted problem:", p.slug);

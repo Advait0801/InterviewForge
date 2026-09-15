@@ -208,5 +208,545 @@
     "Two heaps: max-heap for lower half, min-heap for upper half.",
     "Keep sizes balanced so median is top of larger heap or average of both tops.",
     "Insert pushes into appropriate heap then rebalances."
+  ],
+  "valid-anagram": [
+    "Two strings of different lengths can never be anagrams, so check that first.",
+    "Anagrams have exactly the same multiset of letters. How could you compare multisets cheaply?",
+    "Keep a count of 26 letters: add one for each letter of s, subtract one for each letter of t, and check every count ends at zero."
+  ],
+  "reverse-linked-list": [
+    "Walk the list once, keeping track of the node you came from.",
+    "Before you redirect a node's next pointer, save where it used to point or you will lose the rest of the list.",
+    "Three pointers are enough: previous, current and next. When current runs off the end, previous is the new head."
+  ],
+  "maximum-depth-of-binary-tree": [
+    "The depth of a tree can be defined in terms of the depths of its two subtrees.",
+    "An empty subtree contributes depth 0; a node adds one level on top of its deeper child.",
+    "Alternatively, count levels with a breadth-first traversal that processes one whole level per iteration."
+  ],
+  "same-tree": [
+    "Compare the two roots first: both missing, exactly one missing, or both present.",
+    "If both roots exist and hold equal values, the trees are the same only if both pairs of subtrees are the same.",
+    "A recursive check on (p.left, q.left) and (p.right, q.right) covers every node exactly once."
+  ],
+  "symmetric-tree": [
+    "A tree is symmetric when its left subtree is a mirror image of its right subtree.",
+    "Two subtrees mirror each other when their roots match, the outer children mirror each other, and the inner children mirror each other.",
+    "Write a helper that takes two nodes at once, or use a queue that holds nodes in mirrored pairs."
+  ],
+  "binary-search": [
+    "Because the array is sorted, one comparison against the middle element rules out half of the remaining range.",
+    "Keep two bounds, lo and hi, describing where target could still be.",
+    "Compute the middle index as lo + (hi - lo) / 2 and stop when the range becomes empty."
+  ],
+  "ransom-note": [
+    "Only the number of each letter matters, not the order.",
+    "Count how many of each letter the magazine offers.",
+    "Walk the note and spend one count per letter; if any count would drop below zero, the note cannot be built."
+  ],
+  "majority-element": [
+    "A hash map of counts works in linear time, but uses linear extra space.",
+    "If you sort the array, which index is guaranteed to hold the majority value?",
+    "For O(1) space, pair off different values and cancel them: keep a candidate and a counter, incrementing on a match and decrementing otherwise."
+  ],
+  "single-number": [
+    "A set or map solves it in linear time, but not in constant space.",
+    "Think about a binary operation where combining a value with itself cancels out.",
+    "XOR has exactly that property, and it is commutative, so XOR-ing the whole array leaves only the single value."
+  ],
+  "move-zeroes": [
+    "Picture writing the non-zero values into a new array in order, then padding with zeros. Can you do that without the new array?",
+    "Keep a write index for where the next non-zero value belongs.",
+    "After every non-zero value has been written forward, fill the positions from the write index to the end with zeros (or swap as you go)."
+  ],
+  "palindrome-number": [
+    "Negative numbers, and positive numbers ending in 0, can be rejected immediately.",
+    "Reversing the whole number can overflow. What if you only reverse half of it?",
+    "Pop digits off the end of x onto a reversed number until the reversed number is at least as large as what remains, then compare the two halves."
+  ],
+  "roman-to-integer": [
+    "Map each of the seven symbols to its value.",
+    "A symbol is subtracted exactly when the symbol after it has a larger value.",
+    "Scan left to right: subtract the current value if the next one is bigger, otherwise add it."
+  ],
+  "longest-common-prefix": [
+    "The answer can never be longer than the shortest string.",
+    "Compare the strings column by column: position 0 in every string, then position 1, and so on.",
+    "Stop at the first column where some string has ended or disagrees with the first string."
+  ],
+  "plus-one": [
+    "Adding one only changes the trailing run of 9s and the digit just before it.",
+    "Walk from the last digit: a digit below 9 is incremented and you are done; a 9 becomes 0 and the carry moves left.",
+    "If the carry survives past the first digit, the result is one digit longer: a 1 followed by zeros."
+  ],
+  "sqrtx": [
+    "The answer is the largest integer r such that r * r <= x.",
+    "That condition is monotonic in r, so you can binary search over r.",
+    "Use 64-bit arithmetic for r * r, since the square of a candidate near 46341 overflows a 32-bit integer."
+  ],
+  "merge-sorted-array": [
+    "Merging from the front would overwrite values in nums1 that you still need.",
+    "The free space is at the back of nums1, so fill the result from the back.",
+    "Compare the largest remaining element of each array and place the larger one at the current write position; once nums2 is exhausted, the rest of nums1 is already in place."
+  ],
+  "pascals-triangle": [
+    "Row i has i + 1 entries.",
+    "The first and last entries of every row are 1.",
+    "Each interior entry j of row i equals row[i-1][j-1] + row[i-1][j], so build the rows in order."
+  ],
+  "diameter-of-binary-tree": [
+    "Every path has a single highest node where it turns around.",
+    "The longest path that turns at a node is the height of its left subtree plus the height of its right subtree.",
+    "Compute heights bottom-up in one traversal and record the best left + right sum seen at any node."
+  ],
+  "balanced-binary-tree": [
+    "Checking the height difference at the root alone is not enough; every node must satisfy it.",
+    "Recomputing heights separately at each node is O(n^2) on a skewed tree.",
+    "Return the height from a bottom-up traversal, and use a sentinel such as -1 to report that a subtree is already unbalanced."
+  ],
+  "middle-of-the-linked-list": [
+    "Counting the nodes first and then walking half way works in two passes.",
+    "Can you find the middle in a single pass?",
+    "Move one pointer one step and another two steps at a time; when the fast pointer reaches the end, the slow one is at the middle."
+  ],
+  "palindrome-linked-list": [
+    "Copying the values into an array makes the comparison easy, at the cost of O(n) space.",
+    "For O(1) space, find the middle of the list with a slow and a fast pointer.",
+    "Reverse the second half in place, then walk both halves together comparing values."
+  ],
+  "intersection-of-two-arrays": [
+    "Duplicates inside either array do not matter; only which distinct values are present.",
+    "Put the values of one array into a set.",
+    "Walk the other array and keep each value that is in the set, removing it from the set so it is not added twice."
+  ],
+  "happy-number": [
+    "Try a few numbers by hand. The sequence either reaches 1 or starts repeating.",
+    "Detecting a repeat is enough: remember every number you have seen in a set.",
+    "To avoid the set, run a slow and a fast sequence (Floyd's cycle detection) and stop when they meet or the fast one reaches 1."
+  ],
+  "is-subsequence": [
+    "Matching characters of s as early as possible in t is never worse than matching them later.",
+    "Keep one index into s and one into t.",
+    "Advance through t, and advance the index into s whenever the characters match; s is a subsequence if that index reaches the end."
+  ],
+  "counting-bits": [
+    "Counting the bits of every number independently costs O(n log n).",
+    "Shifting i right by one drops its lowest bit; you have already computed the answer for that smaller number.",
+    "ans[i] = ans[i >> 1] + (i & 1)."
+  ],
+  "fizz-buzz": [
+    "Loop i from 1 to n and decide each entry independently.",
+    "Check divisibility by 15 (both 3 and 5) before checking 3 or 5 alone.",
+    "Alternatively, build the string by appending \"Fizz\" and \"Buzz\" separately, and fall back to the number when nothing was appended."
+  ],
+  "search-insert-position": [
+    "Both cases ask for the same thing: the first index whose value is at least target.",
+    "Binary search over the range [0, n], where n means \"after every element\".",
+    "If nums[mid] < target the answer is to the right of mid; otherwise mid itself may be the answer."
+  ],
+  "add-binary": [
+    "The strings can be far longer than any built-in integer type, so add them digit by digit.",
+    "Start from the rightmost digit of each string and carry into the next position, exactly as in decimal addition.",
+    "Continue while either string has digits left or the carry is non-zero, then reverse the collected digits."
+  ],
+  "binary-tree-inorder-traversal": [
+    "Recursion follows the definition directly: left, node, right.",
+    "To iterate, simulate the call stack with an explicit stack of nodes.",
+    "Push nodes while walking left; when you cannot go further, pop a node, record it, and move to its right child."
+  ],
+  "flood-fill": [
+    "Record the starting pixel's original colour before changing anything.",
+    "If the new colour equals the original colour there is nothing to do, and filling anyway would loop forever.",
+    "Visit connected pixels with DFS or BFS, recolouring each one as you reach it so it is never visited twice."
+  ],
+  "island-perimeter": [
+    "Each land cell contributes 4 edges before accounting for its neighbours.",
+    "Every pair of adjacent land cells hides two edges, one from each cell.",
+    "Count land cells and adjacent land pairs (checking only right and down avoids double counting): perimeter = 4 * land - 2 * pairs."
+  ],
+  "add-two-numbers": [
+    "The lists can hold 100 digits, far more than fits in any integer type, so add digit by digit.",
+    "Because the lowest digit comes first, you can walk both lists together exactly as in column addition.",
+    "Carry into the next node, keep going while either list has nodes or the carry is non-zero, and use a dummy head to simplify building the result."
+  ],
+  "generate-parentheses": [
+    "Generating all 2^(2n) strings and filtering works for tiny n, but most of them are invalid.",
+    "Build strings one character at a time and only take steps that can still lead to a valid result.",
+    "You may add '(' while fewer than n have been used, and ')' only while it would close an open parenthesis."
+  ],
+  "remove-nth-node-from-end-of-list": [
+    "Removing a node requires access to the node just before it, which is awkward when the head itself is removed.",
+    "A dummy node in front of the head makes every removal look the same.",
+    "Move a lead pointer n + 1 steps ahead of a trailing pointer, then advance both until the lead runs off the end; the trailing pointer is now just before the node to remove."
+  ],
+  "search-a-2d-matrix": [
+    "Read row by row, the whole matrix is one sorted sequence of m * n values.",
+    "Binary search over indices 0 .. m*n - 1 of that virtual sequence.",
+    "Index k corresponds to matrix[k / n][k % n]."
+  ],
+  "find-minimum-in-rotated-sorted-array": [
+    "The minimum is the only element smaller than the element before it.",
+    "Compare the middle element with the last element of the current range: that tells you which side of the rotation point you are on.",
+    "If nums[mid] > nums[hi], the minimum is strictly to the right of mid; otherwise it is at mid or to its left."
+  ],
+  "kth-largest-element-in-an-array": [
+    "Sorting works in O(n log n), but you only need one position.",
+    "A min-heap holding the k largest values seen so far has the answer at its top.",
+    "Quickselect partitions around a pivot and recurses into only one side, giving O(n) on average; the small value range also allows counting."
+  ],
+  "subsets": [
+    "An array of n elements has exactly 2^n subsets: each element is either in or out.",
+    "Treat an n-bit number as a membership mask and loop it from 0 to 2^n - 1.",
+    "Alternatively backtrack: at each index, recurse once including the element and once excluding it."
+  ],
+  "combination-sum": [
+    "Picking candidates in any order produces duplicates such as [2,3] and [3,2].",
+    "Enforce an order: once you move past a candidate, never pick it again.",
+    "Backtrack with (start index, remaining target); try each candidate from start onward, recursing with the same index so it can be reused."
+  ],
+  "letter-combinations-of-a-phone-number": [
+    "The answer is the Cartesian product of the letter groups of each digit.",
+    "Build strings position by position: for each partial string, extend it with every letter of the next digit.",
+    "Handle the empty input separately, since the product of zero groups would otherwise be one empty string."
+  ],
+  "word-search": [
+    "Every trace starts somewhere, so try each cell as a starting point.",
+    "From a cell that matches the current letter, recurse into its neighbours for the next letter.",
+    "Mark a cell as used before recursing (for example by overwriting it) and restore it afterwards so other traces can use it."
+  ],
+  "spiral-matrix": [
+    "Track four boundaries: top, bottom, left and right.",
+    "Walk one side, then move that boundary inwards by one.",
+    "Re-check that top <= bottom and left <= right before walking the bottom row and left column, or single rows and columns get read twice."
+  ],
+  "set-matrix-zeroes": [
+    "Clearing as soon as you see a zero makes the zeros you write look like original ones.",
+    "First record which rows and which columns contain a zero, then clear them in a second pass.",
+    "For O(1) space, use the first row and first column as the marker arrays, with one extra flag for whether the first column itself must be cleared."
+  ],
+  "jump-game": [
+    "You only get stuck at a zero that nothing before it can jump over.",
+    "Track the furthest index reachable so far as you scan left to right.",
+    "If the current index is beyond that furthest reach, the end is unreachable; otherwise update the reach with i + nums[i]."
+  ],
+  "unique-paths": [
+    "The number of ways to reach a cell is the number of ways to reach the cell above it plus the cell to its left.",
+    "The first row and first column each have exactly one path.",
+    "A single row of size n updated in place is enough; or count directly as the binomial coefficient C(m + n - 2, m - 1)."
+  ],
+  "longest-increasing-subsequence": [
+    "Let best[i] be the length of the longest increasing subsequence ending at index i; it extends some earlier best[j] with nums[j] < nums[i].",
+    "That DP is O(n^2). For O(n log n), keep tails[k] = the smallest possible last value of an increasing subsequence of length k + 1.",
+    "For each value, binary search tails for the first entry >= value and replace it (or append); the answer is the length of tails."
+  ],
+  "house-robber": [
+    "At each house there are only two choices: take it, or skip it.",
+    "If you take house i you cannot have taken i - 1, so best(i) = max(best(i - 1), best(i - 2) + nums[i]).",
+    "Only the previous two results are needed, so two variables replace the whole table."
+  ],
+  "house-robber-ii": [
+    "The only new constraint is that the first and last houses cannot both be taken.",
+    "So at least one of them is skipped: solve the straight-line problem once without the first house and once without the last.",
+    "The answer is the larger of the two, with a special case when there is only one house."
+  ],
+  "decode-ways": [
+    "The last letter of any decoding uses either the last one digit or the last two digits.",
+    "ways(i) = ways(i - 1) if s[i-1] is not '0', plus ways(i - 2) if the two digits ending at i form a number from 10 to 26.",
+    "Zeros are the trap: a '0' can only appear as the second digit of 10 or 20."
+  ],
+  "partition-equal-subset-sum": [
+    "If the total sum is odd, the answer is immediately false.",
+    "Otherwise the question becomes: is there a subset that sums to exactly total / 2?",
+    "Keep a boolean array reachable[s]; for each number, update it from high sums to low so each number is used at most once."
+  ],
+  "longest-common-subsequence": [
+    "Compare the strings prefix by prefix: let L(i, j) be the answer for the first i characters of text1 and the first j of text2.",
+    "If text1[i-1] == text2[j-1], L(i, j) = L(i-1, j-1) + 1; otherwise it is max(L(i-1, j), L(i, j-1)).",
+    "Filling the table row by row needs only the previous row, so O(min(m, n)) memory is enough."
+  ],
+  "merge-intervals": [
+    "Overlaps are hard to find in arbitrary order, but easy to see once the intervals are sorted.",
+    "Sort by start time; each interval then either overlaps the last merged interval or starts a new one.",
+    "It overlaps when its start is <= the last merged end, in which case extend that end to the maximum of the two."
+  ],
+  "insert-interval": [
+    "The input is already sorted and disjoint, so no sorting is needed.",
+    "Split the list into three parts: intervals ending before newInterval starts, intervals that overlap it, and intervals starting after it ends.",
+    "Copy the first part, merge the middle part into newInterval by widening its bounds, append it, then copy the last part."
+  ],
+  "non-overlapping-intervals": [
+    "Removing the fewest intervals is the same as keeping the most intervals that do not overlap.",
+    "Among intervals that could come next, the one that ends earliest leaves the most room for the rest.",
+    "Sort by end time and greedily keep each interval whose start is >= the end of the last kept interval; count the rest as removed."
+  ],
+  "daily-temperatures": [
+    "Checking every later day for each day is O(n^2).",
+    "Keep the indices of days that are still waiting for a warmer day on a stack.",
+    "Their temperatures on the stack never increase from bottom to top, so a new warmer day resolves days from the top until it meets one that is at least as warm."
+  ],
+  "evaluate-reverse-polish-notation": [
+    "Scan the tokens left to right, keeping the operands you have seen so far.",
+    "When you meet an operator, its two operands are the two most recently seen values that have not been used yet.",
+    "Pop the right operand first, then the left one, and push the result; watch the operand order for '-' and '/', and make sure division truncates toward zero."
+  ],
+  "binary-tree-right-side-view": [
+    "The visible node at each depth is simply the last node at that depth.",
+    "A level-by-level breadth-first traversal makes the last node of each level easy to pick out.",
+    "Alternatively, a depth-first traversal that visits the right child first records a node whenever it reaches a depth for the first time."
+  ],
+  "kth-smallest-element-in-a-bst": [
+    "An inorder traversal of a binary search tree visits the values in increasing order.",
+    "You do not need to collect every value: count nodes as the traversal visits them.",
+    "An iterative inorder traversal with an explicit stack lets you stop as soon as the count reaches k."
+  ],
+  "construct-binary-tree-from-preorder-and-inorder-traversal": [
+    "The first value in preorder is always the root.",
+    "Find that root in inorder: everything to its left is the left subtree and everything to its right is the right subtree, and the sizes tell you how to split preorder too.",
+    "Store each value's inorder index in a hash map so the split is O(1), and consume preorder with a single moving index while recursing left then right."
+  ],
+  "count-good-nodes-in-binary-tree": [
+    "Whether a node is good depends only on the largest value above it on its path.",
+    "Pass the maximum value seen so far down the recursion.",
+    "A node is good when its value is >= that maximum; update the maximum before visiting its children."
+  ],
+  "pacific-atlantic-water-flow": [
+    "Simulating the flow from every cell separately repeats a lot of work.",
+    "Reverse the direction: start from the cells touching an ocean and move to neighbours that are at least as high.",
+    "Run that search once for the Pacific edges and once for the Atlantic edges; the answer is the cells reached by both."
+  ],
+  "number-of-provinces": [
+    "The matrix is an adjacency matrix, and a province is a connected component.",
+    "Start a DFS or BFS from each city you have not visited yet; each start discovers one whole province.",
+    "Union-find works too: union every connected pair and count the distinct roots."
+  ],
+  "gas-station": [
+    "If the total gas is less than the total cost, no start can work.",
+    "If you start at s and run out of fuel before reaching station j, no station between s and j can be the start either.",
+    "So scan once: reset the start to j + 1 and the tank to 0 whenever the tank goes negative, and check the total at the end."
+  ],
+  "sort-colors": [
+    "Counting the 0s, 1s and 2s and rewriting the array takes two passes.",
+    "For one pass, keep three regions: 0s at the front, 2s at the back, and an unexamined region in between.",
+    "Walk a middle pointer: swap a 0 to the front boundary, swap a 2 to the back boundary (without advancing, since the swapped-in value is unexamined), and step over a 1."
+  ],
+  "find-the-duplicate-number": [
+    "Sorting or a set would be easy, but both break the constraints.",
+    "Treat each index i as a node with an edge to nums[i]. Because some value is pointed to twice, following the edges from index 0 must enter a cycle.",
+    "The duplicate is the entrance to that cycle, which Floyd's tortoise-and-hare algorithm finds in two phases."
+  ],
+  "longest-consecutive-sequence": [
+    "Sorting makes runs easy to see, but costs O(n log n).",
+    "Put every value into a hash set so membership checks are O(1).",
+    "Only start counting from a value v when v - 1 is not in the set; then extend v + 1, v + 2, ... Each value is then counted at most once overall."
+  ],
+  "valid-sudoku": [
+    "Each filled cell belongs to exactly one row, one column and one box.",
+    "The box index of cell (r, c) is (r / 3) * 3 + c / 3.",
+    "Keep a seen-set (or a 9-bit mask) for every row, column and box, and fail as soon as a digit is already present in one of its three sets."
+  ],
+  "subarray-sum-equals-k": [
+    "Negative numbers rule out a sliding window, because extending a window can decrease its sum.",
+    "The sum of nums[i..j] equals prefix[j + 1] - prefix[i].",
+    "Walk the array with a running prefix sum and a hash map counting how many earlier prefixes had each value; add the count of prefix - k at every step."
+  ],
+  "maximum-product-subarray": [
+    "A negative number turns the smallest product into the largest one.",
+    "So for each position, track both the largest and the smallest product of a subarray ending there.",
+    "At each element the new maximum and minimum come from the element alone, or the element times the previous maximum or minimum; a zero resets both."
+  ],
+  "palindromic-substrings": [
+    "Checking every substring separately costs O(n^3).",
+    "Every palindrome has a centre: either a single character or the gap between two characters.",
+    "Expand outwards from each of the 2n - 1 centres while the characters on both sides match, counting one palindrome per successful step."
+  ],
+  "coin-change-ii": [
+    "Counting ordered sequences would count 1 + 2 and 2 + 1 twice.",
+    "Fix the order in which coin types are considered: process one denomination at a time.",
+    "With ways[0] = 1, for each coin c and each amount a from c upwards, add ways[a - c] into ways[a]. Looping coins outside amounts is what makes the count unordered."
+  ],
+  "target-sum": [
+    "Trying all 2^n sign assignments is possible for n = 20, but slow.",
+    "Track how many ways each running sum can be reached after the first i numbers; the sums stay within [-1000, 1000].",
+    "Alternatively, if P is the set of numbers given '+', then sum(P) = (total + target) / 2, which turns the problem into counting subsets with a fixed sum."
+  ],
+  "rotate-array": [
+    "Rotating by k and by k % n gives the same result.",
+    "Rotating right by k moves the last k elements to the front, keeping each block's internal order.",
+    "Reverse the whole array, then reverse the first k elements, then reverse the remaining n - k elements."
+  ],
+  "koko-eating-bananas": [
+    "At speed k, a pile of size p takes ceil(p / k) hours.",
+    "The total hours only go down as k goes up, so the feasible speeds form a range that you can binary search between 1 and max(piles).",
+    "If you ever evaluate a very small speed (k = 1 gives sum(piles), up to 10^13), the total overflows 32 bits, so a 64-bit accumulator is the safe choice."
+  ],
+  "min-stack": [
+    "A single variable holding the minimum breaks as soon as that minimum is popped.",
+    "The minimum only depends on what is below each element, and that never changes while the element is on the stack.",
+    "Store, next to every pushed value, the minimum of the stack at the moment it was pushed."
+  ],
+  "lru-cache": [
+    "A hash map gives O(1) lookup, but on its own it does not remember the order of use.",
+    "A doubly linked list ordered by recency lets you move any node to the front, or remove the node at the back, in O(1).",
+    "Combine them: the map points from each key to its list node. Sentinel head and tail nodes remove most edge cases."
+  ],
+  "time-based-key-value-store": [
+    "Keep a separate list of (timestamp, value) pairs for each key.",
+    "Because set timestamps are strictly increasing, each key's list is already sorted by timestamp.",
+    "For get, binary search that list for the last timestamp that is <= the query."
+  ],
+  "regular-expression-matching": [
+    "A '*' always belongs to the character before it, so read the pattern in units of one character with an optional star.",
+    "Let match(i, j) mean s[i:] matches p[j:]. If p[j+1] is '*', either skip the unit (j + 2) or, when s[i] matches p[j], consume one character and stay on the unit (i + 1).",
+    "Without a star, s[i] must match p[j] and both advance. Fill the table from the ends of both strings backwards."
+  ],
+  "wildcard-matching": [
+    "A DP table where dp[i][j] means s[:i] matches p[:j] works in O(m * n).",
+    "A '*' can match nothing (skip it in the pattern) or swallow one more character of s (stay on it).",
+    "There is also a greedy approach: remember the position of the last '*' and, on a mismatch, backtrack so that star absorbs one more character."
+  ],
+  "first-missing-positive": [
+    "For an array of length n, the answer is always somewhere in 1 .. n + 1.",
+    "That means values outside 1 .. n can be ignored, and each useful value v has a natural home at index v - 1.",
+    "Swap every value into its home (skipping duplicates), then scan for the first index i where nums[i] != i + 1."
+  ],
+  "sliding-window-maximum": [
+    "Recomputing the maximum of every window costs O(n * k).",
+    "An element that is smaller than a newer element can never again be a window maximum.",
+    "Keep a deque of indices whose values decrease from front to back: pop smaller values from the back on insert, and pop the front once it leaves the window."
+  ],
+  "word-ladder": [
+    "Treat each word as a graph node, with edges between words that differ in exactly one letter.",
+    "The shortest sequence is a shortest path, so use breadth-first search starting at beginWord.",
+    "Rather than comparing every pair of words, generate the neighbours of a word by changing one letter at a time and looking each candidate up in a hash set."
+  ],
+  "binary-tree-maximum-path-sum": [
+    "Every path has one highest node, where it may turn from the left subtree into the right subtree.",
+    "For each node compute its best downward gain: its value plus the larger of its children's gains, treating negative gains as 0.",
+    "At each node, the best path turning there is value + left gain + right gain; track the maximum over all nodes while returning only the one-sided gain upward."
+  ],
+  "reverse-nodes-in-k-group": [
+    "Before reversing a group, check that k nodes actually remain.",
+    "Reverse a group with the usual three-pointer technique, but start the reversed tail pointing at the node after the group.",
+    "Keep a pointer to the node just before the current group (a dummy head helps) so you can attach the new group head and move on."
+  ],
+  "longest-increasing-path-in-a-matrix": [
+    "A strictly increasing path can never revisit a cell, so there are no cycles to worry about.",
+    "The longest path starting at a cell depends only on the longest paths starting at its larger neighbours.",
+    "Memoise a DFS over cells, so each cell's answer is computed once and the whole matrix takes O(m * n)."
+  ],
+  "burst-balloons": [
+    "Choosing which balloon to burst first is hard, because the neighbours keep changing afterwards.",
+    "Instead choose which balloon in a range is burst last: at that moment its neighbours are exactly the range's boundaries.",
+    "Pad nums with a 1 on each side; best(l, r) over the open interval is the max over last in (l, r) of vals[l] * vals[last] * vals[r] + best(l, last) + best(last, r)."
+  ],
+  "distinct-subsequences": [
+    "Count matches of prefixes: let ways(i, j) be the number of ways the first i characters of s produce the first j characters of t.",
+    "Character s[i-1] can always be skipped; if it equals t[j-1] it can also be used to match that character.",
+    "Iterating j from right to left lets a single 1-D array hold the table; ways for the empty target is 1."
+  ],
+  "best-time-to-buy-and-sell-stock-iv": [
+    "Track, for each transaction count t, the best cash position while holding a share and while not holding one.",
+    "On each day, buy[t] = max(buy[t], sell[t-1] - price) and sell[t] = max(sell[t], buy[t] + price).",
+    "If k is at least half the number of days, the limit never binds and you can simply take every upward price move."
+  ],
+  "candy": [
+    "Handle the two neighbour constraints separately.",
+    "A left-to-right pass fixes every child relative to the left neighbour; a right-to-left pass fixes them relative to the right neighbour.",
+    "In the second pass, take the maximum of the current count and right neighbour + 1, so the first pass's constraint stays satisfied."
+  ],
+  "basic-calculator": [
+    "Without parentheses, keep a running total and apply each number with the sign that precedes it.",
+    "Multi-digit numbers must be accumulated character by character; spaces are simply skipped.",
+    "On '(' push the current total and sign onto a stack and start fresh; on ')' finish the inner total and combine it with the saved total and sign."
+  ],
+  "count-of-smaller-numbers-after-self": [
+    "Comparing every pair is O(n^2).",
+    "Walk from right to left, maintaining a structure over the values already seen that can count how many are below a threshold.",
+    "The value range is small, so a Fenwick (binary indexed) tree over shifted values answers each count and insertion in O(log range); a merge sort that counts right-to-left crossings also works."
+  ],
+  "maximal-rectangle": [
+    "Fix a row as the bottom edge. Above each column, the run of consecutive 1s ending at that row forms a bar of a histogram.",
+    "The histogram for the next row is easy to update: a '1' extends the bar, a '0' resets it to 0.",
+    "Solve largest-rectangle-in-histogram for every row with a monotonic stack; the overall answer is the best over all rows."
+  ],
+  "palindrome-partitioning-ii": [
+    "Let cuts[i] be the minimum cuts for the prefix of length i; the answer is cuts[n].",
+    "cuts[i] = min over palindromic s[j:i] of cuts[j] + 1, with cuts[0] = -1 so a whole-prefix palindrome needs 0 cuts.",
+    "Avoid rechecking substrings: expand around every centre, and each palindrome s[l..r] found relaxes cuts[r + 1] from cuts[l]. That is O(n^2) overall."
+  ],
+  "minimum-number-of-refueling-stops": [
+    "You never need to decide at a station whether to stop; you can decide later, as if the fuel had been collected then.",
+    "Drive as far as the current fuel allows, remembering every station passed along the way.",
+    "When you would run dry, take fuel from the largest station passed so far (a max-heap). Totals can exceed 2^31, so use 64-bit integers."
+  ],
+  "swim-in-rising-water": [
+    "The time needed for a route is the highest elevation along it, so you want the route whose highest cell is lowest.",
+    "Whether a time t is enough is monotone in t, so you could binary search t with a BFS at each step.",
+    "Better: a Dijkstra-style search with a min-heap keyed by the highest elevation seen so far reaches the corner with the answer directly."
+  ],
+  "cherry-pickup": [
+    "Maximising the outbound trip first and then the return trip is greedy, and it fails.",
+    "The return trip is just another right/down path walked backwards, so think of two people walking from (0, 0) at the same time.",
+    "After t steps both walkers are on the diagonal r + c = t, so the state (t, r1, r2) is enough; add both cells' cherries, counting a shared cell once."
+  ],
+  "split-array-largest-sum": [
+    "Guess a limit L on the largest subarray sum. Can the array be split so that no part exceeds L?",
+    "For a fixed L, greedily extend the current part until adding the next element would exceed L; this uses the fewest parts possible.",
+    "Feasibility is monotone in L, so binary search L between max(nums) and sum(nums)."
+  ],
+  "n-queens-ii": [
+    "Exactly one queen goes in each row, so place them row by row.",
+    "For each row, try every column that is not attacked by an earlier queen, and backtrack after exploring it.",
+    "Track used columns and both diagonal directions (r + c and r - c) in sets or bitmasks to check attacks in O(1)."
+  ],
+  "shortest-palindrome": [
+    "Whatever you add must mirror the part of s that follows its longest palindromic prefix.",
+    "So the task reduces to finding the longest prefix of s that is a palindrome; checking every prefix directly is O(n^2).",
+    "Build s + '#' + reverse(s) and compute the KMP failure function: its last value is the length of that longest palindromic prefix."
+  ],
+  "max-points-on-a-line": [
+    "Fix one point as an anchor: every line through it is determined by a direction to another point.",
+    "Points share a line through the anchor exactly when their directions from it are the same.",
+    "Represent a direction exactly as (dx, dy) divided by their gcd with a normalised sign, count directions in a hash map, and avoid floating-point slopes."
+  ],
+  "critical-connections-in-a-network": [
+    "A connection is critical exactly when it lies on no cycle; such an edge is called a bridge.",
+    "Removing each edge and re-checking connectivity works, but is O(E * (V + E)).",
+    "Run one DFS that records each node's discovery time and the lowest discovery time reachable from its subtree (Tarjan's low-link); edge (u, v) is a bridge when low[v] > disc[u]."
+  ],
+  "trapping-rain-water-ii": [
+    "The water level over a cell is decided by the lowest point of the wall that surrounds it, not by its immediate neighbours alone.",
+    "Start from the boundary cells, which can hold no water, and always expand inward from the lowest boundary cell (a min-heap).",
+    "A neighbour lower than the current boundary height traps the difference; push it back with height max(its own height, boundary height)."
+  ],
+  "the-skyline-problem": [
+    "The outline can only change height at a building's left or right edge, so those x coordinates are the only candidates.",
+    "Sweep the candidates in order, keeping the heights of buildings that cover the current x.",
+    "A max-heap of (height, right edge) with lazy removal of expired buildings gives the current height; emit a key point whenever it changes."
+  ],
+  "number-of-digit-one": [
+    "Counting digit by digit over every number is far too slow for n = 10^9.",
+    "Count how often a 1 appears in each decimal position separately, then add the positions up.",
+    "For a position with place value f, split n into the digits above it, the digit at it, and the digits below; the count depends on whether that digit is 0, 1, or larger."
+  ],
+  "integer-to-english-words": [
+    "English groups digits in threes: billions, millions, thousands, and the rest.",
+    "Write a helper that converts a number below 1000, handling hundreds, the special words for 10 through 19, and tens.",
+    "Apply it to each non-zero group followed by its scale word, and treat 0 (\"Zero\") as a special case."
+  ],
+  "dungeon-game": [
+    "Working forwards is awkward: a path that is best so far can need more starting health later.",
+    "Work backwards instead: let need[i][j] be the minimum health required on entering room (i, j) to finish from there.",
+    "need[i][j] = max(1, min(need[i+1][j], need[i][j+1]) - dungeon[i][j]), with the room past the princess requiring 1."
+  ],
+  "best-time-to-buy-and-sell-stock-iii": [
+    "Two transactions never overlap, so there is a day that separates the first from the second.",
+    "Precompute the best single-transaction profit ending by each day and starting from each day, then try every split: O(n).",
+    "Or keep four running values in one pass: best after first buy, first sell, second buy and second sell."
+  ],
+  "lfu-cache": [
+    "Keep a hash map from key to (value, use count).",
+    "Group keys by use count, and inside each group keep them in recency order, so both tie-break rules are available in O(1).",
+    "Track the smallest non-empty use count. It only changes when that group empties after a use (it moves up by 1) or when a new key is inserted (it becomes 1)."
   ]
 }

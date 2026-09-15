@@ -23,7 +23,7 @@ FastAPI `ai-service`. Do not add LLM calls, prompts, or embedding code to `backe
 
 | Service | Tech | Port | Responsibility |
 |---|---|---|---|
-| `web/` | Next.js 16 (App Router), React 19, TS, Tailwind 4 | 3000 (3001 host) | UI: Monaco editor, React Flow diagrams, Recharts, PDF export |
+| `web/` | Next.js 16 (App Router), React 19, TS, Tailwind 4 | 3000 (3002 host) | UI: Monaco editor, React Flow diagrams, Recharts, PDF export |
 | `backend/` | Express 5, TypeScript | 4000 | Auth, sessions, orchestration, all SQL |
 | `ai-service/` | FastAPI, Python | 8000 (8010 host) | RAG, LLM chains, speech, code review, recommendations |
 | `code-runner/` | Node + dockerode | 5000 (5050 host in dev) | Ephemeral Docker sandboxes for user code |
@@ -40,7 +40,10 @@ backend/src/routes/          # one file per resource; SQL lives directly in hand
 backend/src/services/        # ai.service.ts (AI_SERVICE_URL), interview-state.service.ts
 backend/src/db.ts            # single query() helper over a pg Pool
 backend/sql_migrations/      # 001_init.sql … 011_resumes.sql (raw SQL, ordered)
-backend/leetcode_problems.json, starter_templates.json, problem_hints.json
+backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
+backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
+scripts/problemgen/          # problem specs + independent oracles that generate the data files
+scripts/problemgen/curation.py # company tags for all 150 problems; overrides the generators (D-044)
 
 ai-service/app/api/          # routers: rag, interview, speech, system_design, code_review,
 #                              recommendations, resume
@@ -65,7 +68,7 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   `ai-service`, `chromadb`), not `localhost`. Host port bindings exist only for tools
   run from the host, so remapping them never affects service-to-service traffic.
   This machine runs another project on 3000/8000/5432, so InterviewForge's host
-  bindings are offset: **web 3001, ai-service 8010, postgres 5433** (D-024, D-031).
+  bindings are offset: **web 3002, ai-service 8010, postgres 5433** (D-024, D-031, D-041).
   The other project's ports are left alone.
 
 **Database**
@@ -119,6 +122,10 @@ docker compose exec backend npx ts-node scripts/seed_learning_paths.ts # seed pa
 docker compose exec ai-service python scripts/seed_rag.py              # seed RAG corpus
 
 python scripts/verify_resume_isolation.py   # Phase 5: cross-user isolation + deletion, live stack
+python scripts/verify_problems.py           # Phase 7: every problem x 4 languages via the real code-runner
+python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
+python scripts/problemgen/batch1_easy.py    # regenerate a batch's data (idempotent; see D-042)
+python scripts/problemgen/apply_curation.py # write curated company tags into leetcode_problems.json
 docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tune the live-fetch gate
 
 cd backend && npm run build     # tsc

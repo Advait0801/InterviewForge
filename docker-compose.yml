@@ -46,9 +46,9 @@ services:
     image: interviewforge-web:latest
     container_name: interviewforge-web
     ports:
-      # Host 3001 -> container 3000. See the note on postgres: host bindings
+      # Host 3002 -> container 3000. See the note on postgres: host bindings
       # only matter to tools on the host, and 3000 is taken on this machine.
-      - "3001:3000"
+      - "3002:3000"
     volumes:
       - ./web:/app
       - interviewforge-web-node-modules:/app/node_modules
