@@ -1343,5 +1343,338 @@
     "cpp": "class Solution {\npublic:\n    int eraseOverlapIntervals(vector<vector<int>>& intervals) {\n        \n    }\n};",
     "c": "int eraseOverlapIntervals(int** intervals, int intervalsSize, int* intervalsColSize) {\n    \n}",
     "java": "class Solution {\n    public int eraseOverlapIntervals(int[][] intervals) {\n        \n    }\n}"
+  },
+  "daily-temperatures": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "dailyTemperatures",
+      "params": [
+        { "name": "temperatures", "type": "int[]" }
+      ],
+      "returnType": "int[]"
+    },
+    "python3": "class Solution:\n    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:\n        pass",
+    "cpp": "class Solution {\npublic:\n    vector<int> dailyTemperatures(vector<int>& temperatures) {\n        \n    }\n};",
+    "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* dailyTemperatures(int* temperatures, int temperaturesSize, int* returnSize) {\n    \n}",
+    "java": "class Solution {\n    public int[] dailyTemperatures(int[] temperatures) {\n        \n    }\n}"
+  },
+  "evaluate-reverse-polish-notation": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "evalRPN",
+      "params": [
+        { "name": "tokens", "type": "string[]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def evalRPN(self, tokens: List[str]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int evalRPN(vector<string>& tokens) {\n        \n    }\n};",
+    "c": "int evalRPN(char** tokens, int tokensSize) {\n    \n}",
+    "java": "class Solution {\n    public int evalRPN(String[] tokens) {\n        \n    }\n}"
+  },
+  "binary-tree-right-side-view": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "rightSideView",
+      "params": [
+        { "name": "root", "type": "TreeNode" }
+      ],
+      "returnType": "int[]"
+    },
+    "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:\n        pass",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    vector<int> rightSideView(TreeNode* root) {\n        \n    }\n};",
+    "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\n/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* rightSideView(struct TreeNode* root, int* returnSize) {\n    \n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public List<Integer> rightSideView(TreeNode root) {\n        \n    }\n}"
+  },
+  "kth-smallest-element-in-a-bst": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "kthSmallest",
+      "params": [
+        { "name": "root", "type": "TreeNode" },
+        { "name": "k", "type": "int" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:\n        pass",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int kthSmallest(TreeNode* root, int k) {\n        \n    }\n};",
+    "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nint kthSmallest(struct TreeNode* root, int k) {\n    \n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int kthSmallest(TreeNode root, int k) {\n        \n    }\n}"
+  },
+  "construct-binary-tree-from-preorder-and-inorder-traversal": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "buildTree",
+      "params": [
+        { "name": "preorder", "type": "int[]" },
+        { "name": "inorder", "type": "int[]" }
+      ],
+      "returnType": "TreeNode"
+    },
+    "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:\n        pass",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {\n        \n    }\n};",
+    "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nstruct TreeNode* buildTree(int* preorder, int preorderSize, int* inorder, int inorderSize) {\n    \n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public TreeNode buildTree(int[] preorder, int[] inorder) {\n        \n    }\n}"
+  },
+  "count-good-nodes-in-binary-tree": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "goodNodes",
+      "params": [
+        { "name": "root", "type": "TreeNode" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def goodNodes(self, root: TreeNode) -> int:\n        pass",
+    "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int goodNodes(TreeNode* root) {\n        \n    }\n};",
+    "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nint goodNodes(struct TreeNode* root) {\n    \n}",
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int goodNodes(TreeNode root) {\n        \n    }\n}"
+  },
+  "pacific-atlantic-water-flow": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "pacificAtlantic",
+      "params": [
+        { "name": "heights", "type": "int[][]" }
+      ],
+      "returnType": "int[][]"
+    },
+    "python3": "class Solution:\n    def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:\n        pass",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {\n        \n    }\n};",
+    "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** pacificAtlantic(int** heights, int heightsSize, int* heightsColSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
+    "java": "class Solution {\n    public List<List<Integer>> pacificAtlantic(int[][] heights) {\n        \n    }\n}"
+  },
+  "number-of-provinces": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "findCircleNum",
+      "params": [
+        { "name": "isConnected", "type": "int[][]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def findCircleNum(self, isConnected: List[List[int]]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int findCircleNum(vector<vector<int>>& isConnected) {\n        \n    }\n};",
+    "c": "int findCircleNum(int** isConnected, int isConnectedSize, int* isConnectedColSize) {\n    \n}",
+    "java": "class Solution {\n    public int findCircleNum(int[][] isConnected) {\n        \n    }\n}"
+  },
+  "gas-station": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "canCompleteCircuit",
+      "params": [
+        { "name": "gas", "type": "int[]" },
+        { "name": "cost", "type": "int[]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {\n        \n    }\n};",
+    "c": "int canCompleteCircuit(int* gas, int gasSize, int* cost, int costSize) {\n    \n}",
+    "java": "class Solution {\n    public int canCompleteCircuit(int[] gas, int[] cost) {\n        \n    }\n}"
+  },
+  "sort-colors": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "sortColors",
+      "params": [
+        { "name": "nums", "type": "int[]" }
+      ],
+      "returnType": "void"
+    },
+    "python3": "class Solution:\n    def sortColors(self, nums: List[int]) -> None:\n        pass",
+    "cpp": "class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        \n    }\n};",
+    "c": "void sortColors(int* nums, int numsSize) {\n    \n}",
+    "java": "class Solution {\n    public void sortColors(int[] nums) {\n        \n    }\n}"
+  },
+  "find-the-duplicate-number": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "findDuplicate",
+      "params": [
+        { "name": "nums", "type": "int[]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def findDuplicate(self, nums: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int findDuplicate(vector<int>& nums) {\n        \n    }\n};",
+    "c": "int findDuplicate(int* nums, int numsSize) {\n    \n}",
+    "java": "class Solution {\n    public int findDuplicate(int[] nums) {\n        \n    }\n}"
+  },
+  "longest-consecutive-sequence": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "longestConsecutive",
+      "params": [
+        { "name": "nums", "type": "int[]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def longestConsecutive(self, nums: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        \n    }\n};",
+    "c": "int longestConsecutive(int* nums, int numsSize) {\n    \n}",
+    "java": "class Solution {\n    public int longestConsecutive(int[] nums) {\n        \n    }\n}"
+  },
+  "valid-sudoku": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "isValidSudoku",
+      "params": [
+        { "name": "board", "type": "char[][]" }
+      ],
+      "returnType": "bool"
+    },
+    "python3": "class Solution:\n    def isValidSudoku(self, board: List[List[str]]) -> bool:\n        pass",
+    "cpp": "class Solution {\npublic:\n    bool isValidSudoku(vector<vector<char>>& board) {\n        \n    }\n};",
+    "c": "bool isValidSudoku(char** board, int boardSize, int* boardColSize) {\n    \n}",
+    "java": "class Solution {\n    public boolean isValidSudoku(char[][] board) {\n        \n    }\n}"
+  },
+  "subarray-sum-equals-k": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "subarraySum",
+      "params": [
+        { "name": "nums", "type": "int[]" },
+        { "name": "k", "type": "int" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def subarraySum(self, nums: List[int], k: int) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int subarraySum(vector<int>& nums, int k) {\n        \n    }\n};",
+    "c": "int subarraySum(int* nums, int numsSize, int k) {\n    \n}",
+    "java": "class Solution {\n    public int subarraySum(int[] nums, int k) {\n        \n    }\n}"
+  },
+  "maximum-product-subarray": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "maxProduct",
+      "params": [
+        { "name": "nums", "type": "int[]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def maxProduct(self, nums: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int maxProduct(vector<int>& nums) {\n        \n    }\n};",
+    "c": "int maxProduct(int* nums, int numsSize) {\n    \n}",
+    "java": "class Solution {\n    public int maxProduct(int[] nums) {\n        \n    }\n}"
+  },
+  "palindromic-substrings": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "countSubstrings",
+      "params": [
+        { "name": "s", "type": "string" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def countSubstrings(self, s: str) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int countSubstrings(string s) {\n        \n    }\n};",
+    "c": "int countSubstrings(char* s) {\n    \n}",
+    "java": "class Solution {\n    public int countSubstrings(String s) {\n        \n    }\n}"
+  },
+  "coin-change-ii": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "change",
+      "params": [
+        { "name": "amount", "type": "int" },
+        { "name": "coins", "type": "int[]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def change(self, amount: int, coins: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int change(int amount, vector<int>& coins) {\n        \n    }\n};",
+    "c": "int change(int amount, int* coins, int coinsSize) {\n    \n}",
+    "java": "class Solution {\n    public int change(int amount, int[] coins) {\n        \n    }\n}"
+  },
+  "target-sum": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "findTargetSumWays",
+      "params": [
+        { "name": "nums", "type": "int[]" },
+        { "name": "target", "type": "int" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def findTargetSumWays(self, nums: List[int], target: int) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int findTargetSumWays(vector<int>& nums, int target) {\n        \n    }\n};",
+    "c": "int findTargetSumWays(int* nums, int numsSize, int target) {\n    \n}",
+    "java": "class Solution {\n    public int findTargetSumWays(int[] nums, int target) {\n        \n    }\n}"
+  },
+  "rotate-array": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "rotate",
+      "params": [
+        { "name": "nums", "type": "int[]" },
+        { "name": "k", "type": "int" }
+      ],
+      "returnType": "void"
+    },
+    "python3": "class Solution:\n    def rotate(self, nums: List[int], k: int) -> None:\n        pass",
+    "cpp": "class Solution {\npublic:\n    void rotate(vector<int>& nums, int k) {\n        \n    }\n};",
+    "c": "void rotate(int* nums, int numsSize, int k) {\n    \n}",
+    "java": "class Solution {\n    public void rotate(int[] nums, int k) {\n        \n    }\n}"
+  },
+  "koko-eating-bananas": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "minEatingSpeed",
+      "params": [
+        { "name": "piles", "type": "int[]" },
+        { "name": "h", "type": "int" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def minEatingSpeed(self, piles: List[int], h: int) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int minEatingSpeed(vector<int>& piles, int h) {\n        \n    }\n};",
+    "c": "int minEatingSpeed(int* piles, int pilesSize, int h) {\n    \n}",
+    "java": "class Solution {\n    public int minEatingSpeed(int[] piles, int h) {\n        \n    }\n}"
+  },
+  "min-stack": {
+    "meta": {
+      "className": "MinStack",
+      "isDesign": true,
+      "methods": [
+        { "name": "push", "params": [{ "name": "val", "type": "int" }], "returnType": "void" },
+        { "name": "pop", "params": [], "returnType": "void" },
+        { "name": "top", "params": [], "returnType": "int" },
+        { "name": "getMin", "params": [], "returnType": "int" }
+      ]
+    },
+    "python3": "class MinStack:\n\n    def __init__(self):\n        pass\n\n    def push(self, val: int) -> None:\n        pass\n\n    def pop(self) -> None:\n        pass\n\n    def top(self) -> int:\n        pass\n\n    def getMin(self) -> int:\n        pass",
+    "cpp": "class MinStack {\npublic:\n    MinStack() {\n        \n    }\n    \n    void push(int val) {\n        \n    }\n    \n    void pop() {\n        \n    }\n    \n    int top() {\n        \n    }\n    \n    int getMin() {\n        \n    }\n};",
+    "c": "typedef struct {\n    \n} MinStack;\n\n\nMinStack* minStackCreate() {\n    \n}\n\nvoid minStackPush(MinStack* obj, int val) {\n    \n}\n\nvoid minStackPop(MinStack* obj) {\n    \n}\n\nint minStackTop(MinStack* obj) {\n    \n}\n\nint minStackGetMin(MinStack* obj) {\n    \n}\n\nvoid minStackFree(MinStack* obj) {\n    \n}",
+    "java": "class MinStack {\n\n    public MinStack() {\n        \n    }\n    \n    public void push(int val) {\n        \n    }\n    \n    public void pop() {\n        \n    }\n    \n    public int top() {\n        \n    }\n    \n    public int getMin() {\n        \n    }\n}"
+  },
+  "lru-cache": {
+    "meta": {
+      "className": "LRUCache",
+      "isDesign": true,
+      "constructorParams": [{ "name": "capacity", "type": "int" }],
+      "methods": [
+        { "name": "get", "params": [{ "name": "key", "type": "int" }], "returnType": "int" },
+        { "name": "put", "params": [{ "name": "key", "type": "int" }, { "name": "value", "type": "int" }], "returnType": "void" }
+      ]
+    },
+    "python3": "class LRUCache:\n\n    def __init__(self, capacity: int):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass",
+    "cpp": "class LRUCache {\npublic:\n    LRUCache(int capacity) {\n        \n    }\n    \n    int get(int key) {\n        \n    }\n    \n    void put(int key, int value) {\n        \n    }\n};",
+    "c": "typedef struct {\n    \n} LRUCache;\n\n\nLRUCache* lRUCacheCreate(int capacity) {\n    \n}\n\nint lRUCacheGet(LRUCache* obj, int key) {\n    \n}\n\nvoid lRUCachePut(LRUCache* obj, int key, int value) {\n    \n}\n\nvoid lRUCacheFree(LRUCache* obj) {\n    \n}",
+    "java": "class LRUCache {\n\n    public LRUCache(int capacity) {\n        \n    }\n    \n    public int get(int key) {\n        \n    }\n    \n    public void put(int key, int value) {\n        \n    }\n}"
+  },
+  "time-based-key-value-store": {
+    "meta": {
+      "className": "TimeMap",
+      "isDesign": true,
+      "methods": [
+        { "name": "set", "params": [{ "name": "key", "type": "string" }, { "name": "value", "type": "string" }, { "name": "timestamp", "type": "int" }], "returnType": "void" },
+        { "name": "get", "params": [{ "name": "key", "type": "string" }, { "name": "timestamp", "type": "int" }], "returnType": "string" }
+      ]
+    },
+    "python3": "class TimeMap:\n\n    def __init__(self):\n        pass\n\n    def set(self, key: str, value: str, timestamp: int) -> None:\n        pass\n\n    def get(self, key: str, timestamp: int) -> str:\n        pass",
+    "cpp": "class TimeMap {\npublic:\n    TimeMap() {\n        \n    }\n    \n    void set(string key, string value, int timestamp) {\n        \n    }\n    \n    string get(string key, int timestamp) {\n        \n    }\n};",
+    "c": "typedef struct {\n    \n} TimeMap;\n\n\nTimeMap* timeMapCreate() {\n    \n}\n\nvoid timeMapSet(TimeMap* obj, char* key, char* value, int timestamp) {\n    \n}\n\nchar* timeMapGet(TimeMap* obj, char* key, int timestamp) {\n    \n}\n\nvoid timeMapFree(TimeMap* obj) {\n    \n}",
+    "java": "class TimeMap {\n\n    public TimeMap() {\n        \n    }\n    \n    public void set(String key, String value, int timestamp) {\n        \n    }\n    \n    public String get(String key, int timestamp) {\n        \n    }\n}"
   }
 }

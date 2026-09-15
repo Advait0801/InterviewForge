@@ -115,13 +115,17 @@ def fmt_output(value):
 
 def build_cases(spec):
     rng = random.Random(zlib.crc32(spec["slug"].encode()))
-    names = [name for name, _ in spec["params"]]
+    names = [name for name, _ in spec.get("params", [])]
     want = spec.get("case_count", CASES_PER_PROBLEM)
     seen, cases = set(), []
     for attempt, args in enumerate(spec["cases"](rng)):
         if attempt > 20000:
             break
-        text = ", ".join(f"{n} = {fmt_value(a)}" for n, a in zip(names, args))
+        if spec.get("design"):
+            # Design problems: the operations line, then the per-operation arguments line.
+            text = json.dumps(args[0]) + "\n" + json.dumps(args[1])
+        else:
+            text = ", ".join(f"{n} = {fmt_value(a)}" for n, a in zip(names, args))
         if text in seen:
             continue
         seen.add(text)
@@ -180,21 +184,31 @@ def upsert_hints(specs):
     _dump_json(HINTS_JSON, hints, raw)
 
 
+def _json_params(params):
+    return ", ".join(f'{{ "name": {json.dumps(n)}, "type": {json.dumps(t)} }}' for n, t in params)
+
+
 def _template_entry(spec):
-    params = ",\n".join(
-        f'        {{ "name": {json.dumps(n)}, "type": {json.dumps(t)} }}' for n, t in spec["params"]
-    )
-    lines = [
-        f"  {json.dumps(spec['slug'])}: {{",
-        '    "meta": {',
-        '      "className": "Solution",',
-        f'      "methodName": {json.dumps(spec["method"])},',
-        '      "params": [',
-        params,
-        "      ],",
-        f'      "returnType": {json.dumps(spec["ret"])}',
-        "    },",
-    ]
+    lines = [f"  {json.dumps(spec['slug'])}: {{", '    "meta": {']
+    if spec.get("design"):
+        lines += [f'      "className": {json.dumps(spec["className"])},', '      "isDesign": true,']
+        if spec.get("ctor"):
+            lines.append(f'      "constructorParams": [{_json_params(spec["ctor"])}],')
+        methods = ",\n".join(
+            f'        {{ "name": {json.dumps(name)}, "params": [{_json_params(params)}], "returnType": {json.dumps(ret)} }}'
+            for name, params, ret in spec["methods"])
+        lines += ['      "methods": [', methods, "      ]", "    },"]
+    else:
+        params = ",\n".join(f"        {_json_params([p])}" for p in spec["params"])
+        lines += [
+            '      "className": "Solution",',
+            f'      "methodName": {json.dumps(spec["method"])},',
+            '      "params": [',
+            params,
+            "      ],",
+            f'      "returnType": {json.dumps(spec["ret"])}',
+            "    },",
+        ]
     langs = ["python3", "cpp", "c", "java"]
     for i, lang in enumerate(langs):
         comma = "," if i < len(langs) - 1 else ""
@@ -217,15 +231,27 @@ def insert_templates(specs):
     return len(added)
 
 
+def _ts_params(params):
+    return ", ".join(f'{{ name: "{n}", type: "{t}" }}' for n, t in params)
+
+
 def _meta_entry(spec):
-    params = ", ".join(f'{{ name: "{n}", type: "{t}" }}' for n, t in spec["params"])
-    lines = [
-        f'  "{spec["slug"]}": {{',
-        '    className: "Solution",',
-        f'    methodName: "{spec["method"]}",',
-        f"    params: [{params}],",
-        f'    returnType: "{spec["ret"]}",',
-    ]
+    lines = [f'  "{spec["slug"]}": {{']
+    if spec.get("design"):
+        lines += [f'    className: "{spec["className"]}",', "    isDesign: true,"]
+        if spec.get("ctor"):
+            lines.append(f"    constructorParams: [{_ts_params(spec['ctor'])}],")
+        lines.append("    methods: [")
+        lines += [f'      {{ name: "{name}", params: [{_ts_params(params)}], returnType: "{ret}" }},'
+                  for name, params, ret in spec["methods"]]
+        lines.append("    ],")
+    else:
+        lines += [
+            '    className: "Solution",',
+            f'    methodName: "{spec["method"]}",',
+            f"    params: [{_ts_params(spec['params'])}],",
+            f'    returnType: "{spec["ret"]}",',
+        ]
     for flag in ("unorderedOutput", "unorderedInner"):
         if spec.get(flag):
             lines.append(f"    {flag}: true,")
@@ -302,3 +328,39 @@ def templates(py, cpp, c, java, header=None, c_note=""):
         "c": f"{c_head}{c} {{\n    \n}}",
         "java": f"{hj}class Solution {{\n    public {java} {{\n        \n    }}\n}}",
     }
+
+
+_PY_T = {"int": "int", "string": "str", "bool": "bool", "void": "None", "double": "float"}
+_CPP_T = {"int": "int", "string": "string", "bool": "bool", "void": "void", "double": "double"}
+_JAVA_T = {"int": "int", "string": "String", "bool": "boolean", "void": "void", "double": "double"}
+_C_T = {"int": "int", "string": "char*", "bool": "bool", "void": "void", "double": "double"}
+
+
+def design_templates(cls, ctor, methods):
+    """Starter templates for a design problem, in LeetCode's layout.
+
+    ctor: [(name, type)]; methods: [(name, [(name, type)], return type)].
+    C follows LeetCode's naming: lowerFirst(class) + Create/Method/Free.
+    """
+    prefix = cls[0].lower() + cls[1:]
+
+    def py_args(ps):
+        return "".join(f", {n}: {_PY_T[t]}" for n, t in ps)
+
+    def typed(ps, types):
+        return ", ".join(f"{types[t]} {n}" for n, t in ps)
+
+    py = [f"class {cls}:", "", f"    def __init__(self{py_args(ctor)}):", "        pass"]
+    cpp = [f"class {cls} {{", "public:", f"    {cls}({typed(ctor, _CPP_T)}) {{", "        ", "    }"]
+    java = [f"class {cls} {{", "", f"    public {cls}({typed(ctor, _JAVA_T)}) {{", "        ", "    }"]
+    c = ["typedef struct {", "    ", f"}} {cls};", "", "", f"{cls}* {prefix}Create({typed(ctor, _C_T)}) {{", "    ", "}"]
+    for name, ps, ret in methods:
+        py += ["", f"    def {name}(self{py_args(ps)}) -> {_PY_T[ret]}:", "        pass"]
+        cpp += ["    ", f"    {_CPP_T[ret]} {name}({typed(ps, _CPP_T)}) {{", "        ", "    }"]
+        java += ["    ", f"    public {_JAVA_T[ret]} {name}({typed(ps, _JAVA_T)}) {{", "        ", "    }"]
+        c_args = ", ".join([f"{cls}* obj"] + [f"{_C_T[t]} {n}" for n, t in ps])
+        c += ["", f"{_C_T[ret]} {prefix}{name[0].upper() + name[1:]}({c_args}) {{", "    ", "}"]
+    cpp.append("};")
+    java.append("}")
+    c += ["", f"void {prefix}Free({cls}* obj) {{", "    ", "}"]
+    return {"python3": "\n".join(py), "cpp": "\n".join(cpp), "c": "\n".join(c), "java": "\n".join(java)}

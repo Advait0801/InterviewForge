@@ -7,6 +7,55 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-14
+
+### D-042 — Every problem is verified in four languages, and the check is proven able to fail
+**Finding (Phase 7):** no reference solutions existed anywhere, so none of the original 42
+problems had ever been run end to end. Verifying them first, before adding any, found defects
+that would each have failed users writing correct code.
+
+**Decided — how a problem counts as verified:**
+1. **A reference solution per language** in `backend/reference_solutions/<slug>/`, run by
+   `scripts/verify_problems.py` through the real code-runner, the same path as a user's submission.
+2. **Expected outputs come from an independent oracle**, not the reference solution: brute force,
+   `itertools`, big integers, or O(n²) DP where the reference is greedy or O(n log n)
+   (`scripts/problemgen/`). Otherwise a green cell only proves a solution agrees with itself.
+3. **Mutation check per batch:** plausible wrong solutions must fail, and the *margin* matters,
+   not just killed/survived. Five were caught by only 1–3 of 50 cases (values-only symmetric
+   check, negative palindromes, non-strict LIS, word search reusing a cell, insert-interval
+   merging one overlap); their generators were strengthened until those fail 8–24 cases.
+4. A mutant that survives is evidence to investigate, not proof the tests are weak. A 32-bit hour
+   total in koko-eating-bananas survived because it is **correct** for a binary search over
+   [1, max(piles)]: the smallest probed speed keeps the total ≤ ~2h + n < 2³¹. The mutant was
+   replaced, and a hint that overstated the overflow risk was reworded.
+
+**Harness defects found and fixed** (`code-runner/src/harness-gen.ts`, `input-parser.ts`,
+`index.ts`, `harnesses/python3.py`):
+- The single-parameter input parser split on the first `=` anywhere, breaking inputs containing `"="`.
+- C++ char-array parsing read closing quotes as opening ones (segfault on word-search-ii) and
+  printing didn't escape `\` or `"`. Java had the same escape bug and printed `char[]` as a bare string.
+- C++ and Java never printed a mutated `int[][]` for void methods (rotate-image).
+- Java `_treeToJson` used `ArrayDeque.offer(null)` → NPE on every tree return.
+- Java `List<...>` signatures vs the array-based harness → compile errors on 6 problems; fixed
+  with a reflection invoker that converts per declared parameter type.
+- C read `[]` as one empty row, had no `string`/`string[]` returns, never printed a void `char[]`.
+- **Design problems never ran in C++, Java or C** — the harness printed `"[]"` without calling
+  the user's class. Now real drivers in all three, with constructor arguments.
+- The comparator sorted inner arrays unconditionally, so a wrong n-queens board passed; inner
+  ordering is now opt-in (`unorderedInner`).
+- C++/Java `ListNode`/`TreeNode` lacked LeetCode's constructors (`ListNode(val, next)`,
+  `new ListNode()`), so idiomatic solutions failed to compile.
+- code-runner used Express's 100kb JSON default. subsets needs ~150kb; Submit sends every case,
+  so users saw a 502 "Code runner unavailable". fizz-buzz was already at ~99kb. Now 2mb.
+
+**Data defects found and fixed** (`backend/leetcode_problems.json`, `starter_templates.json`):
+minimum-window-substring's 50 expected strings were unquoted (never passable); word-search-ii had
+14 wrong expectations; two-sum had 30 and top-k-frequent 29 cases with more than one valid answer;
+the job-scheduling C template had the wrong signature.
+
+**Going forward:** a problem is added only with all of the above. Catalogue is 119 problems
+(43 easy / 64 medium / 12 hard), 476/476 cells passing. Narrows F-12.
+
 ## 2026-09-13
 
 ### D-041 — Web host port moved 3001 → 3002; backend CORS origin corrected

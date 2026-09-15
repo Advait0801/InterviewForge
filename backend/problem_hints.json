@@ -478,5 +478,120 @@
     "Removing the fewest intervals is the same as keeping the most intervals that do not overlap.",
     "Among intervals that could come next, the one that ends earliest leaves the most room for the rest.",
     "Sort by end time and greedily keep each interval whose start is >= the end of the last kept interval; count the rest as removed."
+  ],
+  "daily-temperatures": [
+    "Checking every later day for each day is O(n^2).",
+    "Keep the indices of days that are still waiting for a warmer day on a stack.",
+    "Their temperatures on the stack never increase from bottom to top, so a new warmer day resolves days from the top until it meets one that is at least as warm."
+  ],
+  "evaluate-reverse-polish-notation": [
+    "Scan the tokens left to right, keeping the operands you have seen so far.",
+    "When you meet an operator, its two operands are the two most recently seen values that have not been used yet.",
+    "Pop the right operand first, then the left one, and push the result; watch the operand order for '-' and '/', and make sure division truncates toward zero."
+  ],
+  "binary-tree-right-side-view": [
+    "The visible node at each depth is simply the last node at that depth.",
+    "A level-by-level breadth-first traversal makes the last node of each level easy to pick out.",
+    "Alternatively, a depth-first traversal that visits the right child first records a node whenever it reaches a depth for the first time."
+  ],
+  "kth-smallest-element-in-a-bst": [
+    "An inorder traversal of a binary search tree visits the values in increasing order.",
+    "You do not need to collect every value: count nodes as the traversal visits them.",
+    "An iterative inorder traversal with an explicit stack lets you stop as soon as the count reaches k."
+  ],
+  "construct-binary-tree-from-preorder-and-inorder-traversal": [
+    "The first value in preorder is always the root.",
+    "Find that root in inorder: everything to its left is the left subtree and everything to its right is the right subtree, and the sizes tell you how to split preorder too.",
+    "Store each value's inorder index in a hash map so the split is O(1), and consume preorder with a single moving index while recursing left then right."
+  ],
+  "count-good-nodes-in-binary-tree": [
+    "Whether a node is good depends only on the largest value above it on its path.",
+    "Pass the maximum value seen so far down the recursion.",
+    "A node is good when its value is >= that maximum; update the maximum before visiting its children."
+  ],
+  "pacific-atlantic-water-flow": [
+    "Simulating the flow from every cell separately repeats a lot of work.",
+    "Reverse the direction: start from the cells touching an ocean and move to neighbours that are at least as high.",
+    "Run that search once for the Pacific edges and once for the Atlantic edges; the answer is the cells reached by both."
+  ],
+  "number-of-provinces": [
+    "The matrix is an adjacency matrix, and a province is a connected component.",
+    "Start a DFS or BFS from each city you have not visited yet; each start discovers one whole province.",
+    "Union-find works too: union every connected pair and count the distinct roots."
+  ],
+  "gas-station": [
+    "If the total gas is less than the total cost, no start can work.",
+    "If you start at s and run out of fuel before reaching station j, no station between s and j can be the start either.",
+    "So scan once: reset the start to j + 1 and the tank to 0 whenever the tank goes negative, and check the total at the end."
+  ],
+  "sort-colors": [
+    "Counting the 0s, 1s and 2s and rewriting the array takes two passes.",
+    "For one pass, keep three regions: 0s at the front, 2s at the back, and an unexamined region in between.",
+    "Walk a middle pointer: swap a 0 to the front boundary, swap a 2 to the back boundary (without advancing, since the swapped-in value is unexamined), and step over a 1."
+  ],
+  "find-the-duplicate-number": [
+    "Sorting or a set would be easy, but both break the constraints.",
+    "Treat each index i as a node with an edge to nums[i]. Because some value is pointed to twice, following the edges from index 0 must enter a cycle.",
+    "The duplicate is the entrance to that cycle, which Floyd's tortoise-and-hare algorithm finds in two phases."
+  ],
+  "longest-consecutive-sequence": [
+    "Sorting makes runs easy to see, but costs O(n log n).",
+    "Put every value into a hash set so membership checks are O(1).",
+    "Only start counting from a value v when v - 1 is not in the set; then extend v + 1, v + 2, ... Each value is then counted at most once overall."
+  ],
+  "valid-sudoku": [
+    "Each filled cell belongs to exactly one row, one column and one box.",
+    "The box index of cell (r, c) is (r / 3) * 3 + c / 3.",
+    "Keep a seen-set (or a 9-bit mask) for every row, column and box, and fail as soon as a digit is already present in one of its three sets."
+  ],
+  "subarray-sum-equals-k": [
+    "Negative numbers rule out a sliding window, because extending a window can decrease its sum.",
+    "The sum of nums[i..j] equals prefix[j + 1] - prefix[i].",
+    "Walk the array with a running prefix sum and a hash map counting how many earlier prefixes had each value; add the count of prefix - k at every step."
+  ],
+  "maximum-product-subarray": [
+    "A negative number turns the smallest product into the largest one.",
+    "So for each position, track both the largest and the smallest product of a subarray ending there.",
+    "At each element the new maximum and minimum come from the element alone, or the element times the previous maximum or minimum; a zero resets both."
+  ],
+  "palindromic-substrings": [
+    "Checking every substring separately costs O(n^3).",
+    "Every palindrome has a centre: either a single character or the gap between two characters.",
+    "Expand outwards from each of the 2n - 1 centres while the characters on both sides match, counting one palindrome per successful step."
+  ],
+  "coin-change-ii": [
+    "Counting ordered sequences would count 1 + 2 and 2 + 1 twice.",
+    "Fix the order in which coin types are considered: process one denomination at a time.",
+    "With ways[0] = 1, for each coin c and each amount a from c upwards, add ways[a - c] into ways[a]. Looping coins outside amounts is what makes the count unordered."
+  ],
+  "target-sum": [
+    "Trying all 2^n sign assignments is possible for n = 20, but slow.",
+    "Track how many ways each running sum can be reached after the first i numbers; the sums stay within [-1000, 1000].",
+    "Alternatively, if P is the set of numbers given '+', then sum(P) = (total + target) / 2, which turns the problem into counting subsets with a fixed sum."
+  ],
+  "rotate-array": [
+    "Rotating by k and by k % n gives the same result.",
+    "Rotating right by k moves the last k elements to the front, keeping each block's internal order.",
+    "Reverse the whole array, then reverse the first k elements, then reverse the remaining n - k elements."
+  ],
+  "koko-eating-bananas": [
+    "At speed k, a pile of size p takes ceil(p / k) hours.",
+    "The total hours only go down as k goes up, so the feasible speeds form a range that you can binary search between 1 and max(piles).",
+    "If you ever evaluate a very small speed (k = 1 gives sum(piles), up to 10^13), the total overflows 32 bits, so a 64-bit accumulator is the safe choice."
+  ],
+  "min-stack": [
+    "A single variable holding the minimum breaks as soon as that minimum is popped.",
+    "The minimum only depends on what is below each element, and that never changes while the element is on the stack.",
+    "Store, next to every pushed value, the minimum of the stack at the moment it was pushed."
+  ],
+  "lru-cache": [
+    "A hash map gives O(1) lookup, but on its own it does not remember the order of use.",
+    "A doubly linked list ordered by recency lets you move any node to the front, or remove the node at the back, in O(1).",
+    "Combine them: the map points from each key to its list node. Sentinel head and tail nodes remove most edge cases."
+  ],
+  "time-based-key-value-store": [
+    "Keep a separate list of (timestamp, value) pairs for each key.",
+    "Because set timestamps are strictly increasing, each key's list is already sorted by timestamp.",
+    "For get, binary search that list for the last timestamp that is <= the query."
   ]
 }
