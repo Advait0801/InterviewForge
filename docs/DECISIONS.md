@@ -9,6 +9,51 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-14
 
+### D-044 — Company tags are curated in one file; every problem has an editorial (closes F-21, F-22)
+**Company tags (F-21).** The generated tags put Amazon on 149 of 150 problems, so filtering by it
+barely narrowed anything. Every problem is now tagged by hand:
+- `scripts/problemgen/curation.py` (`COMPANY_TAGS`) is the single source of truth for all 150 problems,
+  including the original 42 that no generator owns. 3–5 companies each, only the 10 interview
+  companies, most-associated first. Goldman Sachs and Yelp are gone.
+- `common.upsert_problems` takes tags from that table and ignores the spec. A slug with no entry is an
+  error, not a silent fallback. The 108 inline `companies=` in the batch specs were removed, since
+  keeping them would suggest they still do something. `apply_curation.py` writes the table into
+  `leetcode_problems.json`.
+- Proven: regenerating all five batches reproduces the curated JSON **byte for byte**.
+- A Python dict literal silently keeps the last of two identical keys. The first draft listed `min-stack`
+  twice and nothing complained, so `validate()` now parses its own source and rejects duplicate slugs.
+- Counts: Amazon 91, Google 87, Microsoft 61, Meta 57, Apple 42, Bloomberg 42, Uber 36, Adobe 32,
+  LinkedIn 27, Airbnb 20. The first pass still had Amazon on 127, because the biggest name is the easy
+  default when curating, so it was rebalanced once more. Tags remain approximate, just no longer
+  indiscriminate.
+
+**Editorials (F-22).** `backend/problem_editorials.json` holds one per problem, written in our own words:
+approach, 3–5 key steps, and time and space complexity.
+- They are stored structured (`{approach, steps, time, space}`), not as prose. That lets the file be
+  validated and the page lay each part out.
+- `seed_problems.ts` writes them into `editorial` as plain text under fixed headings (Approach /
+  Key steps / Complexity), so the column stays readable text for any other consumer.
+- `web/src/components/editorial-view.tsx` recognises those headings and renders cards, a numbered list
+  and `O(...)` badges. Anything else falls back to plain text.
+- Parsing complexity values needs balanced parentheses: a first version split on commas and broke
+  `O(max(m, n))`. Checked against all 150 with the component's own parser, and in headless Chrome on
+  the real problem page.
+
+**Verified live:** `scripts/verify_phase7.py` 46/46, up from 37. The new checks cover:
+- tags match `curation.py`, and the curated companies equal the backend's `COMPANIES` list;
+- 3–5 tags per problem, no company on more than 2/3 of the catalogue, every company has at least 15;
+- the database carries the curated tags;
+- every problem's detail endpoint serves exactly the formatted editorial.
+
+To prove the checks can fail, the data was corrupted on purpose: one editorial and one tag in the
+database, and one problem's tags in the JSON. All 6 affected checks failed; the data was then restored
+and re-seeded.
+
+**Found while verifying:** the editorial check makes one request per problem, so a second run within
+15 minutes hit `apiLimiter` (500 requests per window). The first version reported those 429s as
+"content differs". It now reports non-200 responses separately, with a rate-limit hint. See F-23 for
+why the limiter keys on IP here.
+
 ### D-043 — Phase 7 complete: 150 verified problems, company filter, and a broken streak query
 **Shipped:** the catalogue is 150 problems (43 easy / 64 medium / 43 hard), all passing reference
 solutions in python, c, cpp and java (600/600 cells, method in D-042). D-042's "119" was an interim
@@ -775,8 +820,9 @@ Things observed in the code that need a call made on them.
 | F-18 | `brendangregg` feed ingested four entries all titled "Brendan Gregg's Blog" — the feed appears to link to the index page rather than individual articles, so those chunks are low value | `ai-service/app/ingest/sources.py` |
 | F-19 | `FetchLimiter` counters are in-process, so limits are per-instance. A multi-instance deployment would multiply the global daily cap by the instance count; needs Redis | `ai-service/app/ingest/limits.py` |
 | F-20 | Live *discovery* depends on Gemini search grounding, which returns 429 on the free tier — the live fetch degrades safely to local context but cannot write back until quota exists (D-038) | `ai-service/app/ingest/live.py` |
-| F-21 | Company tags are too broad to be useful for the biggest companies: Amazon 149/150, Microsoft 139, Google 125 (Phase 7 generated them generously). Needs a curation pass, e.g. 3–5 companies per problem | `scripts/problemgen/`, `backend/leetcode_problems.json` |
-| F-22 | The `editorial` column (migration 008) is never written by `seed_problems.ts`; all 150 problems have no editorial, though the plan and README mention editorials | `backend/scripts/seed_problems.ts` |
+| F-21 | ~~Company tags are too broad: Amazon 149/150, Microsoft 139, Google 125~~ — closed by D-044: curated 3–5 per problem in `curation.py`, Amazon now 91, no company below 20 | `scripts/problemgen/curation.py` |
+| F-22 | ~~The `editorial` column is never written; all 150 problems have none~~ — closed by D-044: `problem_editorials.json`, seeded and rendered as sections | `backend/problem_editorials.json` |
+| F-23 | `apiLimiter` is mounted on `/api` before any auth middleware, so `req.user` is never set there and it always keys on IP, despite the "key on the authenticated user" comment. Users behind one NAT share 500 requests per 15 minutes. `llmLimiter` is unaffected (mounted after `requireAuth`) | `backend/src/index.ts`, `backend/src/middleware/rate-limit.middleware.ts` |
 | F-16 | `EmbeddingService` has no fallback on *error*: if the configured provider returns 401/404 the call raises rather than trying the other provider, unlike `invoke_with_fallback` for LLM calls | `ai-service/app/rag/embeddings.py` |
 | F-17 | Retrieval metrics are identical with and without the company/stage metadata filter, so the filter currently buys nothing measurable on this corpus. Re-test after Phase 4 expands it | `ai-service/app/interview/orchestrator.py` |
 | F-14 | 4 pre-existing `react-hooks` lint errors in `web/`: `setState` called synchronously in effects (theme-provider, paths/[slug], problems/[id]) and `Date.now()` called during render (dashboard "days ago" label). CI lint for `web` is `continue-on-error` until fixed | `web/src/` |

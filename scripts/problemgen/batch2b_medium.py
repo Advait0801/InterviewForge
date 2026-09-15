@@ -3,7 +3,7 @@
     python scripts/problemgen/batch2b_medium.py
 
 Same rules as earlier batches: statements in our own words, LeetCode's
-signatures, approximate company tags, and oracles that share no logic with the
+signatures, company tags from curation.py, and oracles that share no logic with the
 reference solutions. Where no genuinely different algorithm is practical
 (koko-eating-bananas), the oracle asserts a certificate of the answer instead.
 """
@@ -650,7 +650,7 @@ TIME_MAP_METHODS = [("set", [("key", "string"), ("value", "string"), ("timestamp
 
 SPECS = [
     P(slug="daily-temperatures", title="Daily Temperatures", number=739,
-      topics=["array", "stack", "monotonic-stack"], companies=["Amazon", "Google", "Meta", "Microsoft", "Uber"],
+      topics=["array", "stack", "monotonic-stack"],
       method="dailyTemperatures", params=[("temperatures", "int[]")], ret="int[]",
       description="""
 You are given an array temperatures of daily temperatures. Return an array answer where answer[i] is the number of days you would have to wait after day i to see a strictly warmer temperature. If no warmer day ever comes, answer[i] is 0.
@@ -670,7 +670,7 @@ Constraints:
                                        1, 300, [(30, 100), (30, 35)])),
 
     P(slug="evaluate-reverse-polish-notation", title="Evaluate Reverse Polish Notation", number=150,
-      topics=["array", "math", "stack"], companies=["Amazon", "LinkedIn", "Google", "Microsoft", "Meta"],
+      topics=["array", "math", "stack"],
       method="evalRPN", params=[("tokens", "string[]")], ret="int",
       description="""
 You are given an arithmetic expression as an array of tokens in Reverse Polish Notation, where every operator comes after its two operands. Evaluate the expression and return its value.
@@ -689,7 +689,6 @@ Constraints:
 
     P(slug="binary-tree-right-side-view", title="Binary Tree Right Side View", number=199,
       topics=["tree", "depth-first-search", "breadth-first-search", "binary-tree"],
-      companies=["Meta", "Amazon", "Bloomberg", "Microsoft", "Google"],
       method="rightSideView", params=[("root", "TreeNode")], ret="int[]",
       description="""
 Imagine standing to the right of a binary tree. Return the values of the nodes you can see, from top to bottom: for each depth, the rightmost node at that depth.
@@ -708,7 +707,6 @@ Constraints:
 
     P(slug="kth-smallest-element-in-a-bst", title="Kth Smallest Element in a BST", number=230,
       topics=["tree", "depth-first-search", "binary-search-tree", "binary-tree"],
-      companies=["Amazon", "Google", "Meta", "Microsoft", "Uber", "Bloomberg"],
       method="kthSmallest", params=[("root", "TreeNode"), ("k", "int")], ret="int",
       description="""
 Given the root of a binary search tree and an integer k, return the k-th smallest value among all the nodes in the tree, counting from 1.
@@ -729,7 +727,6 @@ Constraints:
     P(slug="construct-binary-tree-from-preorder-and-inorder-traversal",
       title="Construct Binary Tree from Preorder and Inorder Traversal", number=105,
       topics=["array", "hash-table", "divide-and-conquer", "tree", "binary-tree"],
-      companies=["Amazon", "Microsoft", "Meta", "Google", "Bloomberg"],
       method="buildTree", params=[("preorder", "int[]"), ("inorder", "int[]")], ret="TreeNode",
       description="""
 You are given two integer arrays, preorder and inorder, which are the preorder and inorder traversals of the same binary tree. All values in the tree are unique. Rebuild the tree and return its root.
@@ -753,7 +750,6 @@ Constraints:
 
     P(slug="count-good-nodes-in-binary-tree", title="Count Good Nodes in Binary Tree", number=1448,
       topics=["tree", "depth-first-search", "breadth-first-search", "binary-tree"],
-      companies=["Microsoft", "Amazon", "Google", "Meta"],
       method="goodNodes", params=[("root", "TreeNode")], ret="int",
       description="""
 A node X in a binary tree is good if no node on the path from the root down to X has a value greater than X's value.
@@ -772,7 +768,6 @@ Constraints:
 
     P(slug="pacific-atlantic-water-flow", title="Pacific Atlantic Water Flow", number=417, unorderedOutput=True,
       topics=["array", "depth-first-search", "breadth-first-search", "matrix"],
-      companies=["Google", "Amazon", "Meta", "Microsoft", "Uber"],
       method="pacificAtlantic", params=[("heights", "int[][]")], ret="int[][]",
       description="""
 An m x n island is described by heights[r][c], the height of each cell. The Pacific Ocean touches the island's top and left edges; the Atlantic Ocean touches its bottom and right edges.
@@ -797,7 +792,6 @@ Constraints:
 
     P(slug="number-of-provinces", title="Number of Provinces", number=547,
       topics=["depth-first-search", "breadth-first-search", "union-find", "graph"],
-      companies=["Amazon", "Google", "Meta", "Microsoft", "Bloomberg"],
       method="findCircleNum", params=[("isConnected", "int[][]")], ret="int",
       description="""
 There are n cities. You are given an n x n matrix isConnected where isConnected[i][j] = 1 if city i and city j are directly connected, and 0 otherwise. Connection is transitive: if a is connected to b and b to c, then a and c belong to the same group.
@@ -820,7 +814,7 @@ Constraints:
       oracle=provinces_oracle, cases=provinces_cases),
 
     P(slug="gas-station", title="Gas Station", number=134,
-      topics=["array", "greedy"], companies=["Amazon", "Google", "Microsoft", "Bloomberg", "Uber"],
+      topics=["array", "greedy"],
       method="canCompleteCircuit", params=[("gas", "int[]"), ("cost", "int[]")], ret="int",
       description="""
 There are n gas stations on a circular route. Station i provides gas[i] units of fuel, and driving from station i to station i + 1 (wrapping around after the last station) uses cost[i] units.
@@ -842,7 +836,7 @@ Constraints:
       oracle=lambda gas, cost: (gas_valid_starts(gas, cost) or [-1])[0], cases=gas_cases),
 
     P(slug="sort-colors", title="Sort Colors", number=75,
-      topics=["array", "two-pointers", "sorting"], companies=["Microsoft", "Amazon", "Meta", "Google", "Apple"],
+      topics=["array", "two-pointers", "sorting"],
       method="sortColors", params=[("nums", "int[]")], ret="void",
       description="""
 You are given an array nums whose values are 0, 1 and 2, standing for the colours red, white and blue. Sort the array in place so that all 0s come first, then all 1s, then all 2s.
@@ -865,7 +859,6 @@ Constraints:
 
     P(slug="find-the-duplicate-number", title="Find the Duplicate Number", number=287,
       topics=["array", "two-pointers", "binary-search", "bit-manipulation"],
-      companies=["Amazon", "Google", "Microsoft", "Meta", "Bloomberg", "Apple"],
       method="findDuplicate", params=[("nums", "int[]")], ret="int",
       description="""
 You are given an array nums of n + 1 integers, each in the range [1, n]. Exactly one value is repeated, although it may appear more than twice. Return that value.
@@ -885,7 +878,7 @@ Constraints:
       oracle=lambda nums: Counter(nums).most_common(1)[0][0], cases=duplicate_cases),
 
     P(slug="longest-consecutive-sequence", title="Longest Consecutive Sequence", number=128,
-      topics=["array", "hash-table", "union-find"], companies=["Google", "Amazon", "Meta", "Microsoft", "Bloomberg", "Uber"],
+      topics=["array", "hash-table", "union-find"],
       method="longestConsecutive", params=[("nums", "int[]")], ret="int",
       description="""
 Given an unsorted array of integers nums, return the length of the longest run of consecutive integers (such as 4, 5, 6, 7) whose values all appear in nums. The values do not have to be adjacent in the array.
@@ -903,7 +896,7 @@ Constraints:
       oracle=lambda nums: consecutive_oracle(nums), cases=consecutive_cases),
 
     P(slug="valid-sudoku", title="Valid Sudoku", number=36,
-      topics=["array", "hash-table", "matrix"], companies=["Amazon", "Apple", "Microsoft", "Uber", "Bloomberg"],
+      topics=["array", "hash-table", "matrix"],
       method="isValidSudoku", params=[("board", "char[][]")], ret="bool",
       description="""
 Decide whether a partially filled 9 x 9 Sudoku board is valid. Filled cells hold a digit from '1' to '9' and empty cells hold '.'.
@@ -922,7 +915,7 @@ Constraints:
       oracle=sudoku_oracle, cases=sudoku_cases),
 
     P(slug="subarray-sum-equals-k", title="Subarray Sum Equals K", number=560,
-      topics=["array", "hash-table", "prefix-sum"], companies=["Meta", "Google", "Amazon", "Microsoft", "Bloomberg", "Uber"],
+      topics=["array", "hash-table", "prefix-sum"],
       method="subarraySum", params=[("nums", "int[]"), ("k", "int")], ret="int",
       description="""
 Given an integer array nums and an integer k, return the number of contiguous, non-empty subarrays whose elements add up to exactly k.
@@ -939,7 +932,7 @@ Constraints:
       oracle=subarray_sum_oracle, cases=subarray_cases),
 
     P(slug="maximum-product-subarray", title="Maximum Product Subarray", number=152,
-      topics=["array", "dynamic-programming"], companies=["Amazon", "LinkedIn", "Google", "Microsoft", "Meta"],
+      topics=["array", "dynamic-programming"],
       method="maxProduct", params=[("nums", "int[]")], ret="int",
       description="""
 Given an integer array nums, find the contiguous, non-empty subarray with the largest product and return that product.
@@ -958,7 +951,7 @@ Constraints:
       oracle=max_product_oracle, cases=max_product_cases),
 
     P(slug="palindromic-substrings", title="Palindromic Substrings", number=647,
-      topics=["two-pointers", "string", "dynamic-programming"], companies=["Meta", "Amazon", "Google", "Microsoft", "LinkedIn"],
+      topics=["two-pointers", "string", "dynamic-programming"],
       method="countSubstrings", params=[("s", "string")], ret="int",
       description="""
 Given a string s, return how many of its substrings are palindromes. A substring is a contiguous, non-empty sequence of characters. Substrings at different positions are counted separately even if they contain the same characters.
@@ -974,7 +967,7 @@ Constraints:
       oracle=palindromic_oracle, cases=palindromic_cases),
 
     P(slug="coin-change-ii", title="Coin Change II", number=518,
-      topics=["array", "dynamic-programming"], companies=["Amazon", "Google", "Bloomberg", "Microsoft", "Meta"],
+      topics=["array", "dynamic-programming"],
       method="change", params=[("amount", "int"), ("coins", "int[]")], ret="int",
       description="""
 You are given an integer amount and an array coins of distinct coin denominations, with an unlimited supply of each coin. Return the number of different combinations of coins that add up to exactly amount. Combinations are unordered: 1 + 2 and 2 + 1 are the same combination. If amount cannot be made, return 0.
@@ -994,7 +987,7 @@ Constraints:
       oracle=change_oracle, cases=change_cases),
 
     P(slug="target-sum", title="Target Sum", number=494,
-      topics=["array", "dynamic-programming", "backtracking"], companies=["Meta", "Google", "Amazon", "Microsoft"],
+      topics=["array", "dynamic-programming", "backtracking"],
       method="findTargetSumWays", params=[("nums", "int[]"), ("target", "int")], ret="int",
       description="""
 You are given an integer array nums and an integer target. Build an expression by putting either '+' or '-' in front of every number and adding them all up.
@@ -1016,7 +1009,7 @@ Constraints:
       oracle=target_sum_oracle, cases=target_sum_cases),
 
     P(slug="rotate-array", title="Rotate Array", number=189,
-      topics=["array", "math", "two-pointers"], companies=["Microsoft", "Amazon", "Google", "Bloomberg", "Adobe"],
+      topics=["array", "math", "two-pointers"],
       method="rotate", params=[("nums", "int[]"), ("k", "int")], ret="void",
       description="""
 Given an integer array nums, rotate it to the right by k steps, in place: every element moves k positions to the right, and elements that fall off the end wrap around to the front.
@@ -1035,7 +1028,7 @@ Constraints:
       oracle=lambda nums, k: nums[len(nums) - k % len(nums):] + nums[:len(nums) - k % len(nums)], cases=rotate_cases),
 
     P(slug="koko-eating-bananas", title="Koko Eating Bananas", number=875,
-      topics=["array", "binary-search"], companies=["Meta", "Google", "Amazon", "Microsoft", "Airbnb"],
+      topics=["array", "binary-search"],
       method="minEatingSpeed", params=[("piles", "int[]"), ("h", "int")], ret="int",
       description="""
 There are n piles of bananas, where piles[i] is the size of pile i. Koko has h hours before the guards return. She picks an eating speed k (bananas per hour). Each hour she chooses one pile and eats k bananas from it; if the pile has fewer than k bananas she finishes it and eats nothing more that hour.
@@ -1054,7 +1047,7 @@ Constraints:
       oracle=koko_oracle, cases=koko_cases),
 
     P(slug="min-stack", title="Min Stack", number=155, design=True, className="MinStack", ctor=[], methods=MIN_STACK_METHODS,
-      topics=["stack", "design"], companies=["Amazon", "Bloomberg", "Microsoft", "Google", "Apple", "Uber"],
+      topics=["stack", "design"],
       description="""
 Design a stack that, in addition to the usual operations, can report its minimum element in constant time.
 
@@ -1080,7 +1073,6 @@ Constraints:
     P(slug="lru-cache", title="LRU Cache", number=146, design=True, className="LRUCache", ctor=[("capacity", "int")],
       methods=LRU_METHODS,
       topics=["hash-table", "linked-list", "design", "doubly-linked-list"],
-      companies=["Amazon", "Meta", "Microsoft", "Google", "Bloomberg", "Apple", "Uber"],
       description="""
 Design a cache with a fixed capacity that evicts the least recently used entry when it is full.
 
@@ -1104,7 +1096,7 @@ Constraints:
 
     P(slug="time-based-key-value-store", title="Time Based Key-Value Store", number=981, design=True, className="TimeMap", ctor=[],
       methods=TIME_MAP_METHODS,
-      topics=["hash-table", "string", "binary-search", "design"], companies=["Google", "Amazon", "Uber", "Airbnb", "Microsoft"],
+      topics=["hash-table", "string", "binary-search", "design"],
       description="""
 Design a key-value store that keeps every value ever set for a key, each tagged with a timestamp, and can answer what a key's value was at a given time.
 

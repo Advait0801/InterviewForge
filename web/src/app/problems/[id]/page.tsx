@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { api, CodeReview, ProblemDetail, Submission, SubmissionDetail } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import type { WorkspaceLanguage } from "@/components/code-workspace-editor";
+import { EditorialView } from "@/components/editorial-view";
 
 const CodeWorkspaceEditor = dynamic(
   () =>
@@ -747,9 +748,7 @@ export default function WorkspacePage() {
               </div>
             )}
             {activeTab === "editorial" && (
-              <div className="text-sm leading-relaxed text-text-primary whitespace-pre-wrap">
-                {problem.editorial?.trim() ? problem.editorial : "No editorial available for this problem yet."}
-              </div>
+              <EditorialView text={problem.editorial} />
             )}
           </div>
         </div>

@@ -429,7 +429,7 @@ def min_cut_cases(rng):
 
 SPECS = [
     P(slug="regular-expression-matching", title="Regular Expression Matching", number=10,
-      topics=["string", "dynamic-programming", "recursion"], companies=["Google", "Meta", "Amazon", "Microsoft", "Uber", "Airbnb"],
+      topics=["string", "dynamic-programming", "recursion"],
       method="isMatch", params=[("s", "string"), ("p", "string")], ret="bool",
       description="""
 Implement matching of a string s against a pattern p that supports two special characters:
@@ -452,7 +452,7 @@ Constraints:
       oracle=lambda s, p: re.fullmatch(p, s) is not None, cases=regex_cases),
 
     P(slug="wildcard-matching", title="Wildcard Matching", number=44,
-      topics=["string", "dynamic-programming", "greedy", "recursion"], companies=["Google", "Meta", "Amazon", "Microsoft", "Bloomberg"],
+      topics=["string", "dynamic-programming", "greedy", "recursion"],
       method="isMatch", params=[("s", "string"), ("p", "string")], ret="bool",
       description="""
 Implement wildcard matching of a string s against a pattern p, where:
@@ -473,7 +473,7 @@ Constraints:
       oracle=lambda s, p: fnmatch.fnmatchcase(s, p), cases=wildcard_cases),
 
     P(slug="first-missing-positive", title="First Missing Positive", number=41,
-      topics=["array", "hash-table"], companies=["Amazon", "Google", "Meta", "Microsoft", "Bloomberg", "Uber"],
+      topics=["array", "hash-table"],
       method="firstMissingPositive", params=[("nums", "int[]")], ret="int",
       description="""
 Given an unsorted integer array nums, return the smallest positive integer that does not appear in nums.
@@ -492,7 +492,6 @@ Constraints:
 
     P(slug="sliding-window-maximum", title="Sliding Window Maximum", number=239,
       topics=["array", "queue", "sliding-window", "heap-priority-queue", "monotonic-queue"],
-      companies=["Amazon", "Google", "Microsoft", "Meta", "Uber", "Bloomberg"],
       method="maxSlidingWindow", params=[("nums", "int[]"), ("k", "int")], ret="int[]",
       description="""
 You are given an integer array nums and a window of size k that starts at the left end and slides one position to the right at a time until it reaches the right end.
@@ -513,7 +512,7 @@ Constraints:
       oracle=lambda nums, k: [max(nums[i:i + k]) for i in range(len(nums) - k + 1)], cases=window_cases),
 
     P(slug="word-ladder", title="Word Ladder", number=127,
-      topics=["hash-table", "string", "breadth-first-search"], companies=["Amazon", "Meta", "Google", "LinkedIn", "Uber", "Bloomberg"],
+      topics=["hash-table", "string", "breadth-first-search"],
       method="ladderLength", params=[("beginWord", "string"), ("endWord", "string"), ("wordList", "string[]")], ret="int",
       description="""
 A transformation sequence from beginWord to endWord is a list of words that starts with beginWord and ends with endWord, where each consecutive pair of words differs in exactly one letter, and every word after beginWord appears in wordList. beginWord itself does not need to be in wordList.
@@ -539,7 +538,6 @@ Constraints:
 
     P(slug="binary-tree-maximum-path-sum", title="Binary Tree Maximum Path Sum", number=124,
       topics=["dynamic-programming", "tree", "depth-first-search", "binary-tree"],
-      companies=["Meta", "Amazon", "Google", "Microsoft", "Bloomberg", "Uber"],
       method="maxPathSum", params=[("root", "TreeNode")], ret="int",
       description="""
 A path in a binary tree is a sequence of nodes where each adjacent pair is connected by an edge, and no node appears more than once. A path must contain at least one node and does not need to pass through the root.
@@ -557,7 +555,7 @@ Constraints:
       oracle=max_path_oracle, cases=max_path_cases),
 
     P(slug="reverse-nodes-in-k-group", title="Reverse Nodes in k-Group", number=25,
-      topics=["linked-list", "recursion"], companies=["Microsoft", "Amazon", "Meta", "Google", "Bloomberg", "Adobe"],
+      topics=["linked-list", "recursion"],
       method="reverseKGroup", params=[("head", "ListNode"), ("k", "int")], ret="ListNode",
       description="""
 Given the head of a linked list and a positive integer k, reverse the nodes of the list k at a time and return the modified list. If the number of nodes left at the end is less than k, those nodes keep their original order.
@@ -581,7 +579,6 @@ Constraints:
 
     P(slug="longest-increasing-path-in-a-matrix", title="Longest Increasing Path in a Matrix", number=329,
       topics=["array", "dynamic-programming", "depth-first-search", "breadth-first-search", "graph", "topological-sort", "memoization", "matrix"],
-      companies=["Google", "Amazon", "Meta", "Microsoft", "Uber", "Bloomberg"],
       method="longestIncreasingPath", params=[("matrix", "int[][]")], ret="int",
       description="""
 Given an m x n integer matrix, return the length of the longest strictly increasing path. From any cell you may move up, down, left or right, but not diagonally and not outside the matrix.
@@ -601,7 +598,7 @@ Constraints:
       oracle=lip_oracle, cases=lip_cases),
 
     P(slug="burst-balloons", title="Burst Balloons", number=312,
-      topics=["array", "dynamic-programming"], companies=["Google", "Amazon", "Microsoft", "Meta"],
+      topics=["array", "dynamic-programming"],
       method="maxCoins", params=[("nums", "int[]")], ret="int",
       description="""
 There are n balloons in a row, and balloon i shows the number nums[i]. You burst the balloons one at a time. Bursting balloon i earns nums[left] * nums[i] * nums[right] coins, where left and right are the balloons currently adjacent to it. If there is no balloon on a side, that side counts as a 1.
@@ -620,7 +617,7 @@ Constraints:
       oracle=burst_oracle, cases=burst_cases),
 
     P(slug="distinct-subsequences", title="Distinct Subsequences", number=115,
-      topics=["string", "dynamic-programming"], companies=["Google", "Amazon", "Bloomberg", "Microsoft"],
+      topics=["string", "dynamic-programming"],
       method="numDistinct", params=[("s", "string"), ("t", "string")], ret="int",
       description="""
 Given two strings s and t, return the number of distinct ways to choose a subsequence of s that is equal to t. Two ways are distinct when they use a different set of positions in s.
@@ -638,7 +635,7 @@ Constraints:
       oracle=distinct_oracle, cases=distinct_cases),
 
     P(slug="best-time-to-buy-and-sell-stock-iv", title="Best Time to Buy and Sell Stock IV", number=188,
-      topics=["array", "dynamic-programming"], companies=["Amazon", "Google", "Microsoft", "Bloomberg", "Apple"],
+      topics=["array", "dynamic-programming"],
       method="maxProfit", params=[("k", "int"), ("prices", "int[]")], ret="int",
       description="""
 You are given an integer k and an array prices where prices[i] is a stock's price on day i. You may complete at most k transactions, where a transaction is one buy followed later by one sell. You can hold at most one share at a time, so you must sell before buying again.
@@ -657,7 +654,7 @@ Constraints:
       oracle=stock_k_oracle, cases=stock_k_cases),
 
     P(slug="candy", title="Candy", number=135,
-      topics=["array", "greedy"], companies=["Amazon", "Google", "Microsoft", "Bloomberg", "Uber"],
+      topics=["array", "greedy"],
       method="candy", params=[("ratings", "int[]")], ret="int",
       description="""
 Children stand in a line, and ratings[i] is the rating of child i. You hand out candies so that:
@@ -678,7 +675,7 @@ Constraints:
       oracle=candy_oracle, cases=candy_cases),
 
     P(slug="basic-calculator", title="Basic Calculator", number=224,
-      topics=["math", "string", "stack", "recursion"], companies=["Google", "Amazon", "Meta", "Microsoft", "Uber", "LinkedIn"],
+      topics=["math", "string", "stack", "recursion"],
       method="calculate", params=[("s", "string")], ret="int",
       description="""
 Given a string s holding a valid arithmetic expression, evaluate it and return the result. You may not use any built-in function that evaluates strings as expressions.
@@ -698,7 +695,6 @@ Constraints:
 
     P(slug="count-of-smaller-numbers-after-self", title="Count of Smaller Numbers After Self", number=315,
       topics=["array", "binary-search", "divide-and-conquer", "binary-indexed-tree", "segment-tree", "merge-sort"],
-      companies=["Google", "Amazon", "Microsoft", "Bloomberg", "Apple"],
       method="countSmaller", params=[("nums", "int[]")], ret="int[]",
       description="""
 Given an integer array nums, return an array counts where counts[i] is the number of elements to the right of nums[i] that are strictly smaller than nums[i].
@@ -716,7 +712,6 @@ Constraints:
 
     P(slug="maximal-rectangle", title="Maximal Rectangle", number=85,
       topics=["array", "dynamic-programming", "stack", "matrix", "monotonic-stack"],
-      companies=["Google", "Amazon", "Meta", "Microsoft", "Bloomberg"],
       method="maximalRectangle", params=[("matrix", "char[][]")], ret="int",
       description="""
 You are given a rows x cols binary matrix of the characters '0' and '1'. Find the largest axis-aligned rectangle made up only of '1' cells and return its area.
@@ -735,7 +730,7 @@ Constraints:
       oracle=maximal_rect_oracle, cases=maximal_rect_cases),
 
     P(slug="palindrome-partitioning-ii", title="Palindrome Partitioning II", number=132,
-      topics=["string", "dynamic-programming"], companies=["Google", "Amazon", "Microsoft", "Bloomberg"],
+      topics=["string", "dynamic-programming"],
       method="minCut", params=[("s", "string")], ret="int",
       description="""
 Given a string s, split it into pieces so that every piece is a palindrome. Return the minimum number of cuts needed.

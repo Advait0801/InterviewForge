@@ -3,7 +3,7 @@
     python scripts/problemgen/batch2a_medium.py
 
 Same rules as batch 1: statements in our own words, LeetCode's signatures,
-approximate company tags, and oracles that share no logic with the reference
+company tags from curation.py, and oracles that share no logic with the reference
 solutions (brute force, itertools, big-integer arithmetic, O(n^2) DP where the
 reference is greedy or O(n log n)).
 """
@@ -403,7 +403,7 @@ def non_overlap_cases(rng):
 
 SPECS = [
     P(slug="add-two-numbers", title="Add Two Numbers", number=2,
-      topics=["linked-list", "math", "recursion"], companies=["Amazon", "Microsoft", "Bloomberg", "Apple", "Adobe", "Meta"],
+      topics=["linked-list", "math", "recursion"],
       method="addTwoNumbers", params=[("l1", "ListNode"), ("l2", "ListNode")], ret="ListNode",
       description="""
 Two non-negative integers are stored as non-empty linked lists, one digit per node, with the least significant digit first. Add the two numbers and return the sum in the same form.
@@ -424,7 +424,7 @@ Constraints:
       oracle=add_two_oracle, cases=add_two_cases),
 
     P(slug="generate-parentheses", title="Generate Parentheses", number=22, case_count=8, unorderedOutput=True,
-      topics=["string", "dynamic-programming", "backtracking"], companies=["Amazon", "Google", "Meta", "Microsoft", "Bloomberg", "Uber"],
+      topics=["string", "dynamic-programming", "backtracking"],
       method="generateParenthesis", params=[("n", "int")], ret="string[]",
       description="""
 Given n pairs of parentheses, return every string of length 2n made of '(' and ')' in which the parentheses are balanced and correctly nested. The strings may be returned in any order.
@@ -440,7 +440,7 @@ Constraints:
       oracle=generate_parens_oracle, cases=lambda rng: iter([(n,) for n in [3, 1, 2, 4, 5, 6, 7, 8]])),
 
     P(slug="remove-nth-node-from-end-of-list", title="Remove Nth Node From End of List", number=19,
-      topics=["linked-list", "two-pointers"], companies=["Meta", "Amazon", "Microsoft", "Google", "Apple"],
+      topics=["linked-list", "two-pointers"],
       method="removeNthFromEnd", params=[("head", "ListNode"), ("n", "int")], ret="ListNode",
       description="""
 Given the head of a linked list, remove the n-th node counted from the end of the list and return the head of the resulting list.
@@ -462,7 +462,7 @@ Constraints:
       oracle=lambda head, n: head[:len(head) - n] + head[len(head) - n + 1:], cases=remove_nth_cases),
 
     P(slug="search-a-2d-matrix", title="Search a 2D Matrix", number=74,
-      topics=["array", "binary-search", "matrix"], companies=["Amazon", "Microsoft", "Meta", "Bloomberg", "Apple"],
+      topics=["array", "binary-search", "matrix"],
       method="searchMatrix", params=[("matrix", "int[][]"), ("target", "int")], ret="bool",
       description="""
 You are given an m x n integer matrix with two properties: every row is sorted in non-decreasing order, and the first value of each row is greater than the last value of the row above it.
@@ -484,7 +484,7 @@ Constraints:
       oracle=lambda matrix, target: any(target in row for row in matrix), cases=matrix_search_cases),
 
     P(slug="find-minimum-in-rotated-sorted-array", title="Find Minimum in Rotated Sorted Array", number=153,
-      topics=["array", "binary-search"], companies=["Amazon", "Microsoft", "Meta", "Google", "Bloomberg"],
+      topics=["array", "binary-search"],
       method="findMin", params=[("nums", "int[]")], ret="int",
       description="""
 An array of unique integers, originally sorted in ascending order, has been rotated some number of times between 1 and n: rotating moves the last element to the front. For example [0,1,2,4,5,6,7] might become [4,5,6,7,0,1,2].
@@ -506,7 +506,6 @@ Constraints:
 
     P(slug="kth-largest-element-in-an-array", title="Kth Largest Element in an Array", number=215,
       topics=["array", "divide-and-conquer", "sorting", "heap-priority-queue", "quickselect"],
-      companies=["Meta", "Amazon", "Microsoft", "Google", "LinkedIn", "Apple"],
       method="findKthLargest", params=[("nums", "int[]"), ("k", "int")], ret="int",
       description="""
 Given an integer array nums and an integer k, return the k-th largest element in the array: the element that would be at position k if the array were sorted in descending order. Duplicates count separately.
@@ -524,7 +523,7 @@ Constraints:
       oracle=lambda nums, k: sorted(nums)[-k], cases=kth_cases),
 
     P(slug="subsets", title="Subsets", number=78, unorderedOutput=True, unorderedInner=True,
-      topics=["array", "backtracking", "bit-manipulation"], companies=["Meta", "Amazon", "Google", "Microsoft", "Bloomberg", "Uber"],
+      topics=["array", "backtracking", "bit-manipulation"],
       method="subsets", params=[("nums", "int[]")], ret="int[][]",
       description="""
 Given an integer array nums of unique elements, return every possible subset (the power set), including the empty set and nums itself.
@@ -544,7 +543,7 @@ Constraints:
       oracle=subsets_oracle, cases=subsets_cases),
 
     P(slug="combination-sum", title="Combination Sum", number=39, unorderedOutput=True, unorderedInner=True,
-      topics=["array", "backtracking"], companies=["Amazon", "Meta", "Google", "Microsoft", "Uber", "Airbnb"],
+      topics=["array", "backtracking"],
       method="combinationSum", params=[("candidates", "int[]"), ("target", "int")], ret="int[][]",
       description="""
 You are given an array of distinct integers candidates and an integer target. Return every unique combination of candidates whose values add up to target. The same candidate may be used any number of times.
@@ -566,7 +565,7 @@ Constraints:
       oracle=combination_sum_oracle, cases=combination_sum_cases),
 
     P(slug="letter-combinations-of-a-phone-number", title="Letter Combinations of a Phone Number", number=17, unorderedOutput=True,
-      topics=["hash-table", "string", "backtracking"], companies=["Amazon", "Google", "Meta", "Microsoft", "Uber", "Apple"],
+      topics=["hash-table", "string", "backtracking"],
       method="letterCombinations", params=[("digits", "string")], ret="string[]",
       description="""
 On a classic phone keypad, each digit from 2 to 9 maps to letters: 2 -> abc, 3 -> def, 4 -> ghi, 5 -> jkl, 6 -> mno, 7 -> pqrs, 8 -> tuv, 9 -> wxyz.
@@ -586,7 +585,6 @@ Constraints:
 
     P(slug="word-search", title="Word Search", number=79,
       topics=["array", "string", "backtracking", "depth-first-search", "matrix"],
-      companies=["Amazon", "Microsoft", "Meta", "Bloomberg", "Uber", "Apple"],
       method="exist", params=[("board", "char[][]"), ("word", "string")], ret="bool",
       description="""
 Given an m x n grid of characters board and a string word, return true if word can be traced through the grid.
@@ -608,7 +606,7 @@ Constraints:
       oracle=word_search_oracle, cases=word_search_cases),
 
     P(slug="spiral-matrix", title="Spiral Matrix", number=54,
-      topics=["array", "matrix", "simulation"], companies=["Microsoft", "Amazon", "Google", "Apple", "Meta", "Uber"],
+      topics=["array", "matrix", "simulation"],
       method="spiralOrder", params=[("matrix", "int[][]")], ret="int[]",
       description="""
 Given an m x n matrix, return all of its elements in spiral order: across the top row left to right, down the right column, across the bottom row right to left, up the left column, and then inwards in the same pattern.
@@ -629,7 +627,7 @@ Constraints:
                                            ([[1]],), ([[1, 2, 3]],), ([[1], [2], [3]],)], 10, -100, 100)),
 
     P(slug="set-matrix-zeroes", title="Set Matrix Zeroes", number=73,
-      topics=["array", "hash-table", "matrix"], companies=["Amazon", "Microsoft", "Meta", "Apple", "Bloomberg"],
+      topics=["array", "hash-table", "matrix"],
       method="setZeroes", params=[("matrix", "int[][]")], ret="void",
       description="""
 Given an m x n integer matrix, whenever an element is 0, set its entire row and its entire column to 0. Do this in place.
@@ -654,7 +652,7 @@ Constraints:
                                      20, -2**31, 2**31 - 1, zero_bias=0.08)),
 
     P(slug="jump-game", title="Jump Game", number=55,
-      topics=["array", "dynamic-programming", "greedy"], companies=["Amazon", "Microsoft", "Google", "Meta", "Apple", "Bloomberg"],
+      topics=["array", "dynamic-programming", "greedy"],
       method="canJump", params=[("nums", "int[]")], ret="bool",
       description="""
 You start at index 0 of an integer array nums. Each value nums[i] is the maximum number of positions you may jump forward from index i.
@@ -672,7 +670,7 @@ Constraints:
       oracle=can_jump_oracle, cases=jump_cases),
 
     P(slug="unique-paths", title="Unique Paths", number=62,
-      topics=["math", "dynamic-programming", "combinatorics"], companies=["Amazon", "Google", "Meta", "Microsoft", "Bloomberg", "Uber"],
+      topics=["math", "dynamic-programming", "combinatorics"],
       method="uniquePaths", params=[("m", "int"), ("n", "int")], ret="int",
       description="""
 A robot starts in the top-left cell of an m x n grid and wants to reach the bottom-right cell. At each step it may move only one cell right or one cell down.
@@ -689,7 +687,7 @@ Constraints:
       oracle=lambda m, n: math.comb(m + n - 2, m - 1), cases=unique_paths_cases),
 
     P(slug="longest-increasing-subsequence", title="Longest Increasing Subsequence", number=300,
-      topics=["array", "binary-search", "dynamic-programming"], companies=["Amazon", "Google", "Microsoft", "Meta", "Bloomberg"],
+      topics=["array", "binary-search", "dynamic-programming"],
       method="lengthOfLIS", params=[("nums", "int[]")], ret="int",
       description="""
 Given an integer array nums, return the length of its longest strictly increasing subsequence. A subsequence keeps the original order but may skip elements.
@@ -707,7 +705,7 @@ Constraints:
       oracle=lis_oracle, cases=lambda rng: lis_cases(rng)),
 
     P(slug="house-robber", title="House Robber", number=198,
-      topics=["array", "dynamic-programming"], companies=["Amazon", "Google", "Microsoft", "Apple", "Adobe", "LinkedIn"],
+      topics=["array", "dynamic-programming"],
       method="rob", params=[("nums", "int[]")], ret="int",
       description="""
 Houses stand in a row, and nums[i] is the amount of money in house i. You may take money from any set of houses, but never from two adjacent houses, because that sets off an alarm.
@@ -726,7 +724,7 @@ Constraints:
       cases=lambda rng: int_list_cases(rng, [([1, 2, 3, 1],), ([2, 7, 9, 3, 1],), ([0],), ([2, 1, 1, 2],)], 1, 100, 0, 400)),
 
     P(slug="house-robber-ii", title="House Robber II", number=213,
-      topics=["array", "dynamic-programming"], companies=["Amazon", "Google", "Microsoft", "LinkedIn", "Adobe"],
+      topics=["array", "dynamic-programming"],
       method="rob", params=[("nums", "int[]")], ret="int",
       description="""
 This is House Robber with one change: the houses stand in a circle, so the first and last houses are adjacent to each other. You still may not take money from two adjacent houses.
@@ -745,7 +743,7 @@ Constraints:
       cases=lambda rng: int_list_cases(rng, [([2, 3, 2],), ([1, 2, 3, 1],), ([1, 2, 3],), ([5],), ([1, 7],)], 1, 100, 0, 1000)),
 
     P(slug="decode-ways", title="Decode Ways", number=91,
-      topics=["string", "dynamic-programming"], companies=["Meta", "Amazon", "Google", "Microsoft", "Uber", "Bloomberg"],
+      topics=["string", "dynamic-programming"],
       method="numDecodings", params=[("s", "string")], ret="int",
       description="""
 Letters are encoded as numbers: 'A' -> "1", 'B' -> "2", ..., 'Z' -> "26". A string of digits can often be split back into letters in more than one way; for example "12" is either "AB" (1 2) or "L" (12).
@@ -765,7 +763,7 @@ Constraints:
       oracle=lambda s: decode_counts(s)[-1], cases=decode_cases),
 
     P(slug="partition-equal-subset-sum", title="Partition Equal Subset Sum", number=416,
-      topics=["array", "dynamic-programming"], companies=["Amazon", "Meta", "Google", "Microsoft", "Apple"],
+      topics=["array", "dynamic-programming"],
       method="canPartition", params=[("nums", "int[]")], ret="bool",
       description="""
 Given an array of positive integers nums, return true if it can be split into two groups whose sums are equal, using every element exactly once. Otherwise return false.
@@ -781,7 +779,7 @@ Constraints:
       oracle=partition_oracle, cases=partition_cases),
 
     P(slug="longest-common-subsequence", title="Longest Common Subsequence", number=1143,
-      topics=["string", "dynamic-programming"], companies=["Amazon", "Google", "Microsoft", "Meta", "Bloomberg"],
+      topics=["string", "dynamic-programming"],
       method="longestCommonSubsequence", params=[("text1", "string"), ("text2", "string")], ret="int",
       description="""
 Given two strings text1 and text2, return the length of their longest common subsequence, or 0 if they share none.
@@ -801,7 +799,7 @@ Constraints:
       oracle=lcs_oracle, cases=lcs_cases),
 
     P(slug="merge-intervals", title="Merge Intervals", number=56, unorderedOutput=True,
-      topics=["array", "sorting"], companies=["Meta", "Google", "Amazon", "Microsoft", "Bloomberg", "LinkedIn", "Uber"],
+      topics=["array", "sorting"],
       method="merge", params=[("intervals", "int[][]")], ret="int[][]",
       description="""
 You are given an array of intervals where intervals[i] = [start_i, end_i]. Merge every group of overlapping intervals and return the resulting non-overlapping intervals, which together cover exactly the same points as the input.
@@ -822,7 +820,7 @@ Constraints:
       oracle=merge_oracle, cases=merge_cases),
 
     P(slug="insert-interval", title="Insert Interval", number=57,
-      topics=["array"], companies=["Google", "Meta", "Amazon", "LinkedIn", "Microsoft", "Uber"],
+      topics=["array"],
       method="insert", params=[("intervals", "int[][]"), ("newInterval", "int[]")], ret="int[][]",
       description="""
 You are given a list of non-overlapping intervals sorted by start, and one more interval newInterval. Insert newInterval so that the list is still sorted by start and still has no overlapping intervals, merging wherever necessary.
@@ -846,7 +844,7 @@ Constraints:
       oracle=lambda intervals, new: merge_oracle(intervals + [new]), cases=insert_cases),
 
     P(slug="non-overlapping-intervals", title="Non-overlapping Intervals", number=435,
-      topics=["array", "dynamic-programming", "greedy", "sorting"], companies=["Amazon", "Google", "Meta", "Microsoft", "Bloomberg"],
+      topics=["array", "dynamic-programming", "greedy", "sorting"],
       method="eraseOverlapIntervals", params=[("intervals", "int[][]")], ret="int",
       description="""
 Given an array of intervals where intervals[i] = [start_i, end_i], return the minimum number of intervals you must remove so that the remaining intervals do not overlap.

@@ -486,7 +486,7 @@ LFU_METHODS = [("get", [("key", "int")], "int"), ("put", [("key", "int"), ("valu
 
 SPECS = [
     P(slug="minimum-number-of-refueling-stops", title="Minimum Number of Refueling Stops", number=871,
-      topics=["array", "dynamic-programming", "greedy", "heap-priority-queue"], companies=["Google", "Amazon", "Uber", "Microsoft"],
+      topics=["array", "dynamic-programming", "greedy", "heap-priority-queue"],
       method="minRefuelStops", params=[("target", "int"), ("startFuel", "int"), ("stations", "int[][]")], ret="int",
       description="""
 A car starts at position 0 and must reach position target, travelling in one direction. It uses one litre of fuel per mile and starts with startFuel litres; its tank has unlimited capacity.
@@ -511,7 +511,6 @@ Constraints:
 
     P(slug="swim-in-rising-water", title="Swim in Rising Water", number=778,
       topics=["array", "binary-search", "depth-first-search", "breadth-first-search", "union-find", "heap-priority-queue", "matrix"],
-      companies=["Google", "Amazon", "Meta", "Uber"],
       method="swimInWater", params=[("grid", "int[][]")], ret="int",
       description="""
 You are given an n x n grid where grid[i][j] is the elevation of cell (i, j). Rain starts falling, and at time t the water everywhere is at depth t.
@@ -532,7 +531,7 @@ Constraints:
       oracle=swim_oracle, cases=swim_cases),
 
     P(slug="cherry-pickup", title="Cherry Pickup", number=741,
-      topics=["array", "dynamic-programming", "matrix"], companies=["Google", "Amazon", "Microsoft", "Uber"],
+      topics=["array", "dynamic-programming", "matrix"],
       method="cherryPickup", params=[("grid", "int[][]")], ret="int",
       description="""
 You are given an n x n grid where each cell is 0 (empty), 1 (a cherry) or -1 (a thorn that blocks the way).
@@ -557,7 +556,6 @@ Constraints:
 
     P(slug="split-array-largest-sum", title="Split Array Largest Sum", number=410,
       topics=["array", "binary-search", "dynamic-programming", "greedy", "prefix-sum"],
-      companies=["Google", "Amazon", "Meta", "Microsoft", "Bloomberg"],
       method="splitArray", params=[("nums", "int[]"), ("k", "int")], ret="int",
       description="""
 Given an integer array nums and an integer k, split nums into exactly k non-empty contiguous subarrays so that the largest subarray sum is as small as possible. Return that minimised largest sum.
@@ -574,7 +572,7 @@ Constraints:
       oracle=split_oracle, cases=split_cases),
 
     P(slug="n-queens-ii", title="N-Queens II", number=52, case_count=9,
-      topics=["backtracking"], companies=["Amazon", "Google", "Microsoft", "Meta"],
+      topics=["backtracking"],
       method="totalNQueens", params=[("n", "int")], ret="int",
       description="""
 The n-queens puzzle asks you to place n queens on an n x n chessboard so that no two queens attack each other: no two share a row, a column, or a diagonal.
@@ -590,7 +588,7 @@ Constraints:
       oracle=queens_oracle, cases=lambda rng: iter([(n,) for n in [4, 1, 2, 3, 5, 6, 7, 8, 9]])),
 
     P(slug="shortest-palindrome", title="Shortest Palindrome", number=214,
-      topics=["string", "rolling-hash", "string-matching", "hash-function"], companies=["Google", "Amazon", "Microsoft", "Meta"],
+      topics=["string", "rolling-hash", "string-matching", "hash-function"],
       method="shortestPalindrome", params=[("s", "string")], ret="string",
       description="""
 You are given a string s. You may add characters only to the front of s. Return the shortest palindrome you can form this way.
@@ -606,7 +604,7 @@ Constraints:
       oracle=shortest_pal_oracle, cases=shortest_pal_cases),
 
     P(slug="max-points-on-a-line", title="Max Points on a Line", number=149,
-      topics=["array", "hash-table", "math", "geometry"], companies=["Google", "Amazon", "LinkedIn", "Apple", "Microsoft"],
+      topics=["array", "hash-table", "math", "geometry"],
       method="maxPoints", params=[("points", "int[][]")], ret="int",
       description="""
 Given an array points where points[i] = [x_i, y_i] is a point on the X-Y plane, return the maximum number of points that lie on the same straight line.
@@ -625,7 +623,7 @@ Constraints:
 
     P(slug="critical-connections-in-a-network", title="Critical Connections in a Network", number=1192,
       unorderedOutput=True, unorderedInner=True,
-      topics=["depth-first-search", "graph", "biconnected-component"], companies=["Amazon", "Google", "Meta", "Microsoft", "Bloomberg"],
+      topics=["depth-first-search", "graph", "biconnected-component"],
       method="criticalConnections", params=[("n", "int"), ("connections", "int[][]")], ret="int[][]",
       description="""
 There are n servers numbered from 0 to n - 1, joined by undirected connections where connections[i] = [a_i, b_i]. Every server can reach every other server, directly or indirectly.
@@ -648,7 +646,7 @@ Constraints:
       oracle=bridges_oracle, cases=bridges_cases),
 
     P(slug="trapping-rain-water-ii", title="Trapping Rain Water II", number=407,
-      topics=["array", "breadth-first-search", "heap-priority-queue", "matrix"], companies=["Google", "Amazon", "Microsoft", "Uber"],
+      topics=["array", "breadth-first-search", "heap-priority-queue", "matrix"],
       method="trapRainWater", params=[("heightMap", "int[][]")], ret="int",
       description="""
 You are given an m x n matrix heightMap, where heightMap[i][j] is the height of a unit cell of terrain. After it rains, water collects in low areas that are enclosed by higher terrain. Water that can reach the edge of the map flows away.
@@ -670,7 +668,6 @@ Constraints:
 
     P(slug="the-skyline-problem", title="The Skyline Problem", number=218,
       topics=["array", "divide-and-conquer", "binary-indexed-tree", "segment-tree", "line-sweep", "heap-priority-queue", "ordered-set"],
-      companies=["Google", "Amazon", "Microsoft", "Meta", "Uber"],
       method="getSkyline", params=[("buildings", "int[][]")], ret="int[][]",
       description="""
 A city's skyline is the outline formed by all its buildings seen from far away. Each building is buildings[i] = [left_i, right_i, height_i]: a rectangle on flat ground from x = left_i to x = right_i with the given height. The buildings are sorted by left_i.
@@ -692,7 +689,7 @@ Constraints:
       oracle=skyline_oracle, cases=skyline_cases),
 
     P(slug="number-of-digit-one", title="Number of Digit One", number=233,
-      topics=["math", "dynamic-programming", "recursion"], companies=["Google", "Amazon", "Microsoft", "Apple"],
+      topics=["math", "dynamic-programming", "recursion"],
       method="countDigitOne", params=[("n", "int")], ret="int",
       description="""
 Given an integer n, count the total number of times the digit 1 appears when you write out every integer from 0 to n.
@@ -706,7 +703,7 @@ Constraints:
       oracle=digit_one_oracle, cases=digit_one_cases),
 
     P(slug="integer-to-english-words", title="Integer to English Words", number=273,
-      topics=["math", "string", "recursion"], companies=["Amazon", "Meta", "Microsoft", "Google", "LinkedIn"],
+      topics=["math", "string", "recursion"],
       method="numberToWords", params=[("num", "int")], ret="string",
       description="""
 Convert a non-negative integer num to its English words representation, capitalising each word and separating words with single spaces, for example 12345 -> "Twelve Thousand Three Hundred Forty Five".
@@ -721,7 +718,7 @@ Constraints:
       oracle=english_oracle, cases=english_cases),
 
     P(slug="dungeon-game", title="Dungeon Game", number=174,
-      topics=["array", "dynamic-programming", "matrix"], companies=["Amazon", "Google", "Microsoft", "Uber"],
+      topics=["array", "dynamic-programming", "matrix"],
       method="calculateMinimumHP", params=[("dungeon", "int[][]")], ret="int",
       description="""
 A knight starts in the top-left room of an m x n dungeon and must reach the princess in the bottom-right room, moving only right or down. Each room changes the knight's health by dungeon[i][j]: negative values are damage and positive values restore health. The first and last rooms also apply their values.
@@ -742,7 +739,7 @@ Constraints:
       oracle=dungeon_oracle, cases=dungeon_cases),
 
     P(slug="best-time-to-buy-and-sell-stock-iii", title="Best Time to Buy and Sell Stock III", number=123,
-      topics=["array", "dynamic-programming"], companies=["Amazon", "Google", "Microsoft", "Bloomberg", "Uber"],
+      topics=["array", "dynamic-programming"],
       method="maxProfit", params=[("prices", "int[]")], ret="int",
       description="""
 You are given an array prices where prices[i] is a stock's price on day i. You may complete at most two transactions, where each transaction is a buy followed later by a sell, and you may hold at most one share at a time.
@@ -761,7 +758,7 @@ Constraints:
 
     P(slug="lfu-cache", title="LFU Cache", number=460, design=True, className="LFUCache", ctor=[("capacity", "int")],
       methods=LFU_METHODS,
-      topics=["hash-table", "linked-list", "design", "doubly-linked-list"], companies=["Amazon", "Google", "Microsoft", "LinkedIn", "Bloomberg"],
+      topics=["hash-table", "linked-list", "design", "doubly-linked-list"],
       description="""
 Design a cache with a fixed capacity that evicts the least frequently used entry when it is full.
 

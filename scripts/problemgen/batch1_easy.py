@@ -4,8 +4,7 @@
 
 Statements are written in our own words; the problems themselves (numbers,
 titles, signatures, constraints) follow LeetCode, which is credited in the README.
-Company tags are approximate -- drawn from commonly reported interview lists,
-not from any authoritative source.
+Company tags live in curation.py, which overrides anything a spec would set.
 
 Oracles are intentionally naive (sorting, Counter, brute force, Python's
 standard library) so they share no logic with the reference solutions.
@@ -204,7 +203,7 @@ def _sorted_distinct(rng, n, lo, hi):
 
 SPECS = [
     P(slug="valid-anagram", title="Valid Anagram", number=242,
-      topics=["hash-table", "string", "sorting"], companies=["Amazon", "Google", "Microsoft", "Bloomberg", "Uber"],
+      topics=["hash-table", "string", "sorting"],
       method="isAnagram", params=[("s", "string"), ("t", "string")], ret="bool",
       description="""
 You are given two strings s and t. Decide whether t can be produced by rearranging the letters of s, using every letter of s exactly as many times as it appears.
@@ -222,7 +221,7 @@ Constraints:
       oracle=lambda s, t: sorted(s) == sorted(t), cases=anagram_cases),
 
     P(slug="reverse-linked-list", title="Reverse Linked List", number=206,
-      topics=["linked-list", "recursion"], companies=["Amazon", "Microsoft", "Apple", "Google", "Meta", "Bloomberg"],
+      topics=["linked-list", "recursion"],
       method="reverseList", params=[("head", "ListNode")], ret="ListNode",
       description="""
 You are given the head of a singly linked list. Reverse the direction of every link so the last node becomes the first, and return the head of the reversed list.
@@ -241,7 +240,6 @@ Constraints:
 
     P(slug="maximum-depth-of-binary-tree", title="Maximum Depth of Binary Tree", number=104,
       topics=["tree", "depth-first-search", "breadth-first-search", "binary-tree"],
-      companies=["Amazon", "Google", "Microsoft", "LinkedIn", "Apple"],
       method="maxDepth", params=[("root", "TreeNode")], ret="int",
       description="""
 Given the root of a binary tree, return its maximum depth: the number of nodes on the longest path that starts at the root and ends at a leaf. An empty tree has depth 0.
@@ -259,7 +257,6 @@ Constraints:
 
     P(slug="same-tree", title="Same Tree", number=100,
       topics=["tree", "depth-first-search", "breadth-first-search", "binary-tree"],
-      companies=["Amazon", "Microsoft", "Bloomberg", "LinkedIn"],
       method="isSameTree", params=[("p", "TreeNode"), ("q", "TreeNode")], ret="bool",
       description="""
 You are given the roots of two binary trees, p and q. The trees are considered the same when they have exactly the same shape and every pair of corresponding nodes holds the same value.
@@ -280,7 +277,6 @@ Constraints:
 
     P(slug="symmetric-tree", title="Symmetric Tree", number=101,
       topics=["tree", "depth-first-search", "breadth-first-search", "binary-tree"],
-      companies=["Amazon", "Microsoft", "LinkedIn", "Bloomberg", "Google"],
       method="isSymmetric", params=[("root", "TreeNode")], ret="bool",
       description="""
 Given the root of a binary tree, decide whether the tree is a mirror image of itself around its centre line, in both shape and values.
@@ -297,7 +293,7 @@ Constraints:
       cases=lambda rng: symmetric_cases(rng)),
 
     P(slug="binary-search", title="Binary Search", number=704,
-      topics=["array", "binary-search"], companies=["Google", "Microsoft", "Apple", "Amazon"],
+      topics=["array", "binary-search"],
       method="search", params=[("nums", "int[]"), ("target", "int")], ret="int",
       description="""
 You are given an array nums of distinct integers sorted in increasing order, and an integer target. Return the index of target in nums, or -1 if it is not present.
@@ -318,7 +314,7 @@ Constraints:
       cases=lambda rng: search_cases(rng)),
 
     P(slug="ransom-note", title="Ransom Note", number=383,
-      topics=["hash-table", "string", "counting"], companies=["Microsoft", "Apple", "Amazon", "Adobe"],
+      topics=["hash-table", "string", "counting"],
       method="canConstruct", params=[("ransomNote", "string"), ("magazine", "string")], ret="bool",
       description="""
 You are given two strings, ransomNote and magazine. Each letter in magazine can be cut out and used at most once.
@@ -340,7 +336,6 @@ Constraints:
 
     P(slug="majority-element", title="Majority Element", number=169,
       topics=["array", "hash-table", "divide-and-conquer", "sorting", "counting"],
-      companies=["Amazon", "Google", "Microsoft", "Apple", "Adobe"],
       method="majorityElement", params=[("nums", "int[]")], ret="int",
       description="""
 You are given an array nums of length n. Return the majority element: the value that appears more than n / 2 times. A majority element is guaranteed to exist.
@@ -360,7 +355,7 @@ Constraints:
       cases=lambda rng: majority_cases(rng)),
 
     P(slug="single-number", title="Single Number", number=136,
-      topics=["array", "bit-manipulation"], companies=["Amazon", "Google", "Apple", "Microsoft"],
+      topics=["array", "bit-manipulation"],
       method="singleNumber", params=[("nums", "int[]")], ret="int",
       description="""
 You are given a non-empty array of integers in which every value appears exactly twice, except for one value that appears once. Return that value.
@@ -380,7 +375,7 @@ Constraints:
       cases=lambda rng: single_cases(rng)),
 
     P(slug="move-zeroes", title="Move Zeroes", number=283,
-      topics=["array", "two-pointers"], companies=["Meta", "Amazon", "Microsoft", "Apple", "Bloomberg"],
+      topics=["array", "two-pointers"],
       method="moveZeroes", params=[("nums", "int[]")], ret="void",
       description="""
 You are given an integer array nums. Move every 0 to the end of the array while keeping the non-zero elements in their original relative order.
@@ -399,7 +394,7 @@ Constraints:
       cases=lambda rng: move_zero_cases(rng)),
 
     P(slug="palindrome-number", title="Palindrome Number", number=9,
-      topics=["math"], companies=["Amazon", "Google", "Apple", "Bloomberg", "Adobe"],
+      topics=["math"],
       method="isPalindrome", params=[("x", "int")], ret="bool",
       description="""
 Given an integer x, return true if its decimal representation reads the same forwards and backwards, and false otherwise. Negative numbers are never palindromes, because of the leading minus sign.
@@ -417,7 +412,7 @@ Constraints:
       cases=lambda rng: palindrome_number_cases(rng)),
 
     P(slug="roman-to-integer", title="Roman to Integer", number=13,
-      topics=["hash-table", "math", "string"], companies=["Amazon", "Google", "Microsoft", "Apple", "Adobe", "Bloomberg"],
+      topics=["hash-table", "math", "string"],
       method="romanToInt", params=[("s", "string")], ret="int",
       description="""
 Roman numerals use seven symbols: I = 1, V = 5, X = 10, L = 50, C = 100, D = 500 and M = 1000. Symbols are normally written from largest to smallest and their values added. Six combinations instead place a smaller symbol before a larger one to mean subtraction: IV = 4, IX = 9, XL = 40, XC = 90, CD = 400 and CM = 900.
@@ -437,7 +432,7 @@ Constraints:
       cases=lambda rng: roman_cases(rng)),
 
     P(slug="longest-common-prefix", title="Longest Common Prefix", number=14,
-      topics=["string", "trie"], companies=["Amazon", "Google", "Apple", "Microsoft", "Adobe", "Meta"],
+      topics=["string", "trie"],
       method="longestCommonPrefix", params=[("strs", "string[]")], ret="string",
       description="""
 Given an array of strings strs, return the longest string that is a prefix of every string in the array. If the strings share no common prefix, return the empty string "".
@@ -455,7 +450,7 @@ Constraints:
       cases=lambda rng: lcp_cases(rng)),
 
     P(slug="plus-one", title="Plus One", number=66,
-      topics=["array", "math"], companies=["Google", "Amazon", "Microsoft", "Apple"],
+      topics=["array", "math"],
       method="plusOne", params=[("digits", "int[]")], ret="int[]",
       description="""
 A large non-negative integer is stored as an array digits, most significant digit first, with no leading zeros. Add one to the integer and return the resulting array of digits.
@@ -474,7 +469,7 @@ Constraints:
       cases=lambda rng: plus_one_cases(rng)),
 
     P(slug="sqrtx", title="Sqrt(x)", number=69,
-      topics=["math", "binary-search"], companies=["Amazon", "Microsoft", "Apple", "Bloomberg", "Google"],
+      topics=["math", "binary-search"],
       method="mySqrt", params=[("x", "int")], ret="int",
       description="""
 Given a non-negative integer x, return the square root of x rounded down to the nearest integer. The result must itself be a non-negative integer.
@@ -491,7 +486,7 @@ Constraints:
       cases=lambda rng: sqrt_cases(rng)),
 
     P(slug="merge-sorted-array", title="Merge Sorted Array", number=88,
-      topics=["array", "two-pointers", "sorting"], companies=["Meta", "Microsoft", "Amazon", "Apple", "Bloomberg", "LinkedIn"],
+      topics=["array", "two-pointers", "sorting"],
       method="merge", params=[("nums1", "int[]"), ("m", "int"), ("nums2", "int[]"), ("n", "int")], ret="void",
       description="""
 You are given two integer arrays nums1 and nums2, each sorted in non-decreasing order, and two integers m and n giving the number of real elements in nums1 and nums2.
@@ -515,7 +510,7 @@ Constraints:
       cases=lambda rng: merge_cases(rng)),
 
     P(slug="pascals-triangle", title="Pascal's Triangle", number=118, case_count=30,
-      topics=["array", "dynamic-programming"], companies=["Amazon", "Google", "Microsoft", "Apple", "Adobe"],
+      topics=["array", "dynamic-programming"],
       method="generate", params=[("numRows", "int")], ret="int[][]",
       description="""
 Given an integer numRows, return the first numRows rows of Pascal's triangle.
@@ -534,7 +529,7 @@ Constraints:
       cases=lambda rng: iter([(n,) for n in [5, 1, 2, 30] + list(range(3, 30))])),
 
     P(slug="diameter-of-binary-tree", title="Diameter of Binary Tree", number=543,
-      topics=["tree", "depth-first-search", "binary-tree"], companies=["Meta", "Amazon", "Google", "Microsoft", "Bloomberg"],
+      topics=["tree", "depth-first-search", "binary-tree"],
       method="diameterOfBinaryTree", params=[("root", "TreeNode")], ret="int",
       description="""
 Given the root of a binary tree, return the length of its diameter: the number of edges on the longest path between any two nodes. The path does not have to pass through the root.
@@ -552,7 +547,7 @@ Constraints:
       cases=lambda rng: _tree_cases(rng, [([1, 2, 3, 4, 5],), ([1, 2],), ([1],)], 300, -100, 100, allow_empty=False)),
 
     P(slug="balanced-binary-tree", title="Balanced Binary Tree", number=110,
-      topics=["tree", "depth-first-search", "binary-tree"], companies=["Amazon", "Google", "Microsoft", "Bloomberg"],
+      topics=["tree", "depth-first-search", "binary-tree"],
       method="isBalanced", params=[("root", "TreeNode")], ret="bool",
       description="""
 Given a binary tree, decide whether it is height-balanced. A tree is height-balanced when, at every node, the heights of the left and right subtrees differ by at most one.
@@ -569,7 +564,7 @@ Constraints:
       cases=lambda rng: balanced_cases(rng)),
 
     P(slug="middle-of-the-linked-list", title="Middle of the Linked List", number=876,
-      topics=["linked-list", "two-pointers"], companies=["Amazon", "Microsoft", "Apple", "Adobe"],
+      topics=["linked-list", "two-pointers"],
       method="middleNode", params=[("head", "ListNode")], ret="ListNode",
       description="""
 Given the head of a singly linked list, return the middle node. When the list has an even number of nodes there are two middle nodes; return the second one.
@@ -586,7 +581,7 @@ Constraints:
       cases=lambda rng: _list_cases(rng, [([1, 2, 3, 4, 5],), ([1, 2, 3, 4, 5, 6],), ([1],), ([1, 2],)], 100, 1, 100, min_n=1)),
 
     P(slug="palindrome-linked-list", title="Palindrome Linked List", number=234,
-      topics=["linked-list", "two-pointers", "stack", "recursion"], companies=["Meta", "Amazon", "Microsoft", "Apple", "Bloomberg"],
+      topics=["linked-list", "two-pointers", "stack", "recursion"],
       method="isPalindrome", params=[("head", "ListNode")], ret="bool",
       description="""
 Given the head of a singly linked list, return true if the sequence of values reads the same forwards and backwards, and false otherwise.
@@ -606,7 +601,6 @@ Constraints:
 
     P(slug="intersection-of-two-arrays", title="Intersection of Two Arrays", number=349, unorderedOutput=True,
       topics=["array", "hash-table", "two-pointers", "binary-search", "sorting"],
-      companies=["Amazon", "Google", "Meta", "LinkedIn", "Bloomberg"],
       method="intersection", params=[("nums1", "int[]"), ("nums2", "int[]")], ret="int[]",
       description="""
 Given two integer arrays nums1 and nums2, return an array of their intersection: every value that appears in both arrays. Each value must appear only once in the result, and the result may be in any order.
@@ -625,7 +619,7 @@ Constraints:
       cases=lambda rng: intersection_cases(rng)),
 
     P(slug="happy-number", title="Happy Number", number=202,
-      topics=["hash-table", "math", "two-pointers"], companies=["Amazon", "Google", "Apple", "Uber"],
+      topics=["hash-table", "math", "two-pointers"],
       method="isHappy", params=[("n", "int")], ret="bool",
       description="""
 Start with a positive integer n and repeatedly replace it with the sum of the squares of its digits. If this process eventually reaches 1, n is a happy number. Otherwise the process loops forever through a cycle that never contains 1.
@@ -642,7 +636,7 @@ Constraints:
       cases=lambda rng: happy_cases(rng)),
 
     P(slug="is-subsequence", title="Is Subsequence", number=392,
-      topics=["two-pointers", "string", "dynamic-programming"], companies=["Google", "Amazon", "Microsoft", "Bloomberg"],
+      topics=["two-pointers", "string", "dynamic-programming"],
       method="isSubsequence", params=[("s", "string"), ("t", "string")], ret="bool",
       description="""
 Given two strings s and t, return true if s is a subsequence of t: that is, s can be obtained from t by deleting zero or more characters without changing the order of the remaining ones. Otherwise return false.
@@ -660,7 +654,7 @@ Constraints:
       cases=lambda rng: subsequence_cases(rng)),
 
     P(slug="counting-bits", title="Counting Bits", number=338,
-      topics=["dynamic-programming", "bit-manipulation"], companies=["Amazon", "Google", "Apple", "Adobe"],
+      topics=["dynamic-programming", "bit-manipulation"],
       method="countBits", params=[("n", "int")], ret="int[]",
       description="""
 Given an integer n, return an array ans of length n + 1 where ans[i] is the number of 1 bits in the binary representation of i, for every i from 0 to n.
@@ -678,7 +672,7 @@ Constraints:
       cases=lambda rng: int_cases(rng, [2, 5, 0, 1, 1000], 0, 1000)),
 
     P(slug="fizz-buzz", title="Fizz Buzz", number=412,
-      topics=["math", "string", "simulation"], companies=["Microsoft", "Apple", "Amazon", "Bloomberg"],
+      topics=["math", "string", "simulation"],
       method="fizzBuzz", params=[("n", "int")], ret="string[]",
       description="""
 Given an integer n, return a string array answer indexed from 1 to n where:
@@ -698,7 +692,7 @@ Constraints:
       cases=lambda rng: int_cases(rng, [3, 5, 15, 1, 2], 1, 500)),
 
     P(slug="search-insert-position", title="Search Insert Position", number=35,
-      topics=["array", "binary-search"], companies=["Amazon", "Google", "Apple", "Microsoft", "Adobe"],
+      topics=["array", "binary-search"],
       method="searchInsert", params=[("nums", "int[]"), ("target", "int")], ret="int",
       description="""
 You are given a sorted array nums of distinct integers and a target value. Return the index of target if it is present. If it is not, return the index at which it would have to be inserted to keep the array sorted.
@@ -719,7 +713,7 @@ Constraints:
       cases=lambda rng: search_insert_cases(rng)),
 
     P(slug="add-binary", title="Add Binary", number=67,
-      topics=["math", "string", "bit-manipulation", "simulation"], companies=["Meta", "Amazon", "Google", "Microsoft", "Apple"],
+      topics=["math", "string", "bit-manipulation", "simulation"],
       method="addBinary", params=[("a", "string"), ("b", "string")], ret="string",
       description="""
 Given two binary strings a and b, return their sum, also written as a binary string.
@@ -737,7 +731,7 @@ Constraints:
       cases=lambda rng: add_binary_cases(rng)),
 
     P(slug="binary-tree-inorder-traversal", title="Binary Tree Inorder Traversal", number=94,
-      topics=["stack", "tree", "depth-first-search", "binary-tree"], companies=["Microsoft", "Amazon", "Google", "Apple", "Bloomberg"],
+      topics=["stack", "tree", "depth-first-search", "binary-tree"],
       method="inorderTraversal", params=[("root", "TreeNode")], ret="int[]",
       description="""
 Given the root of a binary tree, return the values of its nodes in inorder: for every node, all of its left subtree first, then the node itself, then all of its right subtree.
@@ -757,7 +751,7 @@ Constraints:
       cases=lambda rng: _tree_cases(rng, [([1, None, 2, 3],), ([],), ([1],)], 100, -100, 100)),
 
     P(slug="flood-fill", title="Flood Fill", number=733,
-      topics=["array", "depth-first-search", "breadth-first-search", "matrix"], companies=["Amazon", "Google", "Microsoft", "Uber"],
+      topics=["array", "depth-first-search", "breadth-first-search", "matrix"],
       method="floodFill", params=[("image", "int[][]"), ("sr", "int"), ("sc", "int"), ("color", "int")], ret="int[][]",
       description="""
 An image is given as an m x n grid of integers, where image[i][j] is the colour of a pixel. You are also given a starting pixel (sr, sc) and a new colour.
@@ -781,7 +775,7 @@ Constraints:
       oracle=flood_oracle, cases=flood_cases),
 
     P(slug="island-perimeter", title="Island Perimeter", number=463,
-      topics=["array", "depth-first-search", "breadth-first-search", "matrix"], companies=["Google", "Amazon", "Meta", "Bloomberg"],
+      topics=["array", "depth-first-search", "breadth-first-search", "matrix"],
       method="islandPerimeter", params=[("grid", "int[][]")], ret="int",
       description="""
 You are given a row x col grid where grid[i][j] = 1 is land and grid[i][j] = 0 is water. Cells are joined only horizontally and vertically. The grid contains exactly one island (one or more connected land cells), is surrounded by water, and the island has no lakes inside it.

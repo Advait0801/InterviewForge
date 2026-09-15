@@ -21,6 +21,8 @@ import random
 import zlib
 from collections import deque
 
+from curation import companies_for
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PROBLEMS_JSON = os.path.join(ROOT, "backend", "leetcode_problems.json")
 TEMPLATES_JSON = os.path.join(ROOT, "backend", "starter_templates.json")
@@ -161,7 +163,8 @@ def upsert_problems(specs):
             "description": spec["description"].strip(),
             "difficulty": spec["difficulty"],
             "topics": spec["topics"],
-            "companies": spec["companies"],
+            # Tags come from the curated table, never the spec, so regenerating can't revert them.
+            "companies": companies_for(spec["slug"]),
             "testCases": build_cases(spec),
         }
         if spec["slug"] in index:
