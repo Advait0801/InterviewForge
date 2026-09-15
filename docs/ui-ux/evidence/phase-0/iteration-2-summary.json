@@ -1,0 +1,18 @@
+{
+  "screenshots": 58,
+  "pageErrors": {
+    "test_setup_about_blank": 25,
+    "app_hydration": 27
+  },
+  "menu": {
+    "keyboardOpens": true,
+    "ariaExpanded": null,
+    "escapeCloses": false
+  },
+  "reducedMotion": {
+    "preference": true,
+    "activeInfinite": 4
+  },
+  "analyticsErrorLooksEmpty": true,
+  "notes": "Initial capture before fixing about:blank storage injection in the audit harness. Final baseline recaptured with browser storageState."
+}

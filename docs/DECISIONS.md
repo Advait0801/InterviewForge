@@ -7,6 +7,44 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-15
+
+### D-045 — UI improvements use one branch, phase gates, and a recorded browser baseline
+
+**Agreement:** The UI workstream is governed by `docs/UI_UX_PLAN.md`, independently
+of the platform plan's phase numbers and old branch. All UI phases use
+`feat/ui-ux-polish`, created from `main` at `a9c3fef`. Each phase has a goal,
+at least three substantive iterations, a titled/body commit, and an explicit user
+approval checkpoint. One PR is created only after all UI phases finish and the user
+accepts the final checkpoint; review and required CI precede merge. The user requests
+the current model name in commit attribution:
+`Co-Authored-By: GPT-6 Astra <noreply@openai.com>`.
+
+**Baseline:** Phase 0 leaves application code and dependencies unchanged. Lint,
+standalone TypeScript, and an isolated production build pass. Browser verification
+uses a separate Playwright/Chrome profile, explicitly authorized by the user after
+native Chrome control proved intermittent. Evidence includes 62 screenshots, a
+19-route inventory, five shared-layout widths, both themes, focused keyboard/theme/
+reduced-motion checks, and local production homepage measurements. See
+[`ui-ux/phase-0.md`](ui-ux/phase-0.md) for commands, limitations, and data provenance.
+
+**Existing defects exposed:** Navigation clips at intermediate widths; mobile Escape
+does not close the menu; reduced-motion preference still leaves four infinite
+animations; failed recommendations render an empty panel and failed analytics look
+like no activity; phone workspace toolbars clip controls. Authenticated reloads
+also emit hydration mismatches at `Protected`, reproduced after real form login.
+The guard reads local-storage authentication during initial render, unlike the
+server; correcting its initial rendering belongs in UI Phase 1 while preserving
+access checks. Analytics fixture dates also reveal a local date-label shift.
+
+**Verification lessons:** Initial about:blank local-storage errors came from the
+audit harness, not the app. Origin-scoped browser storage state removed those errors.
+Screenshots with CSS animations disabled can still capture Recharts halfway through
+JavaScript animation; populated charts were recaptured after settling. AI-backed
+recommendations are a labeled 503 fixture, and populated chart/leaderboard data are
+synthetic. No paid model calls were needed. None of these baseline findings is
+claimed fixed in Phase 0.
+
 ## 2026-09-14
 
 ### D-044 — Company tags are curated in one file; every problem has an editorial (closes F-21, F-22)

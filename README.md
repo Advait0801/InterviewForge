@@ -418,7 +418,8 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 | Doc | What it covers |
 |---|---|
-| [`docs/EXECUTION_PLAN.md`](docs/EXECUTION_PLAN.md) | The phased plan, exit criteria, and the parked backlog |
+| [`docs/UI_UX_PLAN.md`](docs/UI_UX_PLAN.md) | Active UI improvement phases, verification, and approval checkpoints |
+| [`docs/EXECUTION_PLAN.md`](docs/EXECUTION_PLAN.md) | Platform phase history, remaining verification, and parked backlog |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only log of every non-obvious decision and finding, with the reasoning |
 | [`docs/eval/`](docs/eval/) | Retrieval baselines and per-phase results, including the negative ones |
 | [`docs/INTERVIEW_NOTES.md`](docs/INTERVIEW_NOTES.md) | Deep walkthrough of every subsystem |

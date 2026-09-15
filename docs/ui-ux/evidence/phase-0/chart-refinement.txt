@@ -1,0 +1,3 @@
+dark: three pie sectors; screenshot recaptured after chart animation
+light: three pie sectors; screenshot recaptured after chart animation
+Exit code: 0

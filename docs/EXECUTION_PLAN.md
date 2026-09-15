@@ -1,5 +1,9 @@
 # Execution Plan
 
+> **UI workstream:** Follow [UI_UX_PLAN.md](UI_UX_PLAN.md) for UI improvements,
+> its `feat/ui-ux-polish` branch, phase approvals, and commit attribution. The
+> platform history and remaining backlog below are preserved independently.
+
 The single source of truth for what gets built and in what order. Phases 0–5 are the
 committed scope; everything considered but not scheduled is parked with its rationale at
 the bottom, so nothing is lost.

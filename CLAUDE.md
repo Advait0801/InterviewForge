@@ -142,7 +142,7 @@ still accurate and redeployable.
 
 - ~~Empty test dirs, no CI~~ — fixed in Phase 0. Vitest in `backend/` and `code-runner/`,
   pytest in `ai-service/`, GitHub Actions in `.github/workflows/ci.yml`. `web/` lint is
-  `continue-on-error` because of 4 pre-existing react-hooks errors (F-14).
+  blocking; the four pre-existing react-hooks errors were fixed in D-031 (F-14 closed).
 - Socket.IO is scaffolded on both ends but only emits a `hello` — realtime is unused.
 - Email verification / password reset tokens work, but emails are only `console.log`ed.
 - ~~Sandbox runs as root with no capability/pid/cpu limits~~ — fixed in Phase 6.
@@ -162,8 +162,10 @@ Code auto-discovers only the root `CLAUDE.md`.
 - `README.md` — public-facing overview, setup, deployment.
 - `docs/DECISIONS.md` — running log of decisions and findings. **Append to this** when a
   non-obvious call gets made; read it before re-litigating something.
-- `docs/EXECUTION_PLAN.md` — **read this first.** The active plan: phases, iteration loops,
-  exit criteria, the working agreement (commit style, pause protocol, branch), and the
-  parked backlog. Follow it.
+- `docs/UI_UX_PLAN.md` — **read this first for UI work.** The active UI plan, with
+  per-phase goals, three-iteration minimums, approval pauses, model-name co-author,
+  and one `feat/ui-ux-polish` branch followed by one PR after all phases finish.
+- `docs/EXECUTION_PLAN.md` — platform phase history, remaining verification, and parked
+  backlog. Its old branch/co-author do not govern the UI workstream.
 - `docs/INTERVIEW_NOTES.md` — deep walkthrough of every subsystem.
 - `docs/PROJECT_CONTEXT.md` — original product spec and long-term vision.
