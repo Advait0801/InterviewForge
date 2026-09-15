@@ -9,6 +9,38 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-14
 
+### D-043 — Phase 7 complete: 150 verified problems, company filter, and a broken streak query
+**Shipped:** the catalogue is 150 problems (43 easy / 64 medium / 43 hard), all passing reference
+solutions in python, c, cpp and java (600/600 cells, method in D-042). D-042's "119" was an interim
+count. Company-filtered practice:
+- `GET /api/problems?company=` filters on `companies[]`, case-insensitively, and combines with
+  difficulty, topic, search and solved. An unknown company returns `[]`; over 64 characters
+  returns 400. List rows now include `companies`.
+- The problems page has a company dropdown with per-company counts, company chips on each card,
+  and a note that tags are approximate.
+
+**Verified live** by `scripts/verify_phase7.py` (37/37): every tag returns exactly the problems
+tagged with it in `leetcode_problems.json` (compared against the source data, not the API itself),
+plus combined filters and bad input. Stats, activity, analytics, leaderboard and the solved
+filter all give correct numbers after real submissions to an original, a new and a design problem,
+plus one failing submission.
+
+**Found and fixed, pre-existing since `7a1a3db` (2026-04-01):** `GET /api/users/activity`
+returned 500 for *every* user. The streak query's final `SELECT` aggregated `MAX(streak)` with no
+`FROM streaks`, so Postgres rejected it. The dashboard's current streak and activity heatmap have
+never loaded. Unit tests could not see it because the SQL only runs against a real database; the
+Phase 7 exit criterion "streak and analytics queries unaffected" is what exercised it.
+
+**Where the plan did not match reality:**
+- The plan says 13 company tags; the data has 12, because F-11 had already merged Facebook into Meta.
+- The plan lists an editorial per problem, but the seed script has never written the `editorial`
+  column (migration 008). All 150 problems, old and new, have none (F-22).
+- The generated company tags are far too broad: Amazon is on 149 of 150 problems, Microsoft 139,
+  Google 125. The filter works, but for the largest tags it barely narrows anything (F-21).
+
+**Going forward:** a code-runner container that dies mid-run makes every mutant look "killed"
+(connection refused counts as a failure). Check that results came back before trusting a kill.
+
 ### D-042 — Every problem is verified in four languages, and the check is proven able to fail
 **Finding (Phase 7):** no reference solutions existed anywhere, so none of the original 42
 problems had ever been run end to end. Verifying them first, before adding any, found defects
@@ -743,11 +775,13 @@ Things observed in the code that need a call made on them.
 | F-18 | `brendangregg` feed ingested four entries all titled "Brendan Gregg's Blog" — the feed appears to link to the index page rather than individual articles, so those chunks are low value | `ai-service/app/ingest/sources.py` |
 | F-19 | `FetchLimiter` counters are in-process, so limits are per-instance. A multi-instance deployment would multiply the global daily cap by the instance count; needs Redis | `ai-service/app/ingest/limits.py` |
 | F-20 | Live *discovery* depends on Gemini search grounding, which returns 429 on the free tier — the live fetch degrades safely to local context but cannot write back until quota exists (D-038) | `ai-service/app/ingest/live.py` |
+| F-21 | Company tags are too broad to be useful for the biggest companies: Amazon 149/150, Microsoft 139, Google 125 (Phase 7 generated them generously). Needs a curation pass, e.g. 3–5 companies per problem | `scripts/problemgen/`, `backend/leetcode_problems.json` |
+| F-22 | The `editorial` column (migration 008) is never written by `seed_problems.ts`; all 150 problems have no editorial, though the plan and README mention editorials | `backend/scripts/seed_problems.ts` |
 | F-16 | `EmbeddingService` has no fallback on *error*: if the configured provider returns 401/404 the call raises rather than trying the other provider, unlike `invoke_with_fallback` for LLM calls | `ai-service/app/rag/embeddings.py` |
 | F-17 | Retrieval metrics are identical with and without the company/stage metadata filter, so the filter currently buys nothing measurable on this corpus. Re-test after Phase 4 expands it | `ai-service/app/interview/orchestrator.py` |
 | F-14 | 4 pre-existing `react-hooks` lint errors in `web/`: `setState` called synchronously in effects (theme-provider, paths/[slug], problems/[id]) and `Date.now()` called during render (dashboard "days ago" label). CI lint for `web` is `continue-on-error` until fixed | `web/src/` |
 | F-15 | `UUID_REGEX` is defined independently in at least 3 route files instead of being imported from `interview-state.service.ts`, which already exports it | `backend/src/routes/` |
 | F-11 | `problems.companies[]` contains both `Facebook` (3) and `Meta` (12) as separate tags for the same company | `backend/leetcode_problems.json` |
-| F-12 | Only 42 problems seeded (12 easy / 18 medium / 12 hard) — thin for a practice platform | `backend/leetcode_problems.json` |
+| F-12 | ~~Only 42 problems seeded~~ — closed by Phase 7 (D-042, D-043): 150 problems, 43/64/43, all verified in four languages | `backend/leetcode_problems.json` |
 | F-13 | Problems are tagged with 13 companies but only 4 have interview profiles; Microsoft has 38 tagged problems and no profile | `ai-service/app/interview/company_profiles.py` |
 | F-10 | `notes.txt` held the live RDS master password and EC2 IP in plaintext. Correctly gitignored, never committed, and since deleted along with the AWS account — no exposure, recorded for completeness | *(removed)* |

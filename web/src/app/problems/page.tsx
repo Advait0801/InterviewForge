@@ -48,6 +48,7 @@ export default function ProblemsPage() {
   const [query, setQuery] = useState("");
   const [difficulty, setDifficulty] = useState<"all" | "easy" | "medium" | "hard">("all");
   const [topic, setTopic] = useState("all");
+  const [company, setCompany] = useState("all");
   const [solvedFilter, setSolvedFilter] = useState<"all" | "solved" | "unsolved">("all");
   const [savingBookmarkId, setSavingBookmarkId] = useState<string | null>(null);
 
@@ -71,21 +72,31 @@ export default function ProblemsPage() {
     return ["all", ...Array.from(allTopics).sort((a, b) => a.localeCompare(b))];
   }, [problems]);
 
+  // Companies with their problem counts, most-tagged first, so thin tags sink to the bottom.
+  const companies = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of problems) {
+      for (const c of p.companies ?? []) counts.set(c, (counts.get(c) ?? 0) + 1);
+    }
+    return Array.from(counts.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }, [problems]);
+
   const filtered = useMemo(() => {
     const DIFF_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
     return problems
       .filter((p) => {
         const matchDiff = difficulty === "all" || p.difficulty === difficulty;
         const matchTopic = topic === "all" || (p.topics ?? []).includes(topic);
+        const matchCompany = company === "all" || (p.companies ?? []).includes(company);
         const isSolved = Boolean(p.is_solved);
         const matchSolved =
           solvedFilter === "all" || (solvedFilter === "solved" ? isSolved : !isSolved);
         const q = query.trim().toLowerCase();
         const matchQuery = !q || p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
-        return matchDiff && matchTopic && matchSolved && matchQuery;
+        return matchDiff && matchTopic && matchCompany && matchSolved && matchQuery;
       })
       .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 9) - (DIFF_ORDER[b.difficulty] ?? 9));
-  }, [problems, query, difficulty, topic, solvedFilter]);
+  }, [problems, query, difficulty, topic, company, solvedFilter]);
 
   const toggleBookmark = async (problemId: string, bookmarked: boolean) => {
     if (savingBookmarkId) return;
@@ -153,7 +164,26 @@ export default function ProblemsPage() {
                   </option>
                 ))}
               </select>
+
+              <select
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                aria-label="Filter by company"
+                className="rounded-xl border border-border bg-surface px-3 py-2 text-sm font-medium text-text-primary transition focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 max-w-[200px]"
+              >
+                <option value="all">All Companies</option>
+                {companies.map(([name, count]) => (
+                  <option key={name} value={name}>
+                    {name} ({count})
+                  </option>
+                ))}
+              </select>
             </div>
+            {company !== "all" ? (
+              <p className="text-xs text-text-secondary">
+                Company tags are approximate, drawn from commonly reported interview questions.
+              </p>
+            ) : null}
 
             {/* Difficulty pills */}
             <div className="flex flex-wrap gap-2">
@@ -226,11 +256,23 @@ export default function ProblemsPage() {
                       </div>
                     </div>
                     <p className="text-sm text-text-secondary line-clamp-2 leading-relaxed">{p.description}</p>
-                    {(p.topics ?? []).length > 0 ? (
+                    {(p.topics ?? []).length > 0 || (p.companies ?? []).length > 0 ? (
                       <div className="mt-3 flex flex-wrap gap-1.5">
                         {(p.topics ?? []).slice(0, 3).map((t) => (
                           <span key={t} className="rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] text-text-secondary">
                             {t}
+                          </span>
+                        ))}
+                        {(p.companies ?? []).slice(0, 3).map((c) => (
+                          <span
+                            key={`company-${c}`}
+                            className={`rounded-full border px-2 py-0.5 text-[11px] ${
+                              c === company
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-primary/20 bg-primary/5 text-text-secondary"
+                            }`}
+                          >
+                            {c}
                           </span>
                         ))}
                       </div>

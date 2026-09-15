@@ -4,6 +4,7 @@ import { verifyAccessToken } from "../auth";
 
 const router = Router();
 type SolvedFilter = "all" | "solved" | "unsolved";
+const MAX_COMPANY_LENGTH = 64;
 
 function getOptionalUserId(authHeader?: string): string | null {
   if (!authHeader?.startsWith("Bearer ")) return null;
@@ -22,7 +23,11 @@ router.get("/", async (req, res) => {
   const topic = typeof req.query.topic === "string" ? req.query.topic.trim() : "";
   const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
   const solved = typeof req.query.solved === "string" ? req.query.solved.toLowerCase() : "all";
+  const company = typeof req.query.company === "string" ? req.query.company.trim() : "";
 
+  if (company.length > MAX_COMPANY_LENGTH) {
+    return res.status(400).json({ error: "Invalid company filter" });
+  }
   if (!["all", "easy", "medium", "hard"].includes(difficulty)) {
     return res.status(400).json({ error: "Invalid difficulty filter" });
   }
@@ -45,6 +50,11 @@ router.get("/", async (req, res) => {
     if (topic) {
       params.push(topic);
       conditions.push(`$${params.length} = ANY(p.topics)`);
+    }
+    if (company && company.toLowerCase() !== "all") {
+      // Case-insensitive, so ?company=amazon and ?company=Amazon agree.
+      params.push(company.toLowerCase());
+      conditions.push(`EXISTS (SELECT 1 FROM unnest(p.companies) AS c WHERE LOWER(c) = $${params.length})`);
     }
     if (search) {
       params.push(`%${search.toLowerCase()}%`);
@@ -83,11 +93,12 @@ router.get("/", async (req, res) => {
       description: string;
       difficulty: string;
       topics: string[];
+      companies: string[];
       created_at: string;
       is_solved: boolean;
       is_bookmarked: boolean;
     }>(
-      `SELECT p.id, p.slug, p.title, p.description, p.difficulty, p.topics, p.created_at,
+      `SELECT p.id, p.slug, p.title, p.description, p.difficulty, p.topics, p.companies, p.created_at,
               ${solvedSelect},
               ${bookmarkedSelect}
        FROM problems p

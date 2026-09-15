@@ -8,8 +8,9 @@ the bottom, so nothing is lost.
 All retrieval work is done: nDCG 0.7712 → 0.9009. CI green on all four jobs.
 Phase 6 complete (sandbox hardening, per-user LLM limits, correlation IDs, cost/latency
 observability). Phase 5 complete (resume-grounded interviews: per-user vector namespaces,
-isolation and deletion verified against the live stack). Remaining: Phase 7 (problem set),
-the demo video, and two verification rounds.
+isolation and deletion verified against the live stack). Phase 7 complete (150 problems, all
+verified in four languages; company-filtered practice; D-042, D-043). Remaining: the demo
+video and two verification rounds.
 
 ---
 

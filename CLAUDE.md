@@ -41,6 +41,8 @@ backend/src/services/        # ai.service.ts (AI_SERVICE_URL), interview-state.s
 backend/src/db.ts            # single query() helper over a pg Pool
 backend/sql_migrations/      # 001_init.sql … 011_resumes.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json
+backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
+scripts/problemgen/          # problem specs + independent oracles that generate the data files
 
 ai-service/app/api/          # routers: rag, interview, speech, system_design, code_review,
 #                              recommendations, resume
@@ -119,6 +121,9 @@ docker compose exec backend npx ts-node scripts/seed_learning_paths.ts # seed pa
 docker compose exec ai-service python scripts/seed_rag.py              # seed RAG corpus
 
 python scripts/verify_resume_isolation.py   # Phase 5: cross-user isolation + deletion, live stack
+python scripts/verify_problems.py           # Phase 7: every problem x 4 languages via the real code-runner
+python scripts/verify_phase7.py             # Phase 7: company filter + stats/streak queries, live stack
+python scripts/problemgen/batch1_easy.py    # regenerate a batch's data (idempotent; see D-042)
 docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tune the live-fetch gate
 
 cd backend && npm run build     # tsc
