@@ -7,6 +7,17 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-13
+
+### D-041 — Web host port moved 3001 → 3002; backend CORS origin corrected
+**Finding:** port 3001 is now also held on this machine (a host `node` process from another
+project), so `interviewforge-web` failed to start with "address already in use".
+**Decided:** InterviewForge's web binding moves to host **3002**. The other process is left
+alone, as with D-031b. Container port is unchanged, so service-to-service traffic is unaffected.
+**Also fixed, and pre-existing:** `backend/.env` had `FRONTEND_URL=http://localhost:3000`, which
+is the CORS origin. It never matched the offset host port, so a browser on the real web port
+would have been CORS-blocked calling the API. It now points at 3002 (local, gitignored file).
+
 ## 2026-09-10
 
 ### D-039 — Resume isolation is three layers, and deletion drops the namespace

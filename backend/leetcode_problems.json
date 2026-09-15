@@ -30,60 +30,60 @@
         "expectedOutput": "[0,1]"
       },
       {
-        "input": "nums = [1, 5, 3, 7], target = 8",
-        "expectedOutput": "[1,2]"
+        "input": "nums = [1, 5, 3, 7], target = 6",
+        "expectedOutput": "[0,1]"
       },
       {
         "input": "nums = [0, 4, 3, 0], target = 0",
         "expectedOutput": "[0,3]"
       },
       {
-        "input": "nums = [-23, -29, 17, -13, -15, -16, -22, 17, -24, 13, 17, 27, 4, -25, 7, -3, -28, -29, -25, -17, -16, 2], target = -40",
-        "expectedOutput": "[5,8]"
+        "input": "nums = [-23, -29, 17, -13, -15, -16, -22, 17, -24, 13, 17, 27, 4, -25, 7, -3, -28, -29, -25, -17, -16, 2], target = -43",
+        "expectedOutput": "[4,16]"
       },
       {
-        "input": "nums = [-18, 15, 11, 14, 4, -4, -16, -2, 7, -13, 21, 25, -30, 18, 21, -20, 14, -3, -9], target = 11",
-        "expectedOutput": "[1,5]"
+        "input": "nums = [-18, 15, 11, 14, 4, -4, -16, -2, 7, -13, 21, 25, -30, 18, 21, -20, 14, -3, -9], target = 13",
+        "expectedOutput": "[1,7]"
       },
       {
-        "input": "nums = [18, -9, -24, -25, -6, -24, -8, 24], target = -30",
-        "expectedOutput": "[2,4]"
+        "input": "nums = [18, -9, -24, -25, -6, -24, -8, 24], target = -31",
+        "expectedOutput": "[3,4]"
       },
       {
         "input": "nums = [21, -28, 16, -1, 4, -23, 29, -6, -25, 5], target = -19",
         "expectedOutput": "[4,5]"
       },
       {
-        "input": "nums = [-18, 15, -26, -28, 12, -16, 19, -12, -25, 24, -16, 25, -24, -6, -13, -1, 10, 23, -7, -20], target = 5",
-        "expectedOutput": "[0,17]"
+        "input": "nums = [-18, 15, -26, -28, 12, -16, 19, -12, -25, 24, -16, 25, -24, -6, -13, -1, 10, 23, -7, -20], target = 2",
+        "expectedOutput": "[1,14]"
       },
       {
         "input": "nums = [12, -13, 14, 29, 13, 11, -26, 8], target = 27",
         "expectedOutput": "[2,4]"
       },
       {
-        "input": "nums = [-15, -20, -1, -6, -13, 29, 10, 14, 5, -16, 13, -10, 23, 19, 19, -27, -16, 22, -28, 21, -10, -5, -13, -26, -17], target = -41",
-        "expectedOutput": "[4,18]"
+        "input": "nums = [-15, -20, -1, -6, -13, 29, 10, 14, 5, -16, 13, -10, 23, 19, 19, -27, -16, 22, -28, 21, -10, -5, -13, -26, -17], target = -45",
+        "expectedOutput": "[18,24]"
       },
       {
-        "input": "nums = [-17, 11, 1, -5, 26, 28, 11, -1, -21, -14, -22, -15], target = -36",
-        "expectedOutput": "[9,10]"
+        "input": "nums = [-17, 11, 1, -5, 26, 28, 11, -1, -21, -14, -22, -15], target = -35",
+        "expectedOutput": "[8,9]"
       },
       {
-        "input": "nums = [-14, 17, 7, -3, 27, 7, -5, -7, -16, -22, 2, 1, -25, 18, -27, 25, -23, -21, 10], target = 25",
-        "expectedOutput": "[5,13]"
+        "input": "nums = [-14, 17, 7, -3, 27, 7, -5, -7, -16, -22, 2, 1, -25, 18, -27, 25, -23, -21, 10], target = 26",
+        "expectedOutput": "[11,15]"
       },
       {
-        "input": "nums = [-26, -6, -6, 8, -1, 3, -14, 5, 25, 30, -30, 13, 16, -23, 13, 26, 4, 18, -13, 19, 11], target = -22",
-        "expectedOutput": "[3,10]"
+        "input": "nums = [-26, -6, -6, 8, -1, 3, -14, 5, 25, 30, -30, 13, 16, -23, 13, 26, 4, 18, -13, 19, 11], target = -23",
+        "expectedOutput": "[0,5]"
       },
       {
         "input": "nums = [-3, -20, -1, -30, 16, 26, 16, -14, 2, 18, -19], target = -18",
         "expectedOutput": "[1,8]"
       },
       {
-        "input": "nums = [-11, 23, 10, 2, 8, -18, -21, -7, 18, -20, 4, 19, 29, 3, 28, -30, 8, -10, 1, -29, -23, 29], target = -1",
-        "expectedOutput": "[0,2]"
+        "input": "nums = [-11, 23, 10, 2, 8, -18, -21, -7, 18, -20, 4, 19, 29, 3, 28, -30, 8, -10, 1, -29, -23, 29], target = 2",
+        "expectedOutput": "[1,6]"
       },
       {
         "input": "nums = [-27, -15, 26, 6, 30, -25, -25, 16, 1], target = 11",
@@ -94,52 +94,52 @@
         "expectedOutput": "[4,5]"
       },
       {
-        "input": "nums = [-17, 29, 4, 18, 16, 14, -18, 15, -11, -5, 12, 11, -7, -2, 27], target = 4",
-        "expectedOutput": "[7,8]"
+        "input": "nums = [-17, 29, 4, 18, 16, 14, -18, 15, -11, -5, 12, 11, -7, -2, 27], target = 3",
+        "expectedOutput": "[5,8]"
       },
       {
         "input": "nums = [-15, -16, -26, -9, -29], target = -45",
         "expectedOutput": "[1,4]"
       },
       {
-        "input": "nums = [-16, -30, -26, 15, 10, -27, -16, -26, 27, -28, 25, -9, -26, 2, -15, -13, 12, 1, -17, 4], target = -7",
-        "expectedOutput": "[11,13]"
+        "input": "nums = [-16, -30, -26, 15, 10, -27, -16, -26, 27, -28, 25, -9, -26, 2, -15, -13, 12, 1, -17, 4], target = -8",
+        "expectedOutput": "[11,17]"
       },
       {
-        "input": "nums = [0, -15, 20, 0, 21, -4, -18, -24, -24, 12, -3, -8, -3, -4, -1, 25, 16, -27, 13, 11], target = -15",
-        "expectedOutput": "[0,1]"
+        "input": "nums = [0, -15, 20, 0, 21, -4, -18, -24, -24, 12, -3, -8, -3, -4, -1, 25, 16, -27, 13, 11], target = -14",
+        "expectedOutput": "[17,18]"
       },
       {
-        "input": "nums = [16, -9, 21, 25, -24, -15, -18, -18, 4, -2, -22, -3, -19, -13], target = 7",
-        "expectedOutput": "[0,1]"
+        "input": "nums = [16, -9, 21, 25, -24, -15, -18, -18, 4, -2, -22, -3, -19, -13], target = 8",
+        "expectedOutput": "[2,13]"
       },
       {
         "input": "nums = [-2, 21, 25, 24], target = 22",
         "expectedOutput": "[0,3]"
       },
       {
-        "input": "nums = [4, 23, -30, -25, 29, 18, 24, -15, -20, -4, 1, 0, -17, 25, -5, 27, -27, -20, -6, -30, -6, -14], target = -9",
-        "expectedOutput": "[9,14]"
+        "input": "nums = [4, 23, -30, -25, 29, 18, 24, -15, -20, -4, 1, 0, -17, 25, -5, 27, -27, -20, -6, -30, -6, -14], target = -15",
+        "expectedOutput": "[7,11]"
       },
       {
-        "input": "nums = [14, 16, 20, 5, 12, 15, 1, -21, -18, -12, -17, -27, 7, 17, 4], target = -13",
-        "expectedOutput": "[3,8]"
+        "input": "nums = [14, 16, 20, 5, 12, 15, 1, -21, -18, -12, -17, -27, 7, 17, 4], target = -15",
+        "expectedOutput": "[4,11]"
       },
       {
-        "input": "nums = [-27, -27, 7, 0, 2, 28, 24, 3, -20, -27, 2, -25], target = -20",
-        "expectedOutput": "[1,2]"
+        "input": "nums = [-27, -27, 7, 0, 2, 28, 24, 3, -20, -27, 2, -25], target = -22",
+        "expectedOutput": "[7,11]"
       },
       {
-        "input": "nums = [-26, 13, 25, -15, -5, -23, 30, 26, 6, -15, 7, 8, -28, 9, -25, -4, 12, 7, 6, 3, -10], target = 36",
-        "expectedOutput": "[6,8]"
+        "input": "nums = [-26, 13, 25, -15, -5, -23, 30, 26, 6, -15, 7, 8, -28, 9, -25, -4, 12, 7, 6, 3, -10], target = 35",
+        "expectedOutput": "[7,13]"
       },
       {
-        "input": "nums = [15, -10, -15, -14, -5, -22, 12, 11, -11, -1, -10, 29, 18, 29, -26, -30, -1, 9, 6, -24, -26, 4, -17], target = -12",
-        "expectedOutput": "[8,9]"
+        "input": "nums = [15, -10, -15, -14, -5, -22, 12, 11, -11, -1, -10, 29, 18, 29, -26, -30, -1, 9, 6, -24, -26, 4, -17], target = -28",
+        "expectedOutput": "[8,22]"
       },
       {
-        "input": "nums = [29, -8, 26, -26, 26, -15], target = 11",
-        "expectedOutput": "[4,5]"
+        "input": "nums = [29, -8, 26, -26, 26, -15], target = 14",
+        "expectedOutput": "[0,5]"
       },
       {
         "input": "nums = [-2, 23, 4, 15, -11, 9, 21], target = -2",
@@ -150,12 +150,12 @@
         "expectedOutput": "[0,1]"
       },
       {
-        "input": "nums = [-14, -23, 26, -24, 17, 5], target = 3",
-        "expectedOutput": "[1,2]"
+        "input": "nums = [-14, -23, 26, -24, 17, 5], target = 2",
+        "expectedOutput": "[2,3]"
       },
       {
-        "input": "nums = [8, -17, 15, -9, -17, 13, 10, 24, -14, 2, 1], target = -9",
-        "expectedOutput": "[0,1]"
+        "input": "nums = [8, -17, 15, -9, -17, 13, 10, 24, -14, 2, 1], target = -8",
+        "expectedOutput": "[3,10]"
       },
       {
         "input": "nums = [10, -3, 23, -13], target = -3",
@@ -166,20 +166,20 @@
         "expectedOutput": "[1,11]"
       },
       {
-        "input": "nums = [27, -21, 4, -28, 23, -7, 7, 5, -21, -3, -22, -28, -11, -7, 27, 29, 20, 25, -28, 27, -8, -17, 13, -15], target = -45",
-        "expectedOutput": "[18,21]"
+        "input": "nums = [27, -21, 4, -28, 23, -7, 7, 5, -21, -3, -22, -28, -11, -7, 27, 29, 20, 25, -28, 27, -8, -17, 13, -15], target = -42",
+        "expectedOutput": "[1,8]"
       },
       {
         "input": "nums = [19, 5, 26, 25, -4, 9, 17, -21, 29, 29, -15, 25, -20], target = 6",
         "expectedOutput": "[2,12]"
       },
       {
-        "input": "nums = [-29, -19, 17, 29, -9, 20, 29, -4, 21, 12, 25, 17, 21, -15, -13], target = 38",
-        "expectedOutput": "[2,8]"
+        "input": "nums = [-29, -19, 17, 29, -9, 20, 29, -4, 21, 12, 25, 17, 21, -15, -13], target = 34",
+        "expectedOutput": "[2,11]"
       },
       {
-        "input": "nums = [-24, -6, 25, -28, 24, 0, -16, -18, 22, 28, -1, -8, -11, 22, 20, 25, -16, -16, -29, 12, -18, -5, -9, -13], target = 47",
-        "expectedOutput": "[2,8]"
+        "input": "nums = [-24, -6, 25, -28, 24, 0, -16, -18, 22, 28, -1, -8, -11, 22, 20, 25, -16, -16, -29, 12, -18, -5, -9, -13], target = 48",
+        "expectedOutput": "[9,14]"
       },
       {
         "input": "nums = [11, 2, -5, 13, 23, 4, -9, 30, -29, -23, 26, -14, -19], target = 0",
@@ -194,24 +194,24 @@
         "expectedOutput": "[8,10]"
       },
       {
-        "input": "nums = [30, 17, 17, 12, -18, -7, -3, -26, 30, 12, 28, -9, 9, -10, 12, 24, -23, 16, 27, -11, 2, -11, 12, -4, -10], target = 21",
+        "input": "nums = [30, 17, 17, 12, -18, -7, -3, -26, 30, 12, 28, -9, 9, -10, 12, 24, -23, 16, 27, -11, 2, -11, 12, -4, -10], target = 15",
+        "expectedOutput": "[11,15]"
+      },
+      {
+        "input": "nums = [5, -22, -18, -4, 12, 30, -6, 13, 17, 27, -19], target = 7",
+        "expectedOutput": "[6,7]"
+      },
+      {
+        "input": "nums = [-5, 5, 23, -30, -11, -12, -17, -3, 20, 7, 8], target = -3",
+        "expectedOutput": "[4,10]"
+      },
+      {
+        "input": "nums = [-2, -2, 13, -17, 2, 0, 20, 27, 20, 17, -20, 12, -25, -12, 2, 12], target = -20",
         "expectedOutput": "[5,10]"
       },
       {
-        "input": "nums = [5, -22, -18, -4, 12, 30, -6, 13, 17, 27, -19], target = 8",
-        "expectedOutput": "[3,4]"
-      },
-      {
-        "input": "nums = [-5, 5, 23, -30, -11, -12, -17, -3, 20, 7, 8], target = -4",
-        "expectedOutput": "[4,9]"
-      },
-      {
-        "input": "nums = [-2, -2, 13, -17, 2, 0, 20, 27, 20, 17, -20, 12, -25, -12, 2, 12], target = -22",
-        "expectedOutput": "[1,10]"
-      },
-      {
-        "input": "nums = [13, -11, -16, 21, -18, -21, -29, -28, -15], target = -39",
-        "expectedOutput": "[4,5]"
+        "input": "nums = [13, -11, -16, 21, -18, -21, -29, -28, -15], target = -40",
+        "expectedOutput": "[1,6]"
       },
       {
         "input": "nums = [-4, 26, 10, 6, -18, 15, 14, -6, 1, -5, -15, -21, 11, 14, -30, 27], target = 17",
@@ -3987,48 +3987,48 @@
         "expectedOutput": "[1]"
       },
       {
-        "input": "nums = [0, -3, 2, -3, 0, -5, 6, -1, -5, 1, -5, 2, -4, 1], k = 6",
-        "expectedOutput": "[-5,-3,0,1,2,6]"
+        "input": "nums = [0, -3, 2, -3, 0, -5, 6, -1, -5, 1, -5, 2, -4, 1], k = 5",
+        "expectedOutput": "[-5,-3,0,1,2]"
       },
       {
-        "input": "nums = [2, 5, -6, -5, -1, 1, -5, 0, -2, 1, 3], k = 5",
-        "expectedOutput": "[-6,-5,1,2,5]"
+        "input": "nums = [2, 5, -6, -5, -1, 1, -5, 0, -2, 1, 3], k = 2",
+        "expectedOutput": "[-5,1]"
       },
       {
-        "input": "nums = [-3, 2, 0, -2, 0, -3, -5, 6, 1, 4, -1, -4, -6, 4, 1, 4], k = 2",
-        "expectedOutput": "[-3,4]"
+        "input": "nums = [-3, 2, 0, -2, 0, -3, -5, 6, 1, 4, -1, -4, -6, 4, 1, 4], k = 1",
+        "expectedOutput": "[4]"
       },
       {
-        "input": "nums = [1, 2, 4, 4, -5, -5, -4, 0, 0, 5, 3, -5, 5, -4], k = 2",
-        "expectedOutput": "[-5,4]"
+        "input": "nums = [1, 2, 4, 4, -5, -5, -4, 0, 0, 5, 3, -5, 5, -4], k = 1",
+        "expectedOutput": "[-5]"
       },
       {
-        "input": "nums = [-3, -1, -3, 3, 0, -5, -3, 0, 5, 1, -2, 6, 5], k = 5",
-        "expectedOutput": "[-3,-1,0,3,5]"
+        "input": "nums = [-3, -1, -3, 3, 0, -5, -3, 0, 5, 1, -2, 6, 5], k = 3",
+        "expectedOutput": "[-3,0,5]"
       },
       {
-        "input": "nums = [-1, 1, 4, 3, 0, 1, 2, -2, -4, 6, 1, -5, -5, -2], k = 8",
-        "expectedOutput": "[-5,-2,-1,0,1,2,3,4]"
+        "input": "nums = [-1, 1, 4, 3, 0, 1, 2, -2, -4, 6, 1, -5, -5, -2], k = 10",
+        "expectedOutput": "[-5,-4,-2,-1,0,1,2,3,4,6]"
       },
       {
-        "input": "nums = [-3, 4, -4, -6, -5, 5, -6, -5, 1, 4, -6, -4, 0, 3, 4, -1, -4], k = 5",
-        "expectedOutput": "[-6,-5,-4,-3,4]"
+        "input": "nums = [-3, 4, -4, -6, -5, 5, -6, -5, 1, 4, -6, -4, 0, 3, 4, -1, -4], k = 4",
+        "expectedOutput": "[-6,-5,-4,4]"
       },
       {
         "input": "nums = [6, -5, 4, 6, 2], k = 4",
         "expectedOutput": "[-5,2,4,6]"
       },
       {
-        "input": "nums = [-3, -2, 4, 1, 1, 2, -2, 2, -1, 6, 2, 2, -6, 6, -6, 0], k = 2",
-        "expectedOutput": "[-2,2]"
+        "input": "nums = [-3, -2, 4, 1, 1, 2, -2, 2, -1, 6, 2, 2, -6, 6, -6, 0], k = 1",
+        "expectedOutput": "[2]"
       },
       {
-        "input": "nums = [1, -1, 0, 1, 1, -6, -6, -4, 2, 4, 6, -2, 5, -4], k = 8",
-        "expectedOutput": "[-6,-4,-1,0,1,2,4,6]"
+        "input": "nums = [1, -1, 0, 1, 1, -6, -6, -4, 2, 4, 6, -2, 5, -4], k = 10",
+        "expectedOutput": "[-6,-4,-2,-1,0,1,2,4,5,6]"
       },
       {
-        "input": "nums = [-4, -2, 5, 0, 1, 6, -5, 3, 4, 1, 4, 2, 4, 2, 3], k = 8",
-        "expectedOutput": "[-4,-2,0,1,2,3,4,5]"
+        "input": "nums = [-4, -2, 5, 0, 1, 6, -5, 3, 4, 1, 4, 2, 4, 2, 3], k = 10",
+        "expectedOutput": "[-5,-4,-2,0,1,2,3,4,5,6]"
       },
       {
         "input": "nums = [2, -4, 2, -6, 0, -2, 1, 3, 0, 3, 4, -1, 6, -2, -1, -6, -6], k = 10",
@@ -4051,8 +4051,8 @@
         "expectedOutput": "[0,3]"
       },
       {
-        "input": "nums = [-5, 5, 4, -3, -1, 1, 2, 6, 6, 4, -1, -4, 3, -2, -1, 0, -3], k = 8",
-        "expectedOutput": "[-5,-3,-1,1,2,4,5,6]"
+        "input": "nums = [-5, 5, 4, -3, -1, 1, 2, 6, 6, 4, -1, -4, 3, -2, -1, 0, -3], k = 4",
+        "expectedOutput": "[-3,-1,4,6]"
       },
       {
         "input": "nums = [2, -3, -2, -2], k = 1",
@@ -4063,28 +4063,28 @@
         "expectedOutput": "[-5,3,5]"
       },
       {
-        "input": "nums = [-5, 3, 6, 2, 1, 0, -3, -1, 6, -5], k = 5",
-        "expectedOutput": "[-5,1,2,3,6]"
+        "input": "nums = [-5, 3, 6, 2, 1, 0, -3, -1, 6, -5], k = 2",
+        "expectedOutput": "[-5,6]"
       },
       {
         "input": "nums = [6, -2, 0, 4, 2, -1, -3, 0, 0, -2, 3, 2, 1, 4, 6, 2, -4, -6], k = 11",
         "expectedOutput": "[-6,-4,-3,-2,-1,0,1,2,3,4,6]"
       },
       {
-        "input": "nums = [-4, 3, 1, -3, 4, 5, 1, -2, 4, 2, 6, 3, 6, 0, 3, 5, 4, -6], k = 9",
-        "expectedOutput": "[-4,-3,-2,1,2,3,4,5,6]"
+        "input": "nums = [-4, 3, 1, -3, 4, 5, 1, -2, 4, 2, 6, 3, 6, 0, 3, 5, 4, -6], k = 11",
+        "expectedOutput": "[-6,-4,-3,-2,0,1,2,3,4,5,6]"
       },
       {
-        "input": "nums = [-1, 1, -4, -3, -4, 5, 4, 6], k = 3",
-        "expectedOutput": "[-4,-1,1]"
+        "input": "nums = [-1, 1, -4, -3, -4, 5, 4, 6], k = 1",
+        "expectedOutput": "[-4]"
       },
       {
         "input": "nums = [0, -1, -5, 4, -3, 0, -2, -2, 4, -4, -2, 4, 3, -3, 0], k = 4",
         "expectedOutput": "[-3,-2,0,4]"
       },
       {
-        "input": "nums = [-4, -3, -6, -3, 6], k = 3",
-        "expectedOutput": "[-6,-4,-3]"
+        "input": "nums = [-4, -3, -6, -3, 6], k = 4",
+        "expectedOutput": "[-6,-4,-3,6]"
       },
       {
         "input": "nums = [1, 2, 0, 0, 4, -6, -3, -4, -2, -4, -6, -2, 6, 6, -2, 4], k = 9",
@@ -4095,12 +4095,12 @@
         "expectedOutput": "[-6]"
       },
       {
-        "input": "nums = [3, -2, -5, 0, -1, 4, 4, -5, 0, 5, -4, -3], k = 2",
-        "expectedOutput": "[-5,0]"
+        "input": "nums = [3, -2, -5, 0, -1, 4, 4, -5, 0, 5, -4, -3], k = 3",
+        "expectedOutput": "[-5,0,4]"
       },
       {
-        "input": "nums = [-5, 2, 4, 3, 6, 2, -2, 1, -5, -3, 3, -5, 6, 6, -1, -1, 3, 5], k = 7",
-        "expectedOutput": "[-5,-2,-1,2,3,4,6]"
+        "input": "nums = [-5, 2, 4, 3, 6, 2, -2, 1, -5, -3, 3, -5, 6, 6, -1, -1, 3, 5], k = 5",
+        "expectedOutput": "[-5,-1,2,3,6]"
       },
       {
         "input": "nums = [0, -3, -4, -5, -4, -3, -2, 1, 0], k = 3",
@@ -4111,64 +4111,64 @@
         "expectedOutput": "[-1,1,2]"
       },
       {
-        "input": "nums = [-1, 2, 0, 1, 4], k = 2",
-        "expectedOutput": "[-1,2]"
+        "input": "nums = [-1, 2, 0, 1, 4], k = 5",
+        "expectedOutput": "[-1,0,1,2,4]"
       },
       {
         "input": "nums = [6, -4, -1, 1, 5, -1, -2, -6, 4, 3], k = 1",
         "expectedOutput": "[-1]"
       },
       {
-        "input": "nums = [5, 6, 4], k = 1",
-        "expectedOutput": "[5]"
+        "input": "nums = [5, 6, 4], k = 3",
+        "expectedOutput": "[4,5,6]"
       },
       {
-        "input": "nums = [2, 0, -2, 4, 5, -1, 6, 4, -5, 2], k = 4",
-        "expectedOutput": "[-2,0,2,4]"
+        "input": "nums = [2, 0, -2, 4, 5, -1, 6, 4, -5, 2], k = 2",
+        "expectedOutput": "[2,4]"
       },
       {
-        "input": "nums = [0, -6, 0, -2, -2, -5, 6, -3, -2, -3, -4, 1, 4, -1, 6, 6], k = 7",
-        "expectedOutput": "[-6,-5,-4,-3,-2,0,6]"
+        "input": "nums = [0, -6, 0, -2, -2, -5, 6, -3, -2, -3, -4, 1, 4, -1, 6, 6], k = 4",
+        "expectedOutput": "[-3,-2,0,6]"
       },
       {
-        "input": "nums = [-2, -5, 6], k = 2",
-        "expectedOutput": "[-5,-2]"
+        "input": "nums = [-2, -5, 6], k = 3",
+        "expectedOutput": "[-5,-2,6]"
       },
       {
-        "input": "nums = [5, 0, -1, 5, 0, -5, -4, 5, -2, 2, -5, -1, 0, 3, 5, 2, 5], k = 6",
-        "expectedOutput": "[-5,-4,-1,0,2,5]"
+        "input": "nums = [5, 0, -1, 5, 0, -5, -4, 5, -2, 2, -5, -1, 0, 3, 5, 2, 5], k = 5",
+        "expectedOutput": "[-5,-1,0,2,5]"
       },
       {
-        "input": "nums = [5, -6, 6, -6, 4, 4, -4, 4, 1, 6, 4, -4, -6, 0, -3, 4], k = 5",
-        "expectedOutput": "[-6,-4,4,5,6]"
+        "input": "nums = [5, -6, 6, -6, 4, 4, -4, 4, 1, 6, 4, -4, -6, 0, -3, 4], k = 4",
+        "expectedOutput": "[-6,-4,4,6]"
       },
       {
-        "input": "nums = [3, -5, -5, -4, -3, 2, 5, 6, 4, 6, -4, 3], k = 7",
-        "expectedOutput": "[-5,-4,-3,2,3,5,6]"
+        "input": "nums = [3, -5, -5, -4, -3, 2, 5, 6, 4, 6, -4, 3], k = 8",
+        "expectedOutput": "[-5,-4,-3,2,3,4,5,6]"
       },
       {
-        "input": "nums = [1, 1, 5, -4, -2, -4, 4, 3, -1, 6, -2, -3], k = 2",
-        "expectedOutput": "[-4,1]"
+        "input": "nums = [1, 1, 5, -4, -2, -4, 4, 3, -1, 6, -2, -3], k = 3",
+        "expectedOutput": "[-4,-2,1]"
       },
       {
-        "input": "nums = [-1, -4, 0, 0, 3, -3, -6, -6, 2, 4, 3, 4, -3, -5, 1], k = 4",
-        "expectedOutput": "[-6,-3,0,3]"
+        "input": "nums = [-1, -4, 0, 0, 3, -3, -6, -6, 2, 4, 3, 4, -3, -5, 1], k = 5",
+        "expectedOutput": "[-6,-3,0,3,4]"
       },
       {
         "input": "nums = [5, -4, -6, 0, 3, 0, 3, -2, -4, -5], k = 3",
         "expectedOutput": "[-4,0,3]"
       },
       {
-        "input": "nums = [3, -5, -6, 5, 2, 0, 6], k = 4",
-        "expectedOutput": "[-6,-5,3,5]"
+        "input": "nums = [3, -5, -6, 5, 2, 0, 6], k = 7",
+        "expectedOutput": "[-6,-5,0,2,3,5,6]"
       },
       {
         "input": "nums = [-5, -3, 5, -3, -3, 6, -2, -2, 5, 1, 0, -4, 0, -3, 3, -3, -2], k = 4",
         "expectedOutput": "[-3,-2,0,5]"
       },
       {
-        "input": "nums = [-4, 0, 6, -4, -6, -2, -2, -3, 3, 1, -3, -1, 3, 4, 4], k = 8",
-        "expectedOutput": "[-6,-4,-3,-2,0,3,4,6]"
+        "input": "nums = [-4, 0, 6, -4, -6, -2, -2, -3, 3, 1, -3, -1, 3, 4, 4], k = 10",
+        "expectedOutput": "[-6,-4,-3,-2,-1,0,1,3,4,6]"
       },
       {
         "input": "nums = [-6, 1, -4, -1], k = 4",
@@ -7061,11 +7061,11 @@
     "testCases": [
       {
         "input": "board = [[\"o\", \"a\", \"a\", \"n\"], [\"e\", \"t\", \"a\", \"e\"], [\"i\", \"h\", \"k\", \"r\"], [\"i\", \"f\", \"l\", \"v\"]], words = [\"oath\", \"pea\", \"eat\", \"rain\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"eat\",\"oath\"]"
       },
       {
         "input": "board = [[\"d\", \"c\", \"c\"], [\"f\", \"a\", \"b\"]], words = [\"ccb\", \"deb\", \"ade\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"ccb\"]"
       },
       {
         "input": "board = [[\"f\", \"d\", \"d\"], [\"b\", \"c\", \"f\"], [\"c\", \"e\", \"c\"]], words = [\"dfd\", \"cab\", \"ead\"]",
@@ -7093,7 +7093,7 @@
       },
       {
         "input": "board = [[\"f\", \"b\"], [\"b\", \"d\"], [\"b\", \"a\"]], words = [\"bcd\", \"acd\", \"fbd\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"fbd\"]"
       },
       {
         "input": "board = [[\"c\", \"d\", \"f\"], [\"d\", \"a\", \"c\"]], words = [\"dbb\", \"dfe\", \"ada\"]",
@@ -7113,11 +7113,11 @@
       },
       {
         "input": "board = [[\"d\", \"c\", \"a\"], [\"e\", \"f\", \"c\"]], words = [\"cdc\", \"fca\", \"ecb\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"fca\"]"
       },
       {
         "input": "board = [[\"d\", \"a\", \"d\"], [\"c\", \"c\", \"f\"], [\"a\", \"e\", \"a\"]], words = [\"cfa\", \"efd\", \"bba\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"cfa\"]"
       },
       {
         "input": "board = [[\"f\", \"b\"], [\"f\", \"d\"]], words = [\"dcc\", \"dfe\", \"bfe\"]",
@@ -7129,7 +7129,7 @@
       },
       {
         "input": "board = [[\"d\", \"a\", \"b\"], [\"f\", \"c\", \"f\"], [\"f\", \"f\", \"a\"]], words = [\"dab\", \"ecc\", \"eee\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"dab\"]"
       },
       {
         "input": "board = [[\"c\", \"e\"], [\"d\", \"b\"]], words = [\"dcf\", \"fbc\", \"efa\"]",
@@ -7157,11 +7157,11 @@
       },
       {
         "input": "board = [[\"d\", \"e\"], [\"a\", \"a\"], [\"d\", \"b\"]], words = [\"bae\", \"cbb\", \"fde\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"bae\"]"
       },
       {
         "input": "board = [[\"b\", \"d\", \"e\"], [\"c\", \"c\", \"c\"], [\"f\", \"a\", \"f\"]], words = [\"fff\", \"cee\", \"edb\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"edb\"]"
       },
       {
         "input": "board = [[\"d\", \"c\", \"d\"], [\"b\", \"b\", \"d\"], [\"c\", \"a\", \"e\"]], words = [\"cdf\", \"bfa\", \"def\"]",
@@ -7181,7 +7181,7 @@
       },
       {
         "input": "board = [[\"d\", \"b\", \"f\"], [\"e\", \"d\", \"b\"]], words = [\"bde\", \"fae\", \"cbb\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"bde\"]"
       },
       {
         "input": "board = [[\"a\", \"f\"], [\"a\", \"f\"], [\"f\", \"d\"]], words = [\"edd\", \"adc\", \"fea\"]",
@@ -7201,11 +7201,11 @@
       },
       {
         "input": "board = [[\"e\", \"c\", \"e\"], [\"a\", \"b\", \"b\"], [\"e\", \"c\", \"a\"]], words = [\"bce\", \"cfc\", \"cfb\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"bce\"]"
       },
       {
         "input": "board = [[\"f\", \"d\", \"f\"], [\"c\", \"b\", \"f\"], [\"f\", \"b\", \"b\"]], words = [\"ecd\", \"cfb\", \"abe\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"cfb\"]"
       },
       {
         "input": "board = [[\"e\", \"a\"], [\"c\", \"c\"], [\"f\", \"e\"]], words = [\"fed\", \"deb\", \"cfb\"]",
@@ -7221,7 +7221,7 @@
       },
       {
         "input": "board = [[\"f\", \"a\", \"c\"], [\"e\", \"a\", \"c\"]], words = [\"eef\", \"eaa\", \"dee\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"eaa\"]"
       },
       {
         "input": "board = [[\"c\", \"f\"], [\"b\", \"f\"]], words = [\"fbb\", \"ffd\", \"bae\"]",
@@ -7233,7 +7233,7 @@
       },
       {
         "input": "board = [[\"f\", \"a\", \"b\"], [\"d\", \"a\", \"d\"]], words = [\"adb\", \"aee\", \"bed\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"adb\"]"
       },
       {
         "input": "board = [[\"e\", \"d\"], [\"a\", \"f\"], [\"d\", \"f\"]], words = [\"bef\", \"eda\", \"cde\"]",
@@ -7249,7 +7249,7 @@
       },
       {
         "input": "board = [[\"b\", \"a\"], [\"b\", \"b\"], [\"c\", \"e\"]], words = [\"cce\", \"daf\", \"ceb\"]",
-        "expectedOutput": "[]"
+        "expectedOutput": "[\"ceb\"]"
       },
       {
         "input": "board = [[\"b\", \"b\", \"d\"], [\"b\", \"b\", \"e\"]], words = [\"fbc\", \"edf\", \"edf\"]",
@@ -7720,203 +7720,203 @@
     "testCases": [
       {
         "input": "s = \"ADOBECODEBANC\", t = \"ABC\"",
-        "expectedOutput": "BANC"
+        "expectedOutput": "\"BANC\""
       },
       {
         "input": "s = \"a\", t = \"a\"",
-        "expectedOutput": "a"
+        "expectedOutput": "\"a\""
       },
       {
         "input": "s = \"a\", t = \"aa\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"adedddd\", t = \"cb\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"ccbdcdab\", t = \"dbb\"",
-        "expectedOutput": "bdcdab"
+        "expectedOutput": "\"bdcdab\""
       },
       {
         "input": "s = \"acdaecaeaeacabae\", t = \"a\"",
-        "expectedOutput": "a"
+        "expectedOutput": "\"a\""
       },
       {
         "input": "s = \"dcaeecabbedbebc\", t = \"b\"",
-        "expectedOutput": "b"
+        "expectedOutput": "\"b\""
       },
       {
         "input": "s = \"ebdbebdaeaeaccac\", t = \"ee\"",
-        "expectedOutput": "eae"
+        "expectedOutput": "\"eae\""
       },
       {
         "input": "s = \"adbebecded\", t = \"aeac\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"cbbdbdacadea\", t = \"c\"",
-        "expectedOutput": "c"
+        "expectedOutput": "\"c\""
       },
       {
         "input": "s = \"ebccbdbcddddadada\", t = \"ede\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"cdcaeabaceeebcaea\", t = \"c\"",
-        "expectedOutput": "c"
+        "expectedOutput": "\"c\""
       },
       {
         "input": "s = \"bceadeebecabadbbc\", t = \"b\"",
-        "expectedOutput": "b"
+        "expectedOutput": "\"b\""
       },
       {
         "input": "s = \"beeaadbacabcbdbcdabb\", t = \"ec\"",
-        "expectedOutput": "eaadbac"
+        "expectedOutput": "\"eaadbac\""
       },
       {
         "input": "s = \"ecbcdadddcbdceadad\", t = \"ba\"",
-        "expectedOutput": "bcda"
+        "expectedOutput": "\"bcda\""
       },
       {
         "input": "s = \"abdabecb\", t = \"dce\"",
-        "expectedOutput": "dabec"
+        "expectedOutput": "\"dabec\""
       },
       {
         "input": "s = \"cecaadbaedbbea\", t = \"daab\"",
-        "expectedOutput": "aadb"
+        "expectedOutput": "\"aadb\""
       },
       {
         "input": "s = \"dbaabd\", t = \"dbd\"",
-        "expectedOutput": "dbaabd"
+        "expectedOutput": "\"dbaabd\""
       },
       {
         "input": "s = \"ebbcae\", t = \"b\"",
-        "expectedOutput": "b"
+        "expectedOutput": "\"b\""
       },
       {
         "input": "s = \"cbcdbaddbceabbb\", t = \"dad\"",
-        "expectedOutput": "add"
+        "expectedOutput": "\"add\""
       },
       {
         "input": "s = \"beecebb\", t = \"aaa\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"eeaebccababadaeade\", t = \"b\"",
-        "expectedOutput": "b"
+        "expectedOutput": "\"b\""
       },
       {
         "input": "s = \"eeaade\", t = \"cedd\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"deccddbdecbb\", t = \"bdc\"",
-        "expectedOutput": "cddb"
+        "expectedOutput": "\"cddb\""
       },
       {
         "input": "s = \"cadcbaddeb\", t = \"bcbd\"",
-        "expectedOutput": "cbaddeb"
+        "expectedOutput": "\"cbaddeb\""
       },
       {
         "input": "s = \"ddddddcccdbebbbbeb\", t = \"ded\"",
-        "expectedOutput": "dcccdbe"
+        "expectedOutput": "\"dcccdbe\""
       },
       {
         "input": "s = \"cbdbdaedcedabbce\", t = \"de\"",
-        "expectedOutput": "ed"
+        "expectedOutput": "\"ed\""
       },
       {
         "input": "s = \"bdabdebcebdebbdcdb\", t = \"dc\"",
-        "expectedOutput": "dc"
+        "expectedOutput": "\"dc\""
       },
       {
         "input": "s = \"aaaaaa\", t = \"acc\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"bbcaceceddc\", t = \"cc\"",
-        "expectedOutput": "cac"
+        "expectedOutput": "\"cac\""
       },
       {
         "input": "s = \"ebbbdaee\", t = \"beed\"",
-        "expectedOutput": "bdaee"
+        "expectedOutput": "\"bdaee\""
       },
       {
         "input": "s = \"babdaabddddba\", t = \"dee\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"dadeccacab\", t = \"ec\"",
-        "expectedOutput": "ec"
+        "expectedOutput": "\"ec\""
       },
       {
         "input": "s = \"babccacedaeedbccb\", t = \"ead\"",
-        "expectedOutput": "eda"
+        "expectedOutput": "\"eda\""
       },
       {
         "input": "s = \"babccddcacdacea\", t = \"ea\"",
-        "expectedOutput": "ea"
+        "expectedOutput": "\"ea\""
       },
       {
         "input": "s = \"cdbdd\", t = \"acdc\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"eddcbccebdccadac\", t = \"a\"",
-        "expectedOutput": "a"
+        "expectedOutput": "\"a\""
       },
       {
         "input": "s = \"ababcabeb\", t = \"a\"",
-        "expectedOutput": "a"
+        "expectedOutput": "\"a\""
       },
       {
         "input": "s = \"aceab\", t = \"caea\"",
-        "expectedOutput": "acea"
+        "expectedOutput": "\"acea\""
       },
       {
         "input": "s = \"bbabaa\", t = \"d\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"baadcebdbdeb\", t = \"cead\"",
-        "expectedOutput": "adce"
+        "expectedOutput": "\"adce\""
       },
       {
         "input": "s = \"eaabbcbeeb\", t = \"a\"",
-        "expectedOutput": "a"
+        "expectedOutput": "\"a\""
       },
       {
         "input": "s = \"bcbbdecedec\", t = \"dc\"",
-        "expectedOutput": "dec"
+        "expectedOutput": "\"dec\""
       },
       {
         "input": "s = \"beaccbaaadcaedad\", t = \"a\"",
-        "expectedOutput": "a"
+        "expectedOutput": "\"a\""
       },
       {
         "input": "s = \"eceaeccdcdcdcdc\", t = \"be\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"acdddcdddd\", t = \"bd\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"abcdbdcadbbebbaadd\", t = \"cc\"",
-        "expectedOutput": "cdbdc"
+        "expectedOutput": "\"cdbdc\""
       },
       {
         "input": "s = \"addbcecbbde\", t = \"ddbd\"",
-        "expectedOutput": "ddbcecbbd"
+        "expectedOutput": "\"ddbcecbbd\""
       },
       {
         "input": "s = \"caacde\", t = \"bbe\"",
-        "expectedOutput": ""
+        "expectedOutput": "\"\""
       },
       {
         "input": "s = \"bddacbccedeaebecccbc\", t = \"aadc\"",
-        "expectedOutput": "acbccedea"
+        "expectedOutput": "\"acbccedea\""
       }
     ]
   },

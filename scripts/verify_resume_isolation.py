@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from pdf_fixtures import RESUME_A, RESUME_B, make_scanned_pdf, make_text_pdf, make_truncated_pdf
 
 # Host ports are offset so this project can coexist with another local stack
-# (D-031b): web 3001, ai-service 8010, postgres 5433.
+# (D-031b): web 3002, ai-service 8010, postgres 5433.
 BACKEND = os.getenv("BACKEND_URL", "http://localhost:4000")
 CHROMA = os.getenv("CHROMA_URL", "http://localhost:8001")
 AI = os.getenv("AI_SERVICE_URL", "http://localhost:8010")

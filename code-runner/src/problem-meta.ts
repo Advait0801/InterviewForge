@@ -16,7 +16,15 @@ export interface ProblemMeta {
   params?: ParamMeta[];
   returnType?: string;
   methods?: MethodMeta[];
+  constructorParams?: ParamMeta[];
+  // C has no objects: LeetCode's C Codec is plain serialize/deserialize
+  // functions rather than codecCreate/codecSerialize(obj, ...).
+  cFreeFunctions?: boolean;
   unorderedOutput?: boolean;
+  // Also ignore element order *inside* each item of an unordered result. Only
+  // for problems where that order carries no meaning (a 3sum triplet, an
+  // anagram group). Off by default: for n-queens the order of rows IS the board.
+  unorderedInner?: boolean;
 }
 
 export const PROBLEM_META: Record<string, ProblemMeta> = {
@@ -69,6 +77,7 @@ export const PROBLEM_META: Record<string, ProblemMeta> = {
     params: [{ name: "nums", type: "int[]" }],
     returnType: "int[][]",
     unorderedOutput: true,
+    unorderedInner: true,
   },
   "product-of-array-except-self": {
     className: "Solution",
@@ -150,6 +159,7 @@ export const PROBLEM_META: Record<string, ProblemMeta> = {
   "serialize-and-deserialize-binary-tree": {
     className: "Codec",
     isDesign: true,
+    cFreeFunctions: true,
     methods: [
       { name: "serialize", params: [{ name: "root", type: "TreeNode" }], returnType: "string" },
       { name: "deserialize", params: [{ name: "data", type: "string" }], returnType: "TreeNode" },
@@ -223,6 +233,7 @@ export const PROBLEM_META: Record<string, ProblemMeta> = {
     params: [{ name: "strs", type: "string[]" }],
     returnType: "string[][]",
     unorderedOutput: true,
+    unorderedInner: true,
   },
   "rotate-image": {
     className: "Solution",

@@ -41,12 +41,13 @@ function parseRegularInput(input: string, meta: ProblemMeta): ParsedInput {
   const argTypes = params.map((p) => p.type);
 
   if (params.length === 1) {
-    const eqIdx = input.indexOf("=");
-    if (eqIdx !== -1) {
-      const valueStr = input.substring(eqIdx + 1).trim();
-      return { isDesign: false, args: [parseValue(valueStr)], argTypes };
-    }
-    return { isDesign: false, args: [parseValue(input)], argTypes };
+    // Strip a leading `name =` only. Searching for the first "=" anywhere broke
+    // any input whose *value* contains one -- e.g. reverse-string with the char
+    // "=" -- by parsing everything after it as the argument (6 of 50 cases).
+    // Same rule splitNamedParams already applies to multi-parameter inputs.
+    const prefix = /^\s*[a-zA-Z_]\w*\s*=/.exec(input);
+    const valueStr = prefix ? input.substring(prefix[0].length).trim() : input;
+    return { isDesign: false, args: [parseValue(valueStr)], argTypes };
   }
 
   const parts = splitNamedParams(input);
@@ -145,7 +146,8 @@ export function normalizeOutput(output: string): string {
 export function compareOutputs(
   actual: string,
   expected: string,
-  unordered = false
+  unordered = false,
+  unorderedInner = false
 ): boolean {
   const a = normalizeOutput(actual);
   const e = normalizeOutput(expected);
@@ -161,7 +163,7 @@ export function compareOutputs(
     }
 
     if (unordered && Array.isArray(ap) && Array.isArray(ep)) {
-      return sortedArrayEqual(ap, ep);
+      return sortedArrayEqual(ap, ep, unorderedInner);
     }
 
     return JSON.stringify(ap) === JSON.stringify(ep);
@@ -170,15 +172,18 @@ export function compareOutputs(
   }
 }
 
-function sortedArrayEqual(a: unknown[], b: unknown[]): boolean {
+function sortedArrayEqual(a: unknown[], b: unknown[], unorderedInner: boolean): boolean {
   if (a.length !== b.length) return false;
-  const sa = a.map(canonicalize).sort();
-  const sb = b.map(canonicalize).sort();
+  const sa = a.map((v) => canonicalize(v, unorderedInner)).sort();
+  const sb = b.map((v) => canonicalize(v, unorderedInner)).sort();
   return sa.every((v, i) => v === sb[i]);
 }
 
-function canonicalize(v: unknown): string {
-  if (Array.isArray(v)) {
+function canonicalize(v: unknown, unorderedInner: boolean): string {
+  // Sorting inside each item used to be unconditional, which let a wrong
+  // n-queens answer pass: any board built from the right rows in the wrong
+  // order canonicalised to the same string as the correct board.
+  if (unorderedInner && Array.isArray(v)) {
     const sorted = [...v].sort((x, y) => {
       const sx = JSON.stringify(x);
       const sy = JSON.stringify(y);

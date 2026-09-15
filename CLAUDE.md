@@ -23,7 +23,7 @@ FastAPI `ai-service`. Do not add LLM calls, prompts, or embedding code to `backe
 
 | Service | Tech | Port | Responsibility |
 |---|---|---|---|
-| `web/` | Next.js 16 (App Router), React 19, TS, Tailwind 4 | 3000 (3001 host) | UI: Monaco editor, React Flow diagrams, Recharts, PDF export |
+| `web/` | Next.js 16 (App Router), React 19, TS, Tailwind 4 | 3000 (3002 host) | UI: Monaco editor, React Flow diagrams, Recharts, PDF export |
 | `backend/` | Express 5, TypeScript | 4000 | Auth, sessions, orchestration, all SQL |
 | `ai-service/` | FastAPI, Python | 8000 (8010 host) | RAG, LLM chains, speech, code review, recommendations |
 | `code-runner/` | Node + dockerode | 5000 (5050 host in dev) | Ephemeral Docker sandboxes for user code |
@@ -65,7 +65,7 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   `ai-service`, `chromadb`), not `localhost`. Host port bindings exist only for tools
   run from the host, so remapping them never affects service-to-service traffic.
   This machine runs another project on 3000/8000/5432, so InterviewForge's host
-  bindings are offset: **web 3001, ai-service 8010, postgres 5433** (D-024, D-031).
+  bindings are offset: **web 3002, ai-service 8010, postgres 5433** (D-024, D-031, D-041).
   The other project's ports are left alone.
 
 **Database**

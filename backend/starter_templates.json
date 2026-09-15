@@ -562,7 +562,7 @@
     },
     "python3": "class Solution:\n    def jobScheduling(self, startTime: List[int], endTime: List[int], profit: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {\n        \n    }\n};",
-    "c": "int jobScheduling(int* startTime, int startTimeSize, int* endTime, int* profit) {\n    \n}",
+    "c": "int jobScheduling(int* startTime, int startTimeSize, int* endTime, int endTimeSize, int* profit, int profitSize) {\n    \n}",
     "java": "class Solution {\n    public int jobScheduling(int[] startTime, int[] endTime, int[] profit) {\n        \n    }\n}"
   }
 }
