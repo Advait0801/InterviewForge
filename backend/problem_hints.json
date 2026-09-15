@@ -363,5 +363,120 @@
     "Each land cell contributes 4 edges before accounting for its neighbours.",
     "Every pair of adjacent land cells hides two edges, one from each cell.",
     "Count land cells and adjacent land pairs (checking only right and down avoids double counting): perimeter = 4 * land - 2 * pairs."
+  ],
+  "add-two-numbers": [
+    "The lists can hold 100 digits, far more than fits in any integer type, so add digit by digit.",
+    "Because the lowest digit comes first, you can walk both lists together exactly as in column addition.",
+    "Carry into the next node, keep going while either list has nodes or the carry is non-zero, and use a dummy head to simplify building the result."
+  ],
+  "generate-parentheses": [
+    "Generating all 2^(2n) strings and filtering works for tiny n, but most of them are invalid.",
+    "Build strings one character at a time and only take steps that can still lead to a valid result.",
+    "You may add '(' while fewer than n have been used, and ')' only while it would close an open parenthesis."
+  ],
+  "remove-nth-node-from-end-of-list": [
+    "Removing a node requires access to the node just before it, which is awkward when the head itself is removed.",
+    "A dummy node in front of the head makes every removal look the same.",
+    "Move a lead pointer n + 1 steps ahead of a trailing pointer, then advance both until the lead runs off the end; the trailing pointer is now just before the node to remove."
+  ],
+  "search-a-2d-matrix": [
+    "Read row by row, the whole matrix is one sorted sequence of m * n values.",
+    "Binary search over indices 0 .. m*n - 1 of that virtual sequence.",
+    "Index k corresponds to matrix[k / n][k % n]."
+  ],
+  "find-minimum-in-rotated-sorted-array": [
+    "The minimum is the only element smaller than the element before it.",
+    "Compare the middle element with the last element of the current range: that tells you which side of the rotation point you are on.",
+    "If nums[mid] > nums[hi], the minimum is strictly to the right of mid; otherwise it is at mid or to its left."
+  ],
+  "kth-largest-element-in-an-array": [
+    "Sorting works in O(n log n), but you only need one position.",
+    "A min-heap holding the k largest values seen so far has the answer at its top.",
+    "Quickselect partitions around a pivot and recurses into only one side, giving O(n) on average; the small value range also allows counting."
+  ],
+  "subsets": [
+    "An array of n elements has exactly 2^n subsets: each element is either in or out.",
+    "Treat an n-bit number as a membership mask and loop it from 0 to 2^n - 1.",
+    "Alternatively backtrack: at each index, recurse once including the element and once excluding it."
+  ],
+  "combination-sum": [
+    "Picking candidates in any order produces duplicates such as [2,3] and [3,2].",
+    "Enforce an order: once you move past a candidate, never pick it again.",
+    "Backtrack with (start index, remaining target); try each candidate from start onward, recursing with the same index so it can be reused."
+  ],
+  "letter-combinations-of-a-phone-number": [
+    "The answer is the Cartesian product of the letter groups of each digit.",
+    "Build strings position by position: for each partial string, extend it with every letter of the next digit.",
+    "Handle the empty input separately, since the product of zero groups would otherwise be one empty string."
+  ],
+  "word-search": [
+    "Every trace starts somewhere, so try each cell as a starting point.",
+    "From a cell that matches the current letter, recurse into its neighbours for the next letter.",
+    "Mark a cell as used before recursing (for example by overwriting it) and restore it afterwards so other traces can use it."
+  ],
+  "spiral-matrix": [
+    "Track four boundaries: top, bottom, left and right.",
+    "Walk one side, then move that boundary inwards by one.",
+    "Re-check that top <= bottom and left <= right before walking the bottom row and left column, or single rows and columns get read twice."
+  ],
+  "set-matrix-zeroes": [
+    "Clearing as soon as you see a zero makes the zeros you write look like original ones.",
+    "First record which rows and which columns contain a zero, then clear them in a second pass.",
+    "For O(1) space, use the first row and first column as the marker arrays, with one extra flag for whether the first column itself must be cleared."
+  ],
+  "jump-game": [
+    "You only get stuck at a zero that nothing before it can jump over.",
+    "Track the furthest index reachable so far as you scan left to right.",
+    "If the current index is beyond that furthest reach, the end is unreachable; otherwise update the reach with i + nums[i]."
+  ],
+  "unique-paths": [
+    "The number of ways to reach a cell is the number of ways to reach the cell above it plus the cell to its left.",
+    "The first row and first column each have exactly one path.",
+    "A single row of size n updated in place is enough; or count directly as the binomial coefficient C(m + n - 2, m - 1)."
+  ],
+  "longest-increasing-subsequence": [
+    "Let best[i] be the length of the longest increasing subsequence ending at index i; it extends some earlier best[j] with nums[j] < nums[i].",
+    "That DP is O(n^2). For O(n log n), keep tails[k] = the smallest possible last value of an increasing subsequence of length k + 1.",
+    "For each value, binary search tails for the first entry >= value and replace it (or append); the answer is the length of tails."
+  ],
+  "house-robber": [
+    "At each house there are only two choices: take it, or skip it.",
+    "If you take house i you cannot have taken i - 1, so best(i) = max(best(i - 1), best(i - 2) + nums[i]).",
+    "Only the previous two results are needed, so two variables replace the whole table."
+  ],
+  "house-robber-ii": [
+    "The only new constraint is that the first and last houses cannot both be taken.",
+    "So at least one of them is skipped: solve the straight-line problem once without the first house and once without the last.",
+    "The answer is the larger of the two, with a special case when there is only one house."
+  ],
+  "decode-ways": [
+    "The last letter of any decoding uses either the last one digit or the last two digits.",
+    "ways(i) = ways(i - 1) if s[i-1] is not '0', plus ways(i - 2) if the two digits ending at i form a number from 10 to 26.",
+    "Zeros are the trap: a '0' can only appear as the second digit of 10 or 20."
+  ],
+  "partition-equal-subset-sum": [
+    "If the total sum is odd, the answer is immediately false.",
+    "Otherwise the question becomes: is there a subset that sums to exactly total / 2?",
+    "Keep a boolean array reachable[s]; for each number, update it from high sums to low so each number is used at most once."
+  ],
+  "longest-common-subsequence": [
+    "Compare the strings prefix by prefix: let L(i, j) be the answer for the first i characters of text1 and the first j of text2.",
+    "If text1[i-1] == text2[j-1], L(i, j) = L(i-1, j-1) + 1; otherwise it is max(L(i-1, j), L(i, j-1)).",
+    "Filling the table row by row needs only the previous row, so O(min(m, n)) memory is enough."
+  ],
+  "merge-intervals": [
+    "Overlaps are hard to find in arbitrary order, but easy to see once the intervals are sorted.",
+    "Sort by start time; each interval then either overlaps the last merged interval or starts a new one.",
+    "It overlaps when its start is <= the last merged end, in which case extend that end to the maximum of the two."
+  ],
+  "insert-interval": [
+    "The input is already sorted and disjoint, so no sorting is needed.",
+    "Split the list into three parts: intervals ending before newInterval starts, intervals that overlap it, and intervals starting after it ends.",
+    "Copy the first part, merge the middle part into newInterval by widening its bounds, append it, then copy the last part."
+  ],
+  "non-overlapping-intervals": [
+    "Removing the fewest intervals is the same as keeping the most intervals that do not overlap.",
+    "Among intervals that could come next, the one that ends earliest leaves the most room for the rest.",
+    "Sort by end time and greedily keep each interval whose start is >= the end of the last kept interval; count the rest as removed."
   ]
 }

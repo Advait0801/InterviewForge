@@ -114,12 +114,14 @@ struct ListNode {
     int val;
     ListNode *next;
     ListNode(int x=0) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *next) : val(x), next(next) {}
 };
 struct TreeNode {
     int val;
     TreeNode *left;
     TreeNode *right;
     TreeNode(int x=0) : val(x), left(nullptr), right(nullptr) {}
+    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
 };
 
 vector<int> _parseIntArr(const string& s) {
@@ -624,13 +626,17 @@ const JAVA_DS_TYPES = `
 class ListNode {
     int val;
     ListNode next;
+    ListNode() {}
     ListNode(int v) { this.val = v; }
+    ListNode(int v, ListNode next) { this.val = v; this.next = next; }
 }
 class TreeNode {
     int val;
     TreeNode left;
     TreeNode right;
+    TreeNode() {}
     TreeNode(int v) { this.val = v; }
+    TreeNode(int v, TreeNode left, TreeNode right) { this.val = v; this.left = left; this.right = right; }
 }
 `;
 

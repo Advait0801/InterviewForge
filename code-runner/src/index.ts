@@ -9,7 +9,10 @@ const app = express();
 const PORT = process.env.CODE_RUNNER_PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
+// The body carries every test case with its expected output. Express's 100kb
+// default rejected subsets (~150kb: up to 1024 subsets per case) with a 413
+// before any code ran, and fizz-buzz was already at ~99kb.
+app.use(express.json({ limit: "2mb" }));
 
 app.get("/health", (req, res) => {
   res.json({
