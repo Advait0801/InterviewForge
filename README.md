@@ -92,6 +92,13 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 - Progressive hints and editorials
 - AI-powered code review (complexity, quality, optimizations)
 - Bookmarking and solved-state tracking
+- Every problem is verified in all four languages: a reference solution runs through the real
+  sandbox against test cases whose expected outputs come from an independent brute-force oracle
+  (`scripts/verify_problems.py`, `scripts/problemgen/`)
+
+> The problems are the well-known ones from [LeetCode](https://leetcode.com): same numbers,
+> titles and function signatures, credited here. Problem statements, hints and test cases are
+> written independently in this repo rather than copied.
 
 ### AI interview simulator
 

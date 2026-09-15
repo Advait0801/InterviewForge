@@ -208,5 +208,160 @@
     "Two heaps: max-heap for lower half, min-heap for upper half.",
     "Keep sizes balanced so median is top of larger heap or average of both tops.",
     "Insert pushes into appropriate heap then rebalances."
+  ],
+  "valid-anagram": [
+    "Two strings of different lengths can never be anagrams, so check that first.",
+    "Anagrams have exactly the same multiset of letters. How could you compare multisets cheaply?",
+    "Keep a count of 26 letters: add one for each letter of s, subtract one for each letter of t, and check every count ends at zero."
+  ],
+  "reverse-linked-list": [
+    "Walk the list once, keeping track of the node you came from.",
+    "Before you redirect a node's next pointer, save where it used to point or you will lose the rest of the list.",
+    "Three pointers are enough: previous, current and next. When current runs off the end, previous is the new head."
+  ],
+  "maximum-depth-of-binary-tree": [
+    "The depth of a tree can be defined in terms of the depths of its two subtrees.",
+    "An empty subtree contributes depth 0; a node adds one level on top of its deeper child.",
+    "Alternatively, count levels with a breadth-first traversal that processes one whole level per iteration."
+  ],
+  "same-tree": [
+    "Compare the two roots first: both missing, exactly one missing, or both present.",
+    "If both roots exist and hold equal values, the trees are the same only if both pairs of subtrees are the same.",
+    "A recursive check on (p.left, q.left) and (p.right, q.right) covers every node exactly once."
+  ],
+  "symmetric-tree": [
+    "A tree is symmetric when its left subtree is a mirror image of its right subtree.",
+    "Two subtrees mirror each other when their roots match, the outer children mirror each other, and the inner children mirror each other.",
+    "Write a helper that takes two nodes at once, or use a queue that holds nodes in mirrored pairs."
+  ],
+  "binary-search": [
+    "Because the array is sorted, one comparison against the middle element rules out half of the remaining range.",
+    "Keep two bounds, lo and hi, describing where target could still be.",
+    "Compute the middle index as lo + (hi - lo) / 2 and stop when the range becomes empty."
+  ],
+  "ransom-note": [
+    "Only the number of each letter matters, not the order.",
+    "Count how many of each letter the magazine offers.",
+    "Walk the note and spend one count per letter; if any count would drop below zero, the note cannot be built."
+  ],
+  "majority-element": [
+    "A hash map of counts works in linear time, but uses linear extra space.",
+    "If you sort the array, which index is guaranteed to hold the majority value?",
+    "For O(1) space, pair off different values and cancel them: keep a candidate and a counter, incrementing on a match and decrementing otherwise."
+  ],
+  "single-number": [
+    "A set or map solves it in linear time, but not in constant space.",
+    "Think about a binary operation where combining a value with itself cancels out.",
+    "XOR has exactly that property, and it is commutative, so XOR-ing the whole array leaves only the single value."
+  ],
+  "move-zeroes": [
+    "Picture writing the non-zero values into a new array in order, then padding with zeros. Can you do that without the new array?",
+    "Keep a write index for where the next non-zero value belongs.",
+    "After every non-zero value has been written forward, fill the positions from the write index to the end with zeros (or swap as you go)."
+  ],
+  "palindrome-number": [
+    "Negative numbers, and positive numbers ending in 0, can be rejected immediately.",
+    "Reversing the whole number can overflow. What if you only reverse half of it?",
+    "Pop digits off the end of x onto a reversed number until the reversed number is at least as large as what remains, then compare the two halves."
+  ],
+  "roman-to-integer": [
+    "Map each of the seven symbols to its value.",
+    "A symbol is subtracted exactly when the symbol after it has a larger value.",
+    "Scan left to right: subtract the current value if the next one is bigger, otherwise add it."
+  ],
+  "longest-common-prefix": [
+    "The answer can never be longer than the shortest string.",
+    "Compare the strings column by column: position 0 in every string, then position 1, and so on.",
+    "Stop at the first column where some string has ended or disagrees with the first string."
+  ],
+  "plus-one": [
+    "Adding one only changes the trailing run of 9s and the digit just before it.",
+    "Walk from the last digit: a digit below 9 is incremented and you are done; a 9 becomes 0 and the carry moves left.",
+    "If the carry survives past the first digit, the result is one digit longer: a 1 followed by zeros."
+  ],
+  "sqrtx": [
+    "The answer is the largest integer r such that r * r <= x.",
+    "That condition is monotonic in r, so you can binary search over r.",
+    "Use 64-bit arithmetic for r * r, since the square of a candidate near 46341 overflows a 32-bit integer."
+  ],
+  "merge-sorted-array": [
+    "Merging from the front would overwrite values in nums1 that you still need.",
+    "The free space is at the back of nums1, so fill the result from the back.",
+    "Compare the largest remaining element of each array and place the larger one at the current write position; once nums2 is exhausted, the rest of nums1 is already in place."
+  ],
+  "pascals-triangle": [
+    "Row i has i + 1 entries.",
+    "The first and last entries of every row are 1.",
+    "Each interior entry j of row i equals row[i-1][j-1] + row[i-1][j], so build the rows in order."
+  ],
+  "diameter-of-binary-tree": [
+    "Every path has a single highest node where it turns around.",
+    "The longest path that turns at a node is the height of its left subtree plus the height of its right subtree.",
+    "Compute heights bottom-up in one traversal and record the best left + right sum seen at any node."
+  ],
+  "balanced-binary-tree": [
+    "Checking the height difference at the root alone is not enough; every node must satisfy it.",
+    "Recomputing heights separately at each node is O(n^2) on a skewed tree.",
+    "Return the height from a bottom-up traversal, and use a sentinel such as -1 to report that a subtree is already unbalanced."
+  ],
+  "middle-of-the-linked-list": [
+    "Counting the nodes first and then walking half way works in two passes.",
+    "Can you find the middle in a single pass?",
+    "Move one pointer one step and another two steps at a time; when the fast pointer reaches the end, the slow one is at the middle."
+  ],
+  "palindrome-linked-list": [
+    "Copying the values into an array makes the comparison easy, at the cost of O(n) space.",
+    "For O(1) space, find the middle of the list with a slow and a fast pointer.",
+    "Reverse the second half in place, then walk both halves together comparing values."
+  ],
+  "intersection-of-two-arrays": [
+    "Duplicates inside either array do not matter; only which distinct values are present.",
+    "Put the values of one array into a set.",
+    "Walk the other array and keep each value that is in the set, removing it from the set so it is not added twice."
+  ],
+  "happy-number": [
+    "Try a few numbers by hand. The sequence either reaches 1 or starts repeating.",
+    "Detecting a repeat is enough: remember every number you have seen in a set.",
+    "To avoid the set, run a slow and a fast sequence (Floyd's cycle detection) and stop when they meet or the fast one reaches 1."
+  ],
+  "is-subsequence": [
+    "Matching characters of s as early as possible in t is never worse than matching them later.",
+    "Keep one index into s and one into t.",
+    "Advance through t, and advance the index into s whenever the characters match; s is a subsequence if that index reaches the end."
+  ],
+  "counting-bits": [
+    "Counting the bits of every number independently costs O(n log n).",
+    "Shifting i right by one drops its lowest bit; you have already computed the answer for that smaller number.",
+    "ans[i] = ans[i >> 1] + (i & 1)."
+  ],
+  "fizz-buzz": [
+    "Loop i from 1 to n and decide each entry independently.",
+    "Check divisibility by 15 (both 3 and 5) before checking 3 or 5 alone.",
+    "Alternatively, build the string by appending \"Fizz\" and \"Buzz\" separately, and fall back to the number when nothing was appended."
+  ],
+  "search-insert-position": [
+    "Both cases ask for the same thing: the first index whose value is at least target.",
+    "Binary search over the range [0, n], where n means \"after every element\".",
+    "If nums[mid] < target the answer is to the right of mid; otherwise mid itself may be the answer."
+  ],
+  "add-binary": [
+    "The strings can be far longer than any built-in integer type, so add them digit by digit.",
+    "Start from the rightmost digit of each string and carry into the next position, exactly as in decimal addition.",
+    "Continue while either string has digits left or the carry is non-zero, then reverse the collected digits."
+  ],
+  "binary-tree-inorder-traversal": [
+    "Recursion follows the definition directly: left, node, right.",
+    "To iterate, simulate the call stack with an explicit stack of nodes.",
+    "Push nodes while walking left; when you cannot go further, pop a node, record it, and move to its right child."
+  ],
+  "flood-fill": [
+    "Record the starting pixel's original colour before changing anything.",
+    "If the new colour equals the original colour there is nothing to do, and filling anyway would loop forever.",
+    "Visit connected pixels with DFS or BFS, recolouring each one as you reach it so it is never visited twice."
+  ],
+  "island-perimeter": [
+    "Each land cell contributes 4 edges before accounting for its neighbours.",
+    "Every pair of adjacent land cells hides two edges, one from each cell.",
+    "Count land cells and adjacent land pairs (checking only right and down avoids double counting): perimeter = 4 * land - 2 * pairs."
   ]
 }
