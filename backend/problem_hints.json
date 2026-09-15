@@ -593,5 +593,85 @@
     "Keep a separate list of (timestamp, value) pairs for each key.",
     "Because set timestamps are strictly increasing, each key's list is already sorted by timestamp.",
     "For get, binary search that list for the last timestamp that is <= the query."
+  ],
+  "regular-expression-matching": [
+    "A '*' always belongs to the character before it, so read the pattern in units of one character with an optional star.",
+    "Let match(i, j) mean s[i:] matches p[j:]. If p[j+1] is '*', either skip the unit (j + 2) or, when s[i] matches p[j], consume one character and stay on the unit (i + 1).",
+    "Without a star, s[i] must match p[j] and both advance. Fill the table from the ends of both strings backwards."
+  ],
+  "wildcard-matching": [
+    "A DP table where dp[i][j] means s[:i] matches p[:j] works in O(m * n).",
+    "A '*' can match nothing (skip it in the pattern) or swallow one more character of s (stay on it).",
+    "There is also a greedy approach: remember the position of the last '*' and, on a mismatch, backtrack so that star absorbs one more character."
+  ],
+  "first-missing-positive": [
+    "For an array of length n, the answer is always somewhere in 1 .. n + 1.",
+    "That means values outside 1 .. n can be ignored, and each useful value v has a natural home at index v - 1.",
+    "Swap every value into its home (skipping duplicates), then scan for the first index i where nums[i] != i + 1."
+  ],
+  "sliding-window-maximum": [
+    "Recomputing the maximum of every window costs O(n * k).",
+    "An element that is smaller than a newer element can never again be a window maximum.",
+    "Keep a deque of indices whose values decrease from front to back: pop smaller values from the back on insert, and pop the front once it leaves the window."
+  ],
+  "word-ladder": [
+    "Treat each word as a graph node, with edges between words that differ in exactly one letter.",
+    "The shortest sequence is a shortest path, so use breadth-first search starting at beginWord.",
+    "Rather than comparing every pair of words, generate the neighbours of a word by changing one letter at a time and looking each candidate up in a hash set."
+  ],
+  "binary-tree-maximum-path-sum": [
+    "Every path has one highest node, where it may turn from the left subtree into the right subtree.",
+    "For each node compute its best downward gain: its value plus the larger of its children's gains, treating negative gains as 0.",
+    "At each node, the best path turning there is value + left gain + right gain; track the maximum over all nodes while returning only the one-sided gain upward."
+  ],
+  "reverse-nodes-in-k-group": [
+    "Before reversing a group, check that k nodes actually remain.",
+    "Reverse a group with the usual three-pointer technique, but start the reversed tail pointing at the node after the group.",
+    "Keep a pointer to the node just before the current group (a dummy head helps) so you can attach the new group head and move on."
+  ],
+  "longest-increasing-path-in-a-matrix": [
+    "A strictly increasing path can never revisit a cell, so there are no cycles to worry about.",
+    "The longest path starting at a cell depends only on the longest paths starting at its larger neighbours.",
+    "Memoise a DFS over cells, so each cell's answer is computed once and the whole matrix takes O(m * n)."
+  ],
+  "burst-balloons": [
+    "Choosing which balloon to burst first is hard, because the neighbours keep changing afterwards.",
+    "Instead choose which balloon in a range is burst last: at that moment its neighbours are exactly the range's boundaries.",
+    "Pad nums with a 1 on each side; best(l, r) over the open interval is the max over last in (l, r) of vals[l] * vals[last] * vals[r] + best(l, last) + best(last, r)."
+  ],
+  "distinct-subsequences": [
+    "Count matches of prefixes: let ways(i, j) be the number of ways the first i characters of s produce the first j characters of t.",
+    "Character s[i-1] can always be skipped; if it equals t[j-1] it can also be used to match that character.",
+    "Iterating j from right to left lets a single 1-D array hold the table; ways for the empty target is 1."
+  ],
+  "best-time-to-buy-and-sell-stock-iv": [
+    "Track, for each transaction count t, the best cash position while holding a share and while not holding one.",
+    "On each day, buy[t] = max(buy[t], sell[t-1] - price) and sell[t] = max(sell[t], buy[t] + price).",
+    "If k is at least half the number of days, the limit never binds and you can simply take every upward price move."
+  ],
+  "candy": [
+    "Handle the two neighbour constraints separately.",
+    "A left-to-right pass fixes every child relative to the left neighbour; a right-to-left pass fixes them relative to the right neighbour.",
+    "In the second pass, take the maximum of the current count and right neighbour + 1, so the first pass's constraint stays satisfied."
+  ],
+  "basic-calculator": [
+    "Without parentheses, keep a running total and apply each number with the sign that precedes it.",
+    "Multi-digit numbers must be accumulated character by character; spaces are simply skipped.",
+    "On '(' push the current total and sign onto a stack and start fresh; on ')' finish the inner total and combine it with the saved total and sign."
+  ],
+  "count-of-smaller-numbers-after-self": [
+    "Comparing every pair is O(n^2).",
+    "Walk from right to left, maintaining a structure over the values already seen that can count how many are below a threshold.",
+    "The value range is small, so a Fenwick (binary indexed) tree over shifted values answers each count and insertion in O(log range); a merge sort that counts right-to-left crossings also works."
+  ],
+  "maximal-rectangle": [
+    "Fix a row as the bottom edge. Above each column, the run of consecutive 1s ending at that row forms a bar of a histogram.",
+    "The histogram for the next row is easy to update: a '1' extends the bar, a '0' resets it to 0.",
+    "Solve largest-rectangle-in-histogram for every row with a monotonic stack; the overall answer is the best over all rows."
+  ],
+  "palindrome-partitioning-ii": [
+    "Let cuts[i] be the minimum cuts for the prefix of length i; the answer is cuts[n].",
+    "cuts[i] = min over palindromic s[j:i] of cuts[j] + 1, with cuts[0] = -1 so a whole-prefix palindrome needs 0 cuts.",
+    "Avoid rechecking substrings: expand around every centre, and each palindrome s[l..r] found relaxes cuts[r + 1] from cuts[l]. That is O(n^2) overall."
   ]
 }
