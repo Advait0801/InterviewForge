@@ -9,6 +9,42 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-15
 
+### D-046 — Shared UI behavior is explicit, responsive, and hydration-stable
+
+**Shipped in UI Phase 1:** The shared shell now provides a keyboard-visible skip link,
+consistent focus treatment, reduced-motion policy, pre-paint theme initialization,
+and semantic busy/error/empty-state primitives. Static cards no longer imply that
+they are clickable; interactive cards opt into lift and glow. Buttons have explicit
+variants, sizes, loading semantics, and `type="button"` by default. Inputs and password
+fields can bind labels, hints, and errors through accessible descriptions.
+
+**Navigation policy:** The eight primary destinations remain familiar, with “OA”
+expanded to “Assessments.” The full navigation appears only where it fits (1320 CSS
+pixels and wider); narrower layouts use the compact menu. Current nested routes use
+`aria-current`, keyboard opening moves focus into the menu, and Escape closes it and
+returns focus to the trigger. Authenticated account actions remain available in both
+layouts.
+
+**Hydration defect closed:** `Protected` now returns the same session-checking state
+on the server and first client render, then reveals authenticated content or redirects.
+The Phase 0 real-reload mismatch is absent in the final browser run: direct/reloaded
+`/dashboard` and `/problems` produced zero hydration diagnostics. A visible
+“Checking your session…” state replaces the blank initial frame.
+
+**Verification:** Vitest, Testing Library, and jsdom provide ten focused behavioral
+tests for controls, theme persistence, navigation, and server-render/hydration behavior.
+The final Playwright run recorded 35 route/viewport/theme observations and 16 screenshots
+at 320–1440 CSS pixels, including a 720-pixel reflow proxy for a 1440-pixel window at
+200% zoom. It found zero horizontal overflows, clipped controls, console errors, or page
+errors. Reduced motion left zero running infinite animations. Lint, standalone
+TypeScript, and an isolated Next production build pass. Evidence and limits are in
+[`ui-ux/phase-1.md`](ui-ux/phase-1.md).
+
+**Going forward:** Page-specific phases should use these primitives rather than create
+new local versions. The shared state panel exists now; migrating dashboard, analytics,
+discovery, and workspace states happens in their owning phases so their behavior can be
+tested with the relevant data and failure cases.
+
 ### D-045 — UI improvements use one branch, phase gates, and a recorded browser baseline
 
 **Agreement:** The UI workstream is governed by `docs/UI_UX_PLAN.md`, independently

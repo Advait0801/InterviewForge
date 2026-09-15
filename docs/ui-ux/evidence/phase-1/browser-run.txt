@@ -1,0 +1,47 @@
+{
+  "screenshots": 16,
+  "observations": 35,
+  "overflowCount": 0,
+  "clippedControlCount": 0,
+  "pageErrors": 0,
+  "consoleErrors": [],
+  "mobileNavigation": {
+    "expanded": "true",
+    "firstLinkFocused": true,
+    "nestedRouteCurrent": "page",
+    "accountSettingsVisible": true,
+    "escapeCloses": true,
+    "escapeRestoresFocus": true
+  },
+  "desktopNavigation": {
+    "primaryVisible": true,
+    "menuButtonVisible": false,
+    "nestedRouteCurrent": "page",
+    "assessmentsLabelVisible": true
+  },
+  "compactNavigation": {
+    "primaryVisible": false,
+    "menuButtonVisible": true
+  },
+  "theme": {
+    "stored": "light",
+    "colorScheme": "light",
+    "persistsAfterReload": true
+  },
+  "focus": {
+    "text": "Skip to main content",
+    "href": "#main-content",
+    "outlineStyle": "solid",
+    "outlineWidth": "3px"
+  },
+  "reducedMotion": {
+    "preference": true,
+    "activeInfinite": 0,
+    "decorativeIterationCount": "1"
+  },
+  "authenticatedReload": {
+    "finalRoute": "/problems",
+    "hydrationConsoleErrors": 0,
+    "accountSettingsVisible": true
+  }
+}

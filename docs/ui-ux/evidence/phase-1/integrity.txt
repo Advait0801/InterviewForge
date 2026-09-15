@@ -1,0 +1,16 @@
+UI Phase 1 evidence integrity
+=============================
+Final browser capture: PASS
+Browser: Chrome 152.0.7977.83
+Observations: 35
+Screenshots: 16 (1,813,587 total bytes)
+Screenshot hashes: 16 unique files recorded in screenshot-sha256.txt
+Horizontal overflows: 0
+Clipped visible controls: 0
+Browser console errors: 0
+Browser page errors: 0
+Authenticated reload hydration errors: 0
+Focused tests: 10 passed in 4 files
+ESLint: PASS
+Standalone TypeScript: PASS
+Isolated production build: PASS

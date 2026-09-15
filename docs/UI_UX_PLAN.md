@@ -1,6 +1,6 @@
 # InterviewForge UI/UX improvement plan
 
-**Status:** Phase 0 complete. Awaiting user approval for Phase 1; later phases have not started.
+**Status:** Phases 0–1 complete. Awaiting user approval for Phase 2; later phases have not started.
 **Prepared:** 2026-09-14
 **Reviewed baseline:** `main` at `a9c3fef`; working tree was clean before this document.
 **Working branch:** `feat/ui-ux-polish` (created in Phase 0; one branch for all phases)
@@ -171,7 +171,7 @@ surface, loading, and motion behavior across shared components.
 Verification: describe the actual three iterations and final check results.
 Evidence: docs/ui-ux/phase-1.md. Reference decision IDs when applicable.
 
-Co-Authored-By: GPT-6 Astra <noreply@openai.com>
+Co-Authored-By: GPT-5.6 Sol <noreply@openai.com>
 ```
 
 Aim for one coherent commit per completed phase. Stage only the phase's files;
@@ -381,8 +381,8 @@ into `main`, and verify the merge.
 
 | Phase | State | Goal/evidence | Commit | Approval to advance |
 |---|---|---|---|---|
-| 0 | Complete | [Branch and baseline](ui-ux/phase-0.md) | `chore(ui): establish the UI polish branch and baseline` | Pending |
-| 1 | Not started | Foundation | — | Pending |
+| 0 | Complete | [Branch and baseline](ui-ux/phase-0.md) | `chore(ui): establish the UI polish branch and baseline` | Approved |
+| 1 | Complete | [Shared UI foundation](ui-ux/phase-1.md) | `feat(ui): refine navigation and shared interaction states` | Pending |
 | 2 | Not started | Landing/onboarding | — | Pending |
 | 3 | Not started | Progress | — | Pending |
 | 4 | Not started | Discovery | — | Pending |
@@ -395,5 +395,5 @@ iterations, test results, surprises/limitations, commit hash, and the next phase
 scope. Then ask for explicit confirmation and stop. Questions that materially change
 scope are raised early; routine design/implementation decisions use this plan.
 
-**Plan approval:** User approved the plan and Phase 0 with “got it go.” Approval for
-later phases is requested at each preceding checkpoint.
+**Plan approval:** User approved the plan and Phase 0 with “got it go,” then approved
+Phase 1 with “yoo lets do phase1.” Approval for Phase 2 is pending at this checkpoint.

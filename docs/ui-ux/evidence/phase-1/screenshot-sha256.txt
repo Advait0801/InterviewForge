@@ -1,0 +1,16 @@
+053722f940c37cb96263c3ec432d5082d04898a16449ce1c7d6cef223b0919f5  docs/ui-ux/evidence/phase-1/dashboard-light-1024.png
+0a27e869ff7ff2d9cee4b576a490bc453595e6500e3c47cbac1b12db7a04cdc8  docs/ui-ux/evidence/phase-1/problems-dark-1440.png
+0a3dd534a98e7ad73e810ae0f4c7c63af6114540ea38a535adc86f970cecf91a  docs/ui-ux/evidence/phase-1/dashboard-dark-1440.png
+0d6b6fd95e9284285c3efed59c789804fff16e013f96cf445a56842acf816891  docs/ui-ux/evidence/phase-1/home-dark-320.png
+170d8ae7196ead0077ff22678323fe7ba2e89d68c1b0c12d405fd475afe67b77  docs/ui-ux/evidence/phase-1/dashboard-light-1440.png
+19ee723d9eabf295aa27fad81fb1d995c6b5785da50c3befb86ffcaf8b2fc383  docs/ui-ux/evidence/phase-1/home-dark-1024.png
+1c43e3c1ac348c0e00a7e8b5e8048069ce2656c0679269a19b1286ed7d6e0fba  docs/ui-ux/evidence/phase-1/dashboard-dark-1024.png
+22fdeadc8584b9c5087cea7377ca47d7d0660e576138eb9bb2a5d1935365234a  docs/ui-ux/evidence/phase-1/problems-light-1440.png
+26d2dd2dad21e97922c619001353553d36a9d3cf0d9d0f43200a353d79793db2  docs/ui-ux/evidence/phase-1/mobile-menu-dark-390.png
+29fe413b5a9df2b821525b1c68e52d2430b282e414908e939a5f2fd27fd9a54f  docs/ui-ux/evidence/phase-1/problems-dark-390.png
+2bf061ebb11f18f24eac376c92cabb55d9dcfc55c068be625e030e8701f4840b  docs/ui-ux/evidence/phase-1/home-light-1440.png
+47e02165e48ad276020fbb6f729576e5f0a11bd835d949dd6e3120042ca51890  docs/ui-ux/evidence/phase-1/home-dark-1440.png
+570fc8dd48a2573736014bbc88e931adc8627b436146dcf1729105cb4297142e  docs/ui-ux/evidence/phase-1/dashboard-light-320.png
+7a6dbb07fcd66ed5c7bf48138967a4cfbc204d71b9eb42260fe71db04072a471  docs/ui-ux/evidence/phase-1/dashboard-dark-320.png
+d0f329c4f19a671ccfba568a386c1f2e6d4455b3dbc13493ce88ef8e295142f1  docs/ui-ux/evidence/phase-1/home-light-1024.png
+deaec067ac18bead0b1e399f639d1d8779802ac940a75120089ca403accf951b  docs/ui-ux/evidence/phase-1/home-light-320.png
