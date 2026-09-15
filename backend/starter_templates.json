@@ -1908,5 +1908,220 @@
     "cpp": "class Solution {\npublic:\n    int minCut(string s) {\n        \n    }\n};",
     "c": "int minCut(char* s) {\n    \n}",
     "java": "class Solution {\n    public int minCut(String s) {\n        \n    }\n}"
+  },
+  "minimum-number-of-refueling-stops": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "minRefuelStops",
+      "params": [
+        { "name": "target", "type": "int" },
+        { "name": "startFuel", "type": "int" },
+        { "name": "stations", "type": "int[][]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def minRefuelStops(self, target: int, startFuel: int, stations: List[List[int]]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int minRefuelStops(int target, int startFuel, vector<vector<int>>& stations) {\n        \n    }\n};",
+    "c": "int minRefuelStops(int target, int startFuel, int** stations, int stationsSize, int* stationsColSize) {\n    \n}",
+    "java": "class Solution {\n    public int minRefuelStops(int target, int startFuel, int[][] stations) {\n        \n    }\n}"
+  },
+  "swim-in-rising-water": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "swimInWater",
+      "params": [
+        { "name": "grid", "type": "int[][]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def swimInWater(self, grid: List[List[int]]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int swimInWater(vector<vector<int>>& grid) {\n        \n    }\n};",
+    "c": "int swimInWater(int** grid, int gridSize, int* gridColSize) {\n    \n}",
+    "java": "class Solution {\n    public int swimInWater(int[][] grid) {\n        \n    }\n}"
+  },
+  "cherry-pickup": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "cherryPickup",
+      "params": [
+        { "name": "grid", "type": "int[][]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def cherryPickup(self, grid: List[List[int]]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int cherryPickup(vector<vector<int>>& grid) {\n        \n    }\n};",
+    "c": "int cherryPickup(int** grid, int gridSize, int* gridColSize) {\n    \n}",
+    "java": "class Solution {\n    public int cherryPickup(int[][] grid) {\n        \n    }\n}"
+  },
+  "split-array-largest-sum": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "splitArray",
+      "params": [
+        { "name": "nums", "type": "int[]" },
+        { "name": "k", "type": "int" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def splitArray(self, nums: List[int], k: int) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int splitArray(vector<int>& nums, int k) {\n        \n    }\n};",
+    "c": "int splitArray(int* nums, int numsSize, int k) {\n    \n}",
+    "java": "class Solution {\n    public int splitArray(int[] nums, int k) {\n        \n    }\n}"
+  },
+  "n-queens-ii": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "totalNQueens",
+      "params": [
+        { "name": "n", "type": "int" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def totalNQueens(self, n: int) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int totalNQueens(int n) {\n        \n    }\n};",
+    "c": "int totalNQueens(int n) {\n    \n}",
+    "java": "class Solution {\n    public int totalNQueens(int n) {\n        \n    }\n}"
+  },
+  "shortest-palindrome": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "shortestPalindrome",
+      "params": [
+        { "name": "s", "type": "string" }
+      ],
+      "returnType": "string"
+    },
+    "python3": "class Solution:\n    def shortestPalindrome(self, s: str) -> str:\n        pass",
+    "cpp": "class Solution {\npublic:\n    string shortestPalindrome(string s) {\n        \n    }\n};",
+    "c": "char* shortestPalindrome(char* s) {\n    \n}",
+    "java": "class Solution {\n    public String shortestPalindrome(String s) {\n        \n    }\n}"
+  },
+  "max-points-on-a-line": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "maxPoints",
+      "params": [
+        { "name": "points", "type": "int[][]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def maxPoints(self, points: List[List[int]]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int maxPoints(vector<vector<int>>& points) {\n        \n    }\n};",
+    "c": "int maxPoints(int** points, int pointsSize, int* pointsColSize) {\n    \n}",
+    "java": "class Solution {\n    public int maxPoints(int[][] points) {\n        \n    }\n}"
+  },
+  "critical-connections-in-a-network": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "criticalConnections",
+      "params": [
+        { "name": "n", "type": "int" },
+        { "name": "connections", "type": "int[][]" }
+      ],
+      "returnType": "int[][]"
+    },
+    "python3": "class Solution:\n    def criticalConnections(self, n: int, connections: List[List[int]]) -> List[List[int]]:\n        pass",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections) {\n        \n    }\n};",
+    "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** criticalConnections(int n, int** connections, int connectionsSize, int* connectionsColSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
+    "java": "class Solution {\n    public List<List<Integer>> criticalConnections(int n, List<List<Integer>> connections) {\n        \n    }\n}"
+  },
+  "trapping-rain-water-ii": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "trapRainWater",
+      "params": [
+        { "name": "heightMap", "type": "int[][]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def trapRainWater(self, heightMap: List[List[int]]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int trapRainWater(vector<vector<int>>& heightMap) {\n        \n    }\n};",
+    "c": "int trapRainWater(int** heightMap, int heightMapSize, int* heightMapColSize) {\n    \n}",
+    "java": "class Solution {\n    public int trapRainWater(int[][] heightMap) {\n        \n    }\n}"
+  },
+  "the-skyline-problem": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "getSkyline",
+      "params": [
+        { "name": "buildings", "type": "int[][]" }
+      ],
+      "returnType": "int[][]"
+    },
+    "python3": "class Solution:\n    def getSkyline(self, buildings: List[List[int]]) -> List[List[int]]:\n        pass",
+    "cpp": "class Solution {\npublic:\n    vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {\n        \n    }\n};",
+    "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** getSkyline(int** buildings, int buildingsSize, int* buildingsColSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
+    "java": "class Solution {\n    public List<List<Integer>> getSkyline(int[][] buildings) {\n        \n    }\n}"
+  },
+  "number-of-digit-one": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "countDigitOne",
+      "params": [
+        { "name": "n", "type": "int" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def countDigitOne(self, n: int) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int countDigitOne(int n) {\n        \n    }\n};",
+    "c": "int countDigitOne(int n) {\n    \n}",
+    "java": "class Solution {\n    public int countDigitOne(int n) {\n        \n    }\n}"
+  },
+  "integer-to-english-words": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "numberToWords",
+      "params": [
+        { "name": "num", "type": "int" }
+      ],
+      "returnType": "string"
+    },
+    "python3": "class Solution:\n    def numberToWords(self, num: int) -> str:\n        pass",
+    "cpp": "class Solution {\npublic:\n    string numberToWords(int num) {\n        \n    }\n};",
+    "c": "char* numberToWords(int num) {\n    \n}",
+    "java": "class Solution {\n    public String numberToWords(int num) {\n        \n    }\n}"
+  },
+  "dungeon-game": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "calculateMinimumHP",
+      "params": [
+        { "name": "dungeon", "type": "int[][]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def calculateMinimumHP(self, dungeon: List[List[int]]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int calculateMinimumHP(vector<vector<int>>& dungeon) {\n        \n    }\n};",
+    "c": "int calculateMinimumHP(int** dungeon, int dungeonSize, int* dungeonColSize) {\n    \n}",
+    "java": "class Solution {\n    public int calculateMinimumHP(int[][] dungeon) {\n        \n    }\n}"
+  },
+  "best-time-to-buy-and-sell-stock-iii": {
+    "meta": {
+      "className": "Solution",
+      "methodName": "maxProfit",
+      "params": [
+        { "name": "prices", "type": "int[]" }
+      ],
+      "returnType": "int"
+    },
+    "python3": "class Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        pass",
+    "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        \n    }\n};",
+    "c": "int maxProfit(int* prices, int pricesSize) {\n    \n}",
+    "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        \n    }\n}"
+  },
+  "lfu-cache": {
+    "meta": {
+      "className": "LFUCache",
+      "isDesign": true,
+      "constructorParams": [{ "name": "capacity", "type": "int" }],
+      "methods": [
+        { "name": "get", "params": [{ "name": "key", "type": "int" }], "returnType": "int" },
+        { "name": "put", "params": [{ "name": "key", "type": "int" }, { "name": "value", "type": "int" }], "returnType": "void" }
+      ]
+    },
+    "python3": "class LFUCache:\n\n    def __init__(self, capacity: int):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass",
+    "cpp": "class LFUCache {\npublic:\n    LFUCache(int capacity) {\n        \n    }\n    \n    int get(int key) {\n        \n    }\n    \n    void put(int key, int value) {\n        \n    }\n};",
+    "c": "typedef struct {\n    \n} LFUCache;\n\n\nLFUCache* lFUCacheCreate(int capacity) {\n    \n}\n\nint lFUCacheGet(LFUCache* obj, int key) {\n    \n}\n\nvoid lFUCachePut(LFUCache* obj, int key, int value) {\n    \n}\n\nvoid lFUCacheFree(LFUCache* obj) {\n    \n}",
+    "java": "class LFUCache {\n\n    public LFUCache(int capacity) {\n        \n    }\n    \n    public int get(int key) {\n        \n    }\n    \n    public void put(int key, int value) {\n        \n    }\n}"
   }
 }

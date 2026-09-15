@@ -673,5 +673,80 @@
     "Let cuts[i] be the minimum cuts for the prefix of length i; the answer is cuts[n].",
     "cuts[i] = min over palindromic s[j:i] of cuts[j] + 1, with cuts[0] = -1 so a whole-prefix palindrome needs 0 cuts.",
     "Avoid rechecking substrings: expand around every centre, and each palindrome s[l..r] found relaxes cuts[r + 1] from cuts[l]. That is O(n^2) overall."
+  ],
+  "minimum-number-of-refueling-stops": [
+    "You never need to decide at a station whether to stop; you can decide later, as if the fuel had been collected then.",
+    "Drive as far as the current fuel allows, remembering every station passed along the way.",
+    "When you would run dry, take fuel from the largest station passed so far (a max-heap). Totals can exceed 2^31, so use 64-bit integers."
+  ],
+  "swim-in-rising-water": [
+    "The time needed for a route is the highest elevation along it, so you want the route whose highest cell is lowest.",
+    "Whether a time t is enough is monotone in t, so you could binary search t with a BFS at each step.",
+    "Better: a Dijkstra-style search with a min-heap keyed by the highest elevation seen so far reaches the corner with the answer directly."
+  ],
+  "cherry-pickup": [
+    "Maximising the outbound trip first and then the return trip is greedy, and it fails.",
+    "The return trip is just another right/down path walked backwards, so think of two people walking from (0, 0) at the same time.",
+    "After t steps both walkers are on the diagonal r + c = t, so the state (t, r1, r2) is enough; add both cells' cherries, counting a shared cell once."
+  ],
+  "split-array-largest-sum": [
+    "Guess a limit L on the largest subarray sum. Can the array be split so that no part exceeds L?",
+    "For a fixed L, greedily extend the current part until adding the next element would exceed L; this uses the fewest parts possible.",
+    "Feasibility is monotone in L, so binary search L between max(nums) and sum(nums)."
+  ],
+  "n-queens-ii": [
+    "Exactly one queen goes in each row, so place them row by row.",
+    "For each row, try every column that is not attacked by an earlier queen, and backtrack after exploring it.",
+    "Track used columns and both diagonal directions (r + c and r - c) in sets or bitmasks to check attacks in O(1)."
+  ],
+  "shortest-palindrome": [
+    "Whatever you add must mirror the part of s that follows its longest palindromic prefix.",
+    "So the task reduces to finding the longest prefix of s that is a palindrome; checking every prefix directly is O(n^2).",
+    "Build s + '#' + reverse(s) and compute the KMP failure function: its last value is the length of that longest palindromic prefix."
+  ],
+  "max-points-on-a-line": [
+    "Fix one point as an anchor: every line through it is determined by a direction to another point.",
+    "Points share a line through the anchor exactly when their directions from it are the same.",
+    "Represent a direction exactly as (dx, dy) divided by their gcd with a normalised sign, count directions in a hash map, and avoid floating-point slopes."
+  ],
+  "critical-connections-in-a-network": [
+    "A connection is critical exactly when it lies on no cycle; such an edge is called a bridge.",
+    "Removing each edge and re-checking connectivity works, but is O(E * (V + E)).",
+    "Run one DFS that records each node's discovery time and the lowest discovery time reachable from its subtree (Tarjan's low-link); edge (u, v) is a bridge when low[v] > disc[u]."
+  ],
+  "trapping-rain-water-ii": [
+    "The water level over a cell is decided by the lowest point of the wall that surrounds it, not by its immediate neighbours alone.",
+    "Start from the boundary cells, which can hold no water, and always expand inward from the lowest boundary cell (a min-heap).",
+    "A neighbour lower than the current boundary height traps the difference; push it back with height max(its own height, boundary height)."
+  ],
+  "the-skyline-problem": [
+    "The outline can only change height at a building's left or right edge, so those x coordinates are the only candidates.",
+    "Sweep the candidates in order, keeping the heights of buildings that cover the current x.",
+    "A max-heap of (height, right edge) with lazy removal of expired buildings gives the current height; emit a key point whenever it changes."
+  ],
+  "number-of-digit-one": [
+    "Counting digit by digit over every number is far too slow for n = 10^9.",
+    "Count how often a 1 appears in each decimal position separately, then add the positions up.",
+    "For a position with place value f, split n into the digits above it, the digit at it, and the digits below; the count depends on whether that digit is 0, 1, or larger."
+  ],
+  "integer-to-english-words": [
+    "English groups digits in threes: billions, millions, thousands, and the rest.",
+    "Write a helper that converts a number below 1000, handling hundreds, the special words for 10 through 19, and tens.",
+    "Apply it to each non-zero group followed by its scale word, and treat 0 (\"Zero\") as a special case."
+  ],
+  "dungeon-game": [
+    "Working forwards is awkward: a path that is best so far can need more starting health later.",
+    "Work backwards instead: let need[i][j] be the minimum health required on entering room (i, j) to finish from there.",
+    "need[i][j] = max(1, min(need[i+1][j], need[i][j+1]) - dungeon[i][j]), with the room past the princess requiring 1."
+  ],
+  "best-time-to-buy-and-sell-stock-iii": [
+    "Two transactions never overlap, so there is a day that separates the first from the second.",
+    "Precompute the best single-transaction profit ending by each day and starting from each day, then try every split: O(n).",
+    "Or keep four running values in one pass: best after first buy, first sell, second buy and second sell."
+  ],
+  "lfu-cache": [
+    "Keep a hash map from key to (value, use count).",
+    "Group keys by use count, and inside each group keep them in recency order, so both tie-break rules are available in O(1).",
+    "Track the smallest non-empty use count. It only changes when that group empties after a use (it moves up by 1) or when a new key is inserted (it becomes 1)."
   ]
 }
