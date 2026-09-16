@@ -1,0 +1,561 @@
+{
+  "base": "http://localhost:3002",
+  "browser": "152.0.7977.83",
+  "observations": [
+    {
+      "label": "problems-populated-dark-320",
+      "route": "/problems",
+      "theme": "dark",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.Ex"
+    },
+    {
+      "label": "problems-populated-dark-390",
+      "route": "/problems",
+      "theme": "dark",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.Ex"
+    },
+    {
+      "label": "problems-populated-dark-720",
+      "route": "/problems",
+      "theme": "dark",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.Ex"
+    },
+    {
+      "label": "problems-populated-dark-768",
+      "route": "/problems",
+      "theme": "dark",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.Ex"
+    },
+    {
+      "label": "problems-populated-dark-1024",
+      "route": "/problems",
+      "theme": "dark",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.Ex"
+    },
+    {
+      "label": "problems-populated-dark-1440",
+      "route": "/problems",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.Ex"
+    },
+    {
+      "label": "problems-populated-light-320",
+      "route": "/problems",
+      "theme": "light",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.E"
+    },
+    {
+      "label": "problems-populated-light-390",
+      "route": "/problems",
+      "theme": "light",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.E"
+    },
+    {
+      "label": "problems-populated-light-720",
+      "route": "/problems",
+      "theme": "light",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.E"
+    },
+    {
+      "label": "problems-populated-light-768",
+      "route": "/problems",
+      "theme": "light",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.E"
+    },
+    {
+      "label": "problems-populated-light-1024",
+      "route": "/problems",
+      "theme": "light",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.E"
+    },
+    {
+      "label": "problems-populated-light-1440",
+      "route": "/problems",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.E"
+    },
+    {
+      "label": "paths-populated-dark-320",
+      "route": "/paths",
+      "theme": "dark",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful step"
+    },
+    {
+      "label": "paths-populated-dark-390",
+      "route": "/paths",
+      "theme": "dark",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful step"
+    },
+    {
+      "label": "paths-populated-dark-720",
+      "route": "/paths",
+      "theme": "dark",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful step"
+    },
+    {
+      "label": "paths-populated-dark-768",
+      "route": "/paths",
+      "theme": "dark",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful step"
+    },
+    {
+      "label": "paths-populated-dark-1024",
+      "route": "/paths",
+      "theme": "dark",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful step"
+    },
+    {
+      "label": "paths-populated-dark-1440",
+      "route": "/paths",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful step"
+    },
+    {
+      "label": "paths-populated-light-320",
+      "route": "/paths",
+      "theme": "light",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful ste"
+    },
+    {
+      "label": "paths-populated-light-390",
+      "route": "/paths",
+      "theme": "light",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful ste"
+    },
+    {
+      "label": "paths-populated-light-720",
+      "route": "/paths",
+      "theme": "light",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful ste"
+    },
+    {
+      "label": "paths-populated-light-768",
+      "route": "/paths",
+      "theme": "light",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful ste"
+    },
+    {
+      "label": "paths-populated-light-1024",
+      "route": "/paths",
+      "theme": "light",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful ste"
+    },
+    {
+      "label": "paths-populated-light-1440",
+      "route": "/paths",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful ste"
+    },
+    {
+      "label": "path-detail-populated-dark-320",
+      "route": "/paths/array-foundations",
+      "theme": "dark",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longes"
+    },
+    {
+      "label": "path-detail-populated-dark-390",
+      "route": "/paths/array-foundations",
+      "theme": "dark",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longes"
+    },
+    {
+      "label": "path-detail-populated-dark-720",
+      "route": "/paths/array-foundations",
+      "theme": "dark",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longes"
+    },
+    {
+      "label": "path-detail-populated-dark-768",
+      "route": "/paths/array-foundations",
+      "theme": "dark",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longes"
+    },
+    {
+      "label": "path-detail-populated-dark-1024",
+      "route": "/paths/array-foundations",
+      "theme": "dark",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longes"
+    },
+    {
+      "label": "path-detail-populated-dark-1440",
+      "route": "/paths/array-foundations",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longes"
+    },
+    {
+      "label": "path-detail-populated-light-320",
+      "route": "/paths/array-foundations",
+      "theme": "light",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longe"
+    },
+    {
+      "label": "path-detail-populated-light-390",
+      "route": "/paths/array-foundations",
+      "theme": "light",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longe"
+    },
+    {
+      "label": "path-detail-populated-light-720",
+      "route": "/paths/array-foundations",
+      "theme": "light",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longe"
+    },
+    {
+      "label": "path-detail-populated-light-768",
+      "route": "/paths/array-foundations",
+      "theme": "light",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longe"
+    },
+    {
+      "label": "path-detail-populated-light-1024",
+      "route": "/paths/array-foundations",
+      "theme": "light",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longe"
+    },
+    {
+      "label": "path-detail-populated-light-1440",
+      "route": "/paths/array-foundations",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Array Foundations",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogout← All learning pathsArraysbeginnerArray FoundationsBuild a dependable base with traversal, lookup, and window patterns.Continue with Longe"
+    },
+    {
+      "label": "problems-error-light-1440",
+      "route": "/problems",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Find your next problem",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutPractice catalogueFind your next problemSearch 150 curated challenges, narrow by skill or interview signal, and save the right next step.E"
+    },
+    {
+      "label": "paths-empty-light-1440",
+      "route": "/paths",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Learning paths",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPFLogoutGuided practiceLearning pathsFollow focused problem sequences in order, see what you have completed, and continue from the next useful ste"
+    },
+    {
+      "label": "path-detail-error-dark-390",
+      "route": "/paths/array-foundations",
+      "theme": "dark",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "This learning path is unavailable",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPFLogoutThis learning path is unavailablePath detail fixture unavailableRetry pathView all pathsself.__next_r=\"oNBsTvsiAEHLL9ESTGzdj\"(self.__next_f"
+    }
+  ],
+  "screenshots": [
+    "problems-populated-dark-390.png",
+    "problems-populated-light-1440.png",
+    "paths-populated-dark-390.png",
+    "paths-populated-light-1440.png",
+    "path-detail-populated-dark-390.png",
+    "path-detail-populated-light-1440.png",
+    "problems-error-light-1440.png",
+    "paths-empty-light-1440.png",
+    "path-detail-error-dark-390.png",
+    "problems-filtered-dark-1440.png"
+  ],
+  "consoleErrors": [],
+  "expectedConsoleErrors": [
+    {
+      "label": "problems-error-light-1440",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    },
+    {
+      "label": "path-detail-error-dark-390",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    },
+    {
+      "label": "problems-local-retry",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    },
+    {
+      "label": "paths-local-retry",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    },
+    {
+      "label": "path-detail-local-retry",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    }
+  ],
+  "pageErrors": [],
+  "notes": [
+    "All catalogue and learning-path API responses are deterministic fixtures.",
+    "The populated catalogue contains exactly 150 problems, including a long-title fixture.",
+    "The 720 CSS-pixel viewport represents the reflow space of a 1440-pixel window at 200% zoom."
+  ],
+  "combinedFilters": {
+    "filteredCount": "Showing 1 of 150 matching problems",
+    "targetHref": "/problems/sliding-graph-window",
+    "noMatchVisible": true,
+    "resetCount": "Showing 150 of 150 problems"
+  },
+  "bookmark": {
+    "beforeUrl": "http://localhost:3002/problems",
+    "afterUrl": "http://localhost:3002/problems",
+    "addRequests": 1,
+    "nestedInteractive": 0,
+    "problemLinkHref": "/problems/problem-002"
+  },
+  "catalogueRetry": {
+    "emptyMistakenlyShown": 0,
+    "requests": 2,
+    "recoveredCount": "Showing 150 of 150 problems"
+  },
+  "pathsRetry": {
+    "requests": 2,
+    "recovered": true
+  },
+  "pathDetail": {
+    "requests": 2,
+    "notFoundMistakenlyShown": 0,
+    "nextHref": "/problems/problem-003",
+    "upNextCount": 1,
+    "progressNow": "2",
+    "stepLabels": [
+      "Step 1 of 4",
+      "Step 2 of 4",
+      "Step 3 of 4",
+      "Step 4 of 4"
+    ]
+  },
+  "motionCap": {
+    "rowCount": 150,
+    "lastRowOpacity": 1,
+    "lastRowVisibleMs": 645,
+    "underThreshold": true
+  },
+  "reducedMotion": {
+    "preference": true,
+    "activeInfinite": 0,
+    "nestedInteractive": 0
+  }
+}

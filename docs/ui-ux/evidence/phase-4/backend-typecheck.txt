@@ -1,0 +1,3 @@
+Command: npm run build -- --noEmit
+Working directory: backend
+Result: passed with no diagnostics

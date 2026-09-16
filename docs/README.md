@@ -16,6 +16,7 @@ All project documentation lives here, except two files that must stay at the rep
 | [`ui-ux/phase-1.md`](ui-ux/phase-1.md) | Shared UI, navigation, motion, authentication hydration, and browser verification evidence |
 | [`ui-ux/phase-2.md`](ui-ux/phase-2.md) | Landing, authentication, onboarding-flow, contrast, and production-browser evidence |
 | [`ui-ux/phase-3.md`](ui-ux/phase-3.md) | Dashboard hierarchy, honest resource states, accessible analytics, and heatmap evidence |
+| [`ui-ux/phase-4.md`](ui-ux/phase-4.md) | Problem discovery, bookmark semantics, learning-path progression, and 150-row evidence |
 | [`EXECUTION_PLAN.md`](EXECUTION_PLAN.md) | Platform phase history, remaining platform verification, and parked backlog |
 | [`INTERVIEW_NOTES.md`](INTERVIEW_NOTES.md) | Deep explain-it-out-loud walkthrough of every subsystem |
 | [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) | Original product spec and long-term vision |

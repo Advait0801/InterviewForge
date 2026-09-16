@@ -7,6 +7,37 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-16
+
+### D-049 — Discovery actions stay independent and path progress follows current membership
+
+**Shipped in UI Phase 4 on 2026-09-16:** The problem catalogue combines search,
+difficulty, topic, company, solved, and saved filters across the loaded 150-problem
+dataset and reports the exact visible count. Every control has a visible label or
+selected-state semantic, one action clears all filters, and failures, a true-empty
+catalogue, and a no-match result remain distinct.
+
+Problem navigation and bookmark mutation are sibling actions rather than nested
+interactive elements. Bookmark requests are tracked per problem, so independent saves
+can run together without silently ignoring another enabled control. Catalogue row delay
+is capped at 120 ms; the final Chrome run showed the 150th row fully visible 645 ms after
+navigation, and reduced-motion users receive no entrance movement.
+
+Learning-path list and detail pages now provide semantic progress, local retries, clear
+empty/missing states, and an explicit next problem. Detail requests are versioned so an
+older slug response cannot overwrite the current route. Database summary counts join
+`user_path_progress` to current `learning_path_problems`, excluding historical progress
+for removed members. Counts are clamped defensively, zero-step paths omit invalid progress
+ranges, and zero-based database positions display as steps 1 through N.
+
+**Verification:** Twenty-eight web tests and 73 backend tests pass. The backend regression
+fails if the current-membership join is removed. A self-asserting Chrome harness records
+39 observations and ten unique screenshots across three routes, both themes, and
+320–1440 CSS pixels, with no page overflow, clipped visible controls, nested interactive
+elements, unexpected console errors, or page errors. The production comparison keeps
+script counts unchanged and adds 0.7–1.0% decoded script bytes; route-ready changes are
+small in absolute local time and are documented in [`ui-ux/phase-4.md`](ui-ux/phase-4.md).
+
 ## 2026-09-15
 
 ### D-048 — Progress failures remain distinct from real zeroes

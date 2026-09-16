@@ -29,10 +29,12 @@ router.get("/", optionalAuth, async (req: AuthRequest, res) => {
     let completedByPath: Record<string, number> = {};
     if (userId) {
       const progRes = await query<{ path_id: string; cnt: string }>(
-        `SELECT path_id, COUNT(*)::text AS cnt
-         FROM user_path_progress
-         WHERE user_id = $1
-         GROUP BY path_id`,
+        `SELECT upp.path_id, COUNT(*)::text AS cnt
+         FROM user_path_progress upp
+         JOIN learning_path_problems lpp
+           ON lpp.path_id = upp.path_id AND lpp.problem_id = upp.problem_id
+         WHERE upp.user_id = $1
+         GROUP BY upp.path_id`,
         [userId]
       );
       completedByPath = Object.fromEntries(progRes.rows.map((r) => [r.path_id, parseInt(r.cnt, 10)]));

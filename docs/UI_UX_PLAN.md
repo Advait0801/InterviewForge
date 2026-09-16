@@ -1,6 +1,6 @@
 # InterviewForge UI/UX improvement plan
 
-**Status:** Phases 0–3 complete. Awaiting user approval for Phase 4; later phases have not started.
+**Status:** Phases 0–4 complete. Awaiting user approval for Phase 5; later phases have not started.
 **Prepared:** 2026-09-14
 **Reviewed baseline:** `main` at `a9c3fef`; working tree was clean before this document.
 **Working branch:** `feat/ui-ux-polish` (created in Phase 0; one branch for all phases)
@@ -384,8 +384,8 @@ into `main`, and verify the merge.
 | 0 | Complete | [Branch and baseline](ui-ux/phase-0.md) | `chore(ui): establish the UI polish branch and baseline` | Approved |
 | 1 | Complete | [Shared UI foundation](ui-ux/phase-1.md) | `feat(ui): refine navigation and shared interaction states` | Approved |
 | 2 | Complete | [Landing and onboarding](ui-ux/phase-2.md) | `feat(ui): polish the landing and authentication experience` | Approved |
-| 3 | Complete | [Dashboard and analytics](ui-ux/phase-3.md) | `feat(ui): clarify dashboard progress and analytics` | Pending |
-| 4 | Not started | Discovery | — | Pending |
+| 3 | Complete | [Dashboard and analytics](ui-ux/phase-3.md) | `feat(ui): clarify dashboard progress and analytics` | Approved |
+| 4 | Complete | [Practice discovery and learning paths](ui-ux/phase-4.md) | `feat(ui): streamline problem discovery and learning paths` | Pending |
 | 5 | Not started | Workspaces | — | Pending |
 | 6 | Not started | Interview/design feedback | — | Pending |
 | 7 | Not started | Completion/regression | — | Pending |
@@ -396,5 +396,6 @@ scope. Then ask for explicit confirmation and stop. Questions that materially ch
 scope are raised early; routine design/implementation decisions use this plan.
 
 **Plan approval:** User approved the plan and Phase 0 with “got it go,” approved
-Phase 1 with “yoo lets do phase1,” Phase 2 with “go phase2,” and Phase 3 with
-“go phase3.” Approval for Phase 4 is pending at this checkpoint.
+Phase 1 with “yoo lets do phase1,” Phase 2 with “go phase2,” Phase 3 with
+“go phase3,” and Phase 4 with “go conontue.” Approval for Phase 5 is pending at
+this checkpoint.

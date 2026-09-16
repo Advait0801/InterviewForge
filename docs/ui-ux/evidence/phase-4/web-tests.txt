@@ -1,0 +1,14 @@
+> web@0.1.0 test
+> vitest run
+
+PASS src/components/auth/__tests__/protected.test.tsx (2 tests)
+PASS src/components/ui/__tests__/theme-provider.test.tsx (1 test)
+PASS src/components/ui/__tests__/controls.test.tsx (5 tests)
+PASS src/components/layout/__tests__/navbar.test.tsx (3 tests)
+PASS src/app/__tests__/progress.test.tsx (4 tests)
+PASS src/app/__tests__/onboarding.test.tsx (7 tests)
+PASS src/app/__tests__/discovery.test.tsx (6 tests)
+
+Test Files: 7 passed (7)
+Tests: 28 passed (28)
+Duration: 2.77s
