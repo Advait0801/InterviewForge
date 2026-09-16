@@ -2,6 +2,10 @@ import { getToken } from "./auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
+export function emailVerificationUrl(token: string) {
+  return `${API_URL}/auth/verify-email?token=${encodeURIComponent(token)}`;
+}
+
 type RequestOptions = {
   method?: "GET" | "POST" | "DELETE";
   body?: unknown;

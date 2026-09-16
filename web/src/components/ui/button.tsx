@@ -1,7 +1,7 @@
 import { ButtonHTMLAttributes } from "react";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
-type ButtonSize = "sm" | "md" | "lg";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonSize = "sm" | "md" | "lg";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -12,13 +12,13 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-gradient-to-r from-primary to-secondary text-white shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 hover:brightness-105",
+    "if-action-gradient text-white shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 hover:brightness-105",
   secondary:
     "border border-primary/25 bg-primary/10 text-primary hover:border-primary/40 hover:bg-primary/15",
   ghost:
     "bg-transparent text-text-primary border border-border hover:border-primary/50 hover:bg-primary/5",
   danger:
-    "bg-gradient-to-r from-error to-red-500 text-white shadow-lg shadow-error/20 hover:shadow-xl hover:shadow-error/30",
+    "if-action-danger-gradient text-white shadow-lg shadow-error/20 hover:shadow-xl hover:shadow-error/30",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -26,6 +26,18 @@ const sizeClasses: Record<ButtonSize, string> = {
   md: "rounded-xl px-5 py-2.5 text-sm",
   lg: "rounded-xl px-6 py-3 text-base",
 };
+
+export function buttonStyles({
+  variant = "primary",
+  size = "md",
+  className = "",
+}: {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  className?: string;
+} = {}) {
+  return `inline-flex items-center justify-center gap-2 font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-200 active:scale-[0.98] ${sizeClasses[size]} ${variantClasses[variant]} ${className}`;
+}
 
 export function Button({
   variant = "primary",
@@ -40,7 +52,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center gap-2 font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
+      className={`${buttonStyles({ variant, size, className })} disabled:pointer-events-none disabled:opacity-50`}
       aria-busy={loading || undefined}
       disabled={disabled || loading}
       {...props}

@@ -75,7 +75,7 @@ export function Navbar() {
       <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Brand */}
         <Link href="/" className="group flex items-center gap-2.5 rounded-lg">
-          <Logo size={30} />
+          <Logo size={30} decorative />
           <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             InterviewForge
           </span>
@@ -125,7 +125,7 @@ export function Navbar() {
           ) : isAuthed === false ? (
             <Link
               href="/login"
-              className="rounded-xl bg-gradient-to-r from-primary to-secondary px-4 py-1.5 text-sm font-medium text-white shadow-lg shadow-primary/20 transition hover:opacity-90"
+              className="if-action-gradient rounded-xl px-4 py-1.5 text-sm font-medium text-white shadow-lg shadow-primary/20 transition hover:opacity-90"
             >
               Login
             </Link>
@@ -206,7 +206,7 @@ export function Navbar() {
                     </button>
                   </>
                 ) : (
-                  <Link onClick={() => setMobileOpen(false)} href="/login" className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white">
+                  <Link onClick={() => setMobileOpen(false)} href="/login" className="if-action-gradient rounded-xl px-4 py-2 text-sm font-medium text-white">
                     Login
                   </Link>
                 )}

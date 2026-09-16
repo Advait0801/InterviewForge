@@ -8,18 +8,21 @@
   --surface-raised: #ffffff;
   --border: #e2e8f0;
   --border-hover: #cbd5e1;
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --accent: #10b981;
-  --secondary: #06b6d4;
+  --primary: #4f46e5;
+  --primary-light: #6366f1;
+  --accent: #047857;
+  --secondary: #0e7490;
   --text-primary: #0f172a;
   --text-secondary: #64748b;
-  --error: #ef4444;
-  --warning: #f59e0b;
+  --error: #dc2626;
+  --warning: #b45309;
   --glow-primary: rgba(99, 102, 241, 0.15);
   --glow-accent: rgba(16, 185, 129, 0.15);
-  --gradient-start: #6366f1;
-  --gradient-end: #06b6d4;
+  --gradient-start: #4f46e5;
+  --gradient-end: #0e7490;
+  --action-start: #4f46e5;
+  --action-end: #0e7490;
+  --action-danger: #b91c1c;
 }
 
 @theme inline {
@@ -62,6 +65,9 @@
   --glow-accent: rgba(52, 211, 153, 0.12);
   --gradient-start: #818cf8;
   --gradient-end: #22d3ee;
+  --action-start: #4f46e5;
+  --action-end: #0e7490;
+  --action-danger: #b91c1c;
 }
 
 body {
@@ -69,6 +75,16 @@ body {
   color: var(--text-primary);
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   min-width: 320px;
+}
+
+@layer utilities {
+  .if-action-gradient {
+    background-image: linear-gradient(to right, var(--action-start), var(--action-end));
+  }
+
+  .if-action-danger-gradient {
+    background-image: linear-gradient(to right, var(--action-danger), #b91c1c);
+  }
 }
 
 * {

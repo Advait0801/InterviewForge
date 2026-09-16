@@ -1,0 +1,17 @@
+
+> web@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /Users/advait0801/Desktop/Development/InterviewForge/web
+
+ ✓ src/components/auth/__tests__/protected.test.tsx (2 tests) 29ms
+ ✓ src/components/ui/__tests__/theme-provider.test.tsx (1 test) 128ms
+ ✓ src/components/ui/__tests__/controls.test.tsx (5 tests) 173ms
+ ✓ src/components/layout/__tests__/navbar.test.tsx (3 tests) 484ms
+ ✓ src/app/__tests__/onboarding.test.tsx (7 tests) 534ms
+
+ Test Files  5 passed (5)
+      Tests  18 passed (18)
+   Start at  17:02:06
+   Duration  2.35s (transform 319ms, setup 1.41s, collect 1.26s, tests 1.35s, environment 2.75s, prepare 388ms)

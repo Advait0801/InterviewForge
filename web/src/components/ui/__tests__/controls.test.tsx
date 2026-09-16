@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Button } from "../button";
 import { Card } from "../card";
 import { Input } from "../input";
+import { Logo } from "../logo";
 import { PasswordField } from "../password-field";
 
 describe("shared controls", () => {
@@ -59,5 +60,13 @@ describe("shared controls", () => {
     expect(screen.getByText("Summary")).not.toHaveAttribute("tabindex");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+
+  it("gives repeated logos unique gradients and hides decorative copies", () => {
+    const { container } = render(<><Logo /><Logo decorative /></>);
+    const gradientIds = [...container.querySelectorAll("linearGradient")].map((gradient) => gradient.id);
+    expect(new Set(gradientIds).size).toBe(2);
+    expect(screen.getAllByRole("img")).toHaveLength(1);
+    expect(screen.getByRole("img")).toHaveAccessibleName("InterviewForge logo");
   });
 });

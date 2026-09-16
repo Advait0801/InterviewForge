@@ -1,0 +1,21 @@
+UI Phase 2 evidence integrity
+=============================
+
+Final browser observations: 36
+Screenshots listed by browser report: 30
+Screenshot files present: 30
+Unique screenshot SHA-256 hashes: 30
+Horizontal overflows: 0
+Clipped visible controls: 0
+Nested interactive controls: 0
+Unexpected console errors: 0
+Expected browser diagnostics: 1 deliberate 401 resource error
+Page errors: 0
+Signed-in home hydration errors: 0
+Active infinite animations under reduced motion: 0
+Focused tests: 18 passed in 5 files
+Lint: passed
+TypeScript: passed
+Production build: passed
+Real local onboarding flow: register, verify, recover, reset, and sign-in passed
+Paid AI calls: none

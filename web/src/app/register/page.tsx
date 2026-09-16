@@ -3,43 +3,27 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { PageShell } from "@/components/layout/page-shell";
-import { Card } from "@/components/ui/card";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { Input } from "@/components/ui/input";
 import { PasswordField } from "@/components/ui/password-field";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/logo";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { setToken } from "@/lib/auth";
 
-type FieldErrors = {
-  username?: string;
-  email?: string;
-  password?: string;
-};
-
+type FieldErrors = { username?: string; email?: string; password?: string };
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validate(username: string, email: string, password: string): FieldErrors | null {
+function validate(username: string, email: string, password: string): FieldErrors {
   const errors: FieldErrors = {};
-  if (!username.trim()) {
-    errors.username = "Username is required";
-  } else if (!USERNAME_RE.test(username)) {
-    errors.username = "3–20 characters, letters/numbers/underscore only";
-  }
-  if (!email.trim()) {
-    errors.email = "Email is required";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = "Enter a valid email address";
-  }
-  if (!password) {
-    errors.password = "Password is required";
-  } else if (password.length < 6) {
-    errors.password = "Must be at least 6 characters";
-  }
-  return Object.keys(errors).length > 0 ? errors : null;
+  if (!username.trim()) errors.username = "Choose a username.";
+  else if (!USERNAME_RE.test(username)) errors.username = "Use 3–20 letters, numbers, or underscores.";
+  if (!email.trim()) errors.email = "Enter your email address.";
+  else if (!EMAIL_RE.test(email)) errors.email = "Enter a valid email address.";
+  if (!password) errors.password = "Create a password.";
+  else if (password.length < 6) errors.password = "Use at least 6 characters.";
+  return errors;
 }
 
 export default function RegisterPage() {
@@ -52,91 +36,95 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (event: FormEvent) => {
+    event.preventDefault();
     setError(null);
-    const errs = validate(username, email, password);
-    if (errs) {
-      setFieldErrors(errs);
+    const errors = validate(username, email, password);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      const firstInvalid = errors.username ? "register-username" : errors.email ? "register-email" : "register-password";
+      document.getElementById(firstInvalid)?.focus();
       return;
     }
+
     setFieldErrors({});
     setLoading(true);
     try {
-      const res = await api.register(username, email, password, fullName || undefined);
-      setToken(res.token);
-      toast.success("Account created — verify your email (link is logged in the backend console in dev).");
+      const response = await api.register(username.trim(), email.trim(), password, fullName.trim() || undefined);
+      setToken(response.token);
+      toast.success("Account created");
       router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "We couldn’t create your account. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <PageShell>
-      <div className="flex flex-1 items-center justify-center relative">
-        {/* Decorative background */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 right-1/4 h-60 w-60 rounded-full bg-accent/10 blur-[120px] animate-blob" />
-          <div className="absolute -bottom-20 left-1/4 h-60 w-60 rounded-full bg-primary/10 blur-[120px] animate-blob [animation-delay:3s]" />
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 24, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-md relative"
-        >
-          <Card className="p-8">
-            <div className="mb-6 flex flex-col items-center">
-              <Logo size={40} className="mb-3" />
-              <h1 className="text-2xl font-bold">Create account</h1>
-              <p className="mt-1 text-sm text-text-secondary">Get started with InterviewForge for free</p>
-            </div>
-            <form className="space-y-4" onSubmit={onSubmit}>
-              <Input
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                error={fieldErrors.username}
-                autoComplete="username"
-              />
-              <Input
-                placeholder="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                error={fieldErrors.email}
-                autoComplete="email"
-              />
-              <PasswordField
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                error={fieldErrors.password}
-                autoComplete="new-password"
-              />
-              <Input
-                placeholder="Full name (optional)"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-              {error ? <p className="text-sm text-error">{error}</p> : null}
-              <Button className="w-full" disabled={loading} type="submit">
-                {loading ? "Creating..." : "Create account"}
-              </Button>
-            </form>
-            <p className="mt-5 text-center text-sm text-text-secondary">
-              Already have an account?{" "}
-              <Link className="font-medium text-primary hover:underline" href="/login">
-                Sign in
-              </Link>
-            </p>
-          </Card>
-        </motion.div>
-      </div>
-    </PageShell>
+    <AuthShell
+      eyebrow="Create your account"
+      title="Start practicing with purpose"
+      description="Create one profile for coding problems, mock interviews, learning paths, and progress."
+      footer={<>Already have an account? <Link className="font-semibold text-primary hover:underline" href="/login">Sign in</Link></>}
+    >
+      <form className="space-y-4" onSubmit={onSubmit} noValidate>
+        <Input
+          id="register-username"
+          label="Username"
+          hint="3–20 letters, numbers, or underscores"
+          placeholder="your_username"
+          value={username}
+          onChange={(event) => {
+            setUsername(event.target.value);
+            if (fieldErrors.username) setFieldErrors((current) => ({ ...current, username: undefined }));
+          }}
+          error={fieldErrors.username}
+          autoComplete="username"
+          required
+        />
+        <Input
+          id="register-email"
+          label="Email address"
+          placeholder="you@example.com"
+          type="email"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            if (fieldErrors.email) setFieldErrors((current) => ({ ...current, email: undefined }));
+          }}
+          error={fieldErrors.email}
+          autoComplete="email"
+          required
+        />
+        <PasswordField
+          id="register-password"
+          label="Password"
+          hint="At least 6 characters"
+          placeholder="Create a password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            if (fieldErrors.password) setFieldErrors((current) => ({ ...current, password: undefined }));
+          }}
+          error={fieldErrors.password}
+          autoComplete="new-password"
+          required
+        />
+        <Input
+          id="register-name"
+          label="Full name"
+          hint="Optional"
+          placeholder="Ada Lovelace"
+          value={fullName}
+          onChange={(event) => setFullName(event.target.value)}
+          autoComplete="name"
+        />
+        {error ? <p className="rounded-xl border border-error/25 bg-error/5 px-3 py-2.5 text-sm text-error" role="alert">{error}</p> : null}
+        <Button className="w-full" type="submit" loading={loading} loadingLabel="Creating account…">
+          Create account
+        </Button>
+      </form>
+    </AuthShell>
   );
 }

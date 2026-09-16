@@ -9,6 +9,39 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-15
 
+### D-047 — Onboarding has one clear, truthful, and verified path
+
+**Shipped in UI Phase 2:** The home page now explains InterviewForge through one
+primary practice action, three capability summaries, a four-stage interview loop,
+and a responsive illustrative workspace built with HTML, CSS, and SVG. Signed-in
+and signed-out destinations remain distinct without producing hydration errors.
+Calls to action are semantic links rather than nested buttons and links.
+
+**Authentication experience:** Login, registration, password recovery/reset, and
+email verification now share one responsive shell with visible labels, field-level
+errors, pending states, focus recovery, and durable outcome panels. Recovery copy
+confirms only that a request was accepted; it does not claim delivery. The existing
+backend verification endpoint is now connected to the browser flow, fixing token
+links that previously opened a page without verifying the account. Verification
+success also chooses the dashboard or sign-in action from hydration-stable auth state.
+
+**Visual and accessibility decisions:** Light-theme status colors and the shared
+action gradient were darkened enough to pass the measured text contrast checks.
+Logo SVG gradient identifiers now remain unique when several logos share a document,
+and decorative logos are hidden from assistive technology. The preview is explicitly
+labeled illustrative and becomes static when reduced motion is requested.
+
+**Verification:** Eighteen focused tests pass. The final Chrome run records 36
+observations and 30 unique screenshots across 320–1440 CSS pixels and both themes,
+with no horizontal overflow, clipped visible controls, nested interactive elements,
+unexpected console errors, page errors, or signed-in home hydration errors. It also
+completes a real disposable register → verify → recover → reset → sign-in flow against
+the local API. Lint, TypeScript, and an isolated production build pass. Production
+comparison keeps 29 scripts, adds about 2% decoded script bytes, and slightly lowers
+the measured layout-shift sum; local navigation timings were noisy and are not field
+performance claims. Full evidence and limits are in
+[`ui-ux/phase-2.md`](ui-ux/phase-2.md).
+
 ### D-046 — Shared UI behavior is explicit, responsive, and hydration-stable
 
 **Shipped in UI Phase 1:** The shared shell now provides a keyboard-visible skip link,
