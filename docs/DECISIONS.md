@@ -9,6 +9,46 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-15
 
+### D-048 — Progress failures remain distinct from real zeroes
+
+**Shipped in UI Phase 3:** Dashboard profile, statistics, activity, and recommendation
+requests now have independent loading, success, stale, and failed states. A failed
+statistics request displays unavailable values rather than zero progress, and each
+retry calls only its owning endpoint. The dashboard prioritizes one coding action,
+then shows an honest progress snapshot, activity history, practice suggestions, and
+secondary practice modes.
+
+**Analytics meaning:** The page describes the backend values as they are actually
+computed: unique solved problems by difficulty, passed-problem records by day, solved
+problem counts by topic, and weekly submission acceptance. Topic counts are no longer
+called “strength.” Date-only API values are formatted in UTC so users west of UTC do
+not see the previous date. Empty, failed, and partially populated responses render as
+different states, and a failed response never becomes “No coding progress yet.”
+
+**Accessible visualization policy:** Charts use theme tokens and pair every populated
+graphic with a keyboard-operable data table. Sparse topic data uses labeled bars rather
+than withholding a chart. The activity heatmap totals only its visible period, hides
+future cells, exposes one roving tab stop with arrow-key navigation and focus/pointer
+tooltips, and includes a chronological active-day list. Its 24-pixel target spacing
+supports touch, while narrow layouts open on the latest week with weekday labels pinned
+in view. Recharts animation is disabled when reduced motion is requested.
+
+**Verification:** Twenty-two frontend tests pass, including local retry isolation,
+failed-versus-empty analytics, exact partial-data totals, stable date formatting, and
+heatmap keyboard behavior. The final deterministic Chrome run records 27 observations
+and nine unique screenshots across 320–1440 CSS pixels and both themes. It found no
+page overflow, clipped visible controls, nested interactive controls, unexpected console
+errors, or page errors. Four deliberate 503 resource diagnostics correspond to tested
+failure states. Lint, TypeScript, and a production build pass.
+
+The final production comparison against the Phase 2 commit kept 28 scripts and added
+14,405 decoded bytes (0.7%). Analytics stayed within roughly -1% to +12% after response
+across repeated samples. The richer dashboard added roughly 7–11 ms of local load work;
+the relative increase was 22–35% because the control completes in about 32–33 ms after
+response. The final sample improved layout shift by about 0.002. These are local
+directional measurements rather than field Web Vitals. Evidence and limits are in
+[`ui-ux/phase-3.md`](ui-ux/phase-3.md).
+
 ### D-047 — Onboarding has one clear, truthful, and verified path
 
 **Shipped in UI Phase 2:** The home page now explains InterviewForge through one

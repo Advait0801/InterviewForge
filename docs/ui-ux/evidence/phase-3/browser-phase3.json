@@ -1,0 +1,454 @@
+{
+  "base": "http://localhost:3002",
+  "browser": "152.0.7977.83",
+  "observations": [
+    {
+      "label": "dashboard-populated-dark-320",
+      "route": "/dashboard",
+      "theme": "dark",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choose"
+    },
+    {
+      "label": "dashboard-populated-dark-390",
+      "route": "/dashboard",
+      "theme": "dark",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choose"
+    },
+    {
+      "label": "dashboard-populated-dark-720",
+      "route": "/dashboard",
+      "theme": "dark",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choose"
+    },
+    {
+      "label": "dashboard-populated-dark-768",
+      "route": "/dashboard",
+      "theme": "dark",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choose"
+    },
+    {
+      "label": "dashboard-populated-dark-1024",
+      "route": "/dashboard",
+      "theme": "dark",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choose"
+    },
+    {
+      "label": "dashboard-populated-dark-1440",
+      "route": "/dashboard",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choose"
+    },
+    {
+      "label": "dashboard-populated-light-320",
+      "route": "/dashboard",
+      "theme": "light",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choos"
+    },
+    {
+      "label": "dashboard-populated-light-390",
+      "route": "/dashboard",
+      "theme": "light",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choos"
+    },
+    {
+      "label": "dashboard-populated-light-720",
+      "route": "/dashboard",
+      "theme": "light",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choos"
+    },
+    {
+      "label": "dashboard-populated-light-768",
+      "route": "/dashboard",
+      "theme": "light",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choos"
+    },
+    {
+      "label": "dashboard-populated-light-1024",
+      "route": "/dashboard",
+      "theme": "light",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choos"
+    },
+    {
+      "label": "dashboard-populated-light-1440",
+      "route": "/dashboard",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choos"
+    },
+    {
+      "label": "analytics-populated-dark-320",
+      "route": "/analytics",
+      "theme": "dark",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy c"
+    },
+    {
+      "label": "analytics-populated-dark-390",
+      "route": "/analytics",
+      "theme": "dark",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy c"
+    },
+    {
+      "label": "analytics-populated-dark-720",
+      "route": "/analytics",
+      "theme": "dark",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy c"
+    },
+    {
+      "label": "analytics-populated-dark-768",
+      "route": "/analytics",
+      "theme": "dark",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy c"
+    },
+    {
+      "label": "analytics-populated-dark-1024",
+      "route": "/analytics",
+      "theme": "dark",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy c"
+    },
+    {
+      "label": "analytics-populated-dark-1440",
+      "route": "/analytics",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy c"
+    },
+    {
+      "label": "analytics-populated-light-320",
+      "route": "/analytics",
+      "theme": "light",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy "
+    },
+    {
+      "label": "analytics-populated-light-390",
+      "route": "/analytics",
+      "theme": "light",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy "
+    },
+    {
+      "label": "analytics-populated-light-720",
+      "route": "/analytics",
+      "theme": "light",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy "
+    },
+    {
+      "label": "analytics-populated-light-768",
+      "route": "/analytics",
+      "theme": "light",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy "
+    },
+    {
+      "label": "analytics-populated-light-1024",
+      "route": "/analytics",
+      "theme": "light",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy "
+    },
+    {
+      "label": "analytics-populated-light-1440",
+      "route": "/analytics",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy "
+    },
+    {
+      "label": "dashboard-empty-light-1440",
+      "route": "/dashboard",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choos"
+    },
+    {
+      "label": "analytics-empty-light-1440",
+      "route": "/analytics",
+      "theme": "light",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Analytics you can act on",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsLightPTLogoutCoding progressAnalytics you can act onSee what you have solved, where you practice most, and how submission accuracy "
+    },
+    {
+      "label": "dashboard-activity-error-dark-1440",
+      "route": "/dashboard",
+      "theme": "dark",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Good to see you, Phase Three.",
+      "bodyText": "Skip to main contentInterviewForgeDashboardPracticeInterviewSystem DesignAssessmentsPathsLeaderboardAnalyticsDarkPTLogoutYour practice hubGood to see you, Phase Three.Build momentum with one focused problem, then use your progress to choose"
+    }
+  ],
+  "screenshots": [
+    "dashboard-populated-dark-390.png",
+    "dashboard-populated-dark-1440.png",
+    "dashboard-populated-light-1440.png",
+    "analytics-populated-dark-390.png",
+    "analytics-populated-dark-1440.png",
+    "analytics-populated-light-1440.png",
+    "dashboard-empty-light-1440.png",
+    "analytics-empty-light-1440.png",
+    "dashboard-activity-error-dark-1440.png"
+  ],
+  "consoleErrors": [],
+  "expectedConsoleErrors": [
+    {
+      "label": "dashboard-activity-error-dark-1440",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    },
+    {
+      "label": "dashboard-stats-retry",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    },
+    {
+      "label": "dashboard-recommendations-retry",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    },
+    {
+      "label": "analytics-error-retry",
+      "message": "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    }
+  ],
+  "pageErrors": [],
+  "notes": [
+    "All dashboard and analytics API responses are deterministic browser fixtures; no paid AI routes were called.",
+    "The 720 CSS-pixel viewport represents the reflow space of a 1440-pixel window at 200% zoom.",
+    "Failure fixtures return one deliberate 503 before a local retry where the scenario requires recovery."
+  ],
+  "dashboardStatsRetry": {
+    "failedStatText": "Problems attempted—Unavailable",
+    "before": {
+      "profile": 3,
+      "stats": 1,
+      "activity": 1,
+      "recommendations": 1,
+      "analytics": 0
+    },
+    "after": {
+      "profile": 3,
+      "stats": 2,
+      "activity": 1,
+      "recommendations": 1,
+      "analytics": 0
+    },
+    "recoveredValue": "18"
+  },
+  "dashboardRecommendationsRetry": {
+    "before": {
+      "profile": 3,
+      "stats": 1,
+      "activity": 1,
+      "recommendations": 1,
+      "analytics": 0
+    },
+    "after": {
+      "profile": 3,
+      "stats": 1,
+      "activity": 1,
+      "recommendations": 2,
+      "analytics": 0
+    },
+    "recovered": true
+  },
+  "analyticsRetry": {
+    "before": {
+      "profile": 2,
+      "stats": 0,
+      "activity": 0,
+      "recommendations": 0,
+      "analytics": 1
+    },
+    "after": {
+      "profile": 2,
+      "stats": 0,
+      "activity": 0,
+      "recommendations": 0,
+      "analytics": 2
+    },
+    "emptyMistakenlyShown": 0,
+    "recoveredTotal": 10
+  },
+  "heatmapKeyboard": {
+    "todayLabel": "2 activities on Tuesday, Sep 15, 2026",
+    "previousLabel": "1 activity on Monday, Sep 14, 2026",
+    "tooltipVisible": true
+  },
+  "heatmapMobile": {
+    "latestWeekVisible": {
+      "scrollLeft": 964,
+      "maxScrollLeft": 964,
+      "todayLeft": 325,
+      "todayRight": 345,
+      "scrollerLeft": 37,
+      "scrollerRight": 353,
+      "visible": true,
+      "weekdayLabelsVisible": true
+    },
+    "tooltipInViewport": true,
+    "tooltipBox": {
+      "x": 214,
+      "y": 665,
+      "width": 106,
+      "height": 55
+    },
+    "scrollerCount": 1
+  },
+  "analyticsData": {
+    "summaryText": "Unique problems solved10Across all recorded submissionsActive solve days3Within the past 90 daysTracked topics4Top solved topic groupsLatest acceptance67%Most recent recorded week",
+    "dataTables": 4,
+    "topicTableCaptions": 1
+  },
+  "reducedMotion": {
+    "preference": true,
+    "activeInfinite": 0,
+    "analyticsChartStatic": true
+  }
+}

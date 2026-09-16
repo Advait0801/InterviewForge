@@ -1,0 +1,24 @@
+UI Phase 3 evidence integrity
+=============================
+
+Final browser observations: 27
+Screenshots listed by browser report: 9
+Screenshot files present: 9
+Unique screenshot SHA-256 hashes: 9
+Page horizontal overflows: 0
+Clipped visible controls: 0
+Nested interactive controls: 0
+Unexpected console errors: 0
+Expected browser diagnostics: 4 deliberate 503 resource errors
+Page errors: 0
+Focused and regression tests: 22 passed in 6 files
+Lint: passed
+TypeScript: passed
+Production build: passed
+Analytics data tables: 4
+Heatmap keyboard navigation: passed
+Heatmap mobile latest-week view: passed
+Heatmap sticky weekday labels: passed
+Heatmap touch tooltip viewport bounds: passed
+Reduced-motion analytics chart: static
+Paid AI calls: none

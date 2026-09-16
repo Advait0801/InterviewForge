@@ -1,0 +1,289 @@
+{
+  "browser": "152.0.7977.83",
+  "method": "Five local unthrottled navigations per route and build; first sample is cold within its browser context.",
+  "builds": {
+    "phase3": {
+      "/dashboard": {
+        "samples": [
+          {
+            "responseStartMs": 5.5,
+            "domContentLoadedMs": 21.099999994039536,
+            "domContentLoadedAfterResponseMs": 15.599999994039536,
+            "loadMs": 56.099999994039536,
+            "loadAfterResponseMs": 50.599999994039536,
+            "layoutShiftSum": 0.002154415328414352,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 7.199999988079071,
+            "domContentLoadedMs": 31.80000001192093,
+            "domContentLoadedAfterResponseMs": 24.600000023841858,
+            "loadMs": 46.900000005960464,
+            "loadAfterResponseMs": 39.70000001788139,
+            "layoutShiftSum": 0.0021645458080150463,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 8.300000011920929,
+            "domContentLoadedMs": 34,
+            "domContentLoadedAfterResponseMs": 25.69999998807907,
+            "loadMs": 53.80000001192093,
+            "loadAfterResponseMs": 45.5,
+            "layoutShiftSum": 0.021587048390078446,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 8.799999982118607,
+            "domContentLoadedMs": 32.900000005960464,
+            "domContentLoadedAfterResponseMs": 24.100000023841858,
+            "loadMs": 47.599999994039536,
+            "loadAfterResponseMs": 38.80000001192093,
+            "layoutShiftSum": 0.021587048390078446,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 9.700000017881393,
+            "domContentLoadedMs": 35.80000001192093,
+            "domContentLoadedAfterResponseMs": 26.099999994039536,
+            "loadMs": 50.80000001192093,
+            "loadAfterResponseMs": 41.099999994039536,
+            "layoutShiftSum": 0.021587048390078446,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          }
+        ],
+        "medians": {
+          "responseStartMs": 8.300000011920929,
+          "domContentLoadedMs": 32.900000005960464,
+          "domContentLoadedAfterResponseMs": 24.600000023841858,
+          "loadMs": 50.80000001192093,
+          "loadAfterResponseMs": 41.099999994039536,
+          "layoutShiftSum": 0.021587048390078446,
+          "scriptCount": 28,
+          "scriptDecodedBytes": 1973670
+        }
+      },
+      "/analytics": {
+        "samples": [
+          {
+            "responseStartMs": 3.4000000059604645,
+            "domContentLoadedMs": 15.599999994039536,
+            "domContentLoadedAfterResponseMs": 12.199999988079071,
+            "loadMs": 58.19999998807907,
+            "loadAfterResponseMs": 54.79999998211861,
+            "layoutShiftSum": 0.0021632951315211334,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 5.199999988079071,
+            "domContentLoadedMs": 19.799999982118607,
+            "domContentLoadedAfterResponseMs": 14.599999994039536,
+            "loadMs": 42.599999994039536,
+            "loadAfterResponseMs": 37.400000005960464,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 7.100000023841858,
+            "domContentLoadedMs": 22.80000001192093,
+            "domContentLoadedAfterResponseMs": 15.699999988079071,
+            "loadMs": 45.20000001788139,
+            "loadAfterResponseMs": 38.099999994039536,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 4.799999982118607,
+            "domContentLoadedMs": 19.900000005960464,
+            "domContentLoadedAfterResponseMs": 15.100000023841858,
+            "loadMs": 42.599999994039536,
+            "loadAfterResponseMs": 37.80000001192093,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 5.300000011920929,
+            "domContentLoadedMs": 21.19999998807907,
+            "domContentLoadedAfterResponseMs": 15.899999976158142,
+            "loadMs": 42.599999994039536,
+            "loadAfterResponseMs": 37.29999998211861,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          }
+        ],
+        "medians": {
+          "responseStartMs": 5.199999988079071,
+          "domContentLoadedMs": 19.900000005960464,
+          "domContentLoadedAfterResponseMs": 15.100000023841858,
+          "loadMs": 42.599999994039536,
+          "loadAfterResponseMs": 37.80000001192093,
+          "layoutShiftSum": 0,
+          "scriptCount": 28,
+          "scriptDecodedBytes": 1973670
+        }
+      }
+    },
+    "phase2-control": {
+      "/dashboard": {
+        "samples": [
+          {
+            "responseStartMs": 9,
+            "domContentLoadedMs": 23.200000017881393,
+            "domContentLoadedAfterResponseMs": 14.200000017881393,
+            "loadMs": 57,
+            "loadAfterResponseMs": 48,
+            "layoutShiftSum": 0.02131544174382716,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          },
+          {
+            "responseStartMs": 5.699999988079071,
+            "domContentLoadedMs": 21.599999994039536,
+            "domContentLoadedAfterResponseMs": 15.900000005960464,
+            "loadMs": 38.80000001192093,
+            "loadAfterResponseMs": 33.10000002384186,
+            "layoutShiftSum": 0.02131544174382716,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          },
+          {
+            "responseStartMs": 5.199999988079071,
+            "domContentLoadedMs": 19.799999982118607,
+            "domContentLoadedAfterResponseMs": 14.599999994039536,
+            "loadMs": 36.19999998807907,
+            "loadAfterResponseMs": 31,
+            "layoutShiftSum": 0.02131544174382716,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          },
+          {
+            "responseStartMs": 5.5,
+            "domContentLoadedMs": 22,
+            "domContentLoadedAfterResponseMs": 16.5,
+            "loadMs": 37.099999994039536,
+            "loadAfterResponseMs": 31.599999994039536,
+            "layoutShiftSum": 0.002154415328414352,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          },
+          {
+            "responseStartMs": 5.5,
+            "domContentLoadedMs": 24.700000017881393,
+            "domContentLoadedAfterResponseMs": 19.200000017881393,
+            "loadMs": 41.10000002384186,
+            "loadAfterResponseMs": 35.60000002384186,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          }
+        ],
+        "medians": {
+          "responseStartMs": 5.5,
+          "domContentLoadedMs": 22,
+          "domContentLoadedAfterResponseMs": 15.900000005960464,
+          "loadMs": 38.80000001192093,
+          "loadAfterResponseMs": 33.10000002384186,
+          "layoutShiftSum": 0.02131544174382716,
+          "scriptCount": 28,
+          "scriptDecodedBytes": 1959265
+        }
+      },
+      "/analytics": {
+        "samples": [
+          {
+            "responseStartMs": 3.800000011920929,
+            "domContentLoadedMs": 12.800000011920929,
+            "domContentLoadedAfterResponseMs": 9,
+            "loadMs": 57.599999994039536,
+            "loadAfterResponseMs": 53.79999998211861,
+            "layoutShiftSum": 0.002154415328414352,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          },
+          {
+            "responseStartMs": 4.5,
+            "domContentLoadedMs": 21,
+            "domContentLoadedAfterResponseMs": 16.5,
+            "loadMs": 41.900000005960464,
+            "loadAfterResponseMs": 37.400000005960464,
+            "layoutShiftSum": 0.002164170605066873,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          },
+          {
+            "responseStartMs": 6.700000017881393,
+            "domContentLoadedMs": 20.80000001192093,
+            "domContentLoadedAfterResponseMs": 14.099999994039536,
+            "loadMs": 42.5,
+            "loadAfterResponseMs": 35.79999998211861,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          },
+          {
+            "responseStartMs": 4.5999999940395355,
+            "domContentLoadedMs": 20.5,
+            "domContentLoadedAfterResponseMs": 15.900000005960464,
+            "loadMs": 40.400000005960464,
+            "loadAfterResponseMs": 35.80000001192093,
+            "layoutShiftSum": 0.002164170605066873,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          },
+          {
+            "responseStartMs": 6.800000011920929,
+            "domContentLoadedMs": 19.700000017881393,
+            "domContentLoadedAfterResponseMs": 12.900000005960464,
+            "loadMs": 41.30000001192093,
+            "loadAfterResponseMs": 34.5,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1959265
+          }
+        ],
+        "medians": {
+          "responseStartMs": 4.5999999940395355,
+          "domContentLoadedMs": 20.5,
+          "domContentLoadedAfterResponseMs": 14.099999994039536,
+          "loadMs": 41.900000005960464,
+          "loadAfterResponseMs": 35.80000001192093,
+          "layoutShiftSum": 0.002154415328414352,
+          "scriptCount": 28,
+          "scriptDecodedBytes": 1959265
+        }
+      }
+    }
+  },
+  "comparison": {
+    "/dashboard": {
+      "responseStartPercent": 50.9,
+      "domContentLoadedPercent": 49.5,
+      "domContentLoadedAfterResponsePercent": 54.7,
+      "loadPercent": 30.9,
+      "loadAfterResponsePercent": 24.2,
+      "scriptDecodedBytesPercent": 0.7,
+      "scriptCountDelta": 0,
+      "layoutShiftDelta": 0.000272
+    },
+    "/analytics": {
+      "responseStartPercent": 13,
+      "domContentLoadedPercent": -2.9,
+      "domContentLoadedAfterResponsePercent": 7.1,
+      "loadPercent": 1.7,
+      "loadAfterResponsePercent": 5.6,
+      "scriptDecodedBytesPercent": 0.7,
+      "scriptCountDelta": 0,
+      "layoutShiftDelta": -0.002154
+    }
+  },
+  "note": "Local directional evidence, not field Web Vitals."
+}
