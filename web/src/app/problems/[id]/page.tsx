@@ -8,11 +8,14 @@ import { api, CodeReview, ProblemDetail, Submission, SubmissionDetail } from "@/
 import { getToken } from "@/lib/auth";
 import type { WorkspaceLanguage } from "@/components/code-workspace-editor";
 import { EditorialView } from "@/components/editorial-view";
+import { WorkspacePaneSwitcher, type WorkspacePane } from "@/components/workspace-pane-switcher";
+import { Button } from "@/components/ui/button";
+import { LoadingState, StatePanel } from "@/components/ui/state-panel";
 
 const CodeWorkspaceEditor = dynamic(
   () =>
     import("@/components/code-workspace-editor").then((m) => m.CodeWorkspaceEditor),
-  { ssr: false, loading: () => <div className="flex flex-1 items-center justify-center bg-[#0a0e17] text-xs text-text-secondary">Loading editor…</div> },
+  { ssr: false, loading: () => <LoadingState label="Loading editor" className="h-full min-h-64 bg-surface" /> },
 );
 
 type Language = WorkspaceLanguage;
@@ -190,8 +193,12 @@ export default function WorkspacePage() {
   const router = useRouter();
 
   const [problem, setProblem] = useState<ProblemDetail | null>(null);
+  const [problemLoading, setProblemLoading] = useState(true);
+  const [problemError, setProblemError] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>(getSavedLanguage);
   const [code, setCode] = useState("");
+  const [mobilePane, setMobilePane] = useState<WorkspacePane>("problem");
+  const [executionError, setExecutionError] = useState<string | null>(null);
   const [runResult, setRunResult] = useState<RunResponse | null>(null);
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -214,7 +221,9 @@ export default function WorkspacePage() {
   const [modalAiReviewLoading, setModalAiReviewLoading] = useState(false);
   const [modalAiReviewOpen, setModalAiReviewOpen] = useState(false);
 
-  const prevStarterRef = useRef<string>("");
+  const languageDraftsRef = useRef<Partial<Record<Language, string>>>({});
+  const languageRequestRef = useRef(0);
+  const problemLoadSequenceRef = useRef(0);
   const rightPaneRef = useRef<HTMLDivElement>(null);
   const [bottomPanelRatio, setBottomPanelRatio] = useState(0.38);
 
@@ -237,40 +246,58 @@ export default function WorkspacePage() {
     }
   }, []);
 
-  useEffect(() => {
+  const loadProblem = useCallback(async () => {
     if (!params.id) return;
     if (!getToken()) {
       router.push("/login");
       return;
     }
+    const sequence = ++problemLoadSequenceRef.current;
+    languageRequestRef.current += 1;
+    setProblemLoading(true);
+    setProblemError(null);
+    setProblem(null);
+    setRunResult(null);
+    setShowResults(false);
+    languageDraftsRef.current = {};
     const preferredLang = getSavedLanguage();
     setLanguage(preferredLang);
-
-    api
-      .getProblem(params.id, true)
-      .then(async (res) => {
-        setProblem(res.problem);
-        const starter = res.problem.starter_code?.[preferredLang] || "";
-        prevStarterRef.current = starter;
-
-        try {
-          const subRes = await api.getSubmissions({ problemId: params.id });
-          setSubmissions(subRes.submissions);
-          const forLang = subRes.submissions.filter((s) => s.language === preferredLang);
-          if (forLang.length > 0) {
-            const detail = await api.getSubmission(forLang[0].id);
-            setCode(detail.submission.code);
-            return;
-          }
-        } catch {
-          /* use starter */
+    try {
+      const res = await api.getProblem(params.id, true);
+      if (sequence !== problemLoadSequenceRef.current) return;
+      setProblem(res.problem);
+      const starter = res.problem.starter_code?.[preferredLang] || "";
+      let restoredCode = starter;
+      try {
+        const subRes = await api.getSubmissions({ problemId: params.id });
+        if (sequence !== problemLoadSequenceRef.current) return;
+        setSubmissions(subRes.submissions);
+        const latestForLanguage = subRes.submissions.find((submission) => submission.language === preferredLang);
+        if (latestForLanguage) {
+          restoredCode = (await api.getSubmission(latestForLanguage.id)).submission.code;
+          if (sequence !== problemLoadSequenceRef.current) return;
         }
-        setCode(starter);
-      })
-      .catch((err) => {
-        toast.error(err instanceof Error ? err.message : "Failed to load problem");
-      });
+      } catch {
+        /* The problem still works with starter code when history is unavailable. */
+      }
+      if (sequence !== problemLoadSequenceRef.current) return;
+      languageDraftsRef.current[preferredLang] = restoredCode;
+      setCode(restoredCode);
+    } catch (err) {
+      if (sequence !== problemLoadSequenceRef.current) return;
+      setProblemError(err instanceof Error ? err.message : "Failed to load problem");
+    } finally {
+      if (sequence === problemLoadSequenceRef.current) setProblemLoading(false);
+    }
   }, [params.id, router]);
+
+  useEffect(() => {
+    void loadProblem();
+    return () => {
+      problemLoadSequenceRef.current += 1;
+      languageRequestRef.current += 1;
+    };
+  }, [loadProblem]);
 
   const fetchSubmissions = async () => {
     if (!params.id) return;
@@ -336,39 +363,40 @@ export default function WorkspacePage() {
 
   const handleLanguageChange = (newLang: Language) => {
     if (!problem) return;
-    const oldStarter = problem.starter_code?.[language] || "";
     const newStarter = problem.starter_code?.[newLang] || "";
-
-    if (code === oldStarter || code === "") {
-      api
-        .getSubmissions({ problemId: problem.id })
-        .then(async (res) => {
-          setSubmissions(res.submissions);
-          const forLang = res.submissions.filter((s) => s.language === newLang);
-          if (forLang.length > 0) {
-            try {
-              const d = await api.getSubmission(forLang[0].id);
-              setCode(d.submission.code);
-            } catch {
-              setCode(newStarter);
-            }
-          } else {
-            setCode(newStarter);
-          }
-          prevStarterRef.current = newStarter;
-        })
-        .catch(() => {
-          setCode(newStarter);
-          prevStarterRef.current = newStarter;
-        });
-    }
+    languageDraftsRef.current[language] = code;
     setLanguage(newLang);
     saveLanguage(newLang);
+    const request = ++languageRequestRef.current;
+    const savedDraft = languageDraftsRef.current[newLang];
+    if (savedDraft !== undefined) {
+      setCode(savedDraft);
+      return;
+    }
+    setCode(newStarter);
+    api.getSubmissions({ problemId: problem.id }).then(async (res) => {
+      setSubmissions(res.submissions);
+      const latest = res.submissions.find((submission) => submission.language === newLang);
+      const restored = latest ? (await api.getSubmission(latest.id)).submission.code : newStarter;
+      if (languageRequestRef.current !== request) return;
+      languageDraftsRef.current[newLang] = restored;
+      setCode(restored);
+    }).catch(() => {
+      if (languageRequestRef.current !== request) return;
+      languageDraftsRef.current[newLang] = newStarter;
+      setCode(newStarter);
+    });
+  };
+
+  const handleCodeChange = (value: string) => {
+    languageDraftsRef.current[language] = value;
+    setCode(value);
   };
 
   const handleRun = async () => {
     if (!problem) return;
     setRunning(true);
+    setExecutionError(null);
     setShowResults(true);
     setResultTab("result");
     try {
@@ -376,7 +404,9 @@ export default function WorkspacePage() {
       setRunResult({ ...res, mode: "run" });
       saveLanguage(language);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Run failed");
+      const message = err instanceof Error ? err.message : "Run failed";
+      setExecutionError(message);
+      toast.error(message);
     } finally {
       setRunning(false);
     }
@@ -385,6 +415,7 @@ export default function WorkspacePage() {
   const handleSubmit = async () => {
     if (!problem) return;
     setSubmitting(true);
+    setExecutionError(null);
     setShowResults(true);
     setResultTab("result");
     try {
@@ -402,7 +433,9 @@ export default function WorkspacePage() {
       saveLanguage(language);
       fetchSubmissions();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Submission failed");
+      const message = err instanceof Error ? err.message : "Submission failed";
+      setExecutionError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -411,16 +444,30 @@ export default function WorkspacePage() {
   const exampleCases = problem?.test_cases?.slice(0, EXAMPLE_CASE_COUNT) ?? [];
   const fullTestCases = problem?.test_cases ?? [];
 
-  if (!problem) {
+  if (problemLoading) {
+    return <LoadingState label="Loading problem workspace" className="min-h-dvh bg-background" />;
+  }
+
+  if (problemError || !problem) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      </div>
+      <main className="flex min-h-dvh items-center justify-center bg-background p-4 text-text-primary">
+        <StatePanel
+          tone="error"
+          title="Problem unavailable"
+          description={problemError ?? "This problem could not be found."}
+          action={
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button variant="ghost" onClick={() => router.push("/problems")}>Back to problems</Button>
+              <Button onClick={loadProblem}>Retry</Button>
+            </div>
+          }
+        />
+      </main>
     );
   }
 
   return (
-    <div className="flex h-screen flex-col bg-background text-text-primary">
+    <main className="flex h-dvh min-h-[560px] flex-col overflow-hidden bg-background text-text-primary">
       {detailId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
           <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-xl border border-border bg-background shadow-xl">
@@ -457,6 +504,7 @@ export default function WorkspacePage() {
                   if (!submissionDetail) return;
                   setCode(submissionDetail.code);
                   setLanguage(submissionDetail.language as Language);
+                  languageDraftsRef.current[submissionDetail.language as Language] = submissionDetail.code;
                   saveLanguage(submissionDetail.language as Language);
                   setDetailId(null);
                   setSubmissionDetail(null);
@@ -517,20 +565,21 @@ export default function WorkspacePage() {
         </div>
       )}
 
-      {/* Toolbar */}
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border glass px-4">
-        <div className="flex items-center gap-3">
+      <header className="shrink-0 border-b border-border bg-background/95 backdrop-blur">
+        <div className="flex min-h-14 items-center gap-2 px-2 sm:px-4">
           <button
+            type="button"
             onClick={() => router.push("/problems")}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-text-secondary transition-all hover:bg-surface-hover hover:text-text-primary"
+            className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-lg px-2 text-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
+            aria-label="Back to problems"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Problems
+            <span className="hidden sm:inline">Problems</span>
           </button>
-          <div className="h-5 w-px bg-border" />
-          <h1 className="text-sm font-semibold">{problem.title}</h1>
+          <div className="hidden h-6 w-px bg-border sm:block" />
+          <h1 className="min-w-0 truncate text-sm font-semibold sm:text-base">{problem.title}</h1>
           <DifficultyBadge d={problem.difficulty} />
           {problem.is_solved ? (
             <span className="inline-flex items-center rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
@@ -538,8 +587,7 @@ export default function WorkspacePage() {
             </span>
           ) : null}
         </div>
-
-        <div className="flex items-center gap-2">
+        <div className="flex min-h-12 flex-wrap items-center gap-2 border-t border-border px-2 py-2 sm:px-4 md:flex-nowrap">
           <button
             type="button"
             onClick={async () => {
@@ -559,14 +607,17 @@ export default function WorkspacePage() {
               }
             }}
             disabled={savingBookmark}
-            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition hover:border-warning/50 hover:text-warning disabled:opacity-50"
+            aria-pressed={problem.is_bookmarked}
+            className="min-h-9 shrink-0 rounded-lg border border-border bg-surface px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-warning/50 hover:text-warning disabled:opacity-50"
           >
             {problem.is_bookmarked ? "Bookmarked" : "Bookmark"}
           </button>
+          <label className="sr-only" htmlFor="problem-language">Language</label>
           <select
+            id="problem-language"
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value as Language)}
-            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-primary transition focus:border-primary focus:outline-none"
+            className="min-h-9 shrink-0 rounded-lg border border-border bg-surface px-2.5 text-xs font-medium text-text-primary"
           >
             {LANGUAGES.map((l) => (
               <option key={l.value} value={l.value}>
@@ -575,31 +626,28 @@ export default function WorkspacePage() {
             ))}
           </select>
 
-          <button
-            onClick={handleRun}
-            disabled={running || submitting}
-            className="rounded-lg border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary transition-all hover:border-primary/50 hover:bg-primary/20 disabled:opacity-50 active:scale-[0.97]"
-          >
-            {running ? "Running..." : "Run"}
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={running || submitting}
-            className="rounded-lg bg-gradient-to-r from-accent to-emerald-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-accent/20 transition-all hover:shadow-lg hover:shadow-accent/30 disabled:opacity-50 active:scale-[0.97]"
-          >
-            {submitting ? "Submitting..." : "Submit"}
-          </button>
+          <Button size="sm" variant="secondary" onClick={handleRun} loading={running} loadingLabel="Running" disabled={submitting}>
+            Run code
+          </Button>
+          <Button size="sm" onClick={handleSubmit} loading={submitting} loadingLabel="Submitting" disabled={running}>
+            Submit
+          </Button>
         </div>
-      </div>
+      </header>
+
+      <WorkspacePaneSwitcher value={mobilePane} onChange={setMobilePane} />
 
       {/* Main content */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
+      <div className="flex min-h-0 flex-1 overflow-hidden md:flex-row">
         {/* Left pane — description */}
-        <div className="flex w-full min-h-0 flex-col border-b md:w-1/2 md:border-b-0 md:border-r md:border-border">
-          <div className="flex shrink-0 border-b border-border">
+        <section className={`${mobilePane === "problem" ? "flex" : "hidden"} min-h-0 w-full flex-col border-border md:flex md:w-1/2 md:border-r`} aria-label="Problem information">
+          <div className="grid shrink-0 grid-cols-3 border-b border-border lg:flex" role="tablist" aria-label="Problem information tabs">
             <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "description"}
               onClick={() => setActiveTab("description")}
-              className={`px-4 py-2.5 text-xs font-medium transition-all ${
+              className={`px-2 py-2.5 text-xs font-medium transition-all sm:px-4 ${
                 activeTab === "description"
                   ? "border-b-2 border-primary text-primary"
                   : "text-text-secondary hover:text-text-primary"
@@ -608,11 +656,14 @@ export default function WorkspacePage() {
               Description
             </button>
             <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "submissions"}
               onClick={() => {
                 setActiveTab("submissions");
                 fetchSubmissions();
               }}
-              className={`px-4 py-2.5 text-xs font-medium transition-all ${
+              className={`px-2 py-2.5 text-xs font-medium transition-all sm:px-4 ${
                 activeTab === "submissions"
                   ? "border-b-2 border-primary text-primary"
                   : "text-text-secondary hover:text-text-primary"
@@ -621,8 +672,11 @@ export default function WorkspacePage() {
               Submissions
             </button>
             <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "hints"}
               onClick={() => setActiveTab("hints")}
-              className={`px-4 py-2.5 text-xs font-medium transition-all ${
+              className={`px-2 py-2.5 text-xs font-medium transition-all sm:px-4 ${
                 activeTab === "hints"
                   ? "border-b-2 border-primary text-primary"
                   : "text-text-secondary hover:text-text-primary"
@@ -631,8 +685,11 @@ export default function WorkspacePage() {
               Hints
             </button>
             <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "editorial"}
               onClick={() => setActiveTab("editorial")}
-              className={`px-4 py-2.5 text-xs font-medium transition-all ${
+              className={`px-2 py-2.5 text-xs font-medium transition-all sm:px-4 ${
                 activeTab === "editorial"
                   ? "border-b-2 border-primary text-primary"
                   : "text-text-secondary hover:text-text-primary"
@@ -642,12 +699,14 @@ export default function WorkspacePage() {
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === "aireview"}
               disabled={!canAiReview}
               onClick={() => {
                 if (canAiReview) setActiveTab("aireview");
               }}
               title={!canAiReview ? "Submit your solution to unlock AI Review" : undefined}
-              className={`px-4 py-2.5 text-xs font-medium transition-all ${
+              className={`px-2 py-2.5 text-xs font-medium transition-all sm:px-4 ${
                 activeTab === "aireview"
                   ? "border-b-2 border-primary text-primary"
                   : canAiReview
@@ -751,67 +810,70 @@ export default function WorkspacePage() {
               <EditorialView text={problem.editorial} />
             )}
           </div>
-        </div>
+        </section>
 
         {/* Right pane — editor + results (resizable when console open) */}
-        <div ref={rightPaneRef} className="flex w-full min-h-0 flex-1 flex-col md:w-1/2">
-          {!showResults ? (
-            <>
-              <div className="flex min-h-0 flex-1 flex-col">
-                <div className="flex shrink-0 items-center border-b border-border px-4 py-2">
-                  <span className="mono text-xs font-medium text-text-secondary">Code</span>
-                </div>
-                <CodeWorkspaceEditor
-                  language={language}
-                  value={code}
-                  onChange={setCode}
-                  className="min-h-0 flex-1"
-                />
-              </div>
-              <div className="flex shrink-0 items-center justify-between border-t border-border px-4 py-2.5">
+        <section ref={rightPaneRef} className={`${mobilePane === "editor" ? "flex" : "hidden"} min-h-0 w-full flex-1 flex-col md:flex md:w-1/2`} aria-label="Code editor and console">
+          <div
+            className="flex min-h-0 flex-col overflow-hidden"
+            style={showResults ? { flex: `${1 - bottomPanelRatio} 1 0px`, minHeight: 100 } : { flex: "1 1 0px", minHeight: 100 }}
+          >
+            <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-2">
+              <span className="mono text-xs font-medium text-text-secondary">Code</span>
+              {!showResults ? (
                 <button
                   type="button"
                   onClick={() => {
                     setShowResults(true);
                     setResultTab("testcases");
                   }}
-                  className="text-xs font-medium text-text-secondary transition hover:text-text-primary"
+                  className="text-xs font-semibold text-text-secondary transition hover:text-text-primary"
                 >
-                  Console
+                  Open console
                 </button>
-              </div>
-            </>
-          ) : (
+              ) : null}
+            </div>
+            <CodeWorkspaceEditor
+              language={language}
+              value={code}
+              onChange={handleCodeChange}
+              className="min-h-0 flex-1"
+            />
+          </div>
+          {showResults ? (
             <>
               <div
-                className="flex min-h-0 flex-col overflow-hidden"
-                style={{ flex: `${1 - bottomPanelRatio} 1 0px`, minHeight: 100 }}
-              >
-                <div className="flex shrink-0 items-center border-b border-border px-4 py-2">
-                  <span className="mono text-xs font-medium text-text-secondary">Code</span>
-                </div>
-                <CodeWorkspaceEditor
-                  language={language}
-                  value={code}
-                  onChange={setCode}
-                  className="min-h-0 flex-1"
-                />
-              </div>
-              <div
                 role="separator"
+                tabIndex={0}
                 aria-orientation="horizontal"
                 aria-label="Resize editor and console panels"
+                aria-valuemin={15}
+                aria-valuemax={88}
+                aria-valuenow={Math.round(bottomPanelRatio * 100)}
                 onMouseDown={handleConsoleResizeStart}
-                className="h-1.5 shrink-0 cursor-row-resize border-y border-border bg-border/50 hover:bg-primary/25"
+                onKeyDown={(event) => {
+                  if (!["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+                  event.preventDefault();
+                  const next = event.key === "Home"
+                    ? 0.15
+                    : event.key === "End"
+                      ? 0.88
+                      : Math.min(0.88, Math.max(0.15, bottomPanelRatio + (event.key === "ArrowUp" ? 0.05 : -0.05)));
+                  setBottomPanelRatio(next);
+                  localStorage.setItem(CONSOLE_SPLIT_STORAGE_KEY, String(next));
+                }}
+                className="h-2 shrink-0 cursor-row-resize border-y border-border bg-border/50 hover:bg-primary/25 focus:bg-primary/30"
               />
               <div
                 className="flex min-h-0 flex-col border-t border-border"
                 style={{ flex: `${bottomPanelRatio} 1 0px`, minHeight: 80 }}
               >
                 <div className="flex shrink-0 items-center justify-between border-b border-border">
-                  <div className="flex">
+                  <div className="flex" role="tablist" aria-label="Console panels">
                     <button
                       type="button"
+                      role="tab"
+                      aria-selected={resultTab === "result"}
                       onClick={() => setResultTab("result")}
                       className={`px-4 py-2.5 text-xs font-medium transition-all ${
                         resultTab === "result"
@@ -823,6 +885,8 @@ export default function WorkspacePage() {
                     </button>
                     <button
                       type="button"
+                      role="tab"
+                      aria-selected={resultTab === "testcases"}
                       onClick={() => setResultTab("testcases")}
                       className={`px-4 py-2.5 text-xs font-medium transition-all ${
                         resultTab === "testcases"
@@ -836,6 +900,7 @@ export default function WorkspacePage() {
                   <button
                     type="button"
                     onClick={() => setShowResults(false)}
+                    aria-label="Close console"
                     className="mr-3 rounded-lg p-1.5 text-text-secondary transition hover:bg-surface-hover hover:text-text-primary"
                   >
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -849,6 +914,7 @@ export default function WorkspacePage() {
                     <ResultPanel
                       result={runResult}
                       loading={running || submitting}
+                      error={executionError}
                       submitCaseInputs={fullTestCases}
                       expandPassedCap={SUBMIT_EXPAND_PASSED_CAP}
                     />
@@ -858,7 +924,7 @@ export default function WorkspacePage() {
                       {exampleCases.map((tc, idx) => (
                         <div key={idx} className="rounded-xl border border-border bg-surface/60 p-3">
                           <p className="mb-1 text-xs font-semibold text-text-secondary">Case {idx + 1}</p>
-                          <pre className="mono whitespace-pre-wrap text-xs text-text-primary">{tc.input}</pre>
+                          <pre className="mono whitespace-pre-wrap break-all text-xs text-text-primary">{tc.input}</pre>
                         </div>
                       ))}
                     </div>
@@ -866,10 +932,10 @@ export default function WorkspacePage() {
                 </div>
               </div>
             </>
-          )}
-        </div>
+          ) : null}
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -931,11 +997,13 @@ function SubmissionsPanel({
 function ResultPanel({
   result,
   loading,
+  error,
   submitCaseInputs,
   expandPassedCap,
 }: {
   result: RunResponse | null;
   loading: boolean;
+  error: string | null;
   submitCaseInputs: Array<{ input: string; expectedOutput: string }>;
   expandPassedCap: number;
 }) {
@@ -948,6 +1016,10 @@ function ResultPanel({
         Running...
       </div>
     );
+  }
+
+  if (error) {
+    return <StatePanel tone="error" title="Execution failed" description={error} className="p-4" />;
   }
 
   if (!result) {

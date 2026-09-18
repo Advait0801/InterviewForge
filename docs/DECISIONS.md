@@ -7,6 +7,36 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-17
+
+### D-050 — Coding workspaces preserve drafts, deadlines, and accepted submissions
+
+**Shipped in UI Phase 5:** Problem detail and timed assessments now use stable
+problem/editor panes. Below 768 CSS pixels, the responsive website exposes an explicit
+pane switch while both panes remain mounted, so changing views does not discard Monaco
+state or active code. This is website reflow behavior only; the removed native mobile
+client remains out of scope.
+
+The shared editor follows light/dark theme, does not steal focus during mount, and
+reduces cursor/scroll animation with the user's motion preference. Problem code is kept
+per language, latest submissions are restored without allowing stale requests to win,
+and hints, editorials, AI-review eligibility, execution, and submission APIs remain on
+their existing contracts.
+
+Assessment code is keyed per problem and language, linked submission IDs are restored,
+and the countdown derives from an absolute deadline. Deadline completion runs once and
+waits for any in-flight problem submission and assessment link before finalizing. A
+failed completion becomes a durable retry state rather than leaving a zero timer with no
+recovery. Setup, history, partial problem loading, execution, and results distinguish
+loading, empty, error, and completed outcomes.
+
+**Verification:** Thirty-nine web tests, lint, TypeScript, and an isolated production
+build pass. A self-asserting Chrome run records 32 observations and 11 unique screenshots
+at 320–1440 CSS pixels in both themes. Real local Run, Submit, submission restoration,
+assessment linkage, and final completion pass with no page overflow, clipped visible
+controls, browser exceptions, or failed requests. Evidence and limits are in
+[`ui-ux/phase-5.md`](ui-ux/phase-5.md).
+
 ## 2026-09-16
 
 ### D-049 — Discovery actions stay independent and path progress follows current membership

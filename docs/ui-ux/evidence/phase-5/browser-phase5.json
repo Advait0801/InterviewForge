@@ -1,0 +1,602 @@
+{
+  "base": "http://localhost:3002",
+  "apiBase": "http://localhost:4000/api",
+  "browser": "153.0.8010.48",
+  "generatedAt": "2026-09-18T00:12:17.070Z",
+  "screenshots": [
+    "problem-dark-320.png",
+    "assessment-problem-dark-390.png",
+    "assessments-light-1440.png",
+    "problem-light-1440.png",
+    "assessment-workspace-light-1440.png",
+    "problem-editor-result-dark-390.png",
+    "problem-accepted-light-1440.png",
+    "assessment-timeout-results-light-1440.png",
+    "problem-error-light-1440.png",
+    "assessments-error-dark-390.png",
+    "problem-light-720-zoom-200.png"
+  ],
+  "observations": [
+    {
+      "label": "assessments-dark-320",
+      "route": "/assessments",
+      "theme": "dark",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-dark-320",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "dark",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-dark-320",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "dark",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessments-dark-390",
+      "route": "/assessments",
+      "theme": "dark",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-dark-390",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "dark",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-dark-390",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "dark",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessments-dark-768",
+      "route": "/assessments",
+      "theme": "dark",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      },
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-dark-768",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "dark",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      },
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-dark-768",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "dark",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      },
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessments-dark-1024",
+      "route": "/assessments",
+      "theme": "dark",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-dark-1024",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "dark",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-dark-1024",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "dark",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessments-dark-1440",
+      "route": "/assessments",
+      "theme": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-dark-1440",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-dark-1440",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessments-light-320",
+      "route": "/assessments",
+      "theme": "light",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-light-320",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "light",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-light-320",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "light",
+      "viewport": {
+        "width": 320,
+        "height": 900
+      },
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessments-light-390",
+      "route": "/assessments",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-light-390",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-light-390",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "light",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessments-light-768",
+      "route": "/assessments",
+      "theme": "light",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      },
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-light-768",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "light",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      },
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-light-768",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "light",
+      "viewport": {
+        "width": 768,
+        "height": 900
+      },
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessments-light-1024",
+      "route": "/assessments",
+      "theme": "light",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-light-1024",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "light",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-light-1024",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "light",
+      "viewport": {
+        "width": 1024,
+        "height": 900
+      },
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessments-light-1440",
+      "route": "/assessments",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessments",
+      "editorBackground": null,
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-light-1440",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "assessment-workspace-light-1440",
+      "route": "/assessments/0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+      "theme": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Coding assessment",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0
+    },
+    {
+      "label": "problem-reduced-motion",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "dark",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(10, 14, 23)",
+      "activeInfiniteAnimations": 0,
+      "reducedMotion": true
+    },
+    {
+      "label": "problem-200-percent-zoom",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "light",
+      "viewport": {
+        "width": 720,
+        "height": 900
+      },
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "nestedInteractive": 0,
+      "h1": "Two Sum",
+      "editorBackground": "rgb(255, 255, 255)",
+      "activeInfiniteAnimations": 0,
+      "cssZoom": "200%"
+    }
+  ],
+  "pageErrors": [],
+  "requestFailures": [],
+  "notes": [
+    "The QA account and assessments are disposable synthetic records.",
+    "Problem catalogue, code execution, submission persistence, assessment linking, and completion use real local services.",
+    "Only explicitly named error, empty, and short-deadline checks use browser response fixtures.",
+    "Phone-width checks exercise the responsive website; no native mobile application is in scope."
+  ],
+  "qa": {
+    "username": "uiqa_phase5_fd687d02",
+    "problemId": "ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+    "displayAssessmentId": "0dd6560d-41e6-4490-b97e-3508fdf18f9f",
+    "deadlineAssessmentId": "c5573e31-544e-4207-85d8-88dec088350f"
+  },
+  "problemPaneRetention": {
+    "requestStatus": 200,
+    "markerPreserved": true,
+    "resultVisible": true
+  },
+  "realProblemExecution": {
+    "runStatus": 200,
+    "runPassed": true,
+    "submitStatus": 201,
+    "submitPassed": true,
+    "submissionId": "41fbe8a7-dfd7-4614-aa22-24ced227acd6",
+    "latestSubmissionRestored": true,
+    "learningSurfaces": {
+      "hintsVisible": true,
+      "editorialVisible": true,
+      "aiReviewUnlocked": true
+    },
+    "languageSnippets": {
+      "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};",
+      "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* twoSum(int* n",
+      "java": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}",
+      "python3": "class Solution:\n    def twoSum(self, nums, target):\n        seen = {}\n        for index, value in en"
+    },
+    "keyboardSplit": {
+      "before": 38,
+      "after": 43
+    }
+  },
+  "realAssessmentSubmission": {
+    "submissionStatus": 201,
+    "submissionId": "347e6d7c-6473-41ea-9d90-b64695bb40e1",
+    "linkStatus": 200
+  },
+  "deadlineCompletion": {
+    "fixtureRemainingMs": 1200,
+    "responseStatus": 200,
+    "score": 0,
+    "status": "completed"
+  },
+  "problemErrorRecovery": {
+    "retryRecovered": true
+  },
+  "assessmentHistoryRecovery": {
+    "errorVisible": true,
+    "emptyAfterRetry": true
+  },
+  "reducedMotion": {
+    "activeInfiniteAnimations": 0
+  },
+  "zoom": {
+    "horizontalOverflow": false,
+    "clippedControls": []
+  }
+}

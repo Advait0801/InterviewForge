@@ -1,23 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { LoadingState, StatePanel } from "@/components/ui/state-panel";
+import { StatusPill } from "@/components/ui/status-pill";
 import { api, Assessment } from "@/lib/api";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.08, duration: 0.45, ease: "easeOut" as const },
-  }),
-};
 
 const DIFFICULTY_OPTIONS = [
   { value: "mixed", label: "Mixed" },
@@ -26,7 +17,15 @@ const DIFFICULTY_OPTIONS = [
   { value: "hard", label: "Hard" },
 ];
 
+const PROBLEM_OPTIONS = [2, 3, 4, 5];
 const TIME_OPTIONS = [30, 45, 60, 90, 120];
+
+function formatAssessmentDate(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
 
 export default function AssessmentsPage() {
   const router = useRouter();
@@ -34,23 +33,42 @@ export default function AssessmentsPage() {
   const [problemCount, setProblemCount] = useState(3);
   const [timeLimit, setTimeLimit] = useState(60);
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [listError, setListError] = useState<string | null>(null);
+
+  const loadAssessments = useCallback(async () => {
+    setLoading(true);
+    setListError(null);
+    try {
+      const response = await api.listAssessments();
+      setAssessments(response.assessments);
+    } catch (error) {
+      setListError(error instanceof Error ? error.message : "Assessments are unavailable right now.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    api.listAssessments().then((r) => setAssessments(r.assessments)).catch(() => {});
-  }, []);
+    void loadAssessments();
+  }, [loadAssessments]);
 
   const handleCreate = async () => {
     setCreating(true);
+    setCreateError(null);
     try {
-      const res = await api.createAssessment({
+      const response = await api.createAssessment({
         timeLimitMinutes: timeLimit,
         problemCount,
         difficultyMix: difficulty,
       });
-      router.push(`/assessments/${res.assessmentId}`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create assessment");
+      router.push(`/assessments/${response.assessmentId}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to create assessment";
+      setCreateError(message);
+      toast.error(message);
     } finally {
       setCreating(false);
     }
@@ -59,121 +77,159 @@ export default function AssessmentsPage() {
   return (
     <Protected>
       <PageShell>
-        <motion.div initial="hidden" animate="visible" className="space-y-8">
-          <motion.div variants={fadeUp} custom={0}>
-            <h1 className="mb-2 text-3xl font-bold sm:text-4xl lg:text-5xl tracking-tight">Online Assessment</h1>
-            <p className="max-w-2xl text-text-secondary text-lg leading-relaxed">
-              Timed coding test simulating a real online assessment. Choose your settings, then solve problems under time pressure.
+        <div className="space-y-10">
+          <header className="max-w-3xl">
+            <p className="mb-2 text-sm font-semibold text-primary">Timed practice</p>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Coding assessments</h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-text-secondary">
+              Build a focused problem set, work against a visible deadline, and review every result when time is up.
             </p>
-          </motion.div>
+          </header>
 
-          {/* Config */}
-          <motion.div variants={fadeUp} custom={1} className="grid gap-6 md:grid-cols-3">
-            <Card>
-              <h3 className="mb-3 font-semibold">Difficulty</h3>
-              <div className="flex flex-wrap gap-2">
-                {DIFFICULTY_OPTIONS.map((d) => (
-                  <button
-                    key={d.value}
-                    onClick={() => setDifficulty(d.value)}
-                    className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-all ${
-                      difficulty === d.value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-text-secondary hover:border-border-hover"
-                    }`}
-                  >
-                    {d.label}
-                  </button>
-                ))}
+          <section aria-labelledby="assessment-setup-heading" className="border-y border-border bg-surface/50 py-6">
+            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 id="assessment-setup-heading" className="text-lg font-semibold">Set up an assessment</h2>
+                <p className="mt-1 text-sm text-text-secondary">The timer starts as soon as the workspace opens.</p>
               </div>
-            </Card>
+              <p className="text-sm font-medium text-text-secondary" aria-live="polite">
+                {problemCount} problems <span aria-hidden>&middot;</span> {timeLimit} minutes <span aria-hidden>&middot;</span> {difficulty}
+              </p>
+            </div>
 
-            <Card>
-              <h3 className="mb-3 font-semibold">Problems</h3>
-              <div className="flex items-center gap-3">
-                {[2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setProblemCount(n)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-bold transition-all ${
-                      problemCount === n
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-text-secondary hover:border-border-hover"
-                    }`}
-                  >
-                    {n}
-                  </button>
-                ))}
+            <div className="grid gap-6 lg:grid-cols-3">
+              <fieldset>
+                <legend className="mb-2 text-sm font-semibold">Difficulty</legend>
+                <div className="flex flex-wrap gap-2">
+                  {DIFFICULTY_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-pressed={difficulty === option.value}
+                      onClick={() => setDifficulty(option.value)}
+                      className={`min-h-10 rounded-lg border px-4 text-sm font-medium transition-colors ${
+                        difficulty === option.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-background text-text-secondary hover:border-border-hover hover:text-text-primary"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend className="mb-2 text-sm font-semibold">Problems</legend>
+                <div className="flex flex-wrap gap-2">
+                  {PROBLEM_OPTIONS.map((count) => (
+                    <button
+                      key={count}
+                      type="button"
+                      aria-pressed={problemCount === count}
+                      aria-label={`${count} problems`}
+                      onClick={() => setProblemCount(count)}
+                      className={`flex size-10 items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${
+                        problemCount === count
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-background text-text-secondary hover:border-border-hover hover:text-text-primary"
+                      }`}
+                    >
+                      {count}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend className="mb-2 text-sm font-semibold">Time limit</legend>
+                <div className="flex flex-wrap gap-2">
+                  {TIME_OPTIONS.map((minutes) => (
+                    <button
+                      key={minutes}
+                      type="button"
+                      aria-pressed={timeLimit === minutes}
+                      onClick={() => setTimeLimit(minutes)}
+                      className={`min-h-10 rounded-lg border px-4 text-sm font-medium transition-colors ${
+                        timeLimit === minutes
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-background text-text-secondary hover:border-border-hover hover:text-text-primary"
+                      }`}
+                    >
+                      {minutes} min
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center gap-4">
+              <Button onClick={handleCreate} loading={creating} loadingLabel="Creating assessment">
+                Start assessment
+              </Button>
+              {createError ? <p className="text-sm text-error" role="alert">{createError}</p> : null}
+            </div>
+          </section>
+
+          <section aria-labelledby="assessment-history-heading">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <h2 id="assessment-history-heading" className="text-xl font-semibold">Your assessments</h2>
+                {!loading && !listError && assessments.length > 0 ? (
+                  <p className="mt-1 text-sm text-text-secondary">{assessments.length} recent attempt{assessments.length === 1 ? "" : "s"}</p>
+                ) : null}
               </div>
-            </Card>
+            </div>
 
-            <Card>
-              <h3 className="mb-3 font-semibold">Time Limit</h3>
-              <div className="flex flex-wrap gap-2">
-                {TIME_OPTIONS.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTimeLimit(t)}
-                    className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-all ${
-                      timeLimit === t
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border text-text-secondary hover:border-border-hover"
-                    }`}
-                  >
-                    {t}m
-                  </button>
-                ))}
+            {loading ? (
+              <LoadingState label="Loading assessments" className="min-h-40 border-y border-border" />
+            ) : listError ? (
+              <StatePanel
+                tone="error"
+                title="Assessments could not be loaded"
+                description={listError}
+                action={<Button variant="ghost" onClick={loadAssessments}>Retry assessments</Button>}
+              />
+            ) : assessments.length === 0 ? (
+              <StatePanel
+                title="No assessments yet"
+                description="Choose your settings above to start your first timed attempt."
+              />
+            ) : (
+              <div className="divide-y divide-border border-y border-border">
+                {assessments.map((assessment) => {
+                  const complete = assessment.status === "completed";
+                  return (
+                    <button
+                      key={assessment.id}
+                      type="button"
+                      onClick={() => router.push(`/assessments/${assessment.id}`)}
+                      className="grid w-full gap-3 px-1 py-4 text-left transition-colors hover:bg-surface-hover sm:grid-cols-[1fr_auto] sm:items-center sm:px-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-semibold">{assessment.problem_count} problem{assessment.problem_count === 1 ? "" : "s"}</p>
+                          <StatusPill label={complete ? "Completed" : "In progress"} tone={complete ? "success" : "warning"} />
+                        </div>
+                        <p className="mt-1 text-sm text-text-secondary">
+                          {assessment.difficulty_mix} <span aria-hidden>&middot;</span> {assessment.time_limit_minutes} minutes <span aria-hidden>&middot;</span> {formatAssessmentDate(assessment.created_at)}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between gap-4 sm:justify-end">
+                        {assessment.score != null ? (
+                          <span className={`text-lg font-bold tabular-nums ${Number(assessment.score) >= 50 ? "text-accent" : "text-error"}`}>
+                            {assessment.score}%
+                          </span>
+                        ) : null}
+                        <span className="text-sm font-semibold text-primary">{complete ? "View results" : "Continue"} <span aria-hidden>&rarr;</span></span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            </Card>
-          </motion.div>
-
-          <motion.div variants={fadeUp} custom={2}>
-            <Button onClick={handleCreate} disabled={creating}>
-              {creating ? "Creating..." : "Start Assessment"}
-            </Button>
-          </motion.div>
-
-          {/* Past assessments */}
-          {assessments.length > 0 && (
-            <motion.div variants={fadeUp} custom={3} className="space-y-3">
-              <h2 className="text-lg font-semibold text-text-secondary">Past Assessments</h2>
-              <div className="space-y-2">
-                {assessments.map((a) => (
-                  <button
-                    key={a.id}
-                    onClick={() => router.push(`/assessments/${a.id}`)}
-                    className="flex w-full items-center justify-between rounded-xl border border-border bg-surface/60 p-4 text-left transition-all hover:border-primary/30 hover:bg-surface"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {a.problem_count} problems &middot; {a.difficulty_mix} &middot; {a.time_limit_minutes}m
-                      </p>
-                      <p className="text-xs text-text-secondary">
-                        {new Date(a.created_at).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {a.score != null && (
-                        <span className={`text-lg font-bold ${Number(a.score) >= 50 ? "text-accent" : "text-error"}`}>
-                          {a.score}%
-                        </span>
-                      )}
-                      <span
-                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase ${
-                          a.status === "completed"
-                            ? "bg-accent/10 text-accent border border-accent/20"
-                            : "bg-warning/10 text-warning border border-warning/20"
-                        }`}
-                      >
-                        {a.status}
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </motion.div>
+            )}
+          </section>
+        </div>
       </PageShell>
     </Protected>
   );

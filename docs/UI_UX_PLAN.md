@@ -1,6 +1,6 @@
 # InterviewForge UI/UX improvement plan
 
-**Status:** Phases 0–4 complete. Awaiting user approval for Phase 5; later phases have not started.
+**Status:** Phases 0–5 complete. Awaiting user approval for Phase 6; later phases have not started.
 **Prepared:** 2026-09-14
 **Reviewed baseline:** `main` at `a9c3fef`; working tree was clean before this document.
 **Working branch:** `feat/ui-ux-polish` (created in Phase 0; one branch for all phases)
@@ -313,14 +313,14 @@ between panes on small screens without remounting and losing active work.
    output, errors, and read-only completion. Test timer expiry and in-flight submission
    behavior with deterministic clock/network controls.
 3. **Iteration 3:** Repair regressions and verify all four language selections,
-   deadline behavior, reduced-motion urgency, and mobile toolbar reachability.
+   deadline behavior, reduced-motion urgency, and narrow-website toolbar reachability.
    Repeat affected integration tests and the web checks.
 
 **Exit:** Code and supported restored state survive layout/theme changes; actions
 stay reachable; assessment time/scoring semantics and Run/Submit results are preserved.
 No decorative motion distracts during active work.
 
-**Commit:** `feat(ui): refine coding and assessment workspaces`
+**Commit:** `feat(ui): improve coding and assessment workspaces`
 
 **Checkpoint:** Demonstrate real execution and timer evidence; pause for Phase 6 approval.
 
@@ -385,8 +385,8 @@ into `main`, and verify the merge.
 | 1 | Complete | [Shared UI foundation](ui-ux/phase-1.md) | `feat(ui): refine navigation and shared interaction states` | Approved |
 | 2 | Complete | [Landing and onboarding](ui-ux/phase-2.md) | `feat(ui): polish the landing and authentication experience` | Approved |
 | 3 | Complete | [Dashboard and analytics](ui-ux/phase-3.md) | `feat(ui): clarify dashboard progress and analytics` | Approved |
-| 4 | Complete | [Practice discovery and learning paths](ui-ux/phase-4.md) | `feat(ui): streamline problem discovery and learning paths` | Pending |
-| 5 | Not started | Workspaces | — | Pending |
+| 4 | Complete | [Practice discovery and learning paths](ui-ux/phase-4.md) | `feat(ui): streamline problem discovery and learning paths` | Approved |
+| 5 | Complete | [Coding and assessment workspaces](ui-ux/phase-5.md) | `feat(ui): improve coding and assessment workspaces` | Pending |
 | 6 | Not started | Interview/design feedback | — | Pending |
 | 7 | Not started | Completion/regression | — | Pending |
 
@@ -397,5 +397,5 @@ scope are raised early; routine design/implementation decisions use this plan.
 
 **Plan approval:** User approved the plan and Phase 0 with “got it go,” approved
 Phase 1 with “yoo lets do phase1,” Phase 2 with “go phase2,” Phase 3 with
-“go phase3,” and Phase 4 with “go conontue.” Approval for Phase 5 is pending at
-this checkpoint.
+“go phase3,” Phase 4 with “go conontue,” and Phase 5 by explicitly requesting the
+Phase 5 workspace scope. Phase 6 approval is pending at this checkpoint.
