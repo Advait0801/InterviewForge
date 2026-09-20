@@ -1,0 +1,30 @@
+{
+  "url": "http://localhost:3002",
+  "route": "/",
+  "browser": "153.0.8010.48",
+  "cache": "one cold then two warm navigations in the same context",
+  "samples": [
+    {
+      "domContentLoadedMs": 75.5,
+      "loadMs": 103.30000001192093,
+      "observedLayoutShiftSum": 0.002550192901234568,
+      "scriptCount": 35,
+      "scriptDecodedBytes": 2228455
+    },
+    {
+      "domContentLoadedMs": 15.599999964237213,
+      "loadMs": 35.89999997615814,
+      "observedLayoutShiftSum": 0.002550192901234568,
+      "scriptCount": 35,
+      "scriptDecodedBytes": 2228455
+    },
+    {
+      "domContentLoadedMs": 16.100000023841858,
+      "loadMs": 34.30000001192093,
+      "observedLayoutShiftSum": 0.002550192901234568,
+      "scriptCount": 35,
+      "scriptDecodedBytes": 2228455
+    }
+  ],
+  "note": "Local unthrottled navigation evidence; compare directionally with Phase 0, not as field Web Vitals."
+}

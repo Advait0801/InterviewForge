@@ -7,6 +7,27 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-20
+
+### D-052 — Secondary pages distinguish resource failure from missing data
+
+**Shipped in UI Phase 7:** Leaderboard, public profile, and settings now present
+explicit loading, empty/missing, and error states with local recovery. Failed
+leaderboard pagination retains the successful page; the public-profile 404 is not
+misreported as a network failure. Settings preserves account and password form state
+on failure and checks the encoded avatar size against the backend's actual limit.
+Six remaining major routes gained local render-error recovery. No API contract,
+credential, avatar persistence, or native mobile behavior was changed.
+
+**Verification:** Fifty-five web tests, lint, TypeScript, and an isolated production
+build passed. Chrome recorded 94 route observations, five focused states, and 16
+verified screenshots across website widths and themes with no browser errors or
+failed requests. Final production homepage warm-load mean was 35.1 ms versus the
+Phase 0 local 24.2 ms, and decoded script resources grew 14.7%; this is a
+directional performance regression to track, not a field measurement. The site
+remained on port 3002, including a brief same-port production measurement. No paid
+AI endpoint was called. See [`ui-ux/phase-7.md`](ui-ux/phase-7.md).
+
 ## 2026-09-19
 
 ### D-051 — Interview answers reconcile against the transcript before retry
