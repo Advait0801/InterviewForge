@@ -1,0 +1,418 @@
+{
+  "browser": "152.0.7977.83",
+  "method": "Five local unthrottled navigations per route and build; deterministic 150-problem and path fixtures; first sample is cold within its browser context.",
+  "builds": {
+    "phase4": {
+      "/problems": {
+        "samples": [
+          {
+            "responseStartMs": 3.5,
+            "domContentLoadedMs": 16.19999998807907,
+            "loadMs": 50.10000002384186,
+            "readyMs": 117.40000003576279,
+            "readyAfterResponseMs": 113.90000003576279,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          },
+          {
+            "responseStartMs": 2.5,
+            "domContentLoadedMs": 13.699999988079071,
+            "loadMs": 24.899999976158142,
+            "readyMs": 64.09999996423721,
+            "readyAfterResponseMs": 61.59999996423721,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          },
+          {
+            "responseStartMs": 2.899999976158142,
+            "domContentLoadedMs": 13.5,
+            "loadMs": 27.599999964237213,
+            "readyMs": 66.89999997615814,
+            "readyAfterResponseMs": 64,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          },
+          {
+            "responseStartMs": 2,
+            "domContentLoadedMs": 11.800000011920929,
+            "loadMs": 24.899999976158142,
+            "readyMs": 61.89999997615814,
+            "readyAfterResponseMs": 59.89999997615814,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          },
+          {
+            "responseStartMs": 2.099999964237213,
+            "domContentLoadedMs": 12.099999964237213,
+            "loadMs": 24.399999976158142,
+            "readyMs": 66.89999997615814,
+            "readyAfterResponseMs": 64.80000001192093,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          }
+        ],
+        "medians": {
+          "responseStartMs": 2.5,
+          "domContentLoadedMs": 13.5,
+          "loadMs": 24.899999976158142,
+          "readyMs": 66.89999997615814,
+          "readyAfterResponseMs": 64,
+          "layoutShiftSum": 0,
+          "scriptCount": 28,
+          "scriptDecodedBytes": 1986875
+        }
+      },
+      "/paths": {
+        "samples": [
+          {
+            "responseStartMs": 6.800000011920929,
+            "domContentLoadedMs": 21.900000035762787,
+            "loadMs": 52.40000003576279,
+            "readyMs": 100.30000001192093,
+            "readyAfterResponseMs": 93.5,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          },
+          {
+            "responseStartMs": 2.300000011920929,
+            "domContentLoadedMs": 10.300000011920929,
+            "loadMs": 22.600000023841858,
+            "readyMs": 40.10000002384186,
+            "readyAfterResponseMs": 37.80000001192093,
+            "layoutShiftSum": 0.002154415328414352,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          },
+          {
+            "responseStartMs": 2.600000023841858,
+            "domContentLoadedMs": 12.199999988079071,
+            "loadMs": 23.900000035762787,
+            "readyMs": 57.40000003576279,
+            "readyAfterResponseMs": 54.80000001192093,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          },
+          {
+            "responseStartMs": 2.699999988079071,
+            "domContentLoadedMs": 15.899999976158142,
+            "loadMs": 28.799999952316284,
+            "readyMs": 62.299999952316284,
+            "readyAfterResponseMs": 59.59999996423721,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          },
+          {
+            "responseStartMs": 2.600000023841858,
+            "domContentLoadedMs": 15.300000011920929,
+            "loadMs": 29.600000023841858,
+            "readyMs": 47.40000003576279,
+            "readyAfterResponseMs": 44.80000001192093,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1986875
+          }
+        ],
+        "medians": {
+          "responseStartMs": 2.600000023841858,
+          "domContentLoadedMs": 15.300000011920929,
+          "loadMs": 28.799999952316284,
+          "readyMs": 57.40000003576279,
+          "readyAfterResponseMs": 54.80000001192093,
+          "layoutShiftSum": 0,
+          "scriptCount": 28,
+          "scriptDecodedBytes": 1986875
+        }
+      },
+      "/paths/array-foundations": {
+        "samples": [
+          {
+            "responseStartMs": 5.300000011920929,
+            "domContentLoadedMs": 17,
+            "loadMs": 50.5,
+            "readyMs": 100.80000001192093,
+            "readyAfterResponseMs": 95.5,
+            "layoutShiftSum": 0,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 2012974
+          },
+          {
+            "responseStartMs": 3.800000011920929,
+            "domContentLoadedMs": 13.800000011920929,
+            "loadMs": 27.700000047683716,
+            "readyMs": 45.200000047683716,
+            "readyAfterResponseMs": 41.40000003576279,
+            "layoutShiftSum": 0,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 2012974
+          },
+          {
+            "responseStartMs": 3.300000011920929,
+            "domContentLoadedMs": 12.900000035762787,
+            "loadMs": 24.80000001192093,
+            "readyMs": 42.10000002384186,
+            "readyAfterResponseMs": 38.80000001192093,
+            "layoutShiftSum": 0,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 2012974
+          },
+          {
+            "responseStartMs": 3.899999976158142,
+            "domContentLoadedMs": 16.30000001192093,
+            "loadMs": 29.600000023841858,
+            "readyMs": 63.5,
+            "readyAfterResponseMs": 59.60000002384186,
+            "layoutShiftSum": 0,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 2012974
+          },
+          {
+            "responseStartMs": 4.299999952316284,
+            "domContentLoadedMs": 12.799999952316284,
+            "loadMs": 25.69999998807907,
+            "readyMs": 45,
+            "readyAfterResponseMs": 40.700000047683716,
+            "layoutShiftSum": 0.002154415328414352,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 2012974
+          }
+        ],
+        "medians": {
+          "responseStartMs": 3.899999976158142,
+          "domContentLoadedMs": 13.800000011920929,
+          "loadMs": 27.700000047683716,
+          "readyMs": 45.200000047683716,
+          "readyAfterResponseMs": 41.40000003576279,
+          "layoutShiftSum": 0,
+          "scriptCount": 29,
+          "scriptDecodedBytes": 2012974
+        }
+      }
+    },
+    "phase3-control": {
+      "/problems": {
+        "samples": [
+          {
+            "responseStartMs": 4.700000047683716,
+            "domContentLoadedMs": 21.900000035762787,
+            "loadMs": 53.200000047683716,
+            "readyMs": 117,
+            "readyAfterResponseMs": 112.29999995231628,
+            "layoutShiftSum": 0.002154415328414352,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 2.399999976158142,
+            "domContentLoadedMs": 12.199999988079071,
+            "loadMs": 26.80000001192093,
+            "readyMs": 65.89999997615814,
+            "readyAfterResponseMs": 63.5,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 3,
+            "domContentLoadedMs": 12.5,
+            "loadMs": 26.400000035762787,
+            "readyMs": 62.40000003576279,
+            "readyAfterResponseMs": 59.40000003576279,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 2.299999952316284,
+            "domContentLoadedMs": 21.899999976158142,
+            "loadMs": 34.89999997615814,
+            "readyMs": 68.5,
+            "readyAfterResponseMs": 66.20000004768372,
+            "layoutShiftSum": 0.0021627948609235685,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 2.5,
+            "domContentLoadedMs": 11.900000035762787,
+            "loadMs": 23.80000001192093,
+            "readyMs": 60.60000002384186,
+            "readyAfterResponseMs": 58.10000002384186,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          }
+        ],
+        "medians": {
+          "responseStartMs": 2.5,
+          "domContentLoadedMs": 12.5,
+          "loadMs": 26.80000001192093,
+          "readyMs": 65.89999997615814,
+          "readyAfterResponseMs": 63.5,
+          "layoutShiftSum": 0,
+          "scriptCount": 28,
+          "scriptDecodedBytes": 1973670
+        }
+      },
+      "/paths": {
+        "samples": [
+          {
+            "responseStartMs": 5.699999988079071,
+            "domContentLoadedMs": 21.80000001192093,
+            "loadMs": 52.30000001192093,
+            "readyMs": 82.10000002384186,
+            "readyAfterResponseMs": 76.40000003576279,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 2.400000035762787,
+            "domContentLoadedMs": 11.600000023841858,
+            "loadMs": 26.30000001192093,
+            "readyMs": 42.200000047683716,
+            "readyAfterResponseMs": 39.80000001192093,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 2,
+            "domContentLoadedMs": 12.700000047683716,
+            "loadMs": 24.80000001192093,
+            "readyMs": 43.30000001192093,
+            "readyAfterResponseMs": 41.30000001192093,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 2.5,
+            "domContentLoadedMs": 12.800000011920929,
+            "loadMs": 26.19999998807907,
+            "readyMs": 40.5,
+            "readyAfterResponseMs": 38,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          },
+          {
+            "responseStartMs": 2.299999952316284,
+            "domContentLoadedMs": 11.399999976158142,
+            "loadMs": 23.599999964237213,
+            "readyMs": 55.59999996423721,
+            "readyAfterResponseMs": 53.30000001192093,
+            "layoutShiftSum": 0,
+            "scriptCount": 28,
+            "scriptDecodedBytes": 1973670
+          }
+        ],
+        "medians": {
+          "responseStartMs": 2.400000035762787,
+          "domContentLoadedMs": 12.700000047683716,
+          "loadMs": 26.19999998807907,
+          "readyMs": 43.30000001192093,
+          "readyAfterResponseMs": 41.30000001192093,
+          "layoutShiftSum": 0,
+          "scriptCount": 28,
+          "scriptDecodedBytes": 1973670
+        }
+      },
+      "/paths/array-foundations": {
+        "samples": [
+          {
+            "responseStartMs": 7.5,
+            "domContentLoadedMs": 18.299999952316284,
+            "loadMs": 57.5,
+            "readyMs": 102.29999995231628,
+            "readyAfterResponseMs": 94.79999995231628,
+            "layoutShiftSum": 0,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 1993511
+          },
+          {
+            "responseStartMs": 4,
+            "domContentLoadedMs": 13.300000011920929,
+            "loadMs": 25.099999964237213,
+            "readyMs": 44.19999998807907,
+            "readyAfterResponseMs": 40.19999998807907,
+            "layoutShiftSum": 0.002154415328414352,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 1993511
+          },
+          {
+            "responseStartMs": 4.399999976158142,
+            "domContentLoadedMs": 17.30000001192093,
+            "loadMs": 29.399999976158142,
+            "readyMs": 44.59999996423721,
+            "readyAfterResponseMs": 40.19999998807907,
+            "layoutShiftSum": 0,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 1993511
+          },
+          {
+            "responseStartMs": 4.5,
+            "domContentLoadedMs": 13.699999988079071,
+            "loadMs": 26.69999998807907,
+            "readyMs": 60.19999998807907,
+            "readyAfterResponseMs": 55.69999998807907,
+            "layoutShiftSum": 0,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 1993511
+          },
+          {
+            "responseStartMs": 4.400000035762787,
+            "domContentLoadedMs": 14.300000011920929,
+            "loadMs": 26.5,
+            "readyMs": 44,
+            "readyAfterResponseMs": 39.59999996423721,
+            "layoutShiftSum": 0,
+            "scriptCount": 29,
+            "scriptDecodedBytes": 1993511
+          }
+        ],
+        "medians": {
+          "responseStartMs": 4.400000035762787,
+          "domContentLoadedMs": 14.300000011920929,
+          "loadMs": 26.69999998807907,
+          "readyMs": 44.59999996423721,
+          "readyAfterResponseMs": 40.19999998807907,
+          "layoutShiftSum": 0,
+          "scriptCount": 29,
+          "scriptDecodedBytes": 1993511
+        }
+      }
+    }
+  },
+  "comparison": {
+    "/problems": {
+      "readyAfterResponsePercent": 0.8,
+      "loadPercent": -7.1,
+      "scriptDecodedBytesPercent": 0.7,
+      "scriptCountDelta": 0,
+      "layoutShiftDelta": 0
+    },
+    "/paths": {
+      "readyAfterResponsePercent": 32.7,
+      "loadPercent": 9.9,
+      "scriptDecodedBytesPercent": 0.7,
+      "scriptCountDelta": 0,
+      "layoutShiftDelta": 0
+    },
+    "/paths/array-foundations": {
+      "readyAfterResponsePercent": 3,
+      "loadPercent": 3.7,
+      "scriptDecodedBytesPercent": 1,
+      "scriptCountDelta": 0,
+      "layoutShiftDelta": 0
+    }
+  },
+  "note": "Local directional evidence, not field Web Vitals."
+}

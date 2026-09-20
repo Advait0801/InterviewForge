@@ -1,0 +1,1389 @@
+{
+  "generatedAt": "2026-09-20T07:24:48.148Z",
+  "browser": "153.0.8010.48",
+  "websitePort": 3002,
+  "routes": [
+    {
+      "route": "/",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Build the skills to interview with confidence."
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 3
+    },
+    {
+      "route": "/dashboard",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Good to see you, Phase Seven QA."
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Find your next problem"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Coding assessments"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments/fa3084fa-4ec7-4938-b219-092046b399ee",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Coding assessment"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/interview",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Mock interview"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/system-design",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "System design review"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Learning paths"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/leaderboard",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Leaderboard"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/analytics",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Analytics you can act on"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/settings",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Settings"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/profile/uiqa_phase7_1e2c0431",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Phase Seven QA"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Two Sum"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths/arrays-101",
+      "theme": "dark",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Arrays 101"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Build the skills to interview with confidence."
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 3
+    },
+    {
+      "route": "/dashboard",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Good to see you, Phase Seven QA."
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Find your next problem"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Coding assessments"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments/fa3084fa-4ec7-4938-b219-092046b399ee",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Coding assessment"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/interview",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Mock interview"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/system-design",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "System design review"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Learning paths"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/leaderboard",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Leaderboard"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/analytics",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Analytics you can act on"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/settings",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Settings"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/profile/uiqa_phase7_1e2c0431",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Phase Seven QA"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Two Sum"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths/arrays-101",
+      "theme": "dark",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Arrays 101"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Build the skills to interview with confidence."
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 3
+    },
+    {
+      "route": "/dashboard",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Good to see you, Phase Seven QA."
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Find your next problem"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Coding assessments"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments/fa3084fa-4ec7-4938-b219-092046b399ee",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Coding assessment"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/interview",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Mock interview"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/system-design",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "System design review"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Learning paths"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/leaderboard",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Leaderboard"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/analytics",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Analytics you can act on"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/settings",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Settings"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/profile/uiqa_phase7_1e2c0431",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Phase Seven QA"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Two Sum"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths/arrays-101",
+      "theme": "dark",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Arrays 101"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Build the skills to interview with confidence."
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 3
+    },
+    {
+      "route": "/dashboard",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Good to see you, Phase Seven QA."
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Find your next problem"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Coding assessments"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments/fa3084fa-4ec7-4938-b219-092046b399ee",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Coding assessment"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/interview",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Mock interview"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/system-design",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "System design review"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Learning paths"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/leaderboard",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Leaderboard"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/analytics",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Analytics you can act on"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/settings",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Settings"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/profile/uiqa_phase7_1e2c0431",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Phase Seven QA"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Two Sum"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths/arrays-101",
+      "theme": "light",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Arrays 101"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Build the skills to interview with confidence."
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 3
+    },
+    {
+      "route": "/dashboard",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Good to see you, Phase Seven QA."
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Find your next problem"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Coding assessments"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments/fa3084fa-4ec7-4938-b219-092046b399ee",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Coding assessment"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/interview",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Mock interview"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/system-design",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "System design review"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Learning paths"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/leaderboard",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Leaderboard"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/analytics",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Analytics you can act on"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/settings",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Settings"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/profile/uiqa_phase7_1e2c0431",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Phase Seven QA"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Two Sum"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths/arrays-101",
+      "theme": "light",
+      "width": 768,
+      "status": 200,
+      "headings": [
+        "Arrays 101"
+      ],
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Build the skills to interview with confidence."
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 3
+    },
+    {
+      "route": "/dashboard",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Good to see you, Phase Seven QA."
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Find your next problem"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Coding assessments"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/assessments/fa3084fa-4ec7-4938-b219-092046b399ee",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Coding assessment"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/interview",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Mock interview"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/system-design",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "System design review"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Learning paths"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/leaderboard",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Leaderboard"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/analytics",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Analytics you can act on"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/settings",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Settings"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/profile/uiqa_phase7_1e2c0431",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Phase Seven QA"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Two Sum"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/paths/arrays-101",
+      "theme": "light",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Arrays 101"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "route": "/login",
+      "theme": "guest",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Continue your practice"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    },
+    {
+      "route": "/register",
+      "theme": "guest",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Start practicing with purpose"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    },
+    {
+      "route": "/forgot-password",
+      "theme": "guest",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Reset your password"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    },
+    {
+      "route": "/reset-password",
+      "theme": "guest",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Choose a new password"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    },
+    {
+      "route": "/verify-email",
+      "theme": "guest",
+      "width": 390,
+      "status": 200,
+      "headings": [
+        "Confirm your email"
+      ],
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    },
+    {
+      "route": "/login",
+      "theme": "guest",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Continue your practice"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    },
+    {
+      "route": "/register",
+      "theme": "guest",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Start practicing with purpose"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    },
+    {
+      "route": "/forgot-password",
+      "theme": "guest",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Reset your password"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    },
+    {
+      "route": "/reset-password",
+      "theme": "guest",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Choose a new password"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    },
+    {
+      "route": "/verify-email",
+      "theme": "guest",
+      "width": 1440,
+      "status": 200,
+      "headings": [
+        "Confirm your email"
+      ],
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 2
+    }
+  ],
+  "states": [
+    {
+      "state": "leaderboard-error-to-empty",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "state": "missing-profile",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "state": "settings-validation",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "state": "200-percent-reflow-proxy",
+      "viewport": 360,
+      "documentWidth": 360,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "state": "keyboard-settings",
+      "viewport": 360,
+      "documentWidth": 360,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    }
+  ],
+  "screenshots": [
+    "leaderboard-dark-390.png",
+    "settings-dark-390.png",
+    "profile-dark-390.png",
+    "leaderboard-dark-1440.png",
+    "settings-dark-1440.png",
+    "profile-dark-1440.png",
+    "leaderboard-light-390.png",
+    "settings-light-390.png",
+    "profile-light-390.png",
+    "leaderboard-light-1440.png",
+    "settings-light-1440.png",
+    "profile-light-1440.png",
+    "leaderboard-error-light-390.png",
+    "profile-missing-light-390.png",
+    "settings-validation-light-390.png",
+    "settings-zoom-200-light-720.png"
+  ],
+  "pageErrors": [],
+  "requestFailures": [],
+  "notes": [
+    "Narrow widths test the responsive website, not a native mobile app.",
+    "No paid AI endpoint is invoked."
+  ]
+}

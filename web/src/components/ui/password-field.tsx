@@ -1,27 +1,36 @@
 "use client";
 
-import { InputHTMLAttributes, useState } from "react";
+import { InputHTMLAttributes, useId, useState } from "react";
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
   error?: string;
+  label?: string;
+  hint?: string;
 };
 
-export function PasswordField({ className = "", error, ...props }: Props) {
+export function PasswordField({ className = "", error, label, hint, id, "aria-describedby": describedBy, ...props }: Props) {
   const [visible, setVisible] = useState(false);
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const localDescriptionId = error || hint ? `${inputId}-description` : undefined;
+  const descriptionId = [describedBy, localDescriptionId].filter(Boolean).join(" ") || undefined;
 
   return (
     <div className="w-full">
+      {label ? <label className="mb-1.5 block text-sm font-medium text-text-primary" htmlFor={inputId}>{label}</label> : null}
       <div className="relative">
         <input
+          id={inputId}
           type={visible ? "text" : "password"}
-          className={`w-full rounded-xl border border-border bg-background/80 px-3.5 py-2.5 pr-10 text-text-primary outline-none ring-0 transition-all duration-200 placeholder:text-text-secondary/60 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:shadow-lg focus:shadow-glow-primary ${error ? "border-error focus:ring-error/20" : ""} ${className}`}
+          aria-invalid={Boolean(error) || undefined}
+          aria-describedby={descriptionId}
+          className={`w-full rounded-xl border border-border bg-background/80 px-3.5 py-2.5 pr-11 text-text-primary outline-none ring-0 transition-[border-color,box-shadow] duration-200 placeholder:text-text-secondary/60 focus:border-primary focus:ring-2 focus:ring-primary/20 ${error ? "border-error focus:border-error focus:ring-error/20" : ""} ${className}`}
           {...props}
         />
         <button
           type="button"
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary transition-colors hover:text-text-primary"
+          className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
           onClick={() => setVisible((v) => !v)}
-          tabIndex={-1}
           aria-label={visible ? "Hide password" : "Show password"}
         >
           {visible ? (
@@ -31,7 +40,7 @@ export function PasswordField({ className = "", error, ...props }: Props) {
           )}
         </button>
       </div>
-      {error ? <p className="mt-1.5 text-xs text-error">{error}</p> : null}
+      {error || hint ? <p id={localDescriptionId} className={`mt-1.5 text-xs ${error ? "text-error" : "text-text-secondary"}`}>{error ?? hint}</p> : null}
     </div>
   );
 }

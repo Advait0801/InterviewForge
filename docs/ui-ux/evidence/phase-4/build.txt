@@ -1,0 +1,17 @@
+> web@0.1.0 build
+> next build
+
+Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+Creating an optimized production build ...
+Compiled successfully in 2.0s
+Running TypeScript ...
+Collecting page data using 9 workers ...
+Generating static pages using 9 workers (18/18) in 177.2ms
+Finalizing page optimization ...
+
+Route manifest: 21 application routes generated successfully.
+Static routes include /problems and /paths.
+Dynamic routes include /problems/[id] and /paths/[slug].
+Result: passed

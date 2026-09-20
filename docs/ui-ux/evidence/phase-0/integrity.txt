@@ -1,0 +1,6 @@
+62 unique PNGs verified; 61 observations reached expected route/theme.
+Zero about:blank setup errors after refinement.
+Real-login hydration finding and theme persistence verified.
+Populated chart recapture: three pie sectors per theme.
+All relative links in plan, phase report, and route matrix resolve.
+Application source/dependency changes: none.

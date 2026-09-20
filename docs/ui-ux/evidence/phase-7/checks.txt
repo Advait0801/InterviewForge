@@ -1,0 +1,33 @@
+InterviewForge UI Phase 7 final checks
+Date: 2026-09-20
+
+web npm run lint -- --max-warnings=0
+PASS - zero ESLint warnings.
+
+web npx tsc --noEmit
+PASS - no TypeScript diagnostics.
+
+web npm test -- --run
+PASS - 11 test files, 55 tests.
+
+isolated web npm run build
+PASS - Next.js 16.1.6 production build and route manifest. The temporary
+production server replaced the dev server on port 3002 for performance sampling;
+the Docker web service was then restored on the same port.
+
+docs/ui-ux/capture-phase7.mjs
+PASS - 94 route observations, 5 state observations, 16 screenshots, 0 page
+errors, failed requests, document overflow, clipped visible controls outside
+the intentional heatmap scroller, or nested interactive controls.
+
+docs/ui-ux/measure-phase2-production.mjs with PROD_URL=localhost:3002
+PASS - three production homepage samples recorded in production-home.json.
+Warm load mean 35.1 ms and decoded script bytes 2,228,455 versus Phase 0's
+24.2 ms and 1,942,620 bytes. This regression is disclosed in phase-7.md.
+
+shasum -a 256 -c docs/ui-ux/evidence/phase-7/screenshot-sha256.txt
+PASS - 16 screenshots verified.
+
+AI-call accounting
+No paid AI endpoints were called in Phase 7. The browser harness created one
+disposable QA assessment through the local API.

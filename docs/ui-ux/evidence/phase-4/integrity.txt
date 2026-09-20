@@ -1,0 +1,27 @@
+UI Phase 4 evidence integrity
+=============================
+
+Final browser observations: 39
+Screenshots listed by browser report: 10
+Screenshot files present: 10
+Unique screenshot SHA-256 hashes: 10
+Page horizontal overflows: 0
+Clipped visible controls: 0
+Nested interactive controls: 0
+Unexpected console errors: 0
+Expected browser diagnostics: 5 deliberate 503 resource errors
+Page errors: 0
+Web tests: 28 passed in 7 files
+Backend tests: 73 passed in 6 files
+Lint: passed
+Web TypeScript: passed
+Backend TypeScript: passed
+Production build: passed
+Combined filters and reset: passed
+Bookmark navigation isolation: passed
+Learning-path retries and next step: passed
+Zero-based position presentation: passed
+150-row animation cap: passed
+Reduced motion: passed
+Production script-count delta: 0
+Screenshot checksum verification: passed

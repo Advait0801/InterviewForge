@@ -1,23 +1,28 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   --background: #f8fafc;
   --surface: #ffffff;
   --surface-hover: #f1f5f9;
+  --surface-raised: #ffffff;
   --border: #e2e8f0;
   --border-hover: #cbd5e1;
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --accent: #10b981;
-  --secondary: #06b6d4;
+  --primary: #4f46e5;
+  --primary-light: #6366f1;
+  --accent: #047857;
+  --secondary: #0e7490;
   --text-primary: #0f172a;
   --text-secondary: #64748b;
-  --error: #ef4444;
-  --warning: #f59e0b;
+  --error: #dc2626;
+  --warning: #b45309;
   --glow-primary: rgba(99, 102, 241, 0.15);
   --glow-accent: rgba(16, 185, 129, 0.15);
-  --gradient-start: #6366f1;
-  --gradient-end: #06b6d4;
+  --gradient-start: #4f46e5;
+  --gradient-end: #0e7490;
+  --action-start: #4f46e5;
+  --action-end: #0e7490;
+  --action-danger: #b91c1c;
 }
 
 @theme inline {
@@ -41,9 +46,11 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: #080c14;
   --surface: #0f1520;
   --surface-hover: #151d2e;
+  --surface-raised: #141c2a;
   --border: #1e293b;
   --border-hover: #334155;
   --primary: #818cf8;
@@ -58,17 +65,61 @@
   --glow-accent: rgba(52, 211, 153, 0.12);
   --gradient-start: #818cf8;
   --gradient-end: #22d3ee;
+  --action-start: #4f46e5;
+  --action-end: #0e7490;
+  --action-danger: #b91c1c;
 }
 
 body {
   background: var(--background);
   color: var(--text-primary);
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
-  overflow-x: hidden;
+  min-width: 320px;
+}
+
+@layer utilities {
+  .if-action-gradient {
+    background-image: linear-gradient(to right, var(--action-start), var(--action-end));
+  }
+
+  .if-action-danger-gradient {
+    background-image: linear-gradient(to right, var(--action-danger), #b91c1c);
+  }
 }
 
 * {
   border-color: var(--border);
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 55%, transparent) !important;
+  outline-offset: 3px;
+}
+
+:where(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+}
+
+#main-content:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  translate: 0 -200%;
+  border-radius: 0.75rem;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  padding: 0.65rem 0.9rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+  transition: translate 150ms ease;
+}
+
+.skip-link:focus {
+  translate: 0;
 }
 
 .mono {
@@ -161,6 +212,21 @@ body {
   background-image:
     radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.06) 1px, transparent 0);
   background-size: 40px 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ─── Selection ─── */

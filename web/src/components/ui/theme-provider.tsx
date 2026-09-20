@@ -89,11 +89,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.style.colorScheme = theme;
   }, [theme]);
 
   const setTheme = (nextTheme: Theme) => {
     writeStoredTheme(nextTheme);
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
+    document.documentElement.style.colorScheme = nextTheme;
   };
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");

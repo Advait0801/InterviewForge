@@ -1,0 +1,52 @@
+[
+  {
+    "route": "/",
+    "status": 200,
+    "interviewforge_marker": true
+  },
+  {
+    "route": "/login",
+    "status": 200,
+    "interviewforge_marker": true
+  },
+  {
+    "route": "/register",
+    "status": 200,
+    "interviewforge_marker": true
+  },
+  {
+    "route": "/forgot-password",
+    "status": 200,
+    "interviewforge_marker": true
+  },
+  {
+    "route": "/reset-password",
+    "status": 200,
+    "interviewforge_marker": true
+  },
+  {
+    "route": "/verify-email",
+    "status": 200,
+    "interviewforge_marker": true
+  },
+  {
+    "route": "/problems",
+    "status": 200,
+    "interviewforge_marker": true
+  },
+  {
+    "route": "/paths",
+    "status": 200,
+    "interviewforge_marker": true
+  },
+  {
+    "route": "/leaderboard",
+    "status": 200,
+    "interviewforge_marker": true
+  },
+  {
+    "endpoint": "/api/problems",
+    "status": 200,
+    "count": 150
+  }
+]

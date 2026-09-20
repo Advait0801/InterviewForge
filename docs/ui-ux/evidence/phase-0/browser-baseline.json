@@ -1,0 +1,1125 @@
+{
+  "base": "http://localhost:3002",
+  "browser": "152.0.7977.83",
+  "screenshots": [
+    "home-dark-320.png",
+    "dashboard-dark-320.png",
+    "home-dark-390.png",
+    "dashboard-dark-390.png",
+    "home-dark-768.png",
+    "dashboard-dark-768.png",
+    "home-dark-1024.png",
+    "dashboard-dark-1024.png",
+    "home-dark-1440.png",
+    "dashboard-dark-1440.png",
+    "home-light-320.png",
+    "dashboard-light-320.png",
+    "home-light-390.png",
+    "dashboard-light-390.png",
+    "home-light-768.png",
+    "dashboard-light-768.png",
+    "home-light-1024.png",
+    "dashboard-light-1024.png",
+    "home-light-1440.png",
+    "dashboard-light-1440.png",
+    "login-dark-1440.png",
+    "register-dark-1440.png",
+    "forgot-password-dark-1440.png",
+    "reset-password-missing-token-dark-1440.png",
+    "verify-email-dark-1440.png",
+    "problems-dark-1440.png",
+    "problem-workspace-dark-1440.png",
+    "paths-dark-1440.png",
+    "path-detail-dark-1440.png",
+    "analytics-empty-dark-1440.png",
+    "assessments-dark-1440.png",
+    "assessment-workspace-dark-1440.png",
+    "interview-setup-dark-1440.png",
+    "system-design-setup-dark-1440.png",
+    "settings-dark-1440.png",
+    "profile-dark-1440.png",
+    "problem-workspace-dark-390.png",
+    "assessment-workspace-dark-390.png",
+    "login-light-1440.png",
+    "register-light-1440.png",
+    "forgot-password-light-1440.png",
+    "reset-password-missing-token-light-1440.png",
+    "verify-email-light-1440.png",
+    "problems-light-1440.png",
+    "problem-workspace-light-1440.png",
+    "paths-light-1440.png",
+    "path-detail-light-1440.png",
+    "analytics-empty-light-1440.png",
+    "assessments-light-1440.png",
+    "assessment-workspace-light-1440.png",
+    "interview-setup-light-1440.png",
+    "system-design-setup-light-1440.png",
+    "settings-light-1440.png",
+    "profile-light-1440.png",
+    "problem-workspace-light-390.png",
+    "assessment-workspace-light-390.png",
+    "home-dark-390-reduced-motion.png",
+    "analytics-error-dark-1440.png",
+    "analytics-populated-fixture-dark-1440.png",
+    "leaderboard-fixture-dark-1440.png",
+    "analytics-populated-fixture-light-1440.png",
+    "leaderboard-fixture-light-1440.png"
+  ],
+  "observations": [
+    {
+      "name": "home-dark-320",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 320,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 320,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "dashboard-dark-320",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 320,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 320,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "home-dark-390",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 390,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 390,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "dashboard-dark-390",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 390,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 390,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "home-dark-768",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 768,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 1034,
+      "clippedControls": [
+        {
+          "tag": "A",
+          "text": "Analytics"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Switch to light mode"
+        },
+        {
+          "tag": "A",
+          "text": "Login"
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "name": "dashboard-dark-768",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 768,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 1081,
+      "clippedControls": [
+        {
+          "tag": "A",
+          "text": "Analytics"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Switch to light mode"
+        },
+        {
+          "tag": "A",
+          "text": "UB"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Logout"
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "name": "home-dark-1024",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 1024,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 1042,
+      "clippedControls": [
+        {
+          "tag": "A",
+          "text": "Login"
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "name": "dashboard-dark-1024",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 1024,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 1089,
+      "clippedControls": [
+        {
+          "tag": "BUTTON",
+          "text": "Logout"
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "name": "home-dark-1440",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "dashboard-dark-1440",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "home-light-320",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 320,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 320,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "dashboard-light-320",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 320,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 320,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "home-light-390",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 390,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 390,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "dashboard-light-390",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 390,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 390,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "home-light-768",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 768,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 1034,
+      "clippedControls": [
+        {
+          "tag": "A",
+          "text": "Analytics"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Switch to dark mode"
+        },
+        {
+          "tag": "A",
+          "text": "Login"
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "name": "dashboard-light-768",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 768,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 1081,
+      "clippedControls": [
+        {
+          "tag": "A",
+          "text": "Analytics"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Switch to dark mode"
+        },
+        {
+          "tag": "A",
+          "text": "UB"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Logout"
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "name": "home-light-1024",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 1024,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 1042,
+      "clippedControls": [
+        {
+          "tag": "A",
+          "text": "Login"
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "name": "dashboard-light-1024",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 1024,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 1089,
+      "clippedControls": [
+        {
+          "tag": "BUTTON",
+          "text": "Logout"
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "name": "home-light-1440",
+      "route": "/",
+      "finalRoute": "/",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Practice real interviews. Ship better code."
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "dashboard-light-1440",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Good to see you, UI Baseline."
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "login-dark-1440",
+      "route": "/login",
+      "finalRoute": "/login",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Welcome back"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "register-dark-1440",
+      "route": "/register",
+      "finalRoute": "/register",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Create account"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "forgot-password-dark-1440",
+      "route": "/forgot-password",
+      "finalRoute": "/forgot-password",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Reset password"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "reset-password-missing-token-dark-1440",
+      "route": "/reset-password",
+      "finalRoute": "/reset-password",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Choose a new password"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "verify-email-dark-1440",
+      "route": "/verify-email",
+      "finalRoute": "/verify-email",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Email verification"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "problems-dark-1440",
+      "route": "/problems",
+      "finalRoute": "/problems",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Problems"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "problem-workspace-dark-1440",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "finalRoute": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Two Sum"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "paths-dark-1440",
+      "route": "/paths",
+      "finalRoute": "/paths",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Learning Paths"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "path-detail-dark-1440",
+      "route": "/paths/arrays-101",
+      "finalRoute": "/paths/arrays-101",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Arrays 101"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "analytics-empty-dark-1440",
+      "route": "/analytics",
+      "finalRoute": "/analytics",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Analytics"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "assessments-dark-1440",
+      "route": "/assessments",
+      "finalRoute": "/assessments",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Online Assessment"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "assessment-workspace-dark-1440",
+      "route": "/assessments/33f53645-c8d3-4c6e-a617-c454f8e26f48",
+      "finalRoute": "/assessments/33f53645-c8d3-4c6e-a617-c454f8e26f48",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "interview-setup-dark-1440",
+      "route": "/interview",
+      "finalRoute": "/interview",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Live Interview Mode"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "system-design-setup-dark-1440",
+      "route": "/system-design",
+      "finalRoute": "/system-design",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "System Design"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "settings-dark-1440",
+      "route": "/settings",
+      "finalRoute": "/settings",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Settings"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "profile-dark-1440",
+      "route": "/profile/uiqa_cb33790a",
+      "finalRoute": "/profile/uiqa_cb33790a",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "UI Baseline"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "problem-workspace-dark-390",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "finalRoute": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "width": 390,
+      "title": "InterviewForge",
+      "headings": [
+        "Two Sum"
+      ],
+      "documentWidth": 561,
+      "clippedControls": [
+        {
+          "tag": "SELECT",
+          "text": "Python 3C++CJava"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Run"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Submit"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "AI Review"
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "name": "assessment-workspace-dark-390",
+      "route": "/assessments/33f53645-c8d3-4c6e-a617-c454f8e26f48",
+      "finalRoute": "/assessments/33f53645-c8d3-4c6e-a617-c454f8e26f48",
+      "width": 390,
+      "title": "InterviewForge",
+      "headings": [],
+      "documentWidth": 661,
+      "clippedControls": [
+        {
+          "tag": "SELECT",
+          "text": "Python 3C++CJava"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Run"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Submit Problem"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Finish All"
+        }
+      ],
+      "theme": "dark"
+    },
+    {
+      "name": "login-light-1440",
+      "route": "/login",
+      "finalRoute": "/login",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Welcome back"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "register-light-1440",
+      "route": "/register",
+      "finalRoute": "/register",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Create account"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "forgot-password-light-1440",
+      "route": "/forgot-password",
+      "finalRoute": "/forgot-password",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Reset password"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "reset-password-missing-token-light-1440",
+      "route": "/reset-password",
+      "finalRoute": "/reset-password",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Choose a new password"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "verify-email-light-1440",
+      "route": "/verify-email",
+      "finalRoute": "/verify-email",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Email verification"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "problems-light-1440",
+      "route": "/problems",
+      "finalRoute": "/problems",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Problems"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "problem-workspace-light-1440",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "finalRoute": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Two Sum"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "paths-light-1440",
+      "route": "/paths",
+      "finalRoute": "/paths",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Learning Paths"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "path-detail-light-1440",
+      "route": "/paths/arrays-101",
+      "finalRoute": "/paths/arrays-101",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Arrays 101"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "analytics-empty-light-1440",
+      "route": "/analytics",
+      "finalRoute": "/analytics",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Analytics"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "assessments-light-1440",
+      "route": "/assessments",
+      "finalRoute": "/assessments",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Online Assessment"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "assessment-workspace-light-1440",
+      "route": "/assessments/33f53645-c8d3-4c6e-a617-c454f8e26f48",
+      "finalRoute": "/assessments/33f53645-c8d3-4c6e-a617-c454f8e26f48",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "interview-setup-light-1440",
+      "route": "/interview",
+      "finalRoute": "/interview",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Live Interview Mode"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "system-design-setup-light-1440",
+      "route": "/system-design",
+      "finalRoute": "/system-design",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "System Design"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "settings-light-1440",
+      "route": "/settings",
+      "finalRoute": "/settings",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Settings"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "profile-light-1440",
+      "route": "/profile/uiqa_cb33790a",
+      "finalRoute": "/profile/uiqa_cb33790a",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "UI Baseline"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "problem-workspace-light-390",
+      "route": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "finalRoute": "/problems/ab3e1caa-a45a-41ed-a943-e330e2967ba1",
+      "width": 390,
+      "title": "InterviewForge",
+      "headings": [
+        "Two Sum"
+      ],
+      "documentWidth": 561,
+      "clippedControls": [
+        {
+          "tag": "SELECT",
+          "text": "Python 3C++CJava"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Run"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Submit"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "AI Review"
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "name": "assessment-workspace-light-390",
+      "route": "/assessments/33f53645-c8d3-4c6e-a617-c454f8e26f48",
+      "finalRoute": "/assessments/33f53645-c8d3-4c6e-a617-c454f8e26f48",
+      "width": 390,
+      "title": "InterviewForge",
+      "headings": [],
+      "documentWidth": 661,
+      "clippedControls": [
+        {
+          "tag": "SELECT",
+          "text": "Python 3C++CJava"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Run"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Submit Problem"
+        },
+        {
+          "tag": "BUTTON",
+          "text": "Finish All"
+        }
+      ],
+      "theme": "light"
+    },
+    {
+      "name": "analytics-error-dark-1440",
+      "route": "/analytics",
+      "finalRoute": "/analytics",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Analytics"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "analytics-populated-fixture-dark-1440",
+      "route": "/analytics",
+      "finalRoute": "/analytics",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Analytics"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "leaderboard-fixture-dark-1440",
+      "route": "/leaderboard",
+      "finalRoute": "/leaderboard",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Leaderboard"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "dark"
+    },
+    {
+      "name": "analytics-populated-fixture-light-1440",
+      "route": "/analytics",
+      "finalRoute": "/analytics",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Analytics"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    },
+    {
+      "name": "leaderboard-fixture-light-1440",
+      "route": "/leaderboard",
+      "finalRoute": "/leaderboard",
+      "width": 1440,
+      "title": "InterviewForge",
+      "headings": [
+        "Leaderboard"
+      ],
+      "documentWidth": 1440,
+      "clippedControls": [],
+      "theme": "light"
+    }
+  ],
+  "pageErrors": [
+    {
+      "route": "/dashboard",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n      <ErrorBoundary errorComponent={function DashboardError} errorStyles={<SegmentViewNode>} errorScripts={[...]}>\n        <ErrorBoundaryHandler pathname=\"/dashboard\" errorComponent={function DashboardError} ...>\n          <LoadingBoundary name=\"dashboard/\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/dashboard\" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/dashb...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function DashboardPage} serverProvidedParams={{...}}>\n                        <DashboardPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n      ...\n",
+      "count": 11
+    },
+    {
+      "route": "/problems",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n      <ErrorBoundary errorComponent={function ProblemsError} errorStyles={<SegmentViewNode>} errorScripts={[...]}>\n        <ErrorBoundaryHandler pathname=\"/problems\" errorComponent={function ProblemsError} ...>\n          <LoadingBoundary name=\"problems/\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/problems\" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/probl...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function ProblemsPage} serverProvidedParams={{...}}>\n                        <ProblemsPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n      ...\n",
+      "count": 2
+    },
+    {
+      "route": "/paths",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n      <ErrorBoundary errorComponent={function PathsError} errorStyles={<SegmentViewNode>} errorScripts={[...]}>\n        <ErrorBoundaryHandler pathname=\"/paths\" errorComponent={function PathsError} errorStyles={<SegmentViewNode>} ...>\n          <LoadingBoundary name=\"paths/\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/paths\" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/paths...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function LearningPathsPage} serverProvidedParams={{...}}>\n                        <LearningPathsPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n      ...\n",
+      "count": 2
+    },
+    {
+      "route": "/paths/arrays-101",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <ScrollAndFocusHandler segmentPath={[...]}>\n      <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n        <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>\n          <LoadingBoundary name=\"arrays-101/\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/paths/arr...\" tree={[...]} params={{slug:\"arra...\"}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/paths...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function LearningPathDetailPage} serverProvidedParams={{...}}>\n                        <LearningPathDetailPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n        ...\n",
+      "count": 2
+    },
+    {
+      "route": "/analytics",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <ScrollAndFocusHandler segmentPath={[...]}>\n      <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n        <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>\n          <LoadingBoundary name=\"analytics/\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/analytics\" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/analy...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function AnalyticsPage} serverProvidedParams={{...}}>\n                        <AnalyticsPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n        ...\n",
+      "count": 5
+    },
+    {
+      "route": "/assessments",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <ScrollAndFocusHandler segmentPath={[...]}>\n      <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n        <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>\n          <LoadingBoundary name=\"assessments/\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/assessments\" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/asses...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function AssessmentsPage} serverProvidedParams={{...}}>\n                        <AssessmentsPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n        ...\n",
+      "count": 2
+    },
+    {
+      "route": "/interview",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n      <ErrorBoundary errorComponent={function InterviewError} errorStyles={<SegmentViewNode>} errorScripts={[...]}>\n        <ErrorBoundaryHandler pathname=\"/interview\" errorComponent={function InterviewError} ...>\n          <LoadingBoundary name=\"interview/\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/interview\" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/inter...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function InterviewPage} serverProvidedParams={{...}}>\n                        <InterviewPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n      ...\n",
+      "count": 2
+    },
+    {
+      "route": "/system-design",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <ScrollAndFocusHandler segmentPath={[...]}>\n      <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n        <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>\n          <LoadingBoundary name=\"system-des...\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/system-de...\" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/syste...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function SystemDesignPage} serverProvidedParams={{...}}>\n                        <SystemDesignPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n        ...\n",
+      "count": 2
+    },
+    {
+      "route": "/settings",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <ScrollAndFocusHandler segmentPath={[...]}>\n      <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n        <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>\n          <LoadingBoundary name=\"settings/\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/settings\" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/setti...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function SettingsPage} serverProvidedParams={{...}}>\n                        <SettingsPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n        ...\n",
+      "count": 2
+    },
+    {
+      "route": "/leaderboard",
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <ScrollAndFocusHandler segmentPath={[...]}>\n      <InnerScrollAndFocusHandler segmentPath={[...]} focusAndScrollRef={{apply:false, ...}}>\n        <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>\n          <LoadingBoundary name=\"leaderboard/\" loading={null}>\n            <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <InnerLayoutRouter url=\"/leaderboard\" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>\n                    <SegmentViewNode type=\"page\" pagePath=\"/src/leade...\">\n                      <SegmentTrieNode>\n                      <ClientPageRoot Component={function LeaderboardPage} serverProvidedParams={{...}}>\n                        <LeaderboardPage params={Promise} searchParams={Promise}>\n                          <Protected>\n                            <PageShell>\n+                             <div className=\"flex min-h-screen flex-col bg-background text-text-primary bg-grid\">\n-                             <Suspense>\n                    ...\n                  ...\n        ...\n",
+      "count": 2
+    }
+  ],
+  "notes": [
+    "Screenshots settle finite animations using Playwright animations:disabled.",
+    "Recommendation requests are replaced by a deterministic 503 to avoid paid AI calls.",
+    "QA account, assessment, and profile are synthetic; catalogue and other API data are real local data.",
+    "Viewport screenshots are not full-page captures. Route inventory is broader than this baseline sample.",
+    "Populated analytics and leaderboard screenshots use synthetic browser fixtures, not recorded user scores.",
+    "Iteration 3 screenshot review found populated charts were captured mid-JavaScript animation. Those two images were recaptured after 2000 ms with synthetic analytics and profile responses. Main capture script now waits for charts as well."
+  ],
+  "qa": {
+    "username": "uiqa_cb33790a",
+    "assessmentId": "33f53645-c8d3-4c6e-a617-c454f8e26f48",
+    "problemId": "ab3e1caa-a45a-41ed-a943-e330e2967ba1"
+  },
+  "menu": {
+    "keyboardOpens": true,
+    "ariaExpanded": null,
+    "escapeCloses": false
+  },
+  "themeToggle": {
+    "storedTheme": "light",
+    "classIsLight": true,
+    "persistsAfterReload": true
+  },
+  "signedOutRedirect": "/login",
+  "realLoginReload": {
+    "finalRoute": "/dashboard",
+    "hydrationError": true
+  },
+  "reducedMotion": {
+    "preference": true,
+    "activeInfinite": 4
+  },
+  "analyticsErrorLooksEmpty": true,
+  "production": {
+    "url": "http://localhost:3003",
+    "route": "/",
+    "cache": "one cold then two warm navigations in same context",
+    "samples": [
+      {
+        "domContentLoadedMs": 24.5,
+        "loadMs": 48.79999998211861,
+        "observedLayoutShiftSum": 0.0025741512345679013,
+        "scriptCount": 29,
+        "scriptDecodedBytes": 1942620
+      },
+      {
+        "domContentLoadedMs": 10.699999988079071,
+        "loadMs": 25.19999998807907,
+        "observedLayoutShiftSum": 0.0025741512345679013,
+        "scriptCount": 29,
+        "scriptDecodedBytes": 1942620
+      },
+      {
+        "domContentLoadedMs": 10.5,
+        "loadMs": 23.200000017881393,
+        "observedLayoutShiftSum": 0.0025741512345679013,
+        "scriptCount": 29,
+        "scriptDecodedBytes": 1942620
+      }
+    ]
+  },
+  "chartRefinement": {
+    "delayMs": 2000,
+    "pieSectors": 3,
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "data": "synthetic analytics and profile"
+  }
+}

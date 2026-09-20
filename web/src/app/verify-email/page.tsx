@@ -1,62 +1,78 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
-import { PageShell } from "@/components/layout/page-shell";
-import { Card } from "@/components/ui/card";
-import { Logo } from "@/components/ui/logo";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { buttonStyles } from "@/components/ui/button";
+import { LoadingState, StatePanel } from "@/components/ui/state-panel";
+import { emailVerificationUrl } from "@/lib/api";
+import { getToken } from "@/lib/auth";
+
+const noopSubscribe = () => () => {};
 
 function VerifyContent() {
   const searchParams = useSearchParams();
+  const token = searchParams.get("token") ?? "";
   const verified = searchParams.get("verified");
-  const err = searchParams.get("error");
+  const error = searchParams.get("error");
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
+  const isAuthed = mounted && Boolean(getToken());
+  const accountHref = isAuthed ? "/dashboard" : "/login";
+  const accountLabel = isAuthed ? "Continue to dashboard" : "Continue to sign in";
 
-  let title = "Email verification";
-  let body = "Use the link from your email to verify your account.";
+  useEffect(() => {
+    if (token) window.location.replace(emailVerificationUrl(token));
+  }, [token]);
+
+  if (token) return <LoadingState label="Verifying your email…" />;
+
   if (verified === "1") {
-    title = "Email verified";
-    body = "Your email is confirmed. You can continue using InterviewForge.";
-  } else if (err === "invalid") {
-    title = "Link expired or invalid";
-    body = "Request a new verification email from your account settings (coming soon), or contact support.";
-  } else if (err === "missing") {
-    title = "Missing token";
-    body = "Open the full verification link from your email.";
-  } else if (err === "server") {
-    title = "Something went wrong";
-    body = "Please try again later.";
+    return (
+      <StatePanel
+        title="Email verified"
+        description="Your email is confirmed. Sign in to continue your InterviewForge practice."
+        icon={<span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent/10 text-xl text-accent" aria-hidden>✓</span>}
+        action={<Link href={accountHref} className={buttonStyles()}>{accountLabel}</Link>}
+      />
+    );
+  }
+
+  if (error) {
+    const content = error === "invalid"
+      ? ["This verification link has expired", "The link may already have been used or is no longer valid."]
+      : error === "missing"
+        ? ["This verification link is incomplete", "Open the full verification link from your email."]
+        : ["We couldn’t verify your email", "Please try the link again later. Your account is still available."];
+    return (
+      <StatePanel
+        tone="error"
+        title={content[0]}
+        description={content[1]}
+        action={<Link href={accountHref} className={buttonStyles({ variant: "secondary" })}>{isAuthed ? "Back to dashboard" : "Back to sign in"}</Link>}
+      />
+    );
   }
 
   return (
-    <>
-      <h1 className="text-2xl font-bold text-center">{title}</h1>
-      <p className="mt-2 text-center text-sm text-text-secondary">{body}</p>
-      <p className="mt-6 text-center">
-        <Link className="font-medium text-primary hover:underline" href="/dashboard">
-          Go to dashboard
-        </Link>
-      </p>
-    </>
+    <StatePanel
+      title="Check your email"
+      description="Open the complete verification link from your email to confirm your address."
+      action={<Link href={accountHref} className={buttonStyles({ variant: "ghost" })}>{isAuthed ? "Back to dashboard" : "Back to sign in"}</Link>}
+    />
   );
 }
 
 export default function VerifyEmailPage() {
   return (
-    <PageShell>
-      <div className="flex flex-1 items-center justify-center">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-          <Card className="p-8">
-            <div className="mb-6 flex flex-col items-center">
-              <Logo size={40} className="mb-3" />
-            </div>
-            <Suspense fallback={<p className="text-center text-text-secondary">Loading…</p>}>
-              <VerifyContent />
-            </Suspense>
-          </Card>
-        </motion.div>
-      </div>
-    </PageShell>
+    <AuthShell
+      eyebrow="Email verification"
+      title="Confirm your email"
+      description="Verification keeps account recovery and important account updates connected to you."
+    >
+      <Suspense fallback={<LoadingState label="Checking verification status…" />}>
+        <VerifyContent />
+      </Suspense>
+    </AuthShell>
   );
 }

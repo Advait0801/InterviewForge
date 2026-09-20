@@ -1,0 +1,455 @@
+{
+  "base": "http://localhost:3002",
+  "browser": "152.0.7977.83",
+  "observations": [
+    {
+      "label": "home-dark-320",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-dark-320",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-dark-390",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-dark-390",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-dark-720",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-dark-720",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-dark-768",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-dark-768",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-dark-1024",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-dark-1024",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-dark-1280",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-dark-1280",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-dark-1320",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 1320,
+      "documentWidth": 1320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-dark-1320",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 1320,
+      "documentWidth": 1320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-dark-1440",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-dark-1440",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-light-320",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-light-320",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-light-390",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-light-390",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-light-720",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-light-720",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 720,
+      "documentWidth": 720,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-light-768",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-light-768",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 768,
+      "documentWidth": 768,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-light-1024",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-light-1024",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 1024,
+      "documentWidth": 1024,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-light-1280",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-light-1280",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 1280,
+      "documentWidth": 1280,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-light-1320",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 1320,
+      "documentWidth": 1320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-light-1320",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 1320,
+      "documentWidth": 1320,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "home-light-1440",
+      "route": "/",
+      "finalRoute": "/",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Practice real interviews. Ship better code."
+    },
+    {
+      "label": "dashboard-light-1440",
+      "route": "/dashboard",
+      "finalRoute": "/dashboard",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Good to see you, UI Phase One."
+    },
+    {
+      "label": "problems-dark-390",
+      "route": "/problems",
+      "finalRoute": "/problems",
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Problems"
+    },
+    {
+      "label": "problems-dark-1440",
+      "route": "/problems",
+      "finalRoute": "/problems",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "dark",
+      "h1": "Problems"
+    },
+    {
+      "label": "problems-light-1440",
+      "route": "/problems",
+      "finalRoute": "/problems",
+      "viewportWidth": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false,
+      "clippedControls": [],
+      "theme": "light",
+      "h1": "Problems"
+    }
+  ],
+  "screenshots": [
+    "home-dark-320.png",
+    "dashboard-dark-320.png",
+    "home-dark-1024.png",
+    "dashboard-dark-1024.png",
+    "home-dark-1440.png",
+    "dashboard-dark-1440.png",
+    "home-light-320.png",
+    "dashboard-light-320.png",
+    "home-light-1024.png",
+    "dashboard-light-1024.png",
+    "home-light-1440.png",
+    "dashboard-light-1440.png",
+    "problems-dark-390.png",
+    "problems-dark-1440.png",
+    "problems-light-1440.png",
+    "mobile-menu-dark-390.png"
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "notes": [
+    "A disposable local QA account and real local API data were used.",
+    "Recommendation requests were replaced by a deterministic 503 to avoid paid AI calls.",
+    "The 720 CSS-pixel check represents the reflow space of a 1440-pixel window at 200% zoom."
+  ],
+  "mobileNavigation": {
+    "expanded": "true",
+    "firstLinkFocused": true,
+    "nestedRouteCurrent": "page",
+    "accountSettingsVisible": true,
+    "escapeCloses": true,
+    "escapeRestoresFocus": true
+  },
+  "desktopNavigation": {
+    "primaryVisible": true,
+    "menuButtonVisible": false,
+    "nestedRouteCurrent": "page",
+    "assessmentsLabelVisible": true
+  },
+  "compactNavigation": {
+    "primaryVisible": false,
+    "menuButtonVisible": true
+  },
+  "focus": {
+    "text": "Skip to main content",
+    "href": "#main-content",
+    "outlineStyle": "solid",
+    "outlineWidth": "3px"
+  },
+  "theme": {
+    "stored": "light",
+    "colorScheme": "light",
+    "persistsAfterReload": true
+  },
+  "reducedMotion": {
+    "preference": true,
+    "activeInfinite": 0,
+    "decorativeIterationCount": "1"
+  },
+  "authenticatedReload": {
+    "finalRoute": "/problems",
+    "hydrationConsoleErrors": 0,
+    "accountSettingsVisible": true
+  }
+}

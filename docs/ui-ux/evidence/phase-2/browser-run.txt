@@ -1,0 +1,81 @@
+{
+  "observations": 36,
+  "screenshots": 30,
+  "overflowCount": 0,
+  "clippedControlCount": 0,
+  "nestedInteractiveCount": 0,
+  "consoleErrors": [],
+  "expectedConsoleErrors": [
+    {
+      "label": "login-failure",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    }
+  ],
+  "pageErrors": [],
+  "home": {
+    "signedOutPrimaryHref": "/register",
+    "signInHref": "/login",
+    "nestedInteractive": 0,
+    "primaryCtaInFirstViewport": true,
+    "previewCaptionVisible": true
+  },
+  "homeSignedIn": {
+    "dashboardHref": "/dashboard",
+    "hydrationErrors": 0
+  },
+  "login": {
+    "invalidFocus": true,
+    "pendingAriaBusy": "true",
+    "pendingDisabled": true,
+    "requests": 1,
+    "error": "Invalid credentials"
+  },
+  "realFlow": {
+    "registeredAndStoredToken": true,
+    "verifiedRedirect": true,
+    "recoveryConfirmation": true,
+    "resetRedirect": true,
+    "newPasswordLogin": true
+  },
+  "contrast": {
+    "light": {
+      "colors": {
+        "background": "#f8fafc",
+        "primary": "#4f46e5",
+        "secondary": "#0e7490",
+        "accent": "#047857",
+        "error": "#dc2626",
+        "actionStart": "#4f46e5",
+        "actionEnd": "#0e7490"
+      },
+      "primaryText": 6.01,
+      "secondaryText": 5.12,
+      "accentText": 5.24,
+      "errorText": 4.62,
+      "whiteOnActionStart": 6.29,
+      "whiteOnActionEnd": 5.36
+    },
+    "dark": {
+      "colors": {
+        "background": "#080c14",
+        "primary": "#818cf8",
+        "secondary": "#22d3ee",
+        "accent": "#34d399",
+        "error": "#f87171",
+        "actionStart": "#4f46e5",
+        "actionEnd": "#0e7490"
+      },
+      "primaryText": 6.56,
+      "secondaryText": 10.83,
+      "accentText": 10.18,
+      "errorText": 7.08,
+      "whiteOnActionStart": 6.29,
+      "whiteOnActionEnd": 5.36
+    }
+  },
+  "reducedMotion": {
+    "preference": true,
+    "activeInfinite": 0,
+    "previewVisible": true
+  }
+}

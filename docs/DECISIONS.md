@@ -7,6 +7,262 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-20
+
+### D-052 — Secondary pages distinguish resource failure from missing data
+
+**Shipped in UI Phase 7:** Leaderboard, public profile, and settings now present
+explicit loading, empty/missing, and error states with local recovery. Failed
+leaderboard pagination retains the successful page; the public-profile 404 is not
+misreported as a network failure. Settings preserves account and password form state
+on failure and checks the encoded avatar size against the backend's actual limit.
+Six remaining major routes gained local render-error recovery. No API contract,
+credential, avatar persistence, or native mobile behavior was changed.
+
+**Verification:** Fifty-five web tests, lint, TypeScript, and an isolated production
+build passed. Chrome recorded 94 route observations, five focused states, and 16
+verified screenshots across website widths and themes with no browser errors or
+failed requests. Final production homepage warm-load mean was 35.1 ms versus the
+Phase 0 local 24.2 ms, and decoded script resources grew 14.7%; this is a
+directional performance regression to track, not a field measurement. The site
+remained on port 3002, including a brief same-port production measurement. No paid
+AI endpoint was called. See [`ui-ux/phase-7.md`](ui-ux/phase-7.md).
+
+## 2026-09-19
+
+### D-051 — Interview answers reconcile against the transcript before retry
+
+**Shipped in UI Phase 6:** Interview answers now use a multiline composer. The UI
+keeps the draft until a candidate message for the current question is observed in the
+server transcript. If the POST succeeds but the following GET fails, or the POST
+outcome is uncertain, the next action refreshes the conversation rather than issuing
+another answer POST. A newly created session with a failed initial transcript load
+also retries the GET without creating a second session. This preserves the existing
+four-stage and follow-up contract while avoiding a duplicate answer from a UI retry.
+
+The system-design result gives the diagram a full-width, theme-aware area and a text
+list of its components and connections. Layout is horizontal on wide screens and
+vertical on narrow website widths. Reduced motion removes edge animation. Analysis
+errors retain the written draft, **Edit design** keeps it for revision, and **Try
+another** clears it. No native mobile client was added.
+
+**Verification:** Forty-eight web tests, lint, TypeScript, and an isolated production
+build pass. Chrome recorded 43 observations and 12 unique screenshots with no overflow,
+clipped controls, nested interactions, page exceptions, or failed requests. A fixture
+run completed all four interview stages and a follow-up, displayed the report, and
+downloaded its PDF. Local authenticated interview listing and design validation
+returned 200 and 400. Two diagnostic design-analysis requests reached the local AI
+service before the browser fixture route was corrected; the final matrix made no
+further AI calls. See [`ui-ux/phase-6.md`](ui-ux/phase-6.md) for evidence and limits.
+
+## 2026-09-17
+
+### D-050 — Coding workspaces preserve drafts, deadlines, and accepted submissions
+
+**Shipped in UI Phase 5:** Problem detail and timed assessments now use stable
+problem/editor panes. Below 768 CSS pixels, the responsive website exposes an explicit
+pane switch while both panes remain mounted, so changing views does not discard Monaco
+state or active code. This is website reflow behavior only; the removed native mobile
+client remains out of scope.
+
+The shared editor follows light/dark theme, does not steal focus during mount, and
+reduces cursor/scroll animation with the user's motion preference. Problem code is kept
+per language, latest submissions are restored without allowing stale requests to win,
+and hints, editorials, AI-review eligibility, execution, and submission APIs remain on
+their existing contracts.
+
+Assessment code is keyed per problem and language, linked submission IDs are restored,
+and the countdown derives from an absolute deadline. Deadline completion runs once and
+waits for any in-flight problem submission and assessment link before finalizing. A
+failed completion becomes a durable retry state rather than leaving a zero timer with no
+recovery. Setup, history, partial problem loading, execution, and results distinguish
+loading, empty, error, and completed outcomes.
+
+**Verification:** Thirty-nine web tests, lint, TypeScript, and an isolated production
+build pass. A self-asserting Chrome run records 32 observations and 11 unique screenshots
+at 320–1440 CSS pixels in both themes. Real local Run, Submit, submission restoration,
+assessment linkage, and final completion pass with no page overflow, clipped visible
+controls, browser exceptions, or failed requests. Evidence and limits are in
+[`ui-ux/phase-5.md`](ui-ux/phase-5.md).
+
+## 2026-09-16
+
+### D-049 — Discovery actions stay independent and path progress follows current membership
+
+**Shipped in UI Phase 4 on 2026-09-16:** The problem catalogue combines search,
+difficulty, topic, company, solved, and saved filters across the loaded 150-problem
+dataset and reports the exact visible count. Every control has a visible label or
+selected-state semantic, one action clears all filters, and failures, a true-empty
+catalogue, and a no-match result remain distinct.
+
+Problem navigation and bookmark mutation are sibling actions rather than nested
+interactive elements. Bookmark requests are tracked per problem, so independent saves
+can run together without silently ignoring another enabled control. Catalogue row delay
+is capped at 120 ms; the final Chrome run showed the 150th row fully visible 645 ms after
+navigation, and reduced-motion users receive no entrance movement.
+
+Learning-path list and detail pages now provide semantic progress, local retries, clear
+empty/missing states, and an explicit next problem. Detail requests are versioned so an
+older slug response cannot overwrite the current route. Database summary counts join
+`user_path_progress` to current `learning_path_problems`, excluding historical progress
+for removed members. Counts are clamped defensively, zero-step paths omit invalid progress
+ranges, and zero-based database positions display as steps 1 through N.
+
+**Verification:** Twenty-eight web tests and 73 backend tests pass. The backend regression
+fails if the current-membership join is removed. A self-asserting Chrome harness records
+39 observations and ten unique screenshots across three routes, both themes, and
+320–1440 CSS pixels, with no page overflow, clipped visible controls, nested interactive
+elements, unexpected console errors, or page errors. The production comparison keeps
+script counts unchanged and adds 0.7–1.0% decoded script bytes; route-ready changes are
+small in absolute local time and are documented in [`ui-ux/phase-4.md`](ui-ux/phase-4.md).
+
+## 2026-09-15
+
+### D-048 — Progress failures remain distinct from real zeroes
+
+**Shipped in UI Phase 3:** Dashboard profile, statistics, activity, and recommendation
+requests now have independent loading, success, stale, and failed states. A failed
+statistics request displays unavailable values rather than zero progress, and each
+retry calls only its owning endpoint. The dashboard prioritizes one coding action,
+then shows an honest progress snapshot, activity history, practice suggestions, and
+secondary practice modes.
+
+**Analytics meaning:** The page describes the backend values as they are actually
+computed: unique solved problems by difficulty, passed-problem records by day, solved
+problem counts by topic, and weekly submission acceptance. Topic counts are no longer
+called “strength.” Date-only API values are formatted in UTC so users west of UTC do
+not see the previous date. Empty, failed, and partially populated responses render as
+different states, and a failed response never becomes “No coding progress yet.”
+
+**Accessible visualization policy:** Charts use theme tokens and pair every populated
+graphic with a keyboard-operable data table. Sparse topic data uses labeled bars rather
+than withholding a chart. The activity heatmap totals only its visible period, hides
+future cells, exposes one roving tab stop with arrow-key navigation and focus/pointer
+tooltips, and includes a chronological active-day list. Its 24-pixel target spacing
+supports touch, while narrow layouts open on the latest week with weekday labels pinned
+in view. Recharts animation is disabled when reduced motion is requested.
+
+**Verification:** Twenty-two frontend tests pass, including local retry isolation,
+failed-versus-empty analytics, exact partial-data totals, stable date formatting, and
+heatmap keyboard behavior. The final deterministic Chrome run records 27 observations
+and nine unique screenshots across 320–1440 CSS pixels and both themes. It found no
+page overflow, clipped visible controls, nested interactive controls, unexpected console
+errors, or page errors. Four deliberate 503 resource diagnostics correspond to tested
+failure states. Lint, TypeScript, and a production build pass.
+
+The final production comparison against the Phase 2 commit kept 28 scripts and added
+14,405 decoded bytes (0.7%). Analytics stayed within roughly -1% to +12% after response
+across repeated samples. The richer dashboard added roughly 7–11 ms of local load work;
+the relative increase was 22–35% because the control completes in about 32–33 ms after
+response. The final sample improved layout shift by about 0.002. These are local
+directional measurements rather than field Web Vitals. Evidence and limits are in
+[`ui-ux/phase-3.md`](ui-ux/phase-3.md).
+
+### D-047 — Onboarding has one clear, truthful, and verified path
+
+**Shipped in UI Phase 2:** The home page now explains InterviewForge through one
+primary practice action, three capability summaries, a four-stage interview loop,
+and a responsive illustrative workspace built with HTML, CSS, and SVG. Signed-in
+and signed-out destinations remain distinct without producing hydration errors.
+Calls to action are semantic links rather than nested buttons and links.
+
+**Authentication experience:** Login, registration, password recovery/reset, and
+email verification now share one responsive shell with visible labels, field-level
+errors, pending states, focus recovery, and durable outcome panels. Recovery copy
+confirms only that a request was accepted; it does not claim delivery. The existing
+backend verification endpoint is now connected to the browser flow, fixing token
+links that previously opened a page without verifying the account. Verification
+success also chooses the dashboard or sign-in action from hydration-stable auth state.
+
+**Visual and accessibility decisions:** Light-theme status colors and the shared
+action gradient were darkened enough to pass the measured text contrast checks.
+Logo SVG gradient identifiers now remain unique when several logos share a document,
+and decorative logos are hidden from assistive technology. The preview is explicitly
+labeled illustrative and becomes static when reduced motion is requested.
+
+**Verification:** Eighteen focused tests pass. The final Chrome run records 36
+observations and 30 unique screenshots across 320–1440 CSS pixels and both themes,
+with no horizontal overflow, clipped visible controls, nested interactive elements,
+unexpected console errors, page errors, or signed-in home hydration errors. It also
+completes a real disposable register → verify → recover → reset → sign-in flow against
+the local API. Lint, TypeScript, and an isolated production build pass. Production
+comparison keeps 29 scripts, adds about 2% decoded script bytes, and slightly lowers
+the measured layout-shift sum; local navigation timings were noisy and are not field
+performance claims. Full evidence and limits are in
+[`ui-ux/phase-2.md`](ui-ux/phase-2.md).
+
+### D-046 — Shared UI behavior is explicit, responsive, and hydration-stable
+
+**Shipped in UI Phase 1:** The shared shell now provides a keyboard-visible skip link,
+consistent focus treatment, reduced-motion policy, pre-paint theme initialization,
+and semantic busy/error/empty-state primitives. Static cards no longer imply that
+they are clickable; interactive cards opt into lift and glow. Buttons have explicit
+variants, sizes, loading semantics, and `type="button"` by default. Inputs and password
+fields can bind labels, hints, and errors through accessible descriptions.
+
+**Navigation policy:** The eight primary destinations remain familiar, with “OA”
+expanded to “Assessments.” The full navigation appears only where it fits (1320 CSS
+pixels and wider); narrower layouts use the compact menu. Current nested routes use
+`aria-current`, keyboard opening moves focus into the menu, and Escape closes it and
+returns focus to the trigger. Authenticated account actions remain available in both
+layouts.
+
+**Hydration defect closed:** `Protected` now returns the same session-checking state
+on the server and first client render, then reveals authenticated content or redirects.
+The Phase 0 real-reload mismatch is absent in the final browser run: direct/reloaded
+`/dashboard` and `/problems` produced zero hydration diagnostics. A visible
+“Checking your session…” state replaces the blank initial frame.
+
+**Verification:** Vitest, Testing Library, and jsdom provide ten focused behavioral
+tests for controls, theme persistence, navigation, and server-render/hydration behavior.
+The final Playwright run recorded 35 route/viewport/theme observations and 16 screenshots
+at 320–1440 CSS pixels, including a 720-pixel reflow proxy for a 1440-pixel window at
+200% zoom. It found zero horizontal overflows, clipped controls, console errors, or page
+errors. Reduced motion left zero running infinite animations. Lint, standalone
+TypeScript, and an isolated Next production build pass. Evidence and limits are in
+[`ui-ux/phase-1.md`](ui-ux/phase-1.md).
+
+**Going forward:** Page-specific phases should use these primitives rather than create
+new local versions. The shared state panel exists now; migrating dashboard, analytics,
+discovery, and workspace states happens in their owning phases so their behavior can be
+tested with the relevant data and failure cases.
+
+### D-045 — UI improvements use one branch, phase gates, and a recorded browser baseline
+
+**Agreement:** The UI workstream is governed by `docs/UI_UX_PLAN.md`, independently
+of the platform plan's phase numbers and old branch. All UI phases use
+`feat/ui-ux-polish`, created from `main` at `a9c3fef`. Each phase has a goal,
+at least three substantive iterations, a titled/body commit, and an explicit user
+approval checkpoint. One PR is created only after all UI phases finish and the user
+accepts the final checkpoint; review and required CI precede merge. The user requests
+the current model name in commit attribution:
+`Co-Authored-By: GPT-6 Astra <noreply@openai.com>`.
+
+**Baseline:** Phase 0 leaves application code and dependencies unchanged. Lint,
+standalone TypeScript, and an isolated production build pass. Browser verification
+uses a separate Playwright/Chrome profile, explicitly authorized by the user after
+native Chrome control proved intermittent. Evidence includes 62 screenshots, a
+19-route inventory, five shared-layout widths, both themes, focused keyboard/theme/
+reduced-motion checks, and local production homepage measurements. See
+[`ui-ux/phase-0.md`](ui-ux/phase-0.md) for commands, limitations, and data provenance.
+
+**Existing defects exposed:** Navigation clips at intermediate widths; mobile Escape
+does not close the menu; reduced-motion preference still leaves four infinite
+animations; failed recommendations render an empty panel and failed analytics look
+like no activity; phone workspace toolbars clip controls. Authenticated reloads
+also emit hydration mismatches at `Protected`, reproduced after real form login.
+The guard reads local-storage authentication during initial render, unlike the
+server; correcting its initial rendering belongs in UI Phase 1 while preserving
+access checks. Analytics fixture dates also reveal a local date-label shift.
+
+**Verification lessons:** Initial about:blank local-storage errors came from the
+audit harness, not the app. Origin-scoped browser storage state removed those errors.
+Screenshots with CSS animations disabled can still capture Recharts halfway through
+JavaScript animation; populated charts were recaptured after settling. AI-backed
+recommendations are a labeled 503 fixture, and populated chart/leaderboard data are
+synthetic. No paid model calls were needed. None of these baseline findings is
+claimed fixed in Phase 0.
+
 ## 2026-09-14
 
 ### D-044 — Company tags are curated in one file; every problem has an editorial (closes F-21, F-22)

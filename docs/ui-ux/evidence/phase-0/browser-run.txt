@@ -1,0 +1,96 @@
+{
+  "screenshots": 62,
+  "observations": 61,
+  "pageErrors": [
+    {
+      "route": "/dashboard",
+      "count": 11,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    },
+    {
+      "route": "/problems",
+      "count": 2,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    },
+    {
+      "route": "/paths",
+      "count": 2,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    },
+    {
+      "route": "/paths/arrays-101",
+      "count": 2,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    },
+    {
+      "route": "/analytics",
+      "count": 5,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    },
+    {
+      "route": "/assessments",
+      "count": 2,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    },
+    {
+      "route": "/interview",
+      "count": 2,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    },
+    {
+      "route": "/system-design",
+      "count": 2,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    },
+    {
+      "route": "/settings",
+      "count": 2,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    },
+    {
+      "route": "/leaderboard",
+      "count": 2,
+      "message": "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:"
+    }
+  ],
+  "menu": {
+    "keyboardOpens": true,
+    "ariaExpanded": null,
+    "escapeCloses": false
+  },
+  "reducedMotion": {
+    "preference": true,
+    "activeInfinite": 4
+  },
+  "analyticsErrorLooksEmpty": true,
+  "production": {
+    "url": "http://localhost:3003",
+    "route": "/",
+    "cache": "one cold then two warm navigations in same context",
+    "samples": [
+      {
+        "domContentLoadedMs": 24.5,
+        "loadMs": 48.79999998211861,
+        "observedLayoutShiftSum": 0.0025741512345679013,
+        "scriptCount": 29,
+        "scriptDecodedBytes": 1942620
+      },
+      {
+        "domContentLoadedMs": 10.699999988079071,
+        "loadMs": 25.19999998807907,
+        "observedLayoutShiftSum": 0.0025741512345679013,
+        "scriptCount": 29,
+        "scriptDecodedBytes": 1942620
+      },
+      {
+        "domContentLoadedMs": 10.5,
+        "loadMs": 23.200000017881393,
+        "observedLayoutShiftSum": 0.0025741512345679013,
+        "scriptCount": 29,
+        "scriptDecodedBytes": 1942620
+      }
+    ]
+  }
+}
+
+Exit code: 0

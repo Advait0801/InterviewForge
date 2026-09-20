@@ -1,0 +1,2 @@
+Command: npx --no-install tsc --noEmit
+Exit code: 0

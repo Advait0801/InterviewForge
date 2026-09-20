@@ -1,0 +1,6 @@
+Baseline: a9c3fefe4b2db822d3c8f915776198c0648d8582
+Branch: feat/ui-ux-polish
+Host Node: v25.4.0
+Host npm: 11.14.1
+Live web: http://localhost:3002
+Build: temporary source copy; environment files excluded

@@ -1,0 +1,15 @@
+> web@0.1.0 test
+> vitest run
+
+ RUN  v3.2.7 /Users/advait0801/Desktop/Development/InterviewForge/web
+
+ PASS src/components/auth/__tests__/protected.test.tsx (2 tests)
+ PASS src/components/ui/__tests__/theme-provider.test.tsx (1 test)
+ PASS src/components/ui/__tests__/controls.test.tsx (5 tests)
+ PASS src/app/__tests__/progress.test.tsx (4 tests)
+ PASS src/components/layout/__tests__/navbar.test.tsx (3 tests)
+ PASS src/app/__tests__/onboarding.test.tsx (7 tests)
+
+ Test Files  6 passed (6)
+ Tests       22 passed (22)
+ Duration    1.60s

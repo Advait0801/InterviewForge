@@ -1,46 +1,46 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { toast } from "sonner";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
-import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { LoadingState, StatePanel } from "@/components/ui/state-panel";
 import { api, LeaderboardEntry } from "@/lib/api";
 
 const PAGE_SIZE = 20;
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
-};
 
 export default function LeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [myUsername, setMyUsername] = useState<string | null>(null);
+  const requestId = useRef(0);
 
-  const fetchLeaderboard = useCallback(async (p: number) => {
+  const fetchLeaderboard = useCallback(async (requestedPage: number) => {
+    const currentRequest = ++requestId.current;
     setLoading(true);
+    setError(null);
     try {
-      const res = await api.getLeaderboard(p, PAGE_SIZE);
+      const res = await api.getLeaderboard(requestedPage, PAGE_SIZE);
+      if (currentRequest !== requestId.current) return;
       setEntries(res.leaderboard);
       setTotal(res.total);
-      setPage(p);
+      setPage(res.page);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to load leaderboard");
+      if (currentRequest === requestId.current) setError(err instanceof Error ? err.message : "Could not load rankings");
     } finally {
-      setLoading(false);
+      if (currentRequest === requestId.current) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchLeaderboard(1);
-    api.me().then((r) => setMyUsername(r.user.username)).catch(() => {});
+    api.me().then((res) => setMyUsername(res.user.username)).catch(() => {});
+    return () => { requestId.current += 1; };
   }, [fetchLeaderboard]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -48,125 +48,68 @@ export default function LeaderboardPage() {
   return (
     <Protected>
       <PageShell>
-        <motion.div initial="hidden" animate="visible" variants={fadeUp} className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Leaderboard</h1>
-            <p className="mt-1 text-text-secondary">Global ranking by problems solved.</p>
-          </div>
+        <div className="space-y-6">
+          <header>
+            <h1 className="text-3xl font-bold sm:text-4xl">Leaderboard</h1>
+            <p className="mt-1 text-text-secondary">Ranked by distinct problems solved. Acceptance is based on submissions.</p>
+          </header>
 
-          <Card className="overflow-hidden p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-surface/50">
-                    <th className="px-4 py-3 text-left font-semibold text-text-secondary w-16">Rank</th>
-                    <th className="px-4 py-3 text-left font-semibold text-text-secondary">User</th>
-                    <th className="px-4 py-3 text-right font-semibold text-text-secondary">Solved</th>
-                    <th className="px-4 py-3 text-right font-semibold text-text-secondary">Acceptance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-12 text-center">
-                        <div className="flex items-center justify-center gap-2 text-text-secondary">
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                          Loading...
-                        </div>
-                      </td>
+          {loading && entries.length === 0 ? <LoadingState label="Loading rankings" /> : null}
+          {error ? (
+            <StatePanel tone="error" title="Rankings unavailable" description={error} action={<Button variant="ghost" onClick={() => fetchLeaderboard(page)}>Retry rankings</Button>} />
+          ) : null}
+          {!loading && !error && entries.length === 0 ? (
+            <StatePanel title="No ranked submissions yet" description="Rankings appear after the first code submission." action={<Link href="/problems" className="text-sm font-semibold text-primary hover:underline">Browse problems</Link>} />
+          ) : null}
+
+          {entries.length > 0 ? (
+            <section aria-label="Global rankings" className="border-y border-border">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[320px] text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-text-secondary">
+                      <th scope="col" className="w-16 px-2 py-3 text-left font-semibold sm:px-4">Rank</th>
+                      <th scope="col" className="px-2 py-3 text-left font-semibold sm:px-4">User</th>
+                      <th scope="col" className="px-2 py-3 text-right font-semibold sm:px-4">Solved</th>
+                      <th scope="col" className="hidden px-4 py-3 text-right font-semibold sm:table-cell">Acceptance</th>
                     </tr>
-                  ) : entries.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-12 text-center text-text-secondary">
-                        No submissions yet. Be the first!
-                      </td>
-                    </tr>
-                  ) : (
-                    entries.map((entry) => {
-                      const isMe = myUsername && entry.username === myUsername;
+                  </thead>
+                  <tbody className={loading ? "opacity-50" : ""}>
+                    {entries.map((entry) => {
+                      const isMe = entry.username === myUsername;
                       return (
-                        <tr
-                          key={entry.rank}
-                          className={`border-b border-border/50 transition-colors hover:bg-surface-hover/50 ${
-                            isMe ? "bg-primary/5" : ""
-                          }`}
-                        >
-                          <td className="px-4 py-3">
-                            <span
-                              className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
-                                entry.rank === 1
-                                  ? "bg-warning/20 text-warning"
-                                  : entry.rank === 2
-                                    ? "bg-text-secondary/20 text-text-secondary"
-                                    : entry.rank === 3
-                                      ? "bg-orange-500/20 text-orange-400"
-                                      : "text-text-secondary"
-                              }`}
-                            >
-                              {entry.rank}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <Link
-                              href={`/profile/${entry.username}`}
-                              className="flex items-center gap-2.5 font-medium text-text-primary hover:text-primary transition-colors"
-                            >
+                        <tr key={entry.username} className={`border-b border-border/50 last:border-0 ${isMe ? "bg-primary/5" : ""}`}>
+                          <td className="px-2 py-3 font-semibold tabular-nums text-text-secondary sm:px-4">{entry.rank}</td>
+                          <td className="px-2 py-3 sm:px-4">
+                            <Link href={`/profile/${encodeURIComponent(entry.username)}`} className="flex min-w-0 items-center gap-2.5 font-medium text-text-primary hover:text-primary">
                               <Avatar src={entry.avatar_url} name={entry.name ?? entry.username} size="sm" />
-                              <div>
-                                <span>
-                                  {entry.name || entry.username}
-                                  {isMe && (
-                                    <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                                      You
-                                    </span>
-                                  )}
-                                </span>
-                                <p className="text-xs text-text-secondary">@{entry.username}</p>
-                              </div>
+                              <span className="min-w-0">
+                                <span className="block break-words">{entry.name || entry.username}{isMe ? <span className="ml-2 text-xs font-semibold text-primary">You</span> : null}</span>
+                                <span className="block break-all text-xs font-normal text-text-secondary">@{entry.username}</span>
+                                <span className="block text-xs font-normal text-text-secondary sm:hidden">{entry.acceptanceRate}% accepted</span>
+                              </span>
                             </Link>
                           </td>
-                          <td className="px-4 py-3 text-right">
-                            <span className="font-semibold text-accent">{entry.solved}</span>
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <span className="text-text-secondary">{entry.acceptanceRate}%</span>
-                          </td>
+                          <td className="px-2 py-3 text-right font-semibold tabular-nums text-accent sm:px-4">{entry.solved}</td>
+                          <td className="hidden px-4 py-3 text-right tabular-nums text-text-secondary sm:table-cell">{entry.acceptanceRate}%</td>
                         </tr>
                       );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-border px-4 py-3">
-                <p className="text-xs text-text-secondary">
-                  Page {page} of {totalPages} ({total} users)
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    disabled={page <= 1}
-                    onClick={() => fetchLeaderboard(page - 1)}
-                    className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition hover:bg-surface-hover disabled:opacity-40"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="button"
-                    disabled={page >= totalPages}
-                    onClick={() => fetchLeaderboard(page + 1)}
-                    className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary transition hover:bg-surface-hover disabled:opacity-40"
-                  >
-                    Next
-                  </button>
-                </div>
+                    })}
+                  </tbody>
+                </table>
               </div>
-            )}
-          </Card>
-        </motion.div>
+              {totalPages > 1 ? (
+                <nav aria-label="Leaderboard pages" className="flex flex-wrap items-center justify-between gap-3 border-t border-border py-3">
+                  <p className="text-sm text-text-secondary">Page {page} of {totalPages} · {total} ranked users</p>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" disabled={loading || page <= 1} onClick={() => fetchLeaderboard(page - 1)}>Previous</Button>
+                    <Button variant="ghost" disabled={loading || page >= totalPages} onClick={() => fetchLeaderboard(page + 1)}>Next</Button>
+                  </div>
+                </nav>
+              ) : null}
+            </section>
+          ) : null}
+        </div>
       </PageShell>
     </Protected>
   );

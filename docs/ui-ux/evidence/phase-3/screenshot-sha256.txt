@@ -1,0 +1,9 @@
+0af430d07b3095176dd1a42772c8791e863e1cd888ff8e16a620011044000d06  docs/ui-ux/evidence/phase-3/dashboard-activity-error-dark-1440.png
+152fae5dae6fe3cb44bc368cb818e9491ef7d1bc25b4499b39871ad10d5ecf7e  docs/ui-ux/evidence/phase-3/dashboard-populated-dark-1440.png
+2ee30b509e6e0a4ec2405b76e469d8984d6e0f9f0f6becfb3d40a0b14f1a58b3  docs/ui-ux/evidence/phase-3/analytics-populated-light-1440.png
+575cf51c431a9d80c4293c722cb6a20c8963b7f370f35be1f4e9f6313705c0cb  docs/ui-ux/evidence/phase-3/analytics-populated-dark-1440.png
+57772f47e20298a0c54efc6e7bc1e9d6852c6839422821d640e0bdc135bbe5e7  docs/ui-ux/evidence/phase-3/analytics-populated-dark-390.png
+61d04d293bc6cb440a30c624879642ce9a25f5a9eb444a12b7ee1b85889014d7  docs/ui-ux/evidence/phase-3/dashboard-populated-light-1440.png
+ab0b53438d6aabf3e8525612218e63d6a0ddc2a42f7f4dde2f8e1a968efe2c80  docs/ui-ux/evidence/phase-3/analytics-empty-light-1440.png
+bb6e8a18db84540b74b08745832a5897a8092530944778fbf978df121e82d6a9  docs/ui-ux/evidence/phase-3/dashboard-populated-dark-390.png
+d82d8490b5abfa75a0839f519a16096239b6763ff272daa404e802a610949994  docs/ui-ux/evidence/phase-3/dashboard-empty-light-1440.png
