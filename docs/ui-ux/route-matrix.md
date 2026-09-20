@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-14
 **Scope:** All 19 `web/src/app/**/page.tsx` routes found during Phase 0 source review.
-**Workstream:** [UI/UX plan](../UI_UX_PLAN.md)
+**Workstream:** UI/UX polish (plan retired 2026-09-20; see [DECISIONS](../DECISIONS.md) D-045 to D-052)
 
 ## Evidence boundary
 

@@ -162,10 +162,8 @@ Code auto-discovers only the root `CLAUDE.md`.
 - `README.md` — public-facing overview, setup, deployment.
 - `docs/DECISIONS.md` — running log of decisions and findings. **Append to this** when a
   non-obvious call gets made; read it before re-litigating something.
-- `docs/UI_UX_PLAN.md` — **read this first for UI work.** The active UI plan, with
-  per-phase goals, three-iteration minimums, approval pauses, model-name co-author,
-  and one `feat/ui-ux-polish` branch followed by one PR after all phases finish.
-- `docs/EXECUTION_PLAN.md` — platform phase history, remaining verification, and parked
-  backlog. Its old branch/co-author do not govern the UI workstream.
+- `docs/BACKLOG.md` — what is deliberately not built yet, plus the two full verification
+  rounds that have never been run. Both phase plans (platform and UI) were retired on
+  2026-09-20 once their workstreams merged; they live in git history at `4083f5e`.
 - `docs/INTERVIEW_NOTES.md` — deep walkthrough of every subsystem.
 - `docs/PROJECT_CONTEXT.md` — original product spec and long-term vision.

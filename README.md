@@ -28,7 +28,11 @@
 
 **InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (10 supported, from Amazon and Google to Microsoft, Uber and Bloomberg), choose a difficulty, and work through **behavioral → coding → system design → core CS** rounds — all powered by **RAG-backed LLM question generation**, with real-time evaluation and follow-ups.
 
-On the coding side, solve problems in a **Monaco editor** with code execution in **isolated Docker sandboxes** (Python, C, C++, Java). Get **AI code reviews**, track progress with **analytics & leaderboards**, follow **learning paths**, and take **timed assessments**.
+On the coding side, work through **150 problems** (43 easy / 64 medium / 43 hard) in a **Monaco
+editor** with code execution in **isolated Docker sandboxes** (Python, C, C++, Java). Every one is
+verified executable in all four languages. Get **AI code reviews**, filter by company, track
+progress with **analytics & leaderboards**, follow **learning paths**, and take **timed
+assessments**.
 
 ### 📈 Retrieval quality, measured
 
@@ -77,7 +81,13 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 - 🏆 **Leaderboard & analytics** — Global rankings, topic radar, difficulty distribution, acceptance trends
 - 📋 **Timed assessments** — Multi-problem flows with countdown timer and scoring
 - 🗺️ **Learning paths** — Curated problem sequences by topic with progress tracking
+- 📄 **Resume-grounded interviews** — an uploaded resume is parsed into a **per-user vector
+  namespace** so questions reference the candidate's real projects; isolation is defended three
+  independent ways and verified against a live stack (API-only, no upload UI yet)
 - 🏗️ **System design** — AI-analyzed architecture explanations rendered as React Flow diagrams
+- ♿ **Resilient, accessible UI** — every route distinguishes loading, empty, missing and error
+  states with local recovery; keyboard focus, reduced-motion and light/dark theming throughout;
+  verified by a scripted Chrome pass across widths and themes
 
 ---
 
@@ -85,13 +95,15 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 
 ### Coding engine
 
-- Problem list with difficulty/topic/solved filters and search
+- 150 problems with difficulty/topic/company/solved/saved filters and search
 - Monaco-based code editor with syntax highlighting
 - **Run** (subset of tests) and **Submit** (full suite) modes
 - Submission history with language, status, runtime
 - Progressive hints and editorials
 - AI-powered code review (complexity, quality, optimizations)
 - Bookmarking and solved-state tracking
+- Hand-curated company tags (3–5 per problem, from the 10 interview companies) driving
+  "practice Amazon problems"-style filtering
 - Every problem is verified in all four languages: a reference solution runs through the real
   sandbox against test cases whose expected outputs come from an independent brute-force oracle
   (`scripts/verify_problems.py`, `scripts/problemgen/`)
@@ -195,7 +207,7 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 |---|---|
 | **Code runner** | Node.js service using Docker Engine API |
 | **Sandboxes** | Per-language images (`docker/python`, `docker/c`, `docker/cpp`, `docker/java`) |
-| **Database** | PostgreSQL 16 — 10 migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks |
+| **Database** | PostgreSQL 16 — 11 migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks, resumes |
 | **Vector store** | ChromaDB 0.5.5 |
 | **Orchestration** | Docker Compose (6 services) |
 
@@ -209,18 +221,21 @@ InterviewForge/
 │   └── src/app/            # App Router pages (dashboard, problems, interview, etc.)
 ├── backend/                # Express API server
 │   ├── src/routes/         # Auth, problems, submissions, interviews, assessments, etc.
-│   ├── sql_migrations/     # 001_init.sql through 010_learning_paths.sql
+│   ├── sql_migrations/     # 001_init.sql through 011_resumes.sql
+│   ├── reference_solutions/# <slug>/solution.{py,c,cpp,java} — every problem, every language
 │   └── scripts/            # seed_problems.ts, seed_learning_paths.ts
 ├── ai-service/             # FastAPI AI backend
 │   ├── app/api/            # RAG, interview, code-review, speech, recommendations
 │   ├── app/interview/      # Company profiles, orchestrator
 │   ├── app/llm/            # LLM chains (question, evaluation, report, etc.)
 │   ├── app/rag/            # Chroma client, chunking, embeddings, service
+│   ├── app/resume/         # PDF parsing and per-user vector namespaces
 │   ├── seed_data/          # documents.json (RAG corpus)
 │   └── scripts/            # seed_rag.py
 ├── code-runner/            # Sandbox orchestration service
 ├── docker/                 # Sandbox Dockerfiles (python, c, cpp, java)
-├── docs/                   # EXECUTION_PLAN, DECISIONS, INTERVIEW_NOTES, PROJECT_CONTEXT
+├── scripts/                # verify_problems.py, verify_phase7.py, problemgen/ (specs + oracles)
+├── docs/                   # DECISIONS, BACKLOG, INTERVIEW_NOTES, PROJECT_CONTEXT, eval/, ui-ux/
 ├── docker-compose.yml      # Local development stack
 └── docker-compose.prod.yml # Production stack (AWS)
 ```
@@ -398,13 +413,17 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [x] Production Docker Compose with multi-stage builds
 - [x] AWS deployment (EC2 + RDS + Nginx)
 - [x] CI pipeline (lint, typecheck, test, build) across all four services
-- [x] Test suites — 324 tests in `ai-service`, plus `backend` and `code-runner`
+- [x] Test suites — 581 tests: 405 `ai-service`, 73 `backend`, 55 `web`, 48 `code-runner`
 - [x] RAG evaluation harness with a committed baseline
 - [x] Retrieval quality work: structural chunking, hybrid search, reranking, routing
 - [x] Live corpus ingestion with provenance and write-back caching
 - [x] Expanded from 4 to 10 company interview profiles
-- [ ] Sandbox hardening (drop root, `CapDrop`, `PidsLimit`, CPU quota)
-- [ ] Resume-grounded personalised interviews
+- [x] Sandbox hardening (non-root, `CapDrop: ALL`, `no-new-privileges`, `PidsLimit`, CPU quota),
+      each control proven adversarially
+- [x] Resume-grounded personalised interviews with per-user vector isolation
+- [x] Problem set expanded 42 → 150, all verified executable in four languages
+- [x] UI/UX pass across every core workflow — honest resource states, responsive panes,
+      accessible analytics, route-level error recovery
 - [ ] HTTPS via Let's Encrypt (requires domain)
 - [ ] Horizontal scaling for code-runner and ai-service
 - [ ] WebSocket reconnection and offline resilience
@@ -412,17 +431,21 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [ ] Interview session replay and sharing
 - [ ] Collaborative mock interviews (peer-to-peer)
 
+The fuller version, with effort and impact estimates, is in [`docs/BACKLOG.md`](docs/BACKLOG.md) —
+including the two full verification rounds that have not been run yet.
+
 ---
 
 ## 📚 Documentation
 
 | Doc | What it covers |
 |---|---|
-| [`docs/UI_UX_PLAN.md`](docs/UI_UX_PLAN.md) | Active UI improvement phases, verification, and approval checkpoints |
-| [`docs/EXECUTION_PLAN.md`](docs/EXECUTION_PLAN.md) | Platform phase history, remaining verification, and parked backlog |
-| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only log of every non-obvious decision and finding, with the reasoning |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only log of every non-obvious decision and finding, with the reasoning (D-001 … D-052) |
+| [`docs/BACKLOG.md`](docs/BACKLOG.md) | What is deliberately not built yet, and the verification rounds still to run |
 | [`docs/eval/`](docs/eval/) | Retrieval baselines and per-phase results, including the negative ones |
+| [`docs/ui-ux/`](docs/ui-ux/) | UI phase reports, route/state matrix, and re-runnable browser capture scripts |
 | [`docs/INTERVIEW_NOTES.md`](docs/INTERVIEW_NOTES.md) | Deep walkthrough of every subsystem |
+| [`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md) | Original product spec and long-term vision |
 
 ---
 
