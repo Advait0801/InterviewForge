@@ -7,6 +7,33 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-19
+
+### D-051 — Interview answers reconcile against the transcript before retry
+
+**Shipped in UI Phase 6:** Interview answers now use a multiline composer. The UI
+keeps the draft until a candidate message for the current question is observed in the
+server transcript. If the POST succeeds but the following GET fails, or the POST
+outcome is uncertain, the next action refreshes the conversation rather than issuing
+another answer POST. A newly created session with a failed initial transcript load
+also retries the GET without creating a second session. This preserves the existing
+four-stage and follow-up contract while avoiding a duplicate answer from a UI retry.
+
+The system-design result gives the diagram a full-width, theme-aware area and a text
+list of its components and connections. Layout is horizontal on wide screens and
+vertical on narrow website widths. Reduced motion removes edge animation. Analysis
+errors retain the written draft, **Edit design** keeps it for revision, and **Try
+another** clears it. No native mobile client was added.
+
+**Verification:** Forty-eight web tests, lint, TypeScript, and an isolated production
+build pass. Chrome recorded 43 observations and 12 unique screenshots with no overflow,
+clipped controls, nested interactions, page exceptions, or failed requests. A fixture
+run completed all four interview stages and a follow-up, displayed the report, and
+downloaded its PDF. Local authenticated interview listing and design validation
+returned 200 and 400. Two diagnostic design-analysis requests reached the local AI
+service before the browser fixture route was corrected; the final matrix made no
+further AI calls. See [`ui-ux/phase-6.md`](ui-ux/phase-6.md) for evidence and limits.
+
 ## 2026-09-17
 
 ### D-050 — Coding workspaces preserve drafts, deadlines, and accepted submissions

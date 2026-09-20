@@ -1,0 +1,35 @@
+InterviewForge UI Phase 6 final checks
+Date: 2026-09-19
+
+web npm run lint -- --max-warnings=0
+PASS - zero ESLint warnings.
+
+web npx tsc --noEmit
+PASS - no TypeScript diagnostics.
+
+web npm test -- --run
+PASS - 10 test files, 48 tests.
+
+isolated web npm run build
+PASS - Next.js 16.1.6 production build compiled and generated all 18
+static pages plus the dynamic route manifest. No extra web
+port was opened for the build.
+
+docs/ui-ux/capture-phase6.mjs
+PASS - 43 route/state/theme/width observations, 12 screenshots, no page
+overflow, clipped visible controls, nested interactive controls, page errors,
+or failed requests. Five interview answers reached completion across four
+stages, including a follow-up. The report PDF downloaded in Chrome. Design
+analysis error/retry preserved the draft. Reduced-motion had zero infinite
+animations. A 360 CSS-pixel reflow proxy covered a 720-pixel window at 200%
+browser zoom.
+
+Local API compatibility
+PASS - GET /api/interviews returned 200 and validation of an empty design
+analysis request returned 400 without calling the AI service.
+
+AI-call accounting
+Two diagnostic system-design analysis calls reached the local AI service
+before the Playwright route matcher was repaired. The final matrix used
+deterministic fixtures and made no further AI calls. This is disclosed in
+the Phase 6 report.

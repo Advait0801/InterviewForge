@@ -1,6 +1,6 @@
 # InterviewForge UI/UX improvement plan
 
-**Status:** Phases 0–5 complete. Awaiting user approval for Phase 6; later phases have not started.
+**Status:** Phases 0–6 complete. Awaiting user approval for Phase 7; later phases have not started.
 **Prepared:** 2026-09-14
 **Reviewed baseline:** `main` at `a9c3fef`; working tree was clean before this document.
 **Working branch:** `feat/ui-ux-polish` (created in Phase 0; one branch for all phases)
@@ -386,8 +386,8 @@ into `main`, and verify the merge.
 | 2 | Complete | [Landing and onboarding](ui-ux/phase-2.md) | `feat(ui): polish the landing and authentication experience` | Approved |
 | 3 | Complete | [Dashboard and analytics](ui-ux/phase-3.md) | `feat(ui): clarify dashboard progress and analytics` | Approved |
 | 4 | Complete | [Practice discovery and learning paths](ui-ux/phase-4.md) | `feat(ui): streamline problem discovery and learning paths` | Approved |
-| 5 | Complete | [Coding and assessment workspaces](ui-ux/phase-5.md) | `feat(ui): improve coding and assessment workspaces` | Pending |
-| 6 | Not started | Interview/design feedback | — | Pending |
+| 5 | Complete | [Coding and assessment workspaces](ui-ux/phase-5.md) | `feat(ui): improve coding and assessment workspaces` | Approved |
+| 6 | Complete | [Interview and design feedback](ui-ux/phase-6.md) | `feat(ui): clarify interview flow and design feedback` | Pending |
 | 7 | Not started | Completion/regression | — | Pending |
 
 Each checkpoint reports: goal achieved, visible changes, evidence from at least three
@@ -397,5 +397,6 @@ scope are raised early; routine design/implementation decisions use this plan.
 
 **Plan approval:** User approved the plan and Phase 0 with “got it go,” approved
 Phase 1 with “yoo lets do phase1,” Phase 2 with “go phase2,” Phase 3 with
-“go phase3,” Phase 4 with “go conontue,” and Phase 5 by explicitly requesting the
-Phase 5 workspace scope. Phase 6 approval is pending at this checkpoint.
+“go phase3,” Phase 4 with “go conontue,” Phase 5 by explicitly requesting the
+Phase 5 workspace scope, and Phase 6 with “continue phase6.” Phase 7 approval is
+pending at this checkpoint.

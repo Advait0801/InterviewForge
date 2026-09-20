@@ -1,0 +1,390 @@
+{
+  "generatedAt": "2026-09-20T07:01:14.544Z",
+  "browser": "153.0.8010.48",
+  "localApi": {
+    "interviewListStatus": 200,
+    "emptyDesignValidationStatus": 400
+  },
+  "notes": [
+    "The live website stays on port 3002.",
+    "The final matrix uses deterministic browser fixtures for interview turns, design analysis, reports, failures, and empty diagrams.",
+    "Two diagnostic design-analysis requests reached the local AI service before the route matcher was corrected; they are disclosed in the phase report.",
+    "Narrow-width checks are responsive website checks, not a native mobile client."
+  ],
+  "observations": [
+    {
+      "label": "interview-setup-dark-320",
+      "viewport": 320,
+      "documentWidth": 320,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-dark-320",
+      "viewport": 320,
+      "documentWidth": 320,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-dark-320",
+      "viewport": 320,
+      "documentWidth": 320,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-dark-320",
+      "viewport": 320,
+      "documentWidth": 320,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "interview-setup-dark-390",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-dark-390",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-dark-390",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-dark-390",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "interview-setup-dark-768",
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-dark-768",
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-dark-768",
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-dark-768",
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "interview-setup-dark-1024",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-dark-1024",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-dark-1024",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-dark-1024",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "interview-setup-dark-1440",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-dark-1440",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-dark-1440",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-dark-1440",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "interview-setup-light-320",
+      "viewport": 320,
+      "documentWidth": 320,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-light-320",
+      "viewport": 320,
+      "documentWidth": 320,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-light-320",
+      "viewport": 320,
+      "documentWidth": 320,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-light-320",
+      "viewport": 320,
+      "documentWidth": 320,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "interview-setup-light-390",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-light-390",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-light-390",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-light-390",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "interview-setup-light-768",
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-light-768",
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-light-768",
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-light-768",
+      "viewport": 768,
+      "documentWidth": 768,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "interview-setup-light-1024",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-light-1024",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-light-1024",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-light-1024",
+      "viewport": 1024,
+      "documentWidth": 1024,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "interview-setup-light-1440",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-active-light-1440",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-setup-light-1440",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-light-1440",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    },
+    {
+      "label": "design-recovered-reduced-motion",
+      "viewport": 390,
+      "documentWidth": 390,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "interview-200-percent-reflow-proxy",
+      "viewport": 360,
+      "documentWidth": 360,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 0
+    },
+    {
+      "label": "design-feedback-200-percent-reflow-proxy",
+      "viewport": 360,
+      "documentWidth": 360,
+      "clipped": [],
+      "nestedInteractive": 0,
+      "infiniteAnimations": 4
+    }
+  ],
+  "screenshots": [
+    "interview-setup-dark-390.png",
+    "interview-active-dark-390.png",
+    "design-setup-dark-390.png",
+    "design-feedback-dark-390.png",
+    "interview-setup-light-1440.png",
+    "design-setup-light-1440.png",
+    "design-feedback-light-1440.png",
+    "interview-report-light-1440.png",
+    "design-error-dark-390.png",
+    "design-empty-light-1440.png",
+    "interview-zoom-200-light-720.png",
+    "design-feedback-zoom-200-light-720.png"
+  ],
+  "pageErrors": [],
+  "requestFailures": [],
+  "fullInterview": {
+    "answers": 5,
+    "stage": 4,
+    "reportVisible": true,
+    "pdfFilename": "interviewforge-report-fixtures.pdf"
+  },
+  "recovery": {
+    "draftPreserved": true,
+    "reducedMotionInfiniteAnimations": 0
+  },
+  "zoomKeyboard": {
+    "companySelectedByKeyboard": true,
+    "promptSelectedByKeyboard": true
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useReducedMotion } from "framer-motion";
 import {
   ReactFlow,
   Background,
@@ -9,12 +9,14 @@ import {
   type Node,
   type Edge,
   MarkerType,
+  Position,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { StatePanel } from "@/components/ui/state-panel";
+import { useTheme } from "@/components/ui/theme-provider";
 import { toast } from "sonner";
 import {
   api,
@@ -33,15 +35,6 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   }
   return btoa(binary);
 }
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.08, duration: 0.4, ease: "easeOut" as const },
-  }),
-};
 
 const PRESET_PROMPTS = [
   "Design a URL shortener like bit.ly",
@@ -88,7 +81,7 @@ function nodeColor(type: string): string {
   }
 }
 
-function layoutNodes(raw: SystemDesignNode[]): Node[] {
+function layoutNodes(raw: SystemDesignNode[], wide: boolean): Node[] {
   const layers: Map<number, SystemDesignNode[]> = new Map();
   for (const n of raw) {
     const layer = TYPE_LAYER[n.type] ?? 2;
@@ -98,7 +91,7 @@ function layoutNodes(raw: SystemDesignNode[]): Node[] {
 
   const sorted = [...layers.entries()].sort((a, b) => a[0] - b[0]);
   const nodes: Node[] = [];
-  const xGap = 240;
+  const xGap = 220;
   const yGap = 140;
 
   sorted.forEach(([, group], layerIdx) => {
@@ -107,7 +100,11 @@ function layoutNodes(raw: SystemDesignNode[]): Node[] {
     group.forEach((n, colIdx) => {
       nodes.push({
         id: n.id,
-        position: { x: startX + colIdx * xGap, y: layerIdx * yGap },
+        position: wide
+          ? { x: layerIdx * xGap, y: (colIdx - (group.length - 1) / 2) * yGap }
+          : { x: startX + colIdx * xGap, y: layerIdx * yGap },
+        sourcePosition: wide ? Position.Right : Position.Bottom,
+        targetPosition: wide ? Position.Left : Position.Top,
         data: { label: n.label },
         style: {
           background: nodeColor(n.type),
@@ -115,9 +112,9 @@ function layoutNodes(raw: SystemDesignNode[]): Node[] {
           border: "none",
           borderRadius: 12,
           padding: "10px 18px",
-          fontSize: 13,
+          fontSize: 16,
           fontWeight: 600,
-          minWidth: 130,
+          minWidth: 150,
           textAlign: "center" as const,
         },
       });
@@ -127,13 +124,23 @@ function layoutNodes(raw: SystemDesignNode[]): Node[] {
   return nodes;
 }
 
-function layoutEdges(raw: { source: string; target: string; label: string }[]): Edge[] {
+function subscribeToWideLayout(onChange: () => void) {
+  const media = window.matchMedia("(min-width: 768px)");
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+
+function getWideLayout() {
+  return window.matchMedia("(min-width: 768px)").matches;
+}
+
+function layoutEdges(raw: { source: string; target: string; label: string }[], reduceMotion: boolean): Edge[] {
   return raw.map((e, i) => ({
     id: `e-${i}`,
     source: e.source,
     target: e.target,
     label: e.label,
-    animated: true,
+    animated: !reduceMotion,
     markerEnd: { type: MarkerType.ArrowClosed },
     style: { strokeWidth: 1.5 },
     labelStyle: { fontSize: 11, fontWeight: 500 },
@@ -143,16 +150,25 @@ function layoutEdges(raw: { source: string; target: string; label: string }[]): 
 /* ── page ── */
 
 export default function SystemDesignPage() {
+  const { theme } = useTheme();
+  const reduceMotion = useReducedMotion() ?? false;
+  const wideLayout = useSyncExternalStore(subscribeToWideLayout, getWideLayout, () => false);
   const [prompt, setPrompt] = useState("");
   const [explanation, setExplanation] = useState("");
   const [company, setCompany] = useState<Company>("none");
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<SystemDesignAnalysis | null>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
 
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => () => {
+    mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
+  }, []);
 
   const [feedbackTab, setFeedbackTab] = useState<"summary" | "rubric" | "risks" | "improvements">("summary");
 
@@ -162,6 +178,7 @@ export default function SystemDesignPage() {
       return;
     }
     setAnalyzing(true);
+    setAnalysisError(null);
     try {
       const res = await api.analyzeSystemDesign(
         prompt,
@@ -170,7 +187,9 @@ export default function SystemDesignPage() {
       );
       setResult(res);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Analysis failed");
+      const message = err instanceof Error ? err.message : "Analysis failed";
+      setAnalysisError(message);
+      toast.error(message);
     } finally {
       setAnalyzing(false);
     }
@@ -183,6 +202,10 @@ export default function SystemDesignPage() {
       return;
     }
     try {
+      setVoiceError(null);
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+        throw new Error("Microphone recording is unavailable in this browser. You can still type your explanation.");
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const recorder = new MediaRecorder(stream);
       chunksRef.current = [];
@@ -199,7 +222,9 @@ export default function SystemDesignPage() {
           setExplanation((prev) => (prev ? prev + "\n\n" : "") + res.transcript);
           toast.success("Transcription appended");
         } catch (err) {
-          toast.error(err instanceof Error ? err.message : "Transcription failed");
+          const message = err instanceof Error ? err.message : "Transcription failed";
+          setVoiceError(message);
+          toast.error(message);
         } finally {
           setTranscribing(false);
         }
@@ -209,7 +234,9 @@ export default function SystemDesignPage() {
       recorder.start();
       setRecording(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not access microphone");
+      const message = err instanceof Error ? err.message : "Could not access microphone";
+      setVoiceError(message);
+      toast.error(message);
     }
   }, [recording]);
 
@@ -218,36 +245,38 @@ export default function SystemDesignPage() {
     setPrompt("");
     setExplanation("");
     setFeedbackTab("summary");
+    setAnalysisError(null);
   };
 
-  const flowNodes = result ? layoutNodes(result.nodes) : [];
-  const flowEdges = result ? layoutEdges(result.edges) : [];
+  const flowNodes = result ? layoutNodes(result.nodes, wideLayout) : [];
+  const flowEdges = result ? layoutEdges(result.edges, reduceMotion) : [];
 
   return (
     <Protected>
       <PageShell>
-        <motion.div initial="hidden" animate="visible">
+        <div>
           {!result ? (
             /* ── Input mode ── */
             <div className="space-y-8">
-              <motion.div variants={fadeUp} custom={0}>
-                <h1 className="mb-2 text-3xl font-semibold sm:text-4xl">System Design</h1>
+              <div>
+                <h1 className="mb-2 text-3xl font-semibold sm:text-4xl">System design review</h1>
                 <p className="max-w-2xl text-text-secondary">
                   Describe your architecture for a system design prompt. Use text, voice, or both.
                   The AI will extract components, generate an architecture diagram, and score your design.
                 </p>
-              </motion.div>
+              </div>
 
               {/* Preset prompts */}
-              <motion.div variants={fadeUp} custom={1}>
-                <h2 className="mb-3 text-lg font-semibold">Choose a Prompt</h2>
+              <div>
+                <h2 className="mb-3 text-lg font-semibold">Design prompt</h2>
                 <div className="flex flex-wrap gap-2">
                   {PRESET_PROMPTS.map((p) => (
                     <button
                       key={p}
                       type="button"
+                      aria-pressed={prompt === p}
                       onClick={() => setPrompt(p)}
-                      className={`rounded-xl border px-4 py-2 text-sm transition ${
+                      className={`rounded-lg border px-4 py-2 text-sm transition-colors ${
                         prompt === p
                           ? "border-primary bg-primary/10 text-primary"
                           : "border-border text-text-secondary hover:border-primary/40"
@@ -258,24 +287,26 @@ export default function SystemDesignPage() {
                   ))}
                 </div>
                 <textarea
+                  aria-label="Design prompt"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Or type a custom system design prompt..."
                   rows={2}
-                  className="mt-3 w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none transition focus:border-primary placeholder:text-text-secondary/50"
+                  className="mt-3 w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm outline-none transition focus:border-primary placeholder:text-text-secondary/50"
                 />
-              </motion.div>
+              </div>
 
               {/* Company selector */}
-              <motion.div variants={fadeUp} custom={2}>
+              <div>
                 <h2 className="mb-3 text-lg font-semibold">Company Context <span className="text-sm font-normal text-text-secondary">(optional)</span></h2>
                 <div className="flex flex-wrap gap-2">
                   {(["none", "amazon", "google", "meta", "apple"] as const).map((c) => (
                     <button
                       key={c}
                       type="button"
+                      aria-pressed={company === c}
                       onClick={() => setCompany(c)}
-                      className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
+                      className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                         company === c
                           ? "border-primary bg-primary/10 text-primary"
                           : "border-border text-text-secondary hover:border-primary/50"
@@ -285,17 +316,18 @@ export default function SystemDesignPage() {
                     </button>
                   ))}
                 </div>
-              </motion.div>
+              </div>
 
               {/* Explanation input */}
-              <motion.div variants={fadeUp} custom={3}>
+              <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Your Explanation</h2>
+                  <label htmlFor="design-explanation" className="text-lg font-semibold">Your explanation</label>
                   <div className="flex items-center gap-2">
                     {transcribing && <span className="text-xs text-text-secondary">Transcribing...</span>}
                     <Button
                       variant={recording ? "danger" : "ghost"}
                       onClick={toggleRecording}
+                      disabled={analyzing || transcribing}
                       className="text-sm"
                     >
                       {recording ? "Stop Recording" : "Record Voice"}
@@ -303,39 +335,45 @@ export default function SystemDesignPage() {
                   </div>
                 </div>
                 <textarea
+                  id="design-explanation"
                   value={explanation}
                   onChange={(e) => setExplanation(e.target.value)}
                   placeholder="Explain your system design here. Describe components, data flow, trade-offs, and scaling strategy. You can also use the voice recorder above..."
                   rows={10}
-                  className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm leading-relaxed outline-none transition focus:border-primary placeholder:text-text-secondary/50"
+                  className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm leading-relaxed outline-none transition focus:border-primary placeholder:text-text-secondary/50"
                 />
-              </motion.div>
+                {voiceError && <p role="alert" className="mt-2 text-sm text-error">{voiceError}</p>}
+              </div>
 
               {/* Analyze */}
-              <motion.div variants={fadeUp} custom={4}>
-                <Button onClick={handleAnalyze} disabled={analyzing || !prompt.trim() || !explanation.trim()}>
-                  {analyzing ? "Analyzing..." : "Analyze Design"}
+              <div>
+                <Button onClick={handleAnalyze} loading={analyzing} loadingLabel="Analyzing design" disabled={!prompt.trim() || !explanation.trim() || recording || transcribing}>
+                  Analyze design
                 </Button>
-              </motion.div>
+                {analysisError && <StatePanel tone="error" title="Analysis unavailable" description={analysisError} className="mt-4" action={<Button variant="ghost" onClick={handleAnalyze}>Retry analysis</Button>} />}
+              </div>
             </div>
           ) : (
             /* ── Results mode ── */
-            <motion.div variants={fadeUp} custom={0} className="space-y-6">
+            <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h1 className="text-2xl font-semibold sm:text-3xl">Analysis Results</h1>
+                  <h1 className="text-2xl font-semibold sm:text-3xl">Design feedback</h1>
                   <p className="mt-1 text-sm text-text-secondary">{prompt}</p>
                 </div>
-                <Button variant="ghost" onClick={reset}>Try Another</Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="ghost" onClick={() => setResult(null)}>Edit design</Button>
+                  <Button variant="ghost" onClick={reset}>Try another</Button>
+                </div>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-2">
-                {/* Left: Architecture diagram */}
-                <Card className="p-0 overflow-hidden">
-                  <div className="border-b border-border px-4 py-2.5">
-                    <h3 className="text-sm font-semibold">Architecture Diagram</h3>
+              <div className="space-y-8">
+                <section aria-labelledby="diagram-heading" className="border-y border-border">
+                  <div className="flex flex-wrap items-center justify-between gap-2 py-3">
+                    <h2 id="diagram-heading" className="text-lg font-semibold">Architecture diagram</h2>
+                    <p className="text-sm text-text-secondary">{result.nodes.length} components · {result.edges.length} connections</p>
                   </div>
-                  <div className="h-[480px]">
+                  {result.nodes.length > 0 ? <div className="h-[min(62vh,600px)] min-h-[340px] w-full bg-surface">
                     <ReactFlow
                       nodes={flowNodes}
                       edges={flowEdges}
@@ -344,21 +382,30 @@ export default function SystemDesignPage() {
                       proOptions={{ hideAttribution: true }}
                       nodesDraggable
                       nodesConnectable={false}
-                      colorMode="dark"
+                      colorMode={theme}
+                      aria-label="Architecture diagram"
                     >
                       <Background gap={20} />
                       <Controls showInteractive={false} />
                     </ReactFlow>
-                  </div>
-                </Card>
+                  </div> : <StatePanel title="No diagram components" description="The analysis returned feedback without an architecture diagram." />}
+                  {result.nodes.length > 0 && <details className="py-3 text-sm">
+                    <summary className="cursor-pointer font-semibold">Components and connections</summary>
+                    <ul className="mt-3 list-inside list-disc space-y-1 text-text-secondary">
+                      {result.nodes.map((node) => <li key={node.id}>{node.label} ({node.type})</li>)}
+                      {result.edges.map((edge, index) => <li key={`${edge.source}-${edge.target}-${index}`}>{result.nodes.find((node) => node.id === edge.source)?.label ?? edge.source} to {result.nodes.find((node) => node.id === edge.target)?.label ?? edge.target}{edge.label ? `: ${edge.label}` : ""}</li>)}
+                    </ul>
+                  </details>}
+                </section>
 
-                {/* Right: AI feedback */}
-                <Card className="flex flex-col p-0 overflow-hidden">
-                  <div className="flex shrink-0 border-b border-border">
+                <section aria-label="Design assessment" className="border-y border-border">
+                  <div className="flex flex-wrap border-b border-border" role="tablist" aria-label="Feedback sections">
                     {(["summary", "rubric", "risks", "improvements"] as const).map((tab) => (
                       <button
                         key={tab}
                         type="button"
+                        role="tab"
+                        aria-selected={feedbackTab === tab}
                         onClick={() => setFeedbackTab(tab)}
                         className={`px-4 py-2.5 text-xs font-medium capitalize transition ${
                           feedbackTab === tab
@@ -370,7 +417,7 @@ export default function SystemDesignPage() {
                       </button>
                     ))}
                   </div>
-                  <div className="flex-1 overflow-y-auto p-4">
+                  <div role="tabpanel" className="max-w-3xl py-5">
                     {feedbackTab === "summary" && (
                       <div className="space-y-3">
                         <p className="text-sm leading-relaxed">{result.summary}</p>
@@ -378,8 +425,7 @@ export default function SystemDesignPage() {
                           {result.nodes.map((n) => (
                             <span
                               key={n.id}
-                              className="rounded-lg px-2.5 py-1 text-xs font-medium"
-                              style={{ background: nodeColor(n.type) + "20", color: nodeColor(n.type) }}
+                              className="rounded-lg border border-border bg-surface px-2.5 py-1 text-xs font-medium"
                             >
                               {n.label}
                             </span>
@@ -396,7 +442,7 @@ export default function SystemDesignPage() {
                               <span className="text-sm font-semibold">{RUBRIC_LABELS[key] ?? key}</span>
                               <span className="text-sm font-bold text-primary">{section.score}/10</span>
                             </div>
-                            <div className="mb-2 h-2 rounded-full bg-border">
+                            <div className="mb-2 h-2 rounded-full bg-border" role="progressbar" aria-label={`${RUBRIC_LABELS[key] ?? key} score`} aria-valuemin={0} aria-valuemax={10} aria-valuenow={section.score}>
                               <div
                                 className="h-2 rounded-full bg-gradient-to-r from-primary to-secondary transition-all"
                                 style={{ width: `${(section.score / 10) * 100}%` }}
@@ -436,11 +482,11 @@ export default function SystemDesignPage() {
                       </ul>
                     )}
                   </div>
-                </Card>
+                </section>
               </div>
-            </motion.div>
+            </div>
           )}
-        </motion.div>
+        </div>
       </PageShell>
     </Protected>
   );
