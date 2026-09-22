@@ -24,6 +24,22 @@
 
 ---
 
+## 🎬 Demo
+
+<div align="center">
+
+**Sandboxed coding workspace — write, run, and get instant results**
+
+<img src="docs/assets/coding-demo.gif" alt="Solving a problem in the Monaco editor with live sandboxed execution" width="820">
+
+**Resume-grounded mock interview — questions that reference your actual projects**
+
+<img src="docs/assets/interview-demo.gif" alt="A RAG-grounded behavioral interview referencing the candidate's resume" width="820">
+
+</div>
+
+---
+
 ## 📱 Overview
 
 **InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (10 supported, from Amazon and Google to Microsoft, Uber and Bloomberg), choose a difficulty, and work through **behavioral → coding → system design → core CS** rounds — all powered by **RAG-backed LLM question generation**, with real-time evaluation and follow-ups.
