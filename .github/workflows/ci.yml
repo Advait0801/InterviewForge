@@ -78,3 +78,92 @@ jobs:
         # calibration check replays recorded responses, so no services and no
         # API keys are required. If this step ever needs a key, that's a bug.
         run: python -m pytest
+
+  docker:
+    # Builds every production image and smoke-tests it (contents + boot). The unit
+    # jobs above never touch a Dockerfile, so before this a broken prod image was
+    # only discovered at deploy time -- and the ai-service image had been shipping
+    # its API keys (D-054). Minutes are free on a public repo, so this runs on
+    # every push like the other jobs.
+    name: prod images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Placeholder .env files
+        # A real host has these, CI doesn't (they're gitignored). Without them the
+        # "no .env in the image" check could never fail here, and the compose check
+        # below would fail on the missing env_file. Values are dummies.
+        run: |
+          for svc in backend ai-service code-runner; do
+            echo "CI_PLACEHOLDER=1" > "$svc/.env"
+          done
+          # web inlines this at build time; see web/.dockerignore.
+          echo "NEXT_PUBLIC_API_URL=http://localhost:4000/api" > web/.env
+
+      - name: Validate prod compose file
+        run: docker compose -f docker-compose.prod.yml config --quiet
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build backend
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile.prod
+          tags: interviewforge-backend:ci
+          load: true
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
+
+      - name: Build ai-service
+        uses: docker/build-push-action@v6
+        with:
+          context: ai-service
+          file: ai-service/Dockerfile.prod
+          tags: interviewforge-ai-service:ci
+          load: true
+          cache-from: type=gha,scope=ai-service
+          cache-to: type=gha,scope=ai-service,mode=max
+
+      - name: Build code-runner
+        uses: docker/build-push-action@v6
+        with:
+          context: code-runner
+          file: code-runner/Dockerfile.prod
+          tags: interviewforge-code-runner:ci
+          load: true
+          cache-from: type=gha,scope=code-runner
+          cache-to: type=gha,scope=code-runner,mode=max
+
+      - name: Build web
+        uses: docker/build-push-action@v6
+        with:
+          context: web
+          file: web/Dockerfile.prod
+          tags: interviewforge-web:ci
+          load: true
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=max
+
+      - name: Smoke test
+        run: bash scripts/ci/smoke_prod_images.sh
+
+  sandboxes:
+    # The images user code runs in. Build-only: their behaviour is covered by
+    # verify_problems.py against a live code-runner.
+    name: sandbox (${{ matrix.lang }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: [python, c, cpp, java]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: docker/sandboxes/${{ matrix.lang }}-sandbox
+          tags: interviewforge-${{ matrix.lang }}-sandbox:ci
+          cache-from: type=gha,scope=sandbox-${{ matrix.lang }}
+          cache-to: type=gha,scope=sandbox-${{ matrix.lang }},mode=max

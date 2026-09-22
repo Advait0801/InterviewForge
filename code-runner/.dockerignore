@@ -1,0 +1,7 @@
+# Runtime config comes from env_file, never the image.
+.env
+.env.*
+node_modules
+dist
+coverage
+.DS_Store

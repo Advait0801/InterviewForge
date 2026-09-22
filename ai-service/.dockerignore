@@ -1,0 +1,17 @@
+# Dockerfile.prod is single-stage and does `COPY . .`, so without this file the
+# provider API keys in .env shipped inside the image (found in D-054).
+# Runtime config comes from env_file.
+.env
+.env.*
+# Not needed at runtime. .corpus_cache is a local, untracked snapshot for
+# `app.ingest.reindex --rebuild`; excluding it keeps local and CI builds identical.
+.corpus_cache
+tests
+.pytest_cache
+__pycache__
+**/__pycache__
+*.pyc
+.venv
+venv
+requirements-dev.txt
+.DS_Store
