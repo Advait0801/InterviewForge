@@ -9,29 +9,37 @@ breakdowns, exit criteria or iteration logs are ever needed. What actually shipp
 Effort: **S** hours · **M** a day or two · **L** a week+.
 **Loud** = an interviewer notices · **Quiet** = nobody praises it, everybody notices its absence.
 
-## Remaining verification (never run end to end)
+## End-to-end verification — DONE (2026-09-21)
 
-**Round 1 — correctness.** Full stack from clean volumes (`docker compose up --build`);
-every migration applied in order against an empty database; all seed scripts run; full test
-suite green across all services; manual walkthrough of register → solve in all 4 languages →
-4-stage interview → report + PDF → assessment → learning path → analytics → leaderboard; eval
-harness re-run and matching the recorded numbers.
+Both rounds were run end to end for the first time, both green.
 
-**Round 2 — resilience & docs.** Adversarial sandbox suite re-run; failure modes exercised
-(LLM provider rate-limited, Chroma unreachable, code-runner down, live-fetch source slow or
-unreachable, malformed input to every endpoint); cross-user resume isolation re-verified;
-live-fetch spend caps re-verified; every command in the README executed verbatim on a clean
-checkout; every closed finding marked closed.
+**Round 1 — correctness. ✅** Full stack from clean volumes; all 11 migrations applied in order
+against an empty database; every seed script run; **581/581 tests** across all services (backend 73,
+code-runner 48, ai-service 405, web 55); lint + backend `tsc` + web `next build`; an 18-step
+walkthrough of register → solve in all 4 languages → 4-stage interview → report → assessment →
+learning path → analytics → leaderboard; eval harness re-run and reproducing the recorded numbers
+(nDCG 0.899, MRR 0.917, hit_rate 0.952).
 
-A round is a full verify → refine pass: if it surfaces a defect, fix it and re-run the round
-from the top rather than resuming at the failure.
+**Round 2 — resilience. ✅** Cross-user resume isolation re-verified (29/29, incl. deletion purge and
+all malformed-PDF classes); malformed input to endpoints returns correct 400/404/401; failure modes
+injected — **Chroma-down and code-runner-down both degrade to a retryable 503**, services stay
+healthy; adversarial sandbox holds at runtime (infinite loop → Time Limit Exceeded, zero leaked
+containers); `verify_phase7.py` 46/46; closed findings F-12/F-14/F-21/F-22 reconfirmed.
+
+**Two findings surfaced:** (1) the recorded eval numbers are only reproducible with
+`app.ingest.reindex --rebuild` from `ai-service/.corpus_cache`, which is **not git-tracked** — so a
+clean clone cannot reproduce them without live re-fetch (decided: not fixed, low priority). (2)
+code-runner-unreachable returned a generic 500 instead of a retryable 503 — **fixed and merged**
+(PR #8). Not exercised: live-fetch spend caps (F-19, needs Gemini grounding quota that 429s on free
+tier, F-20) and the 600-run `verify_problems.py` (already verified once under Phase 7).
 
 ## Presentation
 
-- **Demo video + README GIFs** *(S, Loud)* — the substitute for the live link that no longer
-  exists (D-004). More reliable than a deployment: no quota to exhaust, no dead link. Worth
-  pulling forward if the goal is resume impact rather than engineering depth. Best recorded
-  now that the UI polish has landed.
+- ~~**Demo video + README GIFs** *(S, Loud)*~~ — **DONE (2026-09-21).** Two README GIFs (coding
+  workspace + resume-grounded interview) captured against the live stack via Playwright and embedded
+  at the top of the README (`docs/assets/`). A produced video was deliberately skipped in favour of
+  the GIFs — the substitute for the live link that no longer exists (D-004), with no quota to exhaust
+  or dead link to rot.
 
 ## Interviewer intelligence
 
