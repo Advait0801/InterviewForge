@@ -165,5 +165,4 @@ Code auto-discovers only the root `CLAUDE.md`.
 - `docs/BACKLOG.md` — what is deliberately not built yet, plus the two full verification
   rounds that have never been run. Both phase plans (platform and UI) were retired on
   2026-09-20 once their workstreams merged; they live in git history at `4083f5e`.
-- `docs/INTERVIEW_NOTES.md` — deep walkthrough of every subsystem.
 - `docs/PROJECT_CONTEXT.md` — original product spec and long-term vision.

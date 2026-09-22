@@ -12,7 +12,6 @@ All project documentation lives here, except two files that must stay at the rep
 |---|---|
 | [`DECISIONS.md`](DECISIONS.md) | Running log of decisions and findings. **Append as we go.** The record of what was built and why |
 | [`BACKLOG.md`](BACKLOG.md) | What is deliberately not built yet, and the verification rounds still to run |
-| [`INTERVIEW_NOTES.md`](INTERVIEW_NOTES.md) | Deep explain-it-out-loud walkthrough of every subsystem |
 | [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) | Original product spec and long-term vision |
 | [`eval/`](eval) | Retrieval evaluation results per phase, with the raw JSON behind each number |
 | [`ui-ux/phase-0.md`](ui-ux/phase-0.md) | UI baseline, route/state matrix, verification evidence, and test approach |

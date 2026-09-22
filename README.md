@@ -251,7 +251,7 @@ InterviewForge/
 ├── code-runner/            # Sandbox orchestration service
 ├── docker/                 # Sandbox Dockerfiles (python, c, cpp, java)
 ├── scripts/                # verify_problems.py, verify_phase7.py, problemgen/ (specs + oracles)
-├── docs/                   # DECISIONS, BACKLOG, INTERVIEW_NOTES, PROJECT_CONTEXT, eval/, ui-ux/
+├── docs/                   # DECISIONS, BACKLOG, PROJECT_CONTEXT, eval/, ui-ux/
 ├── docker-compose.yml      # Local development stack
 └── docker-compose.prod.yml # Production stack (AWS)
 ```
@@ -460,7 +460,6 @@ including the two full verification rounds that have not been run yet.
 | [`docs/BACKLOG.md`](docs/BACKLOG.md) | What is deliberately not built yet, and the verification rounds still to run |
 | [`docs/eval/`](docs/eval/) | Retrieval baselines and per-phase results, including the negative ones |
 | [`docs/ui-ux/`](docs/ui-ux/) | UI phase reports, route/state matrix, and re-runnable browser capture scripts |
-| [`docs/INTERVIEW_NOTES.md`](docs/INTERVIEW_NOTES.md) | Deep walkthrough of every subsystem |
 | [`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md) | Original product spec and long-term vision |
 
 ---

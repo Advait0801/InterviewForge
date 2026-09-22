@@ -91,3 +91,6 @@ Pods/
 # and framing intended for a resume, not project documentation.
 RESUME_INTERVIEWFORGE_SUMMARY.md
 RESUME_*.md
+
+# Internal deep-dive notes -- kept locally, not tracked
+docs/INTERVIEW_NOTES.md
