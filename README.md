@@ -237,7 +237,7 @@ InterviewForge/
 │   └── src/app/            # App Router pages (dashboard, problems, interview, etc.)
 ├── backend/                # Express API server
 │   ├── src/routes/         # Auth, problems, submissions, interviews, assessments, etc.
-│   ├── sql_migrations/     # 001_init.sql through 011_resumes.sql
+│   ├── sql_migrations/     # 001_init.sql through 012_query_indexes.sql
 │   ├── reference_solutions/# <slug>/solution.{py,c,cpp,java} — every problem, every language
 │   └── scripts/            # seed_problems.ts, seed_learning_paths.ts
 ├── ai-service/             # FastAPI AI backend
@@ -393,6 +393,8 @@ ssh -i interviewforge-key.pem ec2-user@<ELASTIC_IP>
 # Clone and configure
 git clone <repo-url> ~/InterviewForge && cd ~/InterviewForge
 # Create .env files for each service (backend, ai-service, code-runner, web)
+# backend/.env needs JWT_SECRET (>= 32 chars; the backend refuses to boot otherwise)
+# and TRUST_PROXY=1, since Nginx sits in front and rate limits key on client IP
 
 # Build sandbox images
 docker build -t interviewforge-python-sandbox:latest docker/sandboxes/python-sandbox/
