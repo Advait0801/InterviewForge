@@ -2,6 +2,7 @@ import { Router } from "express";
 import { query } from "../db";
 import { hashPassword, verifyPassword, signAccessToken } from "../auth";
 import { randomToken, hoursFromNow } from "../auth-tokens";
+import { loginLimiter, authWriteLimiter } from "../middleware/rate-limit.middleware";
 
 const router = Router();
 
@@ -15,7 +16,7 @@ function resetLink(token: string): string {
   return `${frontendUrl()}/reset-password?token=${encodeURIComponent(token)}`;
 }
 
-router.post("/register", async (req, res) => {
+router.post("/register", authWriteLimiter, async (req, res) => {
   const { username, email, password, fullName } = req.body as {
     username?: string;
     email?: string;
@@ -71,7 +72,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   const { identifier, password } = req.body as { identifier?: string; password?: string };
 
   if (!identifier || !password) {
@@ -110,7 +111,7 @@ router.post("/login", async (req, res) => {
 });
 
 /** Always returns 200 to avoid email enumeration */
-router.post("/forgot-password", async (req, res) => {
+router.post("/forgot-password", authWriteLimiter, async (req, res) => {
   const { email } = req.body as { email?: string };
   if (!email?.trim()) {
     return res.status(400).json({ error: "Email is required" });
@@ -138,7 +139,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-router.post("/reset-password", async (req, res) => {
+router.post("/reset-password", authWriteLimiter, async (req, res) => {
   const { token, newPassword } = req.body as { token?: string; newPassword?: string };
   if (!token || !newPassword) {
     return res.status(400).json({ error: "Token and new password are required" });

@@ -7,6 +7,50 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-09-22
+
+### D-053 — Backend hardening: no default JWT secret, per-user API limiting, auth limiters, query indexes (closes F-23)
+
+**JWT secret fails closed.** `auth.ts` used to fall back to `"dev-secret-change-me"` when
+`JWT_SECRET` was unset, so a deploy that forgot the variable came up healthy and accepted tokens
+anyone could mint for any `userId`. `resolveJwtSecret()` now rejects a missing secret, the old
+published default, and anything under 32 characters, and `index.ts` calls it before listening, so
+the process exits 1 at boot instead. The check doesn't depend on `NODE_ENV`, because nothing in this
+repo sets it (not even `Dockerfile.prod`). Verification is pinned to HS256. Tests get a valid secret
+from `vitest.config.ts`.
+
+**F-23 closed.** `optionalAuth` now runs before `apiLimiter` on `/api`, so a valid Bearer token keys
+the bucket on the user. A forged or expired token falls back to the IP key, so nobody can spend
+someone else's budget.
+
+**Auth-specific limits.** `/auth/login` allows 10 *failed* attempts per IP per 15 minutes
+(`skipSuccessfulRequests`, so a user who mistypes and then gets in is never counted). Register,
+forgot-password and reset-password share 20 per IP per hour. Before this, the only limit on
+credential guessing was the global 500 per 15 minutes. When the login limit trips, it blocks that
+IP entirely, including correct passwords, until the window ends. That's the intended trade-off.
+
+**`TRUST_PROXY`.** In prod, behind Nginx, `req.ip` is the proxy's address, so every IP-keyed bucket
+would have been one global bucket. Set `TRUST_PROXY=1` in `backend/.env` when running behind Nginx.
+Leave it unset when clients connect directly, because trusting `X-Forwarded-For` there lets anyone
+choose their own IP.
+
+**helmet** adds the standard security headers and removes `X-Powered-By`. Its
+`Cross-Origin-Resource-Policy: same-origin` does not affect the web app, because CORP isn't enforced
+on CORS-mode fetches. A cross-origin fetch from :3002 was checked live.
+
+**Migration 012: nine indexes.** Before this there were only six secondary indexes, and Postgres
+doesn't index foreign keys automatically. Measured on 200k synthetic submissions, 20k sessions and
+200k messages inside a transaction that was rolled back: submission history 17.8 → 0.04 ms,
+per-problem solved flags 73.7 → 0.10 ms, interview transcript 10.3 → 0.04 ms, reset-token lookup
+now uses an index. **The leaderboard did not improve (57 → 66 ms, noise).** It aggregates every
+submission, and no index changes that. It needs a cached or materialised result, which is the
+Redis item in the backlog.
+
+**Verified:** backend 80 tests (73 + 7 new), `tsc` clean; live boot refuses missing, default and
+short secrets; two users on one IP drew from separate buckets (A 499→478 after 20 requests, B
+499→498); 11th failed login → 429 while 12 successful ones passed; 21st auth-write → 429;
+`verify_phase7.py` 46/46; `verify_resume_isolation.py` 32/32; migration 012 is idempotent.
+
 ## 2026-09-20
 
 ### D-052 — Secondary pages distinguish resource failure from missing data
@@ -1078,7 +1122,7 @@ Things observed in the code that need a call made on them.
 | F-20 | Live *discovery* depends on Gemini search grounding, which returns 429 on the free tier — the live fetch degrades safely to local context but cannot write back until quota exists (D-038) | `ai-service/app/ingest/live.py` |
 | F-21 | ~~Company tags are too broad: Amazon 149/150, Microsoft 139, Google 125~~ — closed by D-044: curated 3–5 per problem in `curation.py`, Amazon now 91, no company below 20 | `scripts/problemgen/curation.py` |
 | F-22 | ~~The `editorial` column is never written; all 150 problems have none~~ — closed by D-044: `problem_editorials.json`, seeded and rendered as sections | `backend/problem_editorials.json` |
-| F-23 | `apiLimiter` is mounted on `/api` before any auth middleware, so `req.user` is never set there and it always keys on IP, despite the "key on the authenticated user" comment. Users behind one NAT share 500 requests per 15 minutes. `llmLimiter` is unaffected (mounted after `requireAuth`) | `backend/src/index.ts`, `backend/src/middleware/rate-limit.middleware.ts` |
+| F-23 | ~~`apiLimiter` is mounted on `/api` before any auth middleware, so `req.user` is never set there and it always keys on IP, despite the "key on the authenticated user" comment. Users behind one NAT share 500 requests per 15 minutes. `llmLimiter` is unaffected (mounted after `requireAuth`)~~ — closed by D-053: `optionalAuth` runs first | `backend/src/index.ts`, `backend/src/middleware/rate-limit.middleware.ts` |
 | F-16 | `EmbeddingService` has no fallback on *error*: if the configured provider returns 401/404 the call raises rather than trying the other provider, unlike `invoke_with_fallback` for LLM calls | `ai-service/app/rag/embeddings.py` |
 | F-17 | Retrieval metrics are identical with and without the company/stage metadata filter, so the filter currently buys nothing measurable on this corpus. Re-test after Phase 4 expands it | `ai-service/app/interview/orchestrator.py` |
 | F-14 | 4 pre-existing `react-hooks` lint errors in `web/`: `setState` called synchronously in effects (theme-provider, paths/[slug], problems/[id]) and `Date.now()` called during render (dashboard "days ago" label). CI lint for `web` is `continue-on-error` until fixed | `web/src/` |

@@ -1,8 +1,11 @@
 import http from "http";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import dotenv from "dotenv";
 import { apiLimiter } from "./middleware/rate-limit.middleware";
+import { optionalAuth } from "./middleware/auth.middleware";
+import { resolveJwtSecret } from "./auth";
 import {
   correlationId,
   setCurrentCorrelationId,
@@ -23,7 +26,27 @@ import resumesRoutes from "./routes/resumes.routes";
 
 dotenv.config();
 
+// Fail at boot, not on the first login: a missing or weak secret means forgeable tokens.
+try {
+  resolveJwtSecret();
+} catch (err) {
+  console.error(`[startup] ${(err as Error).message}`);
+  process.exit(1);
+}
+
 const app = express();
+
+// Behind a reverse proxy (Nginx in prod) req.ip is the proxy's address unless Express is
+// told to trust X-Forwarded-For, which would put every user in one rate-limit bucket.
+// Set TRUST_PROXY to the number of proxy hops; leave it unset when clients connect
+// directly, since trusting the header then would let anyone spoof their IP.
+const trustProxyHops = Number.parseInt(process.env.TRUST_PROXY ?? "", 10);
+if (Number.isFinite(trustProxyHops) && trustProxyHops > 0) {
+  app.set("trust proxy", trustProxyHops);
+}
+
+// Security headers. The API serves JSON only, so helmet's defaults cost nothing.
+app.use(helmet());
 const PORT = Number(process.env.BACKEND_PORT) || 4000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
@@ -44,7 +67,7 @@ app.use((req, _res, next) => {
   next();
 });
 
-app.use("/api", apiLimiter);
+app.use("/api", optionalAuth, apiLimiter);
 
 app.get("/health", (req, res) => {
   res.json({

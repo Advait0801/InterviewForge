@@ -73,14 +73,24 @@ tier, F-20) and the 600-run `verify_problems.py` (already verified once under Ph
 - **Redis + BullMQ worker pool** *(L, Loud)* — bounded concurrency in front of code-runner,
   distributed rate limiting, leaderboard caching. Three wins from one component, and it fixes
   the in-process limiter counters (F-19).
-- **Fix F-23** *(S)* — the global API limiter is mounted before auth, so it keys on IP; users
-  behind one NAT share a bucket and repeated integration sweeps exhaust it.
+- ~~**Fix F-23**~~ — **DONE (D-053)**, together with auth limiters, a fail-closed JWT secret, helmet
+  and `TRUST_PROXY`.
 - **Query audit** *(M, Quiet)* — `EXPLAIN ANALYZE` the leaderboard and analytics queries, add
   missing indexes, fix N+1s.
+  *Indexes done in D-053 (migration 012). Remaining: the leaderboard is a full aggregate that no
+  index helps; it needs caching or a materialised view.*
 - **Repository/service layer** *(M, Quiet)* — routes currently hold SQL and business logic.
 - **More languages** *(M)* — JS, Go, Rust: a Dockerfile and harness each.
 - **Custom test cases + failing-case diff view** *(S)* — the gap between "toy judge" and "tool
   I'd actually use".
+- **Token revocation** *(S)* — JWTs live 7 days in `localStorage` and nothing invalidates them;
+  a password reset leaves every existing session alive. A `token_version` column in the JWT,
+  bumped on reset, fixes it.
+- **Route-level backend tests** *(M, Quiet)* — `interviews.routes.ts` (631 lines), submissions,
+  problems, users and assessments have no route tests; the 400/404/503 contract is checked only by
+  the live verify scripts.
+- **CI builds the prod images** *(S, Quiet)* — CI never builds `Dockerfile.prod`, so a broken prod
+  image would only be found at deploy time.
 - **Real email delivery** *(S)* — SES or Resend for verification and reset (F-07).
 
 ## Product

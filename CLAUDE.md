@@ -39,7 +39,7 @@ remains in git history at commits `e24baf6` and `b19f09d` if it's ever needed.
 backend/src/routes/          # one file per resource; SQL lives directly in handlers
 backend/src/services/        # ai.service.ts (AI_SERVICE_URL), interview-state.service.ts
 backend/src/db.ts            # single query() helper over a pg Pool
-backend/sql_migrations/      # 001_init.sql … 011_resumes.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 012_query_indexes.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
 scripts/problemgen/          # problem specs + independent oracles that generate the data files
@@ -81,7 +81,10 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 **API**
 - Validate UUID path params; 400 on malformed, 404 on not found.
 - Protected routes use `requireAuth` (JWT `{ userId }`, HS256, 7d); `optionalAuth`
-  where solved/bookmark flags are enriched for logged-in users.
+  where solved/bookmark flags are enriched for logged-in users. `optionalAuth` also runs
+  globally before `apiLimiter` so the limiter keys per user (D-053).
+- `JWT_SECRET` must be set and ≥32 chars or the backend refuses to boot — there is no
+  fallback. Behind a proxy, set `TRUST_PROXY` to the hop count (D-053).
 - Backend uses native `fetch` for outbound calls — no axios.
 
 **AI service**
@@ -151,7 +154,6 @@ still accurate and redeployable.
   `ReadonlyRootfs` is deliberately not set — see D-032.
 - ~~`memoryKb` always null~~ — now sampled during execution. Absent for runs shorter
   than roughly one sample interval; approximate rather than exact (D-033).
-- README's repo-layout block lists `docs/smoke-test.md`, which never existed.
 
 ## Related docs
 
