@@ -205,11 +205,23 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
     const allTestCases = problem.test_cases || [];
     const testCases = mode === "run" ? allTestCases.slice(0, RUN_CASE_LIMIT) : allTestCases;
 
-    const runRes = await fetch(`${CODE_RUNNER_URL}/run`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ language, code, testCases, slug: problem.slug }),
-    });
+    let runRes: Response;
+    try {
+      runRes = await fetch(`${CODE_RUNNER_URL}/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language, code, testCases, slug: problem.slug }),
+      });
+    } catch (err) {
+      // code-runner is unreachable (connection refused, DNS failure, timeout).
+      // A dependency being down is a retryable 503, not a 500 that implies a bug
+      // in this handler -- mirrors the ai-service Chroma-down response so callers
+      // can treat every dependency outage the same way.
+      console.error("Code runner unreachable", err);
+      return res
+        .status(503)
+        .json({ error: "Code runner unavailable", retryable: true });
+    }
 
     if (!runRes.ok) {
       const text = await runRes.text();
