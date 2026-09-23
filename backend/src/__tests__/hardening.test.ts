@@ -1,4 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
+
+// optionalAuth checks token_version in the database (D-055); every user here is at 0.
+vi.mock("../db", () => ({ query: vi.fn(async () => ({ rows: [{ token_version: 0 }] })) }));
 import { resolveJwtSecret, MIN_JWT_SECRET_LENGTH, signAccessToken } from "../auth";
 import { optionalAuth, type AuthRequest } from "../middleware/auth.middleware";
 import { userOrIpKey } from "../middleware/rate-limit.middleware";
@@ -25,32 +28,32 @@ describe("resolveJwtSecret", () => {
 
 // F-23: apiLimiter is mounted after optionalAuth, so the key it sees depends on the token.
 describe("apiLimiter keying after optionalAuth", () => {
-  function keyFor(authorization?: string): string {
+  async function keyFor(authorization?: string): Promise<string> {
     const req = {
       headers: authorization ? { authorization } : {},
       ip: "203.0.113.7",
     } as unknown as AuthRequest;
     const next = vi.fn();
-    optionalAuth(req, {} as never, next);
+    await optionalAuth(req, {} as never, next);
     expect(next).toHaveBeenCalledOnce();
     return userOrIpKey(req);
   }
 
-  it("keys a valid token on the user, so users behind one NAT get separate buckets", () => {
-    const a = keyFor(`Bearer ${signAccessToken({ userId: "user-a" })}`);
-    const b = keyFor(`Bearer ${signAccessToken({ userId: "user-b" })}`);
+  it("keys a valid token on the user, so users behind one NAT get separate buckets", async () => {
+    const a = await keyFor(`Bearer ${signAccessToken({ userId: "user-a", tokenVersion: 0 })}`);
+    const b = await keyFor(`Bearer ${signAccessToken({ userId: "user-b", tokenVersion: 0 })}`);
     expect(a).toBe("user:user-a");
     expect(b).toBe("user:user-b");
   });
 
-  it("falls back to IP for an anonymous request", () => {
-    expect(keyFor()).toMatch(/^ip:/);
+  it("falls back to IP for an anonymous request", async () => {
+    expect(await keyFor()).toMatch(/^ip:/);
   });
 
-  it("falls back to IP for a forged token, so a caller can't pick someone else's bucket", () => {
-    const token = signAccessToken({ userId: "victim" });
+  it("falls back to IP for a forged token, so a caller can't pick someone else's bucket", async () => {
+    const token = signAccessToken({ userId: "victim", tokenVersion: 0 });
     const [header, , sig] = token.split(".");
     const forged = Buffer.from(JSON.stringify({ userId: "victim" })).toString("base64url");
-    expect(keyFor(`Bearer ${header}.${forged}x.${sig}`)).toMatch(/^ip:/);
+    expect(await keyFor(`Bearer ${header}.${forged}x.${sig}`)).toMatch(/^ip:/);
   });
 });

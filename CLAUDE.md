@@ -39,7 +39,7 @@ remains in git history at commits `e24baf6` and `b19f09d` if it's ever needed.
 backend/src/routes/          # one file per resource; SQL lives directly in handlers
 backend/src/services/        # ai.service.ts (AI_SERVICE_URL), interview-state.service.ts
 backend/src/db.ts            # single query() helper over a pg Pool
-backend/sql_migrations/      # 001_init.sql … 012_query_indexes.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 013_token_version.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
 scripts/problemgen/          # problem specs + independent oracles that generate the data files
@@ -87,6 +87,10 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - Protected routes use `requireAuth` (JWT `{ userId }`, HS256, 7d); `optionalAuth`
   where solved/bookmark flags are enriched for logged-in users. `optionalAuth` also runs
   globally before `apiLimiter` so the limiter keys per user (D-053).
+- Tokens carry `tv` = `users.token_version`; auth checks it on every request (one PK lookup,
+  memoised per request). Bump the column to revoke a user's sessions. Session failures are
+  401 with `code: "session_invalid"` — the web client signs out only on that code, so never
+  add it to a 401 that isn't about the session (D-055).
 - `JWT_SECRET` must be set and ≥32 chars or the backend refuses to boot — there is no
   fallback. Behind a proxy, set `TRUST_PROXY` to the hop count (D-053).
 - Backend uses native `fetch` for outbound calls — no axios.

@@ -39,12 +39,12 @@ describe("password hashing", () => {
 
 describe("access tokens", () => {
   it("round-trips the userId", () => {
-    const token = signAccessToken({ userId: "user-123" });
+    const token = signAccessToken({ userId: "user-123", tokenVersion: 0 });
     expect(verifyAccessToken(token).userId).toBe("user-123");
   });
 
   it("rejects a token signed with a different secret", () => {
-    const token = signAccessToken({ userId: "user-123" });
+    const token = signAccessToken({ userId: "user-123", tokenVersion: 0 });
     const original = process.env.JWT_SECRET;
     // The module captured JWT_SECRET at import time, so tamper with the token
     // itself rather than the env: flipping the signature must invalidate it.
@@ -63,7 +63,7 @@ describe("access tokens", () => {
   });
 
   it("rejects a token whose payload has been tampered with", () => {
-    const token = signAccessToken({ userId: "user-123" });
+    const token = signAccessToken({ userId: "user-123", tokenVersion: 0 });
     const [header, , signature] = token.split(".");
     const forged = Buffer.from(JSON.stringify({ userId: "admin" }))
       .toString("base64url");

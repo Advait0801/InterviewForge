@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { query } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
-import { hashPassword, verifyPassword } from "../auth";
+import { hashPassword, verifyPassword, signAccessToken } from "../auth";
 
 const router = Router();
 
@@ -51,10 +51,19 @@ router.post("/change-password", requireAuth, async (req: AuthRequest, res) => {
       return res.status(401).json({ error: "Current password is incorrect" });
     }
 
+    // Revoke every other session (D-055), then hand this one a token for the new
+    // version so the user who just changed their password stays signed in here.
     const passwordHash = await hashPassword(newPassword);
-    await query("UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2", [passwordHash, userId]);
+    const updated = await query<{ token_version: number }>(
+      `UPDATE users
+       SET password_hash = $1, token_version = token_version + 1, updated_at = NOW()
+       WHERE id = $2
+       RETURNING token_version`,
+      [passwordHash, userId]
+    );
+    const token = signAccessToken({ userId, tokenVersion: updated.rows[0].token_version });
 
-    return res.json({ ok: true });
+    return res.json({ ok: true, token });
   } catch (err) {
     console.error("Change password error", err);
     return res.status(500).json({ error: "Internal server error" });

@@ -83,9 +83,8 @@ tier, F-20) and the 600-run `verify_problems.py` (already verified once under Ph
 - **More languages** *(M)* — JS, Go, Rust: a Dockerfile and harness each.
 - **Custom test cases + failing-case diff view** *(S)* — the gap between "toy judge" and "tool
   I'd actually use".
-- **Token revocation** *(S)* — JWTs live 7 days in `localStorage` and nothing invalidates them;
-  a password reset leaves every existing session alive. A `token_version` column in the JWT,
-  bumped on reset, fixes it.
+- ~~**Token revocation**~~ — **DONE (D-055)**: `token_version`, sign out everywhere, and the web
+  client returns to login when a session ends.
 - **Route-level backend tests** *(M, Quiet)* — `interviews.routes.ts` (631 lines), submissions,
   problems, users and assessments have no route tests; the 400/404/503 contract is checked only by
   the live verify scripts.

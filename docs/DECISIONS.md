@@ -9,6 +9,58 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-22
 
+### D-055 — Token revocation via token_version; the backend no longer crashes when Postgres drops connections
+
+**Why:** JWTs lived 7 days in `localStorage` and nothing could invalidate them. A password reset or
+change left every existing session working, and a deleted user's token still passed `requireAuth`,
+which never looked at the database. Separately, the web client never handled a 401: a dead token
+left the user on error screens instead of sending them to login.
+
+**Decided:**
+- **Migration 013** adds `users.token_version`. Tokens carry it as a `tv` claim. `requireAuth` and
+  `optionalAuth` compare it with one primary-key lookup; a mismatch, a missing `tv`, or a deleted
+  user is a 401 with `code: "session_invalid"`.
+- **Tokens issued before this ship are rejected** (they have no `tv`), which forces one re-login.
+  Chosen over treating them as version 0, which would have kept every old token alive until its
+  owner's next reset. Nothing is deployed, so the cost is nil.
+- **What bumps the version:** password reset (ends every session). Password change (ends every
+  other session, and returns a fresh token so the current tab stays signed in). The new
+  `POST /auth/logout-all` (ends every session, including the caller's).
+- **No in-process cache** of versions: a cache would keep a revoked token alive on other instances
+  for its TTL, which is F-19's per-instance trap again. The auth result is memoised on the request,
+  so the global `optionalAuth` plus a route's `requireAuth` still cost one lookup.
+- **Database unreachable → 503 `retryable`, never 401.** A blip must not sign everyone out.
+- **Revoked token on a public route → anonymous, not 401**, so public pages keep working.
+- `problems.routes.ts` had its own `getOptionalUserId` that decoded tokens by hand. It would have
+  skipped the revocation check, so it now uses `optionalAuth`.
+- **Web:** `request()` signs out (clears the token, goes to `/login?expired=1`, which shows "Your
+  session ended") **only** on `session_invalid`. An ordinary 401, like "current password is
+  incorrect", stays a form error. Settings stores the token returned by change-password and adds a
+  **Sign out everywhere** button.
+
+**Found while verifying: the backend died whenever Postgres dropped its connections.** Stopping
+Postgres to test the 503 path killed the backend process. `pg` emits `error` on the pool when the
+server terminates an idle connection, and with no listener Node treats that as an uncaught
+exception. In prod that means every Postgres restart, failover or RDS maintenance window takes the
+API down until the container restarts. `db.ts` now logs the event instead. With the database
+stopped, requests get a clean 503. It recovered 2 s after Postgres returned, with the same token
+still valid.
+
+**Verified:**
+- backend 92 tests (80 + 11 revocation + 1 db). The revocation tests fail 4/11 with the version
+  check removed, and the db test fails without the listener.
+- web 59 tests (55 + 4). The "ordinary 401 keeps the session" test fails with the code check
+  removed.
+- tsc and lint clean; `next build` clean.
+- Live, 22/22: legacy token rejected with the session code; change-password revokes the other
+  session and returns a working token; a wrong current password is a 401 that keeps the session; a
+  reset revokes all three open sessions; logout-all revokes the caller and the others; a revoked
+  token on `/problems` → 200 anonymous; a deleted user → 401.
+- Database stopped → 503 retryable, backend stays up.
+- Browser: a revoked token in storage → `/login?expired=1` with the notice and the token cleared.
+  Settings → Sign out everywhere → login, and the token is 401 on the server.
+- `verify_phase7.py` 46/46, `verify_resume_isolation.py` 33/33, migration 013 idempotent.
+
 ### D-054 — CI builds and smoke-tests every production image; ai-service stopped shipping its .env
 
 **Why:** CI ran unit tests, lint and `tsc`, but never built a `Dockerfile.prod`, so a broken prod

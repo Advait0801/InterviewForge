@@ -3,6 +3,7 @@ import { query } from "../db";
 import { hashPassword, verifyPassword, signAccessToken } from "../auth";
 import { randomToken, hoursFromNow } from "../auth-tokens";
 import { loginLimiter, authWriteLimiter } from "../middleware/rate-limit.middleware";
+import { requireAuth, type AuthRequest } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -50,21 +51,21 @@ router.post("/register", authWriteLimiter, async (req, res) => {
     const verifyToken = randomToken();
     const verifyExpires = hoursFromNow(24 * 7);
 
-    const result = await query<{ id: string }>(
+    const result = await query<{ id: string; token_version: number }>(
       `INSERT INTO users (
          username, email, password_hash, name,
          email_verified, email_verification_token, email_verification_expires_at
        )
        VALUES ($1, $2, $3, $4, FALSE, $5, $6)
-       RETURNING id`,
+       RETURNING id, token_version`,
       [username, email, passwordHash, fullName ?? null, verifyToken, verifyExpires]
     );
 
-    const userId = result.rows[0].id;
+    const { id: userId, token_version: tokenVersion } = result.rows[0];
     const link = verificationLink(verifyToken);
     console.log("[email-verify] Send verification email to", email, "link:", link);
 
-    const token = signAccessToken({ userId });
+    const token = signAccessToken({ userId, tokenVersion });
     return res.status(201).json({ token });
   } catch (err) {
     console.error("Register error", err);
@@ -81,10 +82,10 @@ router.post("/login", loginLimiter, async (req, res) => {
 
   try {
     const isEmail = identifier.includes("@");
-    const result = await query<{ id: string; password_hash: string | null }>(
+    const result = await query<{ id: string; password_hash: string | null; token_version: number }>(
       isEmail
-        ? "SELECT id, password_hash FROM users WHERE LOWER(email) = LOWER($1)"
-        : "SELECT id, password_hash FROM users WHERE LOWER(username) = LOWER($1)",
+        ? "SELECT id, password_hash, token_version FROM users WHERE LOWER(email) = LOWER($1)"
+        : "SELECT id, password_hash, token_version FROM users WHERE LOWER(username) = LOWER($1)",
       [identifier]
     );
 
@@ -102,7 +103,7 @@ router.post("/login", loginLimiter, async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const token = signAccessToken({ userId: user.id });
+    const token = signAccessToken({ userId: user.id, tokenVersion: user.token_version });
     return res.json({ token });
   } catch (err) {
     console.error("Login error", err);
@@ -166,6 +167,8 @@ router.post("/reset-password", authWriteLimiter, async (req, res) => {
          password_hash = $1,
          password_reset_token = NULL,
          password_reset_expires_at = NULL,
+         -- Whoever needed a reset may have lost control of a session; end them all.
+         token_version = token_version + 1,
          updated_at = NOW()
        WHERE id = $2`,
       [passwordHash, r.rows[0].id]
@@ -173,6 +176,23 @@ router.post("/reset-password", authWriteLimiter, async (req, res) => {
     return res.json({ ok: true });
   } catch (err) {
     console.error("Reset password error", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * Sign out everywhere, this session included: bumping token_version revokes every token
+ * issued so far (D-055). The client clears its own token and returns to login.
+ */
+router.post("/logout-all", requireAuth, async (req: AuthRequest, res) => {
+  try {
+    await query(
+      "UPDATE users SET token_version = token_version + 1, updated_at = NOW() WHERE id = $1",
+      [req.user!.id]
+    );
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Logout-all error", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
