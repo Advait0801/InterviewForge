@@ -10,6 +10,7 @@ import { PasswordField } from "@/components/ui/password-field";
 import { Avatar } from "@/components/ui/avatar";
 import { LoadingState, StatePanel } from "@/components/ui/state-panel";
 import { api } from "@/lib/api";
+import { clearToken, setToken } from "@/lib/auth";
 
 const MIN_LEN = 6;
 
@@ -32,6 +33,7 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [signingOutAll, setSigningOutAll] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -125,8 +127,10 @@ export default function SettingsPage() {
     }
     setSubmitting(true);
     try {
-      await api.changePassword(currentPassword, newPassword);
-      toast.success("Password updated");
+      const { token } = await api.changePassword(currentPassword, newPassword);
+      // The change revoked every earlier token, this tab's included; keep the new one.
+      setToken(token);
+      toast.success("Password updated. Other sessions have been signed out.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -135,6 +139,19 @@ export default function SettingsPage() {
       setPasswordError(msg);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const onSignOutEverywhere = async () => {
+    if (!window.confirm("Sign out of InterviewForge on every device, including this one?")) return;
+    setSigningOutAll(true);
+    try {
+      await api.logoutAll();
+      clearToken();
+      window.location.assign("/login");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not sign out everywhere");
+      setSigningOutAll(false);
     }
   };
 
@@ -249,7 +266,24 @@ export default function SettingsPage() {
                   <Button className="w-full" type="submit" loading={submitting} loadingLabel="Updating password">
                     Update password
                   </Button>
+                  <p className="text-xs text-text-secondary">Changing your password signs out your other devices.</p>
                 </form>
+              </Card>
+
+              <Card className="mt-6 p-6">
+                <h2 className="text-lg font-semibold">Sessions</h2>
+                <p className="mt-1 mb-4 text-sm text-text-secondary">
+                  Lost a device, or signed in somewhere you shouldn&apos;t have? This ends every session, including this one.
+                </p>
+                <Button
+                  variant="danger"
+                  className="w-full"
+                  onClick={onSignOutEverywhere}
+                  loading={signingOutAll}
+                  loadingLabel="Signing out everywhere"
+                >
+                  Sign out everywhere
+                </Button>
               </Card>
             </div>
           </div>

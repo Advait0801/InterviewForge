@@ -9,6 +9,198 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-22
 
+### D-057 — Hidden test cases stay hidden, the assessment timer is enforced, multi-write routes are transactional
+
+These close the three items D-056 found and left open.
+
+**Hidden test cases.** `GET /problems/:id` returned the whole suite, so every hidden case could be
+read off the API and hard-coded. Now:
+- `services/test-cases.ts` defines the first 4 cases as the public examples (what Run uses).
+- The problem API sends only those examples, plus `test_case_count`.
+- Submit results attach input and expected output to the examples and to the **first failing
+  hidden case** (as LeetCode does, so the user can debug it). Every other hidden case is reduced to
+  `{ passed, hidden: true }`. A passing hidden case's actual output is dropped too, because a passing
+  output *is* the expected answer.
+- The web problem page used to render submit results from the full suite it fetched. It now renders
+  from each result's own fields and labels the rest "Hidden test case".
+
+**Assessment timer.** The page stopped work at zero, but the API still accepted a solution linked
+after time ran out. `/solve` now refuses once
+`NOW() > started_at + time_limit + 30 s`. That's computed by Postgres, so the deadline uses the same
+clock as `started_at`; the 30 s absorbs a submit made in the last second. Submitting the assessment
+itself stays allowed after the deadline; it just can't count late work.
+
+**Transactions.** A new `db.withTransaction` helper, applied where one request makes several writes
+that must land together:
+- **`/answer`.** The turn now commits in one transaction. It starts by **claiming the turn**: an
+  UPDATE that only matches while the session is still on the stage and turn count the answer
+  responded to. A failure part-way rolls the whole turn back. A double submit (two tabs, a retry)
+  records once; the loser gets a **409** instead of advancing the interview twice.
+- **Creating an interview:** the session row plus its opening question.
+- **Storing a report:** the report plus its score rows.
+- **Creating an assessment:** the assessment plus its problem rows. A partial insert here used to
+  be a permanent 500 on `GET /assessments/:id`.
+- LLM calls and code execution stay outside the transactions, so no connection or row lock is held
+  across them.
+
+**Caught while doing it:** inside a transaction `NOW()` is frozen. The answer, its evaluation and
+the next question would have shared one `created_at`, and the transcript (`ORDER BY created_at`)
+would have come back in arbitrary order. Message inserts now set `created_at = clock_timestamp()`.
+
+**Verified:**
+- backend 178 tests (+8), each fix's test failing with the fix removed: claim guard, redaction,
+  example-only problem API, timer, frozen `NOW()`. web 59, code-runner 48, ai-service 405 = **690**.
+- Live: the problem API sent 4 of 50 cases. A wrong submit showed the 4 examples and the first
+  failing hidden case, with the other 45 as pass/fail only. A link 61 min into a 60-min assessment
+  → 400; inside the 30 s grace → 200. Two concurrent answers to one question → 200 and 409; the
+  session advanced once; the transcript came back in order with 4 distinct timestamps.
+- Browser: the problem page renders examples and "Hidden test case" rows.
+- `verify_phase7.py` 46/46, `verify_resume_isolation.py` 36/36.
+
+### D-056 — Route-level backend tests; the five bugs they found
+
+**Why:** the backend had unit tests for helpers and middleware, but none for the routes that hold
+the product: `interviews.routes.ts` (631 lines), submissions, assessments, users and problems. Their
+400/404/503 behaviour was checked only by the live `verify_*.py` scripts.
+
+**Decided:** `src/__tests__/helpers/harness.ts` mounts a real router over HTTP, behind the same
+middleware as `index.ts` (the 8mb JSON limit and global `optionalAuth`). It replaces Postgres with a
+**strict** scripted fake: a query no handler claims throws, so a route can't run unexpected SQL and
+still pass. The AI service is mocked with its real `AIServiceError`, so the status mapping is what's
+under test. Submissions talk to a stand-in code-runner on a real socket, so the unreachable-runner
+path is the real `fetch` failure. There are 78 new tests.
+
+**Bugs the tests found, all fixed and pinned by tests:**
+1. **The interview report was regenerated on every page view.** Each reload cost an LLM call and
+   inserted another set of score rows, which inflated analytics. Migration 014 adds
+   `interview_sessions.report_json`: the first generation is stored and served from then on. The
+   store is conditional (`WHERE report_json IS NULL`), so of two concurrent first loads only one
+   records scores, and the other serves the winner's copy. Live: first load 4.1 s, repeats 12–14 ms,
+   scores +5 once, one `interview_report_chain` call.
+2. **Assessment scores could be faked.** `/assessments/:id/solve` accepted any `submissionId`:
+   another user's passed submission, or the caller's own passed solution to a different, easier
+   problem, which was full marks either way. It now requires the caller's own submission for that
+   problem (404 / 400). Verified live, plus the real happy path: a reference solution through the
+   code-runner, linked, scored 100.
+3. `POST /submissions` sent a **malformed `problemId`** to Postgres (a 500 from the uuid cast), and
+   sent an **unsupported language** to the runner. The latter was stored as a submission and came
+   back as a misleading "Code runner unavailable". Both, and an unknown `mode`, are now 400 before
+   any I/O.
+4. `POST /assessments` with a non-numeric `problemCount` or `timeLimitMinutes` produced `LIMIT NaN`,
+   which Postgres returned as a 500. An unknown `difficultyMix` fell through to a query as well. All
+   are now 400.
+5. The unknown-company error still listed "amazon, google, meta, apple". It's now built from
+   `COMPANIES` (10).
+
+**Found, not fixed (in `BACKLOG.md`):** the assessment timer is advisory, since nothing server-side
+rejects a link or submit after time runs out. `GET /problems/:id` returns the full hidden test
+suite. The writes in `/answer` aren't in a transaction, so a mid-sequence failure can leave a
+partial turn.
+
+**Verified:**
+- Tests: backend 170 (92 + 78; each fix's test failed before the fix), web 59, code-runner 48,
+  ai-service 405 = **682**. tsc and build clean.
+- Live: each fix behaves as above, and migration 014 is idempotent.
+- `verify_phase7.py` 46/46 and `verify_resume_isolation.py` 35/35.
+
+### D-055 — Token revocation via token_version; the backend no longer crashes when Postgres drops connections
+
+**Why:** JWTs lived 7 days in `localStorage` and nothing could invalidate them. A password reset or
+change left every existing session working, and a deleted user's token still passed `requireAuth`,
+which never looked at the database. Separately, the web client never handled a 401: a dead token
+left the user on error screens instead of sending them to login.
+
+**Decided:**
+- **Migration 013** adds `users.token_version`. Tokens carry it as a `tv` claim. `requireAuth` and
+  `optionalAuth` compare it with one primary-key lookup; a mismatch, a missing `tv`, or a deleted
+  user is a 401 with `code: "session_invalid"`.
+- **Tokens issued before this ship are rejected** (they have no `tv`), which forces one re-login.
+  Chosen over treating them as version 0, which would have kept every old token alive until its
+  owner's next reset. Nothing is deployed, so the cost is nil.
+- **What bumps the version:** password reset (ends every session). Password change (ends every
+  other session, and returns a fresh token so the current tab stays signed in). The new
+  `POST /auth/logout-all` (ends every session, including the caller's).
+- **No in-process cache** of versions: a cache would keep a revoked token alive on other instances
+  for its TTL, which is F-19's per-instance trap again. The auth result is memoised on the request,
+  so the global `optionalAuth` plus a route's `requireAuth` still cost one lookup.
+- **Database unreachable → 503 `retryable`, never 401.** A blip must not sign everyone out.
+- **Revoked token on a public route → anonymous, not 401**, so public pages keep working.
+- `problems.routes.ts` had its own `getOptionalUserId` that decoded tokens by hand. It would have
+  skipped the revocation check, so it now uses `optionalAuth`.
+- **Web:** `request()` signs out (clears the token, goes to `/login?expired=1`, which shows "Your
+  session ended") **only** on `session_invalid`. An ordinary 401, like "current password is
+  incorrect", stays a form error. Settings stores the token returned by change-password and adds a
+  **Sign out everywhere** button.
+
+**Found while verifying: the backend died whenever Postgres dropped its connections.** Stopping
+Postgres to test the 503 path killed the backend process. `pg` emits `error` on the pool when the
+server terminates an idle connection, and with no listener Node treats that as an uncaught
+exception. In prod that means every Postgres restart, failover or RDS maintenance window takes the
+API down until the container restarts. `db.ts` now logs the event instead. With the database
+stopped, requests get a clean 503. It recovered 2 s after Postgres returned, with the same token
+still valid.
+
+**Verified:**
+- backend 92 tests (80 + 11 revocation + 1 db). The revocation tests fail 4/11 with the version
+  check removed, and the db test fails without the listener.
+- web 59 tests (55 + 4). The "ordinary 401 keeps the session" test fails with the code check
+  removed.
+- tsc and lint clean; `next build` clean.
+- Live, 22/22: legacy token rejected with the session code; change-password revokes the other
+  session and returns a working token; a wrong current password is a 401 that keeps the session; a
+  reset revokes all three open sessions; logout-all revokes the caller and the others; a revoked
+  token on `/problems` → 200 anonymous; a deleted user → 401.
+- Database stopped → 503 retryable, backend stays up.
+- Browser: a revoked token in storage → `/login?expired=1` with the notice and the token cleared.
+  Settings → Sign out everywhere → login, and the token is 401 on the server.
+- `verify_phase7.py` 46/46, `verify_resume_isolation.py` 33/33, migration 013 idempotent.
+
+### D-054 — CI builds and smoke-tests every production image; ai-service stopped shipping its .env
+
+**Why:** CI ran unit tests, lint and `tsc`, but never built a `Dockerfile.prod`, so a broken prod
+image would only have been found at deploy time. Building them found two real defects:
+
+- **The ai-service prod image contained `/app/.env` with both provider API keys**, plus `tests/`,
+  `.pytest_cache`, `.corpus_cache` and `.DS_Store`. Its `Dockerfile.prod` is single-stage with
+  `COPY . .`, and no service had a `.dockerignore`. Anyone with the image had the keys. The backend
+  and code-runner images were safe only by luck: they're multi-stage, so `.env` reached just the
+  builder stage (which still sits in the local build cache).
+- **The backend prod image omitted `problem_editorials.json`.** `seed_problems.ts` checks for the
+  file with `existsSync` and silently falls back, so seeding in prod would have given all 150
+  problems no editorial (undoing the fix for F-22 without any error).
+
+**Decided:**
+- Every service gets a `.dockerignore` that keeps `.env` out. `web/` is the deliberate exception:
+  its `.env` holds only `NEXT_PUBLIC_API_URL`, which `next build` inlines into the client bundle, so
+  it's public by definition. `web/.dockerignore` says never to put a secret there.
+- A `prod images` CI job builds all four images (with a GitHub Actions layer cache), validates
+  `docker-compose.prod.yml`, and runs `scripts/ci/smoke_prod_images.sh`. That script checks image
+  **contents** (no `.env` in any image, the four backend data files present, ai-service dev files
+  excluded) and **boot** (each image answers its health route with no database, vector store or
+  keys; the backend exits 1 without `JWT_SECRET`, locking in D-053). A `sandbox` matrix builds the
+  four sandbox images.
+- CI writes placeholder `.env` files before building. Checkouts don't have them (they're
+  gitignored), so without this the no-`.env` check could never fail in CI. It would pass for the
+  wrong reason.
+- Smoke failures are also raised as `::error` annotations. GitHub hides job logs from anyone not
+  signed in; annotations appear on the PR checks summary and are readable through the public API.
+- The job runs on every push like the others: the repo is public, so Actions minutes are free.
+
+**Verified:**
+- Locally: 16/16 smoke checks pass. Restoring the old ai-service build context fails 4 checks with
+  exit 1.
+- In CI: green on the branch. A throwaway branch that re-introduced the editorials omission went
+  **red** at the smoke step, with the annotation
+  `backend: problem_editorials.json missing from image`.
+- The layer cache works within a branch: prod images 378 s cold → 157 s warm, sandboxes about
+  50 s → 12–23 s. GitHub's cache is per branch, so a new branch's first run is cold, unless `main`
+  has already populated the cache.
+- Action versions: `build-push-action@v7` and `setup-buildx-action@v4`, bumped after the first run
+  warned that v6/v3 target the deprecated Node 20.
+
+**Not fixed, noted:** prod seeding still needs the README's workaround, a global `ts-node` install,
+because the backend image ships only `dist/`.
+
 ### D-053 — Backend hardening: no default JWT secret, per-user API limiting, auth limiters, query indexes (closes F-23)
 
 **JWT secret fails closed.** `auth.ts` used to fall back to `"dev-secret-change-me"` when

@@ -53,12 +53,31 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
 export interface JwtPayload {
   userId: string;
+  /** users.token_version when the token was issued; a mismatch means revoked (D-055). */
+  tokenVersion: number;
 }
 
 export function signAccessToken(payload: JwtPayload): string {
-  return jwt.sign(payload, jwtSecret(), { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign({ userId: payload.userId, tv: payload.tokenVersion }, jwtSecret(), {
+    expiresIn: JWT_EXPIRES_IN,
+  });
 }
 
+/**
+ * Check the signature and expiry and return the claims. It doesn't check revocation,
+ * which needs the database; auth.middleware does that.
+ *
+ * A token without a numeric `tv` predates revocation and is rejected, which forces one
+ * re-login when this ships. That was chosen over treating it as version 0, which would
+ * have kept every old token alive until its owner's next password reset.
+ */
 export function verifyAccessToken(token: string): JwtPayload {
-  return jwt.verify(token, jwtSecret(), { algorithms: ["HS256"] }) as JwtPayload;
+  const claims = jwt.verify(token, jwtSecret(), { algorithms: ["HS256"] }) as {
+    userId?: unknown;
+    tv?: unknown;
+  };
+  if (typeof claims.userId !== "string" || !Number.isInteger(claims.tv)) {
+    throw new Error("Token is missing required claims");
+  }
+  return { userId: claims.userId, tokenVersion: claims.tv as number };
 }

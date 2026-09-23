@@ -1,0 +1,7 @@
+# .env is deliberately NOT excluded: it holds only NEXT_PUBLIC_API_URL, which
+# `next build` inlines into the client bundle at build time. Anything in it is
+# public by definition -- never put a secret in web/.env.
+node_modules
+.next
+coverage
+.DS_Store

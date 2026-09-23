@@ -1,24 +1,16 @@
 import { Router } from "express";
 import { query } from "../db";
-import { verifyAccessToken } from "../auth";
+import { optionalAuth, type AuthRequest } from "../middleware/auth.middleware";
+import { exampleCases, type TestCase } from "../services/test-cases";
 
 const router = Router();
 type SolvedFilter = "all" | "solved" | "unsolved";
 const MAX_COMPANY_LENGTH = 64;
 
-function getOptionalUserId(authHeader?: string): string | null {
-  if (!authHeader?.startsWith("Bearer ")) return null;
-  try {
-    const token = authHeader.substring("Bearer ".length);
-    const payload = verifyAccessToken(token);
-    return payload.userId;
-  } catch {
-    return null;
-  }
-}
-
-router.get("/", async (req, res) => {
-  const userId = getOptionalUserId(req.headers.authorization);
+// optionalAuth rather than a local token decode: a hand-rolled check here skipped the
+// revocation lookup, so a revoked token still got solved/bookmark flags (D-055).
+router.get("/", optionalAuth, async (req: AuthRequest, res) => {
+  const userId = req.user?.id ?? null;
   const difficulty = typeof req.query.difficulty === "string" ? req.query.difficulty.toLowerCase() : "all";
   const topic = typeof req.query.topic === "string" ? req.query.topic.trim() : "";
   const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
@@ -115,8 +107,9 @@ router.get("/", async (req, res) => {
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
+router.get("/:id", optionalAuth, async (req: AuthRequest, res) => {
+  // AuthRequest's params are string | string[]; an array fails the UUID check below.
+  const id = String(req.params.id);
   if (!UUID_REGEX.test(id)) {
     return res.status(400).json({ error: "Invalid problem id" });
   }
@@ -131,7 +124,7 @@ router.get("/:id", async (req, res) => {
       editorial: string | null;
       topics: string[];
       companies: string[];
-      test_cases: unknown;
+      test_cases: TestCase[] | null;
       starter_code: unknown;
       created_at: string;
       is_solved: boolean;
@@ -152,14 +145,22 @@ router.get("/:id", async (req, res) => {
               ) AS is_bookmarked
        FROM problems p
        WHERE p.id = $1`,
-      [id, getOptionalUserId(req.headers.authorization)]
+      [id, req.user?.id ?? null]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Problem not found" });
     }
 
-    return res.json({ problem: result.rows[0] });
+    // Only the public examples leave the server; the hidden suite stays here (D-057).
+    const { test_cases, ...problem } = result.rows[0];
+    return res.json({
+      problem: {
+        ...problem,
+        test_cases: exampleCases(test_cases),
+        test_case_count: test_cases?.length ?? 0,
+      },
+    });
   } catch (err) {
     console.error("Get problem error", err);
     return res.status(500).json({ error: "Internal server error" });

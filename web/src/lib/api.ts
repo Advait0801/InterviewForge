@@ -1,4 +1,4 @@
-import { getToken } from "./auth";
+import { clearToken, getToken } from "./auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
 
@@ -12,13 +12,33 @@ type RequestOptions = {
   auth?: boolean;
 };
 
+/** The backend's code on a 401 caused by the session itself (D-055). */
+const SESSION_INVALID = "session_invalid";
+
+/**
+ * The stored token has been revoked, has expired, or belongs to a deleted account.
+ * Drop it and go to login instead of leaving every page to show its own error. This
+ * runs only on the backend's explicit session code, so an ordinary 401 such as "current
+ * password is incorrect" stays a form error.
+ */
+function endSession() {
+  clearToken();
+  if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+    window.location.assign("/login?expired=1");
+  }
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
+  let sentToken = false;
   if (options.auth) {
     const token = getToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+      sentToken = true;
+    }
   }
 
   const res = await fetch(`${API_URL}${path}`, {
@@ -31,6 +51,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const payload = text ? JSON.parse(text) : null;
 
   if (!res.ok) {
+    if (res.status === 401 && sentToken && payload?.code === SESSION_INVALID) endSession();
     const message = payload?.error || payload?.detail || `Request failed (${res.status})`;
     throw new Error(message);
   }
@@ -51,7 +72,10 @@ export type Problem = {
 };
 
 export type ProblemDetail = Problem & {
+  /** The public examples only; the hidden suite never leaves the server (D-057). */
   test_cases: Array<{ input: string; expectedOutput: string }>;
+  /** Total cases Submit runs, hidden ones included. */
+  test_case_count?: number;
   starter_code: Record<string, string>;
   hints?: string | null;
   editorial?: string | null;
@@ -316,12 +340,18 @@ export const api = {
       method: "POST",
       body: { token, newPassword },
     }),
+  logoutAll: () =>
+    request<{ ok: boolean }>("/auth/logout-all", {
+      method: "POST",
+      auth: true,
+    }),
   me: () =>
     request<{ user: { id: string; email: string; username: string | null; name: string | null; avatar_url: string | null } }>("/users/me", {
       auth: true,
     }),
+  // Returns a fresh token: the change revokes every earlier one, this tab's included.
   changePassword: (currentPassword: string, newPassword: string) =>
-    request<{ ok: boolean }>("/users/change-password", {
+    request<{ ok: boolean; token: string }>("/users/change-password", {
       method: "POST",
       auth: true,
       body: { currentPassword, newPassword },
@@ -367,7 +397,15 @@ export const api = {
       submissionId: string;
       status: string;
       passed: boolean;
-      results: Array<{ passed: boolean; actualOutput?: string; error?: string }>;
+      // Hidden cases arrive as { passed, hidden: true } only (D-057).
+      results: Array<{
+        passed: boolean;
+        actualOutput?: string;
+        error?: string;
+        input?: string;
+        expectedOutput?: string;
+        hidden?: boolean;
+      }>;
       runtimeMs?: number;
     }>("/submissions", {
       method: "POST",

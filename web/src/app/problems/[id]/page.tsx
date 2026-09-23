@@ -110,6 +110,11 @@ type CaseResult = {
   passed: boolean;
   actualOutput?: string;
   error?: string;
+  /** Submit only: present for examples and the first failing hidden case (D-057). */
+  input?: string;
+  expectedOutput?: string;
+  /** Submit only: a hidden case, reduced to pass/fail. */
+  hidden?: boolean;
 };
 
 type RunResponse = {
@@ -442,7 +447,6 @@ export default function WorkspacePage() {
   };
 
   const exampleCases = problem?.test_cases?.slice(0, EXAMPLE_CASE_COUNT) ?? [];
-  const fullTestCases = problem?.test_cases ?? [];
 
   if (problemLoading) {
     return <LoadingState label="Loading problem workspace" className="min-h-dvh bg-background" />;
@@ -915,7 +919,6 @@ export default function WorkspacePage() {
                       result={runResult}
                       loading={running || submitting}
                       error={executionError}
-                      submitCaseInputs={fullTestCases}
                       expandPassedCap={SUBMIT_EXPAND_PASSED_CAP}
                     />
                   )}
@@ -998,13 +1001,11 @@ function ResultPanel({
   result,
   loading,
   error,
-  submitCaseInputs,
   expandPassedCap,
 }: {
   result: RunResponse | null;
   loading: boolean;
   error: string | null;
-  submitCaseInputs: Array<{ input: string; expectedOutput: string }>;
   expandPassedCap: number;
 }) {
   const [showAllPassed, setShowAllPassed] = useState(false);
@@ -1029,7 +1030,13 @@ function ResultPanel({
   const passedCount = result.results.filter((r) => r.passed).length;
   const totalCount = result.results.length;
   const isAccepted = result.passed;
-  const cases = result.mode === "run" ? (result.testCases ?? []) : submitCaseInputs;
+  // Run echoes the example cases it used; Submit attaches each case to its result,
+  // and only where the server allows it to be seen (D-057).
+  const caseFor = (idx: number) => {
+    if (result.mode === "run") return result.testCases?.[idx];
+    const r = result.results[idx];
+    return r.input != null ? { input: r.input, expectedOutput: r.expectedOutput ?? "" } : undefined;
+  };
 
   const failedIndices: number[] = [];
   const passedIndices: number[] = [];
@@ -1095,16 +1102,17 @@ function ResultPanel({
                 <span className={`text-xs font-semibold ${r.passed ? "text-accent" : "text-error"}`}>
                   {r.passed ? "✓" : "✗"} Case {idx + 1}
                 </span>
+                {r.hidden ? <span className="text-[11px] text-text-secondary">Hidden test case</span> : null}
               </div>
-              {cases[idx] && (
+              {caseFor(idx) && (
                 <div className="mono space-y-0.5 text-xs">
                   <div>
                     <span className="text-text-secondary">Input: </span>
-                    <span className="text-text-primary">{cases[idx].input}</span>
+                    <span className="text-text-primary">{caseFor(idx)!.input}</span>
                   </div>
                   <div>
                     <span className="text-text-secondary">Expected: </span>
-                    <span className="text-text-primary">{cases[idx].expectedOutput}</span>
+                    <span className="text-text-primary">{caseFor(idx)!.expectedOutput}</span>
                   </div>
                   {r.actualOutput != null && (
                     <div>

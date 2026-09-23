@@ -12,6 +12,7 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/leetcode_problems.json ./
 COPY --from=builder /app/problem_hints.json ./
+COPY --from=builder /app/problem_editorials.json ./
 COPY --from=builder /app/starter_templates.json ./
 COPY --from=builder /app/scripts ./scripts
 EXPOSE 4000

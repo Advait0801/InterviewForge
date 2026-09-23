@@ -39,7 +39,7 @@ remains in git history at commits `e24baf6` and `b19f09d` if it's ever needed.
 backend/src/routes/          # one file per resource; SQL lives directly in handlers
 backend/src/services/        # ai.service.ts (AI_SERVICE_URL), interview-state.service.ts
 backend/src/db.ts            # single query() helper over a pg Pool
-backend/sql_migrations/      # 001_init.sql … 012_query_indexes.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 014_interview_report.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
 scripts/problemgen/          # problem specs + independent oracles that generate the data files
@@ -64,6 +64,10 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - One `.env` per service: `backend/.env`, `ai-service/.env`, `web/.env`,
   `code-runner/.env`, plus `.env.postgres` at the root. All gitignored.
 - Never put env values statically in `docker-compose.yml` — use `env_file:` only.
+- Every service has a `.dockerignore` that keeps `.env` out of images (D-054). The one
+  exception is `web/`, whose `.env` holds only `NEXT_PUBLIC_API_URL`, inlined at build —
+  never put a secret there. A new data file the backend reads at runtime must also be
+  added to `backend/Dockerfile.prod`, or the CI smoke test (and prod) will miss it.
 - Services talk over the compose network by hostname (`postgres`, `code-runner`,
   `ai-service`, `chromadb`), not `localhost`. Host port bindings exist only for tools
   run from the host, so remapping them never affects service-to-service traffic.
@@ -83,9 +87,26 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - Protected routes use `requireAuth` (JWT `{ userId }`, HS256, 7d); `optionalAuth`
   where solved/bookmark flags are enriched for logged-in users. `optionalAuth` also runs
   globally before `apiLimiter` so the limiter keys per user (D-053).
+- Tokens carry `tv` = `users.token_version`; auth checks it on every request (one PK lookup,
+  memoised per request). Bump the column to revoke a user's sessions. Session failures are
+  401 with `code: "session_invalid"` — the web client signs out only on that code, so never
+  add it to a 401 that isn't about the session (D-055).
 - `JWT_SECRET` must be set and ≥32 chars or the backend refuses to boot — there is no
   fallback. Behind a proxy, set `TRUST_PROXY` to the hop count (D-053).
 - Backend uses native `fetch` for outbound calls — no axios.
+
+**Multi-write routes**
+- Writes that must land together go through `db.withTransaction` (D-057). Keep LLM calls and
+  code execution *outside* it. Inside a transaction `NOW()` is frozen — use
+  `clock_timestamp()` where row order matters (interview messages do).
+- Only the first 4 test cases of a problem ever leave the server (`services/test-cases.ts`);
+  never return `problems.test_cases` directly.
+
+**Backend tests**
+- Route tests use `src/__tests__/helpers/harness.ts`: a real router over HTTP behind the
+  same middleware as `index.ts`, with Postgres replaced by a strict fake — any query no
+  handler claims throws, so a route can't run unexpected SQL and still pass. Handlers match
+  by substring in order, so put the more specific pattern first (D-056).
 
 **AI service**
 - Every chain uses `JsonOutputParser(pydantic_object=…)` with `{format_instructions}`
@@ -130,6 +151,8 @@ python scripts/verify_phase7.py             # Phase 7: company filter, curated t
 python scripts/problemgen/batch1_easy.py    # regenerate a batch's data (idempotent; see D-042)
 python scripts/problemgen/apply_curation.py # write curated company tags into leetcode_problems.json
 docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tune the live-fetch gate
+
+bash scripts/ci/smoke_prod_images.sh  # prod image contents + boot; build tags first (see its header)
 
 cd backend && npm run build     # tsc
 cd web && npm run build         # next build

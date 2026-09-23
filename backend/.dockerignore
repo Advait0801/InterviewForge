@@ -1,0 +1,8 @@
+# Runtime config comes from env_file; secrets must never enter an image layer,
+# including the builder stage's (it stays in the local build cache).
+.env
+.env.*
+node_modules
+dist
+coverage
+.DS_Store

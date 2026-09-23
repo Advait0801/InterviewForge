@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthShell } from "@/components/auth/auth-shell";
@@ -27,6 +27,13 @@ export default function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sessionEnded, setSessionEnded] = useState(false);
+
+  // Set by api.ts when the backend reports the stored session is no longer valid.
+  // Read from window rather than useSearchParams, which would need a Suspense boundary.
+  useEffect(() => {
+    setSessionEnded(new URLSearchParams(window.location.search).get("expired") === "1");
+  }, []);
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -60,6 +67,11 @@ export default function LoginPage() {
       description="Sign in to pick up your coding, interview, and system-design progress."
       footer={<>New to InterviewForge? <Link className="font-semibold text-primary hover:underline" href="/register">Create an account</Link></>}
     >
+      {sessionEnded ? (
+        <p className="mb-4 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2.5 text-sm text-text-primary" role="status">
+          Your session ended. Please sign in again.
+        </p>
+      ) : null}
       <form className="space-y-4" onSubmit={onSubmit} noValidate>
         <Input
           id="login-identifier"

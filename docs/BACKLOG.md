@@ -83,14 +83,13 @@ tier, F-20) and the 600-run `verify_problems.py` (already verified once under Ph
 - **More languages** *(M)* — JS, Go, Rust: a Dockerfile and harness each.
 - **Custom test cases + failing-case diff view** *(S)* — the gap between "toy judge" and "tool
   I'd actually use".
-- **Token revocation** *(S)* — JWTs live 7 days in `localStorage` and nothing invalidates them;
-  a password reset leaves every existing session alive. A `token_version` column in the JWT,
-  bumped on reset, fixes it.
-- **Route-level backend tests** *(M, Quiet)* — `interviews.routes.ts` (631 lines), submissions,
-  problems, users and assessments have no route tests; the 400/404/503 contract is checked only by
-  the live verify scripts.
-- **CI builds the prod images** *(S, Quiet)* — CI never builds `Dockerfile.prod`, so a broken prod
-  image would only be found at deploy time.
+- ~~**Token revocation**~~ — **DONE (D-055)**: `token_version`, sign out everywhere, and the web
+  client returns to login when a session ends.
+- ~~**Route-level backend tests**~~ — **DONE (D-056)**: 78 tests over interviews, submissions,
+  assessments, users and problems; they found five bugs, all fixed. The three items it left
+  open (timer, hidden test suite, `/answer` transaction) were closed in D-057.
+- ~~**CI builds the prod images**~~ — **DONE (D-054)**: all four prod images plus the four sandboxes
+  build in CI, and a smoke test checks image contents and boot.
 - **Real email delivery** *(S)* — SES or Resend for verification and reset (F-07).
 
 ## Product

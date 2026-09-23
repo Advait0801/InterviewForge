@@ -15,6 +15,9 @@ describe("learning path summaries", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.query.mockImplementation(async (sql: string) => {
+      if (sql.includes("SELECT token_version FROM users")) {
+        return { rows: [{ token_version: 0 }] };
+      }
       if (sql.includes("FROM learning_paths lp")) {
         return {
           rows: [{
@@ -52,14 +55,19 @@ describe("learning path summaries", () => {
     const { port } = server.address() as AddressInfo;
 
     const response = await fetch(`http://127.0.0.1:${port}/api/learning-paths`, {
-      headers: { Authorization: `Bearer ${signAccessToken({ userId: "user-id" })}` },
+      headers: { Authorization: `Bearer ${signAccessToken({ userId: "user-id", tokenVersion: 0 })}` },
     });
     const payload = await response.json() as { paths: Array<{ completedCount: number; problemCount: number }> };
 
     expect(response.status).toBe(200);
     expect(payload.paths).toEqual([expect.objectContaining({ completedCount: 1, problemCount: 2 })]);
-    expect(mocks.query).toHaveBeenCalledTimes(2);
-    expect(mocks.query.mock.calls[1][0]).toContain("JOIN learning_path_problems");
-    expect(mocks.query.mock.calls[1][0]).toContain("lpp.problem_id = upp.problem_id");
+    // The first call is optionalAuth's revocation lookup (D-055); the route's own
+    // queries follow it.
+    const routeQueries = mocks.query.mock.calls
+      .map(([sql]) => sql as string)
+      .filter((sql) => !sql.includes("SELECT token_version FROM users"));
+    expect(routeQueries).toHaveLength(2);
+    expect(routeQueries[1]).toContain("JOIN learning_path_problems");
+    expect(routeQueries[1]).toContain("lpp.problem_id = upp.problem_id");
   });
 });
