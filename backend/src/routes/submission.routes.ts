@@ -10,6 +10,10 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 
 type TestCase = { input: string; expectedOutput: string };
 
+/** What code-runner executes (code-runner/src/types.ts SupportedLanguage). */
+const LANGUAGES = ["python3", "c", "cpp", "java"] as const;
+const MODES = ["run", "submit"] as const;
+
 /** Max example cases sent for Run; Submit uses the full suite. */
 const RUN_CASE_LIMIT = 4;
 
@@ -189,6 +193,18 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
     return res.status(400).json({
       error: "problemId, language, and code are required",
     });
+  }
+  // Checked here rather than left to Postgres and the runner (D-056): a malformed id
+  // was a 500 from the uuid cast, and an unsupported language reached the runner and
+  // came back as a misleading "Code runner unavailable".
+  if (!UUID_REGEX.test(problemId)) {
+    return res.status(400).json({ error: "Invalid problemId" });
+  }
+  if (!(LANGUAGES as readonly string[]).includes(language)) {
+    return res.status(400).json({ error: `language must be one of: ${LANGUAGES.join(", ")}` });
+  }
+  if (!(MODES as readonly string[]).includes(mode)) {
+    return res.status(400).json({ error: "mode must be run or submit" });
   }
 
   try {

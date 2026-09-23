@@ -39,7 +39,7 @@ remains in git history at commits `e24baf6` and `b19f09d` if it's ever needed.
 backend/src/routes/          # one file per resource; SQL lives directly in handlers
 backend/src/services/        # ai.service.ts (AI_SERVICE_URL), interview-state.service.ts
 backend/src/db.ts            # single query() helper over a pg Pool
-backend/sql_migrations/      # 001_init.sql … 013_token_version.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 014_interview_report.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
 scripts/problemgen/          # problem specs + independent oracles that generate the data files
@@ -94,6 +94,12 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - `JWT_SECRET` must be set and ≥32 chars or the backend refuses to boot — there is no
   fallback. Behind a proxy, set `TRUST_PROXY` to the hop count (D-053).
 - Backend uses native `fetch` for outbound calls — no axios.
+
+**Backend tests**
+- Route tests use `src/__tests__/helpers/harness.ts`: a real router over HTTP behind the
+  same middleware as `index.ts`, with Postgres replaced by a strict fake — any query no
+  handler claims throws, so a route can't run unexpected SQL and still pass. Handlers match
+  by substring in order, so put the more specific pattern first (D-056).
 
 **AI service**
 - Every chain uses `JsonOutputParser(pydantic_object=…)` with `{format_instructions}`

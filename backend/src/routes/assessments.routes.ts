@@ -5,6 +5,8 @@ import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
 const router = Router();
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+const DIFFICULTY_MIXES = ["mixed", "easy", "medium", "hard"];
+
 function getSingleParam(value: string | string[] | undefined): string | null {
   return typeof value === "string" ? value : null;
 }
@@ -65,8 +67,17 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
     difficultyMix?: string;
   };
 
-  const count = Math.min(Math.max(problemCount, 1), 10);
-  const timeLimit = Math.min(Math.max(timeLimitMinutes, 15), 180);
+  // Validated before use (D-056): a string here made Math.min/max produce NaN, and
+  // `LIMIT NaN` reached Postgres as a 500.
+  if (!Number.isFinite(problemCount) || !Number.isFinite(timeLimitMinutes)) {
+    return res.status(400).json({ error: "problemCount and timeLimitMinutes must be numbers" });
+  }
+  if (!DIFFICULTY_MIXES.includes(difficultyMix)) {
+    return res.status(400).json({ error: `difficultyMix must be one of: ${DIFFICULTY_MIXES.join(", ")}` });
+  }
+
+  const count = Math.min(Math.max(Math.trunc(problemCount), 1), 10);
+  const timeLimit = Math.min(Math.max(Math.trunc(timeLimitMinutes), 15), 180);
 
   try {
     let whereClause = "";
@@ -194,6 +205,20 @@ router.post("/:id/solve", requireAuth, async (req: AuthRequest, res) => {
     }
     if (assessmentResult.rows[0].status !== "active") {
       return res.status(400).json({ error: "Assessment is no longer active" });
+    }
+
+    // The linked submission decides the score, so it must be the caller's own and for
+    // this problem (D-056). Before, any id was accepted: another user's passed
+    // submission, or the caller's own solution to a different, easier problem.
+    const submissionResult = await query<{ problem_id: string }>(
+      `SELECT problem_id FROM submissions WHERE id = $1 AND user_id = $2`,
+      [submissionId, userId]
+    );
+    if (submissionResult.rows.length === 0) {
+      return res.status(404).json({ error: "Submission not found" });
+    }
+    if (submissionResult.rows[0].problem_id !== problemId) {
+      return res.status(400).json({ error: "Submission is for a different problem" });
     }
 
     const updateRes = await query(

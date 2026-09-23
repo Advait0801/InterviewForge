@@ -9,6 +9,52 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-22
 
+### D-056 — Route-level backend tests; the five bugs they found
+
+**Why:** the backend had unit tests for helpers and middleware, but none for the routes that hold
+the product: `interviews.routes.ts` (631 lines), submissions, assessments, users and problems. Their
+400/404/503 behaviour was checked only by the live `verify_*.py` scripts.
+
+**Decided:** `src/__tests__/helpers/harness.ts` mounts a real router over HTTP, behind the same
+middleware as `index.ts` (the 8mb JSON limit and global `optionalAuth`). It replaces Postgres with a
+**strict** scripted fake: a query no handler claims throws, so a route can't run unexpected SQL and
+still pass. The AI service is mocked with its real `AIServiceError`, so the status mapping is what's
+under test. Submissions talk to a stand-in code-runner on a real socket, so the unreachable-runner
+path is the real `fetch` failure. There are 78 new tests.
+
+**Bugs the tests found, all fixed and pinned by tests:**
+1. **The interview report was regenerated on every page view.** Each reload cost an LLM call and
+   inserted another set of score rows, which inflated analytics. Migration 014 adds
+   `interview_sessions.report_json`: the first generation is stored and served from then on. The
+   store is conditional (`WHERE report_json IS NULL`), so of two concurrent first loads only one
+   records scores, and the other serves the winner's copy. Live: first load 4.1 s, repeats 12–14 ms,
+   scores +5 once, one `interview_report_chain` call.
+2. **Assessment scores could be faked.** `/assessments/:id/solve` accepted any `submissionId`:
+   another user's passed submission, or the caller's own passed solution to a different, easier
+   problem, which was full marks either way. It now requires the caller's own submission for that
+   problem (404 / 400). Verified live, plus the real happy path: a reference solution through the
+   code-runner, linked, scored 100.
+3. `POST /submissions` sent a **malformed `problemId`** to Postgres (a 500 from the uuid cast), and
+   sent an **unsupported language** to the runner. The latter was stored as a submission and came
+   back as a misleading "Code runner unavailable". Both, and an unknown `mode`, are now 400 before
+   any I/O.
+4. `POST /assessments` with a non-numeric `problemCount` or `timeLimitMinutes` produced `LIMIT NaN`,
+   which Postgres returned as a 500. An unknown `difficultyMix` fell through to a query as well. All
+   are now 400.
+5. The unknown-company error still listed "amazon, google, meta, apple". It's now built from
+   `COMPANIES` (10).
+
+**Found, not fixed (in `BACKLOG.md`):** the assessment timer is advisory, since nothing server-side
+rejects a link or submit after time runs out. `GET /problems/:id` returns the full hidden test
+suite. The writes in `/answer` aren't in a transaction, so a mid-sequence failure can leave a
+partial turn.
+
+**Verified:**
+- Tests: backend 170 (92 + 78; each fix's test failed before the fix), web 59, code-runner 48,
+  ai-service 405 = **682**. tsc and build clean.
+- Live: each fix behaves as above, and migration 014 is idempotent.
+- `verify_phase7.py` 46/46 and `verify_resume_isolation.py` 35/35.
+
 ### D-055 — Token revocation via token_version; the backend no longer crashes when Postgres drops connections
 
 **Why:** JWTs lived 7 days in `localStorage` and nothing could invalidate them. A password reset or

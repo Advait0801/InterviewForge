@@ -237,7 +237,7 @@ InterviewForge/
 │   └── src/app/            # App Router pages (dashboard, problems, interview, etc.)
 ├── backend/                # Express API server
 │   ├── src/routes/         # Auth, problems, submissions, interviews, assessments, etc.
-│   ├── sql_migrations/     # 001_init.sql through 013_token_version.sql
+│   ├── sql_migrations/     # 001_init.sql through 014_interview_report.sql
 │   ├── reference_solutions/# <slug>/solution.{py,c,cpp,java} — every problem, every language
 │   └── scripts/            # seed_problems.ts, seed_learning_paths.ts
 ├── ai-service/             # FastAPI AI backend
@@ -431,7 +431,8 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [x] Production Docker Compose with multi-stage builds
 - [x] AWS deployment (EC2 + RDS + Nginx)
 - [x] CI pipeline (lint, typecheck, test, build) across all four services
-- [x] Test suites — 581 tests: 405 `ai-service`, 73 `backend`, 55 `web`, 48 `code-runner`
+- [x] Test suites — 682 tests: 405 `ai-service`, 170 `backend` (incl. route-level tests for every
+      core router), 59 `web`, 48 `code-runner`
 - [x] RAG evaluation harness with a committed baseline
 - [x] Retrieval quality work: structural chunking, hybrid search, reranking, routing
 - [x] Live corpus ingestion with provenance and write-back caching

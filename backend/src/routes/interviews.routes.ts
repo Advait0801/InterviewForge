@@ -5,6 +5,7 @@ import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
 import { llmLimiter } from "../middleware/rate-limit.middleware";
 import {
   UUID_REGEX,
+  COMPANIES,
   normalizeCompany,
   isValidInterviewStage,
   type InterviewStage,
@@ -34,6 +35,7 @@ type SessionRow = {
   status: string;
   stage_turn_count: number;
   resume_grounded: boolean;
+  report_json: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 };
@@ -95,7 +97,7 @@ async function userHasResume(userId: string): Promise<boolean> {
 async function getSessionForUser(sessionId: string, userId: string) {
   return query<SessionRow>(
     `SELECT id, user_id, company, current_stage, status, stage_turn_count, resume_grounded,
-            created_at, updated_at
+            report_json, created_at, updated_at
      FROM interview_sessions
      WHERE id = $1 AND user_id = $2`,
     [sessionId, userId]
@@ -159,7 +161,7 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
 
   const normalizedCompany = normalizeCompany(company);
   if (!normalizedCompany) {
-    return res.status(400).json({ error: "company must be one of: amazon, google, meta, apple" });
+    return res.status(400).json({ error: `company must be one of: ${COMPANIES.join(", ")}` });
   }
 
   const startingStage: InterviewStage = "behavioral";
@@ -275,6 +277,12 @@ router.get("/:id/report", requireAuth, llmLimiter, async (req: AuthRequest, res)
       return res.status(400).json({ error: "Interview is not yet completed" });
     }
 
+    // Served from storage after the first generation (D-056): a reload must not
+    // cost another model call or record the scores again.
+    if (session.report_json) {
+      return res.json({ sessionId: id, company: session.company, ...session.report_json });
+    }
+
     const messagesResult = await getSessionMessages(id);
     const conversation = messagesResult.rows
       .map((m) => `[${m.stage}] ${m.role}: ${m.content}`)
@@ -284,6 +292,22 @@ router.get("/:id/report", requireAuth, llmLimiter, async (req: AuthRequest, res)
       company: session.company,
       conversation,
     });
+
+    // Conditional, so two concurrent first loads can't both record scores: only the
+    // request that actually stores the report does.
+    const stored = await query<{ id: string }>(
+      `UPDATE interview_sessions SET report_json = $2, updated_at = NOW()
+       WHERE id = $1 AND report_json IS NULL
+       RETURNING id`,
+      [id, JSON.stringify(report)]
+    );
+
+    if (stored.rows.length === 0) {
+      // Lost that race: serve the copy that won, so every viewer sees one report.
+      const winner = await getSessionForUser(id, userId);
+      const winning = winner.rows[0]?.report_json ?? report;
+      return res.json({ sessionId: id, company: session.company, ...winning });
+    }
 
     const stageScores = report.stageScores || {};
     for (const [stage, data] of Object.entries(stageScores)) {
