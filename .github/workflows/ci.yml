@@ -104,10 +104,10 @@ jobs:
       - name: Validate prod compose file
         run: docker compose -f docker-compose.prod.yml config --quiet
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
 
       - name: Build backend
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: backend
           file: backend/Dockerfile.prod
@@ -117,7 +117,7 @@ jobs:
           cache-to: type=gha,scope=backend,mode=max
 
       - name: Build ai-service
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ai-service
           file: ai-service/Dockerfile.prod
@@ -127,7 +127,7 @@ jobs:
           cache-to: type=gha,scope=ai-service,mode=max
 
       - name: Build code-runner
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: code-runner
           file: code-runner/Dockerfile.prod
@@ -137,7 +137,7 @@ jobs:
           cache-to: type=gha,scope=code-runner,mode=max
 
       - name: Build web
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: web
           file: web/Dockerfile.prod
@@ -160,8 +160,8 @@ jobs:
         lang: [python, c, cpp, java]
     steps:
       - uses: actions/checkout@v5
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/build-push-action@v6
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
         with:
           context: docker/sandboxes/${{ matrix.lang }}-sandbox
           tags: interviewforge-${{ matrix.lang }}-sandbox:ci

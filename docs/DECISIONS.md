@@ -9,6 +9,52 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-22
 
+### D-054 — CI builds and smoke-tests every production image; ai-service stopped shipping its .env
+
+**Why:** CI ran unit tests, lint and `tsc`, but never built a `Dockerfile.prod`, so a broken prod
+image would only have been found at deploy time. Building them found two real defects:
+
+- **The ai-service prod image contained `/app/.env` with both provider API keys**, plus `tests/`,
+  `.pytest_cache`, `.corpus_cache` and `.DS_Store`. Its `Dockerfile.prod` is single-stage with
+  `COPY . .`, and no service had a `.dockerignore`. Anyone with the image had the keys. The backend
+  and code-runner images were safe only by luck: they're multi-stage, so `.env` reached just the
+  builder stage (which still sits in the local build cache).
+- **The backend prod image omitted `problem_editorials.json`.** `seed_problems.ts` checks for the
+  file with `existsSync` and silently falls back, so seeding in prod would have given all 150
+  problems no editorial (undoing the fix for F-22 without any error).
+
+**Decided:**
+- Every service gets a `.dockerignore` that keeps `.env` out. `web/` is the deliberate exception:
+  its `.env` holds only `NEXT_PUBLIC_API_URL`, which `next build` inlines into the client bundle, so
+  it's public by definition. `web/.dockerignore` says never to put a secret there.
+- A `prod images` CI job builds all four images (with a GitHub Actions layer cache), validates
+  `docker-compose.prod.yml`, and runs `scripts/ci/smoke_prod_images.sh`. That script checks image
+  **contents** (no `.env` in any image, the four backend data files present, ai-service dev files
+  excluded) and **boot** (each image answers its health route with no database, vector store or
+  keys; the backend exits 1 without `JWT_SECRET`, locking in D-053). A `sandbox` matrix builds the
+  four sandbox images.
+- CI writes placeholder `.env` files before building. Checkouts don't have them (they're
+  gitignored), so without this the no-`.env` check could never fail in CI. It would pass for the
+  wrong reason.
+- Smoke failures are also raised as `::error` annotations. GitHub hides job logs from anyone not
+  signed in; annotations appear on the PR checks summary and are readable through the public API.
+- The job runs on every push like the others: the repo is public, so Actions minutes are free.
+
+**Verified:**
+- Locally: 16/16 smoke checks pass. Restoring the old ai-service build context fails 4 checks with
+  exit 1.
+- In CI: green on the branch. A throwaway branch that re-introduced the editorials omission went
+  **red** at the smoke step, with the annotation
+  `backend: problem_editorials.json missing from image`.
+- The layer cache works within a branch: prod images 378 s cold → 157 s warm, sandboxes about
+  50 s → 12–23 s. GitHub's cache is per branch, so a new branch's first run is cold, unless `main`
+  has already populated the cache.
+- Action versions: `build-push-action@v7` and `setup-buildx-action@v4`, bumped after the first run
+  warned that v6/v3 target the deprecated Node 20.
+
+**Not fixed, noted:** prod seeding still needs the README's workaround, a global `ts-node` install,
+because the backend image ships only `dist/`.
+
 ### D-053 — Backend hardening: no default JWT secret, per-user API limiting, auth limiters, query indexes (closes F-23)
 
 **JWT secret fails closed.** `auth.ts` used to fall back to `"dev-secret-change-me"` when
