@@ -89,8 +89,8 @@ tier, F-20) and the 600-run `verify_problems.py` (already verified once under Ph
 - **Route-level backend tests** *(M, Quiet)* — `interviews.routes.ts` (631 lines), submissions,
   problems, users and assessments have no route tests; the 400/404/503 contract is checked only by
   the live verify scripts.
-- **CI builds the prod images** *(S, Quiet)* — CI never builds `Dockerfile.prod`, so a broken prod
-  image would only be found at deploy time.
+- ~~**CI builds the prod images**~~ — **DONE (D-054)**: all four prod images plus the four sandboxes
+  build in CI, and a smoke test checks image contents and boot.
 - **Real email delivery** *(S)* — SES or Resend for verification and reset (F-07).
 
 ## Product

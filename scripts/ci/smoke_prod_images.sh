@@ -17,7 +17,13 @@ TAG="${IMAGE_TAG:-ci}"
 failures=0
 
 pass() { echo "PASS  $*"; }
-fail() { echo "FAIL  $*"; failures=$((failures + 1)); }
+fail() {
+  echo "FAIL  $*"
+  # Under Actions, also raise an annotation so the reason shows on the PR's checks
+  # summary instead of only in the job log.
+  [ -n "${GITHUB_ACTIONS:-}" ] && echo "::error title=prod image smoke test::$*"
+  failures=$((failures + 1))
+}
 
 img() { echo "interviewforge-$1:$TAG"; }
 

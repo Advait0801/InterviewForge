@@ -64,6 +64,10 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - One `.env` per service: `backend/.env`, `ai-service/.env`, `web/.env`,
   `code-runner/.env`, plus `.env.postgres` at the root. All gitignored.
 - Never put env values statically in `docker-compose.yml` — use `env_file:` only.
+- Every service has a `.dockerignore` that keeps `.env` out of images (D-054). The one
+  exception is `web/`, whose `.env` holds only `NEXT_PUBLIC_API_URL`, inlined at build —
+  never put a secret there. A new data file the backend reads at runtime must also be
+  added to `backend/Dockerfile.prod`, or the CI smoke test (and prod) will miss it.
 - Services talk over the compose network by hostname (`postgres`, `code-runner`,
   `ai-service`, `chromadb`), not `localhost`. Host port bindings exist only for tools
   run from the host, so remapping them never affects service-to-service traffic.
@@ -130,6 +134,8 @@ python scripts/verify_phase7.py             # Phase 7: company filter, curated t
 python scripts/problemgen/batch1_easy.py    # regenerate a batch's data (idempotent; see D-042)
 python scripts/problemgen/apply_curation.py # write curated company tags into leetcode_problems.json
 docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tune the live-fetch gate
+
+bash scripts/ci/smoke_prod_images.sh  # prod image contents + boot; build tags first (see its header)
 
 cd backend && npm run build     # tsc
 cd web && npm run build         # next build
