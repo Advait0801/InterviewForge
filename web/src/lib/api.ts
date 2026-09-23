@@ -72,7 +72,10 @@ export type Problem = {
 };
 
 export type ProblemDetail = Problem & {
+  /** The public examples only; the hidden suite never leaves the server (D-057). */
   test_cases: Array<{ input: string; expectedOutput: string }>;
+  /** Total cases Submit runs, hidden ones included. */
+  test_case_count?: number;
   starter_code: Record<string, string>;
   hints?: string | null;
   editorial?: string | null;
@@ -394,7 +397,15 @@ export const api = {
       submissionId: string;
       status: string;
       passed: boolean;
-      results: Array<{ passed: boolean; actualOutput?: string; error?: string }>;
+      // Hidden cases arrive as { passed, hidden: true } only (D-057).
+      results: Array<{
+        passed: boolean;
+        actualOutput?: string;
+        error?: string;
+        input?: string;
+        expectedOutput?: string;
+        hidden?: boolean;
+      }>;
       runtimeMs?: number;
     }>("/submissions", {
       method: "POST",

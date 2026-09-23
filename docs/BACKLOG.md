@@ -86,9 +86,8 @@ tier, F-20) and the 600-run `verify_problems.py` (already verified once under Ph
 - ~~**Token revocation**~~ — **DONE (D-055)**: `token_version`, sign out everywhere, and the web
   client returns to login when a session ends.
 - ~~**Route-level backend tests**~~ — **DONE (D-056)**: 78 tests over interviews, submissions,
-  assessments, users and problems; they found five bugs, all fixed. Not fixed, noted there:
-  the assessment timer is advisory (not enforced server-side), `GET /problems/:id` returns the
-  full hidden test suite, and `/answer` writes aren't in a transaction.
+  assessments, users and problems; they found five bugs, all fixed. The three items it left
+  open (timer, hidden test suite, `/answer` transaction) were closed in D-057.
 - ~~**CI builds the prod images**~~ — **DONE (D-054)**: all four prod images plus the four sandboxes
   build in CI, and a smoke test checks image contents and boot.
 - **Real email delivery** *(S)* — SES or Resend for verification and reset (F-07).

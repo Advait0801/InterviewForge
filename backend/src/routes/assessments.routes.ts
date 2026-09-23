@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { query } from "../db";
+import { query, withTransaction } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
 
 const router = Router();
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const DIFFICULTY_MIXES = ["mixed", "easy", "medium", "hard"];
+/** Slack for a solution submitted in the last second that lands just after the deadline. */
+const DEADLINE_GRACE_SECONDS = 30;
 
 function getSingleParam(value: string | string[] | undefined): string | null {
   return typeof value === "string" ? value : null;
@@ -97,21 +99,26 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: "No problems available for the selected criteria" });
     }
 
-    const assessmentResult = await query<{ id: string }>(
-      `INSERT INTO assessments (user_id, status, time_limit_minutes, difficulty_mix, problem_count, started_at)
-       VALUES ($1, 'active', $2, $3, $4, NOW())
-       RETURNING id`,
-      [userId, timeLimit, difficultyMix, problemsResult.rows.length]
-    );
-    const assessmentId = assessmentResult.rows[0].id;
-
-    for (let i = 0; i < problemsResult.rows.length; i++) {
-      await query(
-        `INSERT INTO assessment_problems (assessment_id, problem_id, problem_order)
-         VALUES ($1, $2, $3)`,
-        [assessmentId, problemsResult.rows[i].id, i]
+    // One transaction (D-057): a partial insert left an assessment whose problem rows
+    // didn't match problem_count, which GET /:id reports as a 500 forever after.
+    const assessmentId = await withTransaction(async (tx) => {
+      const assessmentResult = await tx.query<{ id: string }>(
+        `INSERT INTO assessments (user_id, status, time_limit_minutes, difficulty_mix, problem_count, started_at)
+         VALUES ($1, 'active', $2, $3, $4, NOW())
+         RETURNING id`,
+        [userId, timeLimit, difficultyMix, problemsResult.rows.length]
       );
-    }
+      const newId = assessmentResult.rows[0].id;
+
+      for (let i = 0; i < problemsResult.rows.length; i++) {
+        await tx.query(
+          `INSERT INTO assessment_problems (assessment_id, problem_id, problem_order)
+           VALUES ($1, $2, $3)`,
+          [newId, problemsResult.rows[i].id, i]
+        );
+      }
+      return newId;
+    });
 
     return res.status(201).json({ assessmentId, problemCount: problemsResult.rows.length, timeLimitMinutes: timeLimit });
   } catch (err) {
@@ -195,16 +202,25 @@ router.post("/:id/solve", requireAuth, async (req: AuthRequest, res) => {
   }
 
   try {
-    const assessmentResult = await query<AssessmentRow>(
-      `SELECT id, user_id, status, started_at, time_limit_minutes
+    // `expired` is computed by Postgres so the deadline uses the same clock as
+    // started_at, not this server's (D-057).
+    const assessmentResult = await query<AssessmentRow & { expired: boolean }>(
+      `SELECT id, user_id, status, started_at, time_limit_minutes,
+              NOW() > started_at + make_interval(mins => time_limit_minutes) + $3::interval AS expired
        FROM assessments WHERE id = $1 AND user_id = $2`,
-      [id, userId]
+      [id, userId, `${DEADLINE_GRACE_SECONDS} seconds`]
     );
     if (assessmentResult.rows.length === 0) {
       return res.status(404).json({ error: "Assessment not found" });
     }
     if (assessmentResult.rows[0].status !== "active") {
       return res.status(400).json({ error: "Assessment is no longer active" });
+    }
+    // The timer used to be advisory: the page stopped you, but the API still accepted
+    // a solution linked after time ran out. Submitting the assessment itself stays
+    // allowed afterwards; it just can't count work done late.
+    if (assessmentResult.rows[0].expired) {
+      return res.status(400).json({ error: "Time is up for this assessment" });
     }
 
     // The linked submission decides the score, so it must be the caller's own and for

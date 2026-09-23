@@ -3,7 +3,6 @@ import { createServer, type Server } from "node:http";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   callsMatching,
-  fakeQuery,
   resetDb,
   serve,
   USER_ID,
@@ -12,7 +11,7 @@ import {
 } from "./helpers/harness";
 
 const db = vi.hoisted(() => ({ handlers: [], calls: [] }) as FakeDb);
-vi.mock("../db", () => ({ query: vi.fn((sql: string, params: unknown[]) => fakeQuery(db, sql, params)) }));
+vi.mock("../db", async () => (await import("./helpers/fake-db")).fakeDbModule(db));
 
 const ai = vi.hoisted(() => ({ reviewCode: vi.fn() }));
 vi.mock("../services/ai.service", async (importOriginal) => ({
@@ -45,9 +44,14 @@ beforeAll(async () => {
         res.writeHead(500).end("sandbox exploded");
         return;
       }
-      const passed = runner.mode === "pass";
+      // One result per case sent; in "fail" mode the last two cases fail.
+      const cases = runner.lastBody!.testCases;
+      const results = cases.map((_, i) => {
+        const ok = runner.mode === "pass" || i < cases.length - 2;
+        return { passed: ok, actualOutput: ok ? `${i}` : "wrong" };
+      });
       res.writeHead(200, { "Content-Type": "application/json" }).end(
-        JSON.stringify({ passed, results: [{ passed }], runtimeMs: 12, memoryKb: 900 })
+        JSON.stringify({ passed: results.every((r) => r.passed), results, runtimeMs: 12, memoryKb: 900 })
       );
     });
   });
@@ -145,6 +149,26 @@ describe("POST /api/submissions execution", () => {
     runner.mode = "error";
     const r = await submit(valid);
     expect(r.status).toBe(502);
+  });
+});
+
+describe("hidden test cases (D-057)", () => {
+  it("submit reveals examples and only the first failing hidden case", async () => {
+    runner.mode = "fail"; // cases 4 and 5 (both hidden) fail
+    const r = await submit(valid);
+    const results = r.body.results as Array<Record<string, unknown>>;
+    expect(results).toHaveLength(6);
+    // Examples: full detail.
+    expect(results[0]).toMatchObject({ passed: true, hidden: false, input: "0", expectedOutput: "0" });
+    // First failing hidden case: revealed so it can be debugged.
+    expect(results[4]).toMatchObject({ passed: false, hidden: false, input: "4", expectedOutput: "4", actualOutput: "wrong" });
+    // Any other hidden case: pass/fail only.
+    expect(results[5]).toEqual({ passed: false, hidden: true });
+  });
+
+  it("a passing hidden case doesn't leak its output, which equals the expected answer", async () => {
+    const r = await submit(valid);
+    expect(r.body.results[5]).toEqual({ passed: true, hidden: true });
   });
 });
 

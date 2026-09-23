@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   callsMatching,
-  fakeQuery,
   resetDb,
   serve,
   tokenFor,
@@ -13,7 +12,7 @@ import {
 import { COMPANIES } from "../services/interview-state.service";
 
 const db = vi.hoisted(() => ({ handlers: [], calls: [] }) as FakeDb);
-vi.mock("../db", () => ({ query: vi.fn((sql: string, params: unknown[]) => fakeQuery(db, sql, params)) }));
+vi.mock("../db", async () => (await import("./helpers/fake-db")).fakeDbModule(db));
 
 const ai = vi.hoisted(() => ({
   generateNextQuestion: vi.fn(),
@@ -126,6 +125,14 @@ describe("POST /api/interviews", () => {
     expect(insert.params[1]).toBe(USER_ID);
   });
 
+  it("writes the session and its opening question in one transaction", async () => {
+    ai.generateNextQuestion.mockResolvedValue(QUESTION);
+    await api.request("POST", "/api/interviews", { body: { company: "amazon" } });
+    const sqls = db.calls.map((c) => c.sql).filter((s) => !s.includes("token_version") && !s.includes("resumes"));
+    expect(sqls[0]).toBe("BEGIN");
+    expect(sqls[sqls.length - 1]).toBe("COMMIT");
+  });
+
   it("leaves no orphan session when question generation fails", async () => {
     ai.generateNextQuestion.mockRejectedValue(new AIServiceError(502, "upstream down"));
     const r = await api.request("POST", "/api/interviews", { body: { company: "amazon" } });
@@ -178,10 +185,12 @@ describe("POST /api/interviews/:id/answer", () => {
     match: "metadata_json->>'kind' = 'question'",
     reply: [{ id: "q1", content: QUESTION.question, metadata_json: { context: "ctx" } }],
   };
+  // The turn is claimed by an UPDATE that returns the row while the session is still
+  // on the answered turn (D-057).
   const writes = () => {
     db.handlers.push(
       { match: "INSERT INTO interview_messages", reply: [] },
-      { match: "UPDATE interview_sessions", reply: [] }
+      { match: "UPDATE interview_sessions", reply: [{ id: SESSION }] }
     );
   };
 
@@ -230,6 +239,57 @@ describe("POST /api/interviews/:id/answer", () => {
     const r = await api.request("POST", `/api/interviews/${SESSION}/answer`, { body: { answer: "An answer" } });
     expect(r.body.action).toBe("completed");
     expect(callsMatching(db, "status = 'completed'")).toHaveLength(1);
+  });
+
+  it("records the whole turn in one transaction, with ordered timestamps", async () => {
+    sessionLookup(session({ stage_turn_count: 1 }));
+    db.handlers.push(latestQuestion);
+    writes();
+    ai.evaluateAnswer.mockResolvedValue(EVAL(false));
+    ai.generateNextQuestion.mockResolvedValue(QUESTION);
+
+    await api.request("POST", `/api/interviews/${SESSION}/answer`, { body: { answer: "An answer" } });
+    const sqls = db.calls.map((c) => c.sql);
+    const begin = sqls.indexOf("BEGIN");
+    const commit = sqls.indexOf("COMMIT");
+    const inserts = sqls.flatMap((s, i) => (s.includes("INSERT INTO interview_messages") ? [i] : []));
+    expect(inserts).toHaveLength(3);
+    expect(inserts.every((i) => i > begin && i < commit)).toBe(true);
+    // NOW() is frozen inside a transaction; three rows would tie on created_at.
+    expect(sqls[inserts[0]]).toContain("clock_timestamp()");
+  });
+
+  it("a double submit records once: the second gets 409 and writes nothing", async () => {
+    sessionLookup(session({ stage_turn_count: 1 }));
+    db.handlers.push(latestQuestion, { match: "INSERT INTO interview_messages", reply: [] });
+    // The first request already moved the session on, so the claim matches no row.
+    db.handlers.push({ match: "UPDATE interview_sessions", reply: [] });
+    ai.evaluateAnswer.mockResolvedValue(EVAL(false));
+    ai.generateNextQuestion.mockResolvedValue(QUESTION);
+
+    const r = await api.request("POST", `/api/interviews/${SESSION}/answer`, { body: { answer: "again" } });
+    expect(r.status).toBe(409);
+    expect(callsMatching(db, "INSERT INTO interview_messages")).toHaveLength(0);
+    expect(db.calls.map((c) => c.sql)).toContain("ROLLBACK");
+    // The claim is guarded on the turn the answer responded to.
+    const claim = callsMatching(db, "UPDATE interview_sessions")[0];
+    expect(claim.sql).toContain("current_stage = $2 AND stage_turn_count = $3");
+    expect(claim.params.slice(0, 3)).toEqual([SESSION, "behavioral", 1]);
+  });
+
+  it("a write failing part-way rolls the whole turn back", async () => {
+    sessionLookup(session({ stage_turn_count: 1 }));
+    db.handlers.push(latestQuestion, { match: "UPDATE interview_sessions", reply: [{ id: SESSION }] });
+    db.handlers.push({ match: "INSERT INTO interview_messages", reply: [], once: true });
+    // No handler for the second insert: the fake throws, as a dropped connection would.
+    ai.evaluateAnswer.mockResolvedValue(EVAL(false));
+    ai.generateNextQuestion.mockResolvedValue(QUESTION);
+
+    const r = await api.request("POST", `/api/interviews/${SESSION}/answer`, { body: { answer: "An answer" } });
+    expect(r.status).toBe(500);
+    const sqls = db.calls.map((c) => c.sql);
+    expect(sqls).toContain("ROLLBACK");
+    expect(sqls).not.toContain("COMMIT");
   });
 
   it("stores nothing when evaluation fails, so the answer can be retried", async () => {

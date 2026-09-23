@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db";
 import { optionalAuth, type AuthRequest } from "../middleware/auth.middleware";
+import { exampleCases, type TestCase } from "../services/test-cases";
 
 const router = Router();
 type SolvedFilter = "all" | "solved" | "unsolved";
@@ -123,7 +124,7 @@ router.get("/:id", optionalAuth, async (req: AuthRequest, res) => {
       editorial: string | null;
       topics: string[];
       companies: string[];
-      test_cases: unknown;
+      test_cases: TestCase[] | null;
       starter_code: unknown;
       created_at: string;
       is_solved: boolean;
@@ -151,7 +152,15 @@ router.get("/:id", optionalAuth, async (req: AuthRequest, res) => {
       return res.status(404).json({ error: "Problem not found" });
     }
 
-    return res.json({ problem: result.rows[0] });
+    // Only the public examples leave the server; the hidden suite stays here (D-057).
+    const { test_cases, ...problem } = result.rows[0];
+    return res.json({
+      problem: {
+        ...problem,
+        test_cases: exampleCases(test_cases),
+        test_case_count: test_cases?.length ?? 0,
+      },
+    });
   } catch (err) {
     console.error("Get problem error", err);
     return res.status(500).json({ error: "Internal server error" });

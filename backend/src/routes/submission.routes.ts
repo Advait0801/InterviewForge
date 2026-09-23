@@ -3,19 +3,16 @@ import { query } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
 import { llmLimiter } from "../middleware/rate-limit.middleware";
 import { AIServiceError, reviewCode } from "../services/ai.service";
+import { clientSubmitResults, exampleCases, type TestCase } from "../services/test-cases";
 
 const router = Router();
 const CODE_RUNNER_URL = process.env.CODE_RUNNER_URL || "http://code-runner:5000";
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-type TestCase = { input: string; expectedOutput: string };
-
 /** What code-runner executes (code-runner/src/types.ts SupportedLanguage). */
 const LANGUAGES = ["python3", "c", "cpp", "java"] as const;
 const MODES = ["run", "submit"] as const;
 
-/** Max example cases sent for Run; Submit uses the full suite. */
-const RUN_CASE_LIMIT = 4;
 
 router.get("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
@@ -219,7 +216,8 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
 
     const problem = problemResult.rows[0];
     const allTestCases = problem.test_cases || [];
-    const testCases = mode === "run" ? allTestCases.slice(0, RUN_CASE_LIMIT) : allTestCases;
+    // Run uses the public examples; Submit uses the full suite, hidden cases included.
+    const testCases = mode === "run" ? exampleCases(allTestCases) : allTestCases;
 
     let runRes: Response;
     try {
@@ -287,7 +285,8 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
       submissionId: insertResult.rows[0].id,
       status,
       passed: runResult.passed,
-      results: runResult.results,
+      // Hidden cases are reduced to pass/fail, except the first failing one (D-057).
+      results: clientSubmitResults(testCases, runResult.results),
       runtimeMs: runResult.runtimeMs,
     });
   } catch (err) {

@@ -95,6 +95,13 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   fallback. Behind a proxy, set `TRUST_PROXY` to the hop count (D-053).
 - Backend uses native `fetch` for outbound calls — no axios.
 
+**Multi-write routes**
+- Writes that must land together go through `db.withTransaction` (D-057). Keep LLM calls and
+  code execution *outside* it. Inside a transaction `NOW()` is frozen — use
+  `clock_timestamp()` where row order matters (interview messages do).
+- Only the first 4 test cases of a problem ever leave the server (`services/test-cases.ts`);
+  never return `problems.test_cases` directly.
+
 **Backend tests**
 - Route tests use `src/__tests__/helpers/harness.ts`: a real router over HTTP behind the
   same middleware as `index.ts`, with Postgres replaced by a strict fake — any query no

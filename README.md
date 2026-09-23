@@ -431,7 +431,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [x] Production Docker Compose with multi-stage builds
 - [x] AWS deployment (EC2 + RDS + Nginx)
 - [x] CI pipeline (lint, typecheck, test, build) across all four services
-- [x] Test suites — 682 tests: 405 `ai-service`, 170 `backend` (incl. route-level tests for every
+- [x] Test suites — 690 tests: 405 `ai-service`, 178 `backend` (incl. route-level tests for every
       core router), 59 `web`, 48 `code-runner`
 - [x] RAG evaluation harness with a committed baseline
 - [x] Retrieval quality work: structural chunking, hybrid search, reranking, routing

@@ -9,6 +9,54 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-22
 
+### D-057 — Hidden test cases stay hidden, the assessment timer is enforced, multi-write routes are transactional
+
+These close the three items D-056 found and left open.
+
+**Hidden test cases.** `GET /problems/:id` returned the whole suite, so every hidden case could be
+read off the API and hard-coded. Now:
+- `services/test-cases.ts` defines the first 4 cases as the public examples (what Run uses).
+- The problem API sends only those examples, plus `test_case_count`.
+- Submit results attach input and expected output to the examples and to the **first failing
+  hidden case** (as LeetCode does, so the user can debug it). Every other hidden case is reduced to
+  `{ passed, hidden: true }`. A passing hidden case's actual output is dropped too, because a passing
+  output *is* the expected answer.
+- The web problem page used to render submit results from the full suite it fetched. It now renders
+  from each result's own fields and labels the rest "Hidden test case".
+
+**Assessment timer.** The page stopped work at zero, but the API still accepted a solution linked
+after time ran out. `/solve` now refuses once
+`NOW() > started_at + time_limit + 30 s`. That's computed by Postgres, so the deadline uses the same
+clock as `started_at`; the 30 s absorbs a submit made in the last second. Submitting the assessment
+itself stays allowed after the deadline; it just can't count late work.
+
+**Transactions.** A new `db.withTransaction` helper, applied where one request makes several writes
+that must land together:
+- **`/answer`.** The turn now commits in one transaction. It starts by **claiming the turn**: an
+  UPDATE that only matches while the session is still on the stage and turn count the answer
+  responded to. A failure part-way rolls the whole turn back. A double submit (two tabs, a retry)
+  records once; the loser gets a **409** instead of advancing the interview twice.
+- **Creating an interview:** the session row plus its opening question.
+- **Storing a report:** the report plus its score rows.
+- **Creating an assessment:** the assessment plus its problem rows. A partial insert here used to
+  be a permanent 500 on `GET /assessments/:id`.
+- LLM calls and code execution stay outside the transactions, so no connection or row lock is held
+  across them.
+
+**Caught while doing it:** inside a transaction `NOW()` is frozen. The answer, its evaluation and
+the next question would have shared one `created_at`, and the transcript (`ORDER BY created_at`)
+would have come back in arbitrary order. Message inserts now set `created_at = clock_timestamp()`.
+
+**Verified:**
+- backend 178 tests (+8), each fix's test failing with the fix removed: claim guard, redaction,
+  example-only problem API, timer, frozen `NOW()`. web 59, code-runner 48, ai-service 405 = **690**.
+- Live: the problem API sent 4 of 50 cases. A wrong submit showed the 4 examples and the first
+  failing hidden case, with the other 45 as pass/fail only. A link 61 min into a 60-min assessment
+  → 400; inside the 30 s grace → 200. Two concurrent answers to one question → 200 and 409; the
+  session advanced once; the transcript came back in order with 4 distinct timestamps.
+- Browser: the problem page renders examples and "Hidden test case" rows.
+- `verify_phase7.py` 46/46, `verify_resume_isolation.py` 36/36.
+
 ### D-056 — Route-level backend tests; the five bugs they found
 
 **Why:** the backend had unit tests for helpers and middleware, but none for the routes that hold

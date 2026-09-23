@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { Response, Router } from "express";
-import { query } from "../db";
+import { query, withTransaction, type Queryable } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
 import { llmLimiter } from "../middleware/rate-limit.middleware";
 import {
@@ -114,19 +114,27 @@ async function getSessionMessages(sessionId: string) {
   );
 }
 
-async function insertMessage(params: {
+type NewMessage = {
   sessionId: string;
   role: "assistant" | "candidate" | "system";
   stage: string;
   content: string;
   metadata: Record<string, unknown>;
-}) {
-  await query(
-    `INSERT INTO interview_messages (session_id, role, stage, content, metadata_json)
-     VALUES ($1, $2, $3, $4, $5)`,
+};
+
+async function insertMessage(db: Queryable, params: NewMessage) {
+  // clock_timestamp(), not the column default NOW(): inside a transaction NOW() is
+  // frozen, so an answer, its evaluation and the next question would share one
+  // timestamp and the transcript (ORDER BY created_at) would come back in any order.
+  await db.query(
+    `INSERT INTO interview_messages (session_id, role, stage, content, metadata_json, created_at)
+     VALUES ($1, $2, $3, $4, $5, clock_timestamp())`,
     [params.sessionId, params.role, params.stage, params.content, JSON.stringify(params.metadata)]
   );
 }
+
+/** The answered turn is no longer the session's current one (double submit, two tabs). */
+class StaleTurnError extends Error {}
 
 router.get("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
@@ -188,30 +196,34 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
       session_id: sessionId,
     });
 
-    await query(
-      `INSERT INTO interview_sessions (id, user_id, company, current_stage, status, stage_turn_count, resume_grounded)
-       VALUES ($1, $2, $3, $4, 'active', 0, $5)`,
-      [sessionId, userId, normalizedCompany, startingStage, resumeGrounded]
-    );
+    // One transaction (D-057): a session row without its opening question is a dead
+    // interview the user can't answer.
+    await withTransaction(async (tx) => {
+      await tx.query(
+        `INSERT INTO interview_sessions (id, user_id, company, current_stage, status, stage_turn_count, resume_grounded)
+         VALUES ($1, $2, $3, $4, 'active', 0, $5)`,
+        [sessionId, userId, normalizedCompany, startingStage, resumeGrounded]
+      );
 
-    await insertMessage({
-      sessionId,
-      role: "assistant",
-      stage: startingStage,
-      content: nextQuestion.question,
-      metadata: {
-        kind: "question",
-        company: normalizedCompany,
+      await insertMessage(tx, {
+        sessionId,
+        role: "assistant",
         stage: startingStage,
-        reasoningFocus: nextQuestion.reasoningFocus,
-        expectedCompetencies: nextQuestion.expectedCompetencies,
-        context: nextQuestion.context,
-        resumeGrounded: nextQuestion.resumeGrounded ?? false,
-        groundedIn: nextQuestion.groundedIn ?? null,
-        resumeEvidence: nextQuestion.resumeEvidence ?? [],
-        retrievalConfidence: nextQuestion.retrievalConfidence ?? null,
-        liveIngestion: nextQuestion.liveIngestion ?? null,
-      },
+        content: nextQuestion.question,
+        metadata: {
+          kind: "question",
+          company: normalizedCompany,
+          stage: startingStage,
+          reasoningFocus: nextQuestion.reasoningFocus,
+          expectedCompetencies: nextQuestion.expectedCompetencies,
+          context: nextQuestion.context,
+          resumeGrounded: nextQuestion.resumeGrounded ?? false,
+          groundedIn: nextQuestion.groundedIn ?? null,
+          resumeEvidence: nextQuestion.resumeEvidence ?? [],
+          retrievalConfidence: nextQuestion.retrievalConfidence ?? null,
+          liveIngestion: nextQuestion.liveIngestion ?? null,
+        },
+      });
     });
 
     return res.status(201).json({
@@ -293,40 +305,46 @@ router.get("/:id/report", requireAuth, llmLimiter, async (req: AuthRequest, res)
       conversation,
     });
 
-    // Conditional, so two concurrent first loads can't both record scores: only the
-    // request that actually stores the report does.
-    const stored = await query<{ id: string }>(
-      `UPDATE interview_sessions SET report_json = $2, updated_at = NOW()
-       WHERE id = $1 AND report_json IS NULL
-       RETURNING id`,
-      [id, JSON.stringify(report)]
-    );
+    // Stored and scored in one transaction (D-057), so scores are never recorded without
+    // the report or vice versa. The write is conditional, so of two concurrent first
+    // loads only one stores the report and records scores; the other's UPDATE waits on
+    // the row lock, then matches nothing.
+    const stored = await withTransaction(async (tx) => {
+      const claimed = await tx.query<{ id: string }>(
+        `UPDATE interview_sessions SET report_json = $2, updated_at = NOW()
+         WHERE id = $1 AND report_json IS NULL
+         RETURNING id`,
+        [id, JSON.stringify(report)]
+      );
+      if (claimed.rows.length === 0) return false;
 
-    if (stored.rows.length === 0) {
+      const stageScores = report.stageScores || {};
+      for (const [stage, data] of Object.entries(stageScores)) {
+        const score = typeof data.score === "string" ? parseInt(data.score, 10) : data.score;
+        if (!isNaN(score)) {
+          await tx.query(
+            `INSERT INTO scores (user_id, category, score, max_score)
+             VALUES ($1, $2, $3, 10)`,
+            [userId, stage, score]
+          );
+        }
+      }
+
+      if (report.overallScore) {
+        await tx.query(
+          `INSERT INTO scores (user_id, category, score, max_score)
+           VALUES ($1, 'overall', $2, 10)`,
+          [userId, report.overallScore]
+        );
+      }
+      return true;
+    });
+
+    if (!stored) {
       // Lost that race: serve the copy that won, so every viewer sees one report.
       const winner = await getSessionForUser(id, userId);
       const winning = winner.rows[0]?.report_json ?? report;
       return res.json({ sessionId: id, company: session.company, ...winning });
-    }
-
-    const stageScores = report.stageScores || {};
-    for (const [stage, data] of Object.entries(stageScores)) {
-      const score = typeof data.score === "string" ? parseInt(data.score, 10) : data.score;
-      if (!isNaN(score)) {
-        await query(
-          `INSERT INTO scores (user_id, category, score, max_score)
-           VALUES ($1, $2, $3, 10)`,
-          [userId, stage, score]
-        );
-      }
-    }
-
-    if (report.overallScore) {
-      await query(
-        `INSERT INTO scores (user_id, category, score, max_score)
-         VALUES ($1, 'overall', $2, 10)`,
-        [userId, report.overallScore]
-      );
     }
 
     return res.json({
@@ -399,6 +417,41 @@ router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res
       context: String(latestQuestion.metadata_json.context ?? ""),
     });
 
+    const answerMessage: NewMessage = {
+      sessionId: id,
+      role: "candidate",
+      stage: session.current_stage,
+      content: answer,
+      metadata: { kind: "answer" },
+    };
+    const evaluationMessage: NewMessage = {
+      sessionId: id,
+      role: "system",
+      stage: session.current_stage,
+      content: buildEvaluationSummary(evaluation),
+      metadata: { kind: "evaluation", ...evaluation },
+    };
+
+    /**
+     * Record the turn: every model call is done by now, so this is quick. One
+     * transaction (D-057) so a failure part-way can't leave an answer with no
+     * evaluation, or a stage advanced with no question. It starts by claiming the
+     * turn -- the UPDATE only matches while the session is still on the stage and
+     * turn this answer responded to -- so a double submit records once and the
+     * second gets a 409 instead of advancing the interview twice.
+     */
+    const commitTurn = (update: { set: string; params: unknown[] }, messages: NewMessage[]) =>
+      withTransaction(async (tx) => {
+        const claimed = await tx.query(
+          `UPDATE interview_sessions SET ${update.set}, updated_at = NOW()
+           WHERE id = $1 AND status = 'active' AND current_stage = $2 AND stage_turn_count = $3
+           RETURNING id`,
+          [id, session.current_stage, session.stage_turn_count, ...update.params]
+        );
+        if (claimed.rows.length === 0) throw new StaleTurnError();
+        for (const message of messages) await insertMessage(tx, message);
+      });
+
     if (shouldAskFollowup(session.stage_turn_count) && evaluation.shouldAskFollowup) {
       const followup = await generateFollowup({
         company: normalizedCompany,
@@ -408,40 +461,21 @@ router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res
         evaluation,
       });
 
-      await insertMessage({
-        sessionId: id,
-        role: "candidate",
-        stage: session.current_stage,
-        content: answer,
-        metadata: { kind: "answer" },
-      });
-
-      await insertMessage({
-        sessionId: id,
-        role: "system",
-        stage: session.current_stage,
-        content: buildEvaluationSummary(evaluation),
-        metadata: { kind: "evaluation", ...evaluation },
-      });
-
-      await insertMessage({
-        sessionId: id,
-        role: "assistant",
-        stage: session.current_stage,
-        content: followup.question,
-        metadata: {
-          kind: "followup",
-          focus: followup.focus,
-          reason: followup.reason,
+      await commitTurn({ set: "stage_turn_count = stage_turn_count + 1", params: [] }, [
+        answerMessage,
+        evaluationMessage,
+        {
+          sessionId: id,
+          role: "assistant",
+          stage: session.current_stage,
+          content: followup.question,
+          metadata: {
+            kind: "followup",
+            focus: followup.focus,
+            reason: followup.reason,
+          },
         },
-      });
-
-      await query(
-        `UPDATE interview_sessions
-         SET stage_turn_count = stage_turn_count + 1, updated_at = NOW()
-         WHERE id = $1`,
-        [id]
-      );
+      ]);
 
       return res.json({
         action: "followup",
@@ -454,27 +488,9 @@ router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res
 
     const nextStage = getNextStage(session.current_stage);
     if (nextStage === "report") {
-      await insertMessage({
-        sessionId: id,
-        role: "candidate",
-        stage: session.current_stage,
-        content: answer,
-        metadata: { kind: "answer" },
-      });
-
-      await insertMessage({
-        sessionId: id,
-        role: "system",
-        stage: session.current_stage,
-        content: buildEvaluationSummary(evaluation),
-        metadata: { kind: "evaluation", ...evaluation },
-      });
-
-      await query(
-        `UPDATE interview_sessions
-         SET current_stage = 'report', status = 'completed', stage_turn_count = 0, updated_at = NOW()
-         WHERE id = $1`,
-        [id]
+      await commitTurn(
+        { set: "current_stage = 'report', status = 'completed', stage_turn_count = 0", params: [] },
+        [answerMessage, evaluationMessage]
       );
 
       return res.json({
@@ -497,48 +513,29 @@ router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res
       session_id: id,
     });
 
-    await insertMessage({
-      sessionId: id,
-      role: "candidate",
-      stage: session.current_stage,
-      content: answer,
-      metadata: { kind: "answer" },
-    });
-
-    await insertMessage({
-      sessionId: id,
-      role: "system",
-      stage: session.current_stage,
-      content: buildEvaluationSummary(evaluation),
-      metadata: { kind: "evaluation", ...evaluation },
-    });
-
-    await insertMessage({
-      sessionId: id,
-      role: "assistant",
-      stage: nextStage,
-      content: nextQuestion.question,
-      metadata: {
-        kind: "question",
-        company: session.company,
+    await commitTurn({ set: "current_stage = $4, stage_turn_count = 0", params: [nextStage] }, [
+      answerMessage,
+      evaluationMessage,
+      {
+        sessionId: id,
+        role: "assistant",
         stage: nextStage,
-        reasoningFocus: nextQuestion.reasoningFocus,
-        expectedCompetencies: nextQuestion.expectedCompetencies,
-        context: nextQuestion.context,
-        resumeGrounded: nextQuestion.resumeGrounded ?? false,
-        groundedIn: nextQuestion.groundedIn ?? null,
-        resumeEvidence: nextQuestion.resumeEvidence ?? [],
-        retrievalConfidence: nextQuestion.retrievalConfidence ?? null,
-        liveIngestion: nextQuestion.liveIngestion ?? null,
+        content: nextQuestion.question,
+        metadata: {
+          kind: "question",
+          company: session.company,
+          stage: nextStage,
+          reasoningFocus: nextQuestion.reasoningFocus,
+          expectedCompetencies: nextQuestion.expectedCompetencies,
+          context: nextQuestion.context,
+          resumeGrounded: nextQuestion.resumeGrounded ?? false,
+          groundedIn: nextQuestion.groundedIn ?? null,
+          resumeEvidence: nextQuestion.resumeEvidence ?? [],
+          retrievalConfidence: nextQuestion.retrievalConfidence ?? null,
+          liveIngestion: nextQuestion.liveIngestion ?? null,
+        },
       },
-    });
-
-    await query(
-      `UPDATE interview_sessions
-       SET current_stage = $2, stage_turn_count = 0, updated_at = NOW()
-       WHERE id = $1`,
-      [id, nextStage]
-    );
+    ]);
 
     return res.json({
       action: "advance_stage",
@@ -549,6 +546,9 @@ router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res
       nextQuestion,
     });
   } catch (err) {
+    if (err instanceof StaleTurnError) {
+      return res.status(409).json({ error: "This question was already answered. Refresh to continue." });
+    }
     if (err instanceof AIServiceError) {
       return sendAIServiceError(res, err);
     }

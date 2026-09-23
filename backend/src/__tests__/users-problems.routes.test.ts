@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   callsMatching,
-  fakeQuery,
   resetDb,
   serve,
   USER_ID,
@@ -10,7 +9,7 @@ import {
 } from "./helpers/harness";
 
 const db = vi.hoisted(() => ({ handlers: [], calls: [] }) as FakeDb);
-vi.mock("../db", () => ({ query: vi.fn((sql: string, params: unknown[]) => fakeQuery(db, sql, params)) }));
+vi.mock("../db", async () => (await import("./helpers/fake-db")).fakeDbModule(db));
 
 import usersRouter from "../routes/users.routes";
 import problemsRouter from "../routes/problems.routes";
@@ -138,6 +137,15 @@ describe("problems", () => {
     const list = callsMatching(db, "FROM problems p")[0];
     expect(list.params).toEqual(["amazon", USER_ID]);
     expect(list.sql).toContain("AS is_bookmarked");
+  });
+
+  it("GET /:id sends only the example cases, never the hidden suite", async () => {
+    const suite = Array.from({ length: 9 }, (_, i) => ({ input: `in${i}`, expectedOutput: `out${i}` }));
+    db.handlers.push({ match: "WHERE p.id = $1", reply: [{ id: PROBLEM, title: "t", test_cases: suite }] });
+    const r = await problems.request("GET", `/api/problems/${PROBLEM}`);
+    expect(r.body.problem.test_cases).toEqual(suite.slice(0, 4));
+    expect(r.body.problem.test_case_count).toBe(9);
+    expect(JSON.stringify(r.body)).not.toContain("out8");
   });
 
   it("GET /:id 400s on a malformed id and 404s on an unknown one", async () => {

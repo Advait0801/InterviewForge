@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   callsMatching,
-  fakeQuery,
   resetDb,
   serve,
   OTHER_USER_ID,
@@ -11,7 +10,7 @@ import {
 } from "./helpers/harness";
 
 const db = vi.hoisted(() => ({ handlers: [], calls: [] }) as FakeDb);
-vi.mock("../db", () => ({ query: vi.fn((sql: string, params: unknown[]) => fakeQuery(db, sql, params)) }));
+vi.mock("../db", async () => (await import("./helpers/fake-db")).fakeDbModule(db));
 
 import assessmentsRouter from "../routes/assessments.routes";
 
@@ -67,6 +66,10 @@ describe("POST /api/assessments", () => {
     expect(r.body.timeLimitMinutes).toBe(15);
     expect(callsMatching(db, "FROM problems")[0].params[0]).toBe(10);
     expect(callsMatching(db, "INSERT INTO assessment_problems")).toHaveLength(2);
+    // Assessment and its problem rows land together, or not at all (D-057).
+    const sqls = db.calls.map((c) => c.sql);
+    expect(sqls.indexOf("BEGIN")).toBeLessThan(sqls.findIndex((s) => s.includes("INSERT INTO assessments")));
+    expect(sqls.lastIndexOf("COMMIT")).toBeGreaterThan(sqls.findLastIndex((s) => s.includes("INSERT INTO assessment_problems")));
   });
 
   it.each([
@@ -139,6 +142,23 @@ describe("POST /api/assessments/:id/solve", () => {
     const r = await link({ problemId: PROBLEM_A, submissionId: SUB });
     expect(r.status).toBe(400);
     expect(callsMatching(db, "UPDATE assessment_problems")).toHaveLength(0);
+  });
+
+  it("refuses to link once time is up", async () => {
+    // Postgres computes `expired` against started_at + limit + 30 s grace (D-057).
+    db.handlers.unshift({
+      match: "FROM assessments WHERE id = $1 AND user_id = $2",
+      reply: [assessment({ expired: true })],
+    });
+    db.handlers.push({
+      match: "FROM submissions WHERE id = $1 AND user_id = $2",
+      reply: [{ problem_id: PROBLEM_A }],
+    });
+    const r = await link({ problemId: PROBLEM_A, submissionId: SUB });
+    expect(r.status).toBe(400);
+    expect(r.body.error).toMatch(/time is up/i);
+    expect(callsMatching(db, "UPDATE assessment_problems")).toHaveLength(0);
+    expect(callsMatching(db, "FROM assessments WHERE")[0].sql).toContain("make_interval(mins => time_limit_minutes)");
   });
 
   it("400s on malformed ids", async () => {

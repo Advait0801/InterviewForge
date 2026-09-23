@@ -8,8 +8,8 @@
  * expected.
  *
  * Usage, in a test file:
- *   const db = vi.hoisted(() => ({ handlers: [] as Handler[], calls: [] as Call[] }));
- *   vi.mock("../db", () => ({ query: vi.fn((sql, params) => fakeQuery(db, sql, params)) }));
+ *   const db = vi.hoisted(() => ({ handlers: [], calls: [] }) as FakeDb);
+ *   vi.mock("../db", async () => (await import("./helpers/fake-db")).fakeDbModule(db));
  */
 import type { AddressInfo } from "node:net";
 import type { Server } from "node:http";
@@ -17,53 +17,8 @@ import express, { type Router } from "express";
 import { signAccessToken } from "../../auth";
 import { optionalAuth } from "../../middleware/auth.middleware";
 
-export type Row = Record<string, unknown>;
-export type Call = { sql: string; params: unknown[] };
-export type Result = { rows: Row[]; rowCount?: number };
-export type Handler = {
-  /** Matched against the whitespace-collapsed SQL. */
-  match: string | RegExp;
-  reply: Row[] | Result | ((params: unknown[], sql: string) => Row[] | Result);
-  /** Remove the handler after it has answered once. */
-  once?: boolean;
-};
-export type FakeDb = { handlers: Handler[]; calls: Call[] };
-
-export const USER_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-export const OTHER_USER_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
-
-const squash = (sql: string) => sql.replace(/\s+/g, " ").trim();
-
-export async function fakeQuery(db: FakeDb, sql: string, params: unknown[] = []): Promise<Result> {
-  const flat = squash(sql);
-  db.calls.push({ sql: flat, params });
-
-  // Every authenticated request first checks token revocation (D-055); tokens from
-  // tokenFor() are always at version 0 for either known user.
-  if (flat.startsWith("SELECT token_version FROM users")) {
-    const known = params[0] === USER_ID || params[0] === OTHER_USER_ID;
-    return { rows: known ? [{ token_version: 0 }] : [] };
-  }
-
-  const i = db.handlers.findIndex((h) =>
-    typeof h.match === "string" ? flat.includes(h.match) : h.match.test(flat)
-  );
-  if (i === -1) throw new Error(`Unexpected query in test: ${flat.slice(0, 160)}`);
-  const handler = db.handlers[i];
-  if (handler.once) db.handlers.splice(i, 1);
-  const out = typeof handler.reply === "function" ? handler.reply(params, flat) : handler.reply;
-  return Array.isArray(out) ? { rows: out, rowCount: out.length } : { rowCount: out.rows.length, ...out };
-}
-
-export function resetDb(db: FakeDb) {
-  db.handlers.length = 0;
-  db.calls.length = 0;
-}
-
-/** Calls whose SQL contains `fragment`, excluding the auth lookup. */
-export function callsMatching(db: FakeDb, fragment: string): Call[] {
-  return db.calls.filter((c) => c.sql.includes(fragment));
-}
+export * from "./fake-db";
+import { USER_ID } from "./fake-db";
 
 export const tokenFor = (userId = USER_ID) => signAccessToken({ userId, tokenVersion: 0 });
 

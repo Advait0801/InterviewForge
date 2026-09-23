@@ -23,7 +23,7 @@ type Language = WorkspaceLanguage;
 type ConsoleTab = "result" | "testcases";
 type ExecutionResult = {
   passed: boolean;
-  results: Array<{ passed: boolean; actualOutput?: string; error?: string }>;
+  results: Array<{ passed: boolean; actualOutput?: string; error?: string; hidden?: boolean }>;
   runtimeMs?: number;
 };
 
@@ -524,7 +524,7 @@ function ExecutionPanel({ result, error, loading }: { result: ExecutionResult | 
       </div>
       {result.results.map((caseResult, index) => (
         <div key={index} className={`rounded-lg border p-3 ${caseResult.passed ? "border-accent/30 bg-accent/5" : "border-error/30 bg-error/5"}`}>
-          <p className={`text-xs font-semibold ${caseResult.passed ? "text-accent" : "text-error"}`}>{caseResult.passed ? "Passed" : "Failed"} case {index + 1}</p>
+          <p className={`text-xs font-semibold ${caseResult.passed ? "text-accent" : "text-error"}`}>{caseResult.passed ? "Passed" : "Failed"} case {index + 1}{caseResult.hidden ? " (hidden)" : ""}</p>
           {caseResult.actualOutput != null ? <pre className="mono mt-2 whitespace-pre-wrap break-all text-xs">{caseResult.actualOutput}</pre> : null}
           {caseResult.error ? <pre className="mono mt-2 whitespace-pre-wrap break-all text-xs text-error">{caseResult.error}</pre> : null}
         </div>
