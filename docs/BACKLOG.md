@@ -1,45 +1,12 @@
-# Backlog & remaining verification
+# Backlog
 
-What is deliberately *not* built yet, and the verification that has not been run.
-Condensed from the two phase plans (`EXECUTION_PLAN.md`, `UI_UX_PLAN.md`) when they were
-retired on 2026-09-20 — both remain in git history at `4083f5e` if the full phase
-breakdowns, exit criteria or iteration logs are ever needed. What actually shipped is in
-[`DECISIONS.md`](DECISIONS.md); this file is only the forward-looking remainder.
+What is deliberately *not* built yet. Condensed from the two phase plans (`EXECUTION_PLAN.md`,
+`UI_UX_PLAN.md`) when they were retired on 2026-09-20 — both remain in git history at `4083f5e`.
+Everything that shipped, including the end-to-end verification rounds (D-058), is in
+[`DECISIONS.md`](DECISIONS.md). When an item here ships, delete it and write the decision entry.
 
 Effort: **S** hours · **M** a day or two · **L** a week+.
 **Loud** = an interviewer notices · **Quiet** = nobody praises it, everybody notices its absence.
-
-## End-to-end verification — DONE (2026-09-21)
-
-Both rounds were run end to end for the first time, both green.
-
-**Round 1 — correctness. ✅** Full stack from clean volumes; all 11 migrations applied in order
-against an empty database; every seed script run; **581/581 tests** across all services (backend 73,
-code-runner 48, ai-service 405, web 55); lint + backend `tsc` + web `next build`; an 18-step
-walkthrough of register → solve in all 4 languages → 4-stage interview → report → assessment →
-learning path → analytics → leaderboard; eval harness re-run and reproducing the recorded numbers
-(nDCG 0.899, MRR 0.917, hit_rate 0.952).
-
-**Round 2 — resilience. ✅** Cross-user resume isolation re-verified (29/29, incl. deletion purge and
-all malformed-PDF classes); malformed input to endpoints returns correct 400/404/401; failure modes
-injected — **Chroma-down and code-runner-down both degrade to a retryable 503**, services stay
-healthy; adversarial sandbox holds at runtime (infinite loop → Time Limit Exceeded, zero leaked
-containers); `verify_phase7.py` 46/46; closed findings F-12/F-14/F-21/F-22 reconfirmed.
-
-**Two findings surfaced:** (1) the recorded eval numbers are only reproducible with
-`app.ingest.reindex --rebuild` from `ai-service/.corpus_cache`, which is **not git-tracked** — so a
-clean clone cannot reproduce them without live re-fetch (decided: not fixed, low priority). (2)
-code-runner-unreachable returned a generic 500 instead of a retryable 503 — **fixed and merged**
-(PR #8). Not exercised: live-fetch spend caps (F-19, needs Gemini grounding quota that 429s on free
-tier, F-20) and the 600-run `verify_problems.py` (already verified once under Phase 7).
-
-## Presentation
-
-- ~~**Demo video + README GIFs** *(S, Loud)*~~ — **DONE (2026-09-21).** Two README GIFs (coding
-  workspace + resume-grounded interview) captured against the live stack via Playwright and embedded
-  at the top of the README (`docs/assets/`). A produced video was deliberately skipped in favour of
-  the GIFs — the substitute for the live link that no longer exists (D-004), with no quota to exhaust
-  or dead link to rot.
 
 ## Interviewer intelligence
 
@@ -73,23 +40,13 @@ tier, F-20) and the 600-run `verify_problems.py` (already verified once under Ph
 - **Redis + BullMQ worker pool** *(L, Loud)* — bounded concurrency in front of code-runner,
   distributed rate limiting, leaderboard caching. Three wins from one component, and it fixes
   the in-process limiter counters (F-19).
-- ~~**Fix F-23**~~ — **DONE (D-053)**, together with auth limiters, a fail-closed JWT secret, helmet
-  and `TRUST_PROXY`.
-- **Query audit** *(M, Quiet)* — `EXPLAIN ANALYZE` the leaderboard and analytics queries, add
-  missing indexes, fix N+1s.
-  *Indexes done in D-053 (migration 012). Remaining: the leaderboard is a full aggregate that no
-  index helps; it needs caching or a materialised view.*
+- **Leaderboard caching** *(S–M, Quiet)* — the leaderboard aggregates every submission on each
+  request; no index helps (measured in D-053). Cache it, or keep a materialised view refreshed on
+  submit. Pairs naturally with the Redis item above.
 - **Repository/service layer** *(M, Quiet)* — routes currently hold SQL and business logic.
 - **More languages** *(M)* — JS, Go, Rust: a Dockerfile and harness each.
 - **Custom test cases + failing-case diff view** *(S)* — the gap between "toy judge" and "tool
   I'd actually use".
-- ~~**Token revocation**~~ — **DONE (D-055)**: `token_version`, sign out everywhere, and the web
-  client returns to login when a session ends.
-- ~~**Route-level backend tests**~~ — **DONE (D-056)**: 78 tests over interviews, submissions,
-  assessments, users and problems; they found five bugs, all fixed. The three items it left
-  open (timer, hidden test suite, `/answer` transaction) were closed in D-057.
-- ~~**CI builds the prod images**~~ — **DONE (D-054)**: all four prod images plus the four sandboxes
-  build in CI, and a smoke test checks image contents and boot.
 - **Real email delivery** *(S)* — SES or Resend for verification and reset (F-07).
 
 ## Product

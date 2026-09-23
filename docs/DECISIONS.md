@@ -9,6 +9,34 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-09-22
 
+### D-058 — Recorded: the end-to-end verification rounds and the README demo GIFs (2026-09-21)
+
+These shipped on 2026-09-21 but were only written up in `BACKLOG.md`. That file holds only unbuilt
+work, so the record moves here.
+
+**Verification, both rounds green, the first end-to-end run the project had.**
+- **Round 1, correctness:** the full stack from clean volumes; the then-11 migrations applied in
+  order to an empty database; every seed script; 581/581 tests; lint, backend `tsc` and web
+  `next build`. Then an 18-step walkthrough: register → solve in all four languages → four-stage
+  interview → report → assessment → learning path → analytics → leaderboard. The eval re-run
+  reproduced the recorded numbers (nDCG 0.899, MRR 0.917, hit rate 0.952).
+- **Round 2, resilience:** resume isolation 29/29, including the deletion purge and every
+  malformed-PDF class. Malformed input returns the right 400/404/401. Chroma down and code-runner
+  down both degrade to a retryable 503 while the services stay healthy. An adversarial infinite loop
+  ends as Time Limit Exceeded with zero leaked containers. `verify_phase7.py` 46/46.
+- **Findings:**
+  1. The recorded eval numbers only reproduce via `app.ingest.reindex --rebuild` from
+     `ai-service/.corpus_cache`, which isn't tracked, so a clean clone can't reproduce them without
+     a live re-fetch. Decided: not fixed; low priority.
+  2. An unreachable code-runner returned 500 instead of a retryable 503. Fixed in PR #8.
+- **Not exercised:** the live-fetch spend caps (F-19; they need Gemini grounding quota, which 429s
+  on the free tier, F-20) and the 600-run `verify_problems.py` (verified once under Phase 7).
+
+**Demo:** two README GIFs (the coding workspace and a resume-grounded interview) were captured
+against the live stack with Playwright, in `docs/assets/`. A produced video was deliberately
+skipped. The GIFs stand in for the live link that no longer exists (D-004), with no quota to run out
+and no dead link to rot.
+
 ### D-057 — Hidden test cases stay hidden, the assessment timer is enforced, multi-write routes are transactional
 
 These close the three items D-056 found and left open.

@@ -62,7 +62,9 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 
 **Env & Docker**
 - One `.env` per service: `backend/.env`, `ai-service/.env`, `web/.env`,
-  `code-runner/.env`, plus `.env.postgres` at the root. All gitignored.
+  `code-runner/.env`, plus `.env.postgres` at the root. All gitignored; each has a
+  committed `.env.example` template (names and placeholders only). Adding an env var
+  means adding it to the template too.
 - Never put env values statically in `docker-compose.yml` — use `env_file:` only.
 - Every service has a `.dockerignore` that keeps `.env` out of images (D-054). The one
   exception is `web/`, whose `.env` holds only `NEXT_PUBLIC_API_URL`, inlined at build —
@@ -166,9 +168,14 @@ still accurate and redeployable.
 
 ## Known gaps (don't be surprised by these)
 
-- ~~Empty test dirs, no CI~~ — fixed in Phase 0. Vitest in `backend/` and `code-runner/`,
-  pytest in `ai-service/`, GitHub Actions in `.github/workflows/ci.yml`. `web/` lint is
-  blocking; the four pre-existing react-hooks errors were fixed in D-031 (F-14 closed).
+- ~~Empty test dirs, no CI~~ — fixed in Phase 0. Vitest in `backend/`, `web/` and
+  `code-runner/`, pytest in `ai-service/`; `.github/workflows/ci.yml` also builds and
+  smoke-tests the four prod images and builds the four sandboxes (D-054). `web/` lint is
+  blocking (F-14 closed in D-031).
+- Local `docker compose up` does not build the sandbox images — build them once
+  (`docker/sandboxes/*`, see README) or every code run fails.
+- Prod seeding needs a one-off global `ts-node` (the backend image ships `dist/` only);
+  the README deploy section has the command.
 - Socket.IO is scaffolded on both ends but only emits a `hello` — realtime is unused.
 - Email verification / password reset tokens work, but emails are only `console.log`ed.
 - ~~Sandbox runs as root with no capability/pid/cpu limits~~ — fixed in Phase 6.
@@ -187,7 +194,7 @@ Code auto-discovers only the root `CLAUDE.md`.
 - `README.md` — public-facing overview, setup, deployment.
 - `docs/DECISIONS.md` — running log of decisions and findings. **Append to this** when a
   non-obvious call gets made; read it before re-litigating something.
-- `docs/BACKLOG.md` — what is deliberately not built yet, plus the two full verification
-  rounds that have never been run. Both phase plans (platform and UI) were retired on
+- `docs/BACKLOG.md` — what is deliberately not built yet (shipped items are deleted from it
+  and recorded in DECISIONS; the verification rounds ran in D-058). Both phase plans (platform and UI) were retired on
   2026-09-20 once their workstreams merged; they live in git history at `4083f5e`.
 - `docs/PROJECT_CONTEXT.md` — original product spec and long-term vision.

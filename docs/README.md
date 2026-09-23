@@ -11,7 +11,7 @@ All project documentation lives here, except two files that must stay at the rep
 | Doc | What it's for |
 |---|---|
 | [`DECISIONS.md`](DECISIONS.md) | Running log of decisions and findings. **Append as we go.** The record of what was built and why |
-| [`BACKLOG.md`](BACKLOG.md) | What is deliberately not built yet, and the verification rounds still to run |
+| [`BACKLOG.md`](BACKLOG.md) | What is deliberately not built yet, with effort and impact estimates |
 | [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) | Original product spec and long-term vision |
 | [`eval/`](eval) | Retrieval evaluation results per phase, with the raw JSON behind each number |
 | [`ui-ux/phase-0.md`](ui-ux/phase-0.md) | UI baseline, route/state matrix, verification evidence, and test approach |
@@ -27,9 +27,11 @@ All project documentation lives here, except two files that must stay at the rep
 
 Both phase plans were retired on 2026-09-20 once their workstreams merged — the platform
 plan (`EXECUTION_PLAN.md`, phases 0–7) and the UI plan (`UI_UX_PLAN.md`, UI phases 0–7).
-They remain in git history at `4083f5e`. Their still-relevant remainder — parked ideas and
-the two unrun verification rounds — is in [`BACKLOG.md`](BACKLOG.md); everything they
-delivered is recorded in [`DECISIONS.md`](DECISIONS.md) as D-001 through D-052.
+They remain in git history at `4083f5e`. Their still-relevant remainder is in
+[`BACKLOG.md`](BACKLOG.md); everything they delivered is recorded in
+[`DECISIONS.md`](DECISIONS.md) as D-001 through D-052. Work since then — the end-to-end
+verification rounds, backend hardening, CI production-image checks, session revocation, and the
+route-level test pass with the fixes it drove — is D-053 through D-058.
 
 ## Conventions
 

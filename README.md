@@ -92,10 +92,11 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
   cleaned, deduplicated and **written back** to the vector store, so the first user to ask
   about a thin topic pays the latency and everyone after does not
 - 💻 **Sandboxed code execution** — Run/submit user code in ephemeral Docker containers, never on the host
-- 🔐 **Full auth system** — JWT tokens, bcrypt hashing, email verification, password reset
+- 🔐 **Full auth system** — JWT tokens, bcrypt hashing, email verification, password reset,
+  server-side session revocation (password change/reset and "sign out everywhere" end other sessions)
 - 📊 **Practice ecosystem** — Problem bookmarks, filters, hints, editorials, submission history, streaks, heatmaps
 - 🏆 **Leaderboard & analytics** — Global rankings, topic radar, difficulty distribution, acceptance trends
-- 📋 **Timed assessments** — Multi-problem flows with countdown timer and scoring
+- 📋 **Timed assessments** — Multi-problem flows with a server-enforced deadline and scoring
 - 🗺️ **Learning paths** — Curated problem sequences by topic with progress tracking
 - 📄 **Resume-grounded interviews** — an uploaded resume is parsed into a **per-user vector
   namespace** so questions reference the candidate's real projects; isolation is defended three
@@ -113,7 +114,8 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 
 - 150 problems with difficulty/topic/company/solved/saved filters and search
 - Monaco-based code editor with syntax highlighting
-- **Run** (subset of tests) and **Submit** (full suite) modes
+- **Run** (the public example cases) and **Submit** (full suite, including hidden cases whose
+  contents never leave the server; the first failing one is revealed for debugging)
 - Submission history with language, status, runtime
 - Progressive hints and editorials
 - AI-powered code review (complexity, quality, optimizations)
@@ -130,12 +132,14 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 
 ### AI interview simulator
 
-- Choose company (**Amazon / Google / Meta / Apple**) and difficulty (**Easy / Medium / Hard**)
+- Choose one of **10 companies** (Amazon, Google, Meta, Apple, Microsoft, Uber, Bloomberg, Adobe,
+  LinkedIn, Airbnb) and difficulty (**Easy / Medium / Hard**)
 - 4-stage flow: Behavioral → Coding → System Design → Core CS
 - RAG-retrieved context feeds the LLM for realistic, company-styled questions
 - Real-time evaluation with follow-up questions
 - Voice recording → transcription → explanation scoring
-- Session report with per-stage scores, strengths, weaknesses, recommendations
+- Session report with per-stage scores, strengths, weaknesses, recommendations — generated once
+  and stored, so reopening it costs no model call
 - **One-click PDF export** of the full report + transcript
 
 ### Platform
@@ -205,7 +209,7 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 | **Auth** | JWT (`jsonwebtoken`), bcrypt |
 | **Database** | PostgreSQL via `pg` |
 | **Realtime** | Socket.IO |
-| **Security** | `express-rate-limit`, CORS |
+| **Security** | `helmet`, CORS, per-user API rate limits + per-IP login/sign-up limits (`express-rate-limit`), revocable sessions (`token_version`), fail-closed `JWT_SECRET` |
 
 ### AI Service (Python)
 
@@ -215,15 +219,15 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 | **LLM** | Gemini 3.1 Flash Lite (primary), GPT-4o-mini (fallback), set via `GEMINI_MODEL` / `OPENAI_MODEL` |
 | **RAG** | LangChain + ChromaDB, hybrid BM25 + RRF, LLM reranking, per-stage routing |
 | **Evaluation** | Golden-set harness (nDCG / MRR / hit rate), LLM-judge calibration, context-sufficiency rubric |
-| **Embeddings** | Google `text-embedding-004` or OpenAI `text-embedding-3-small` |
+| **Embeddings** | OpenAI `text-embedding-3-small` (default, chosen for bulk-ingestion throughput); Gemini `gemini-embedding-001` supported |
 
 ### Execution & Data
 
 | | |
 |---|---|
 | **Code runner** | Node.js service using Docker Engine API |
-| **Sandboxes** | Per-language images (`docker/python`, `docker/c`, `docker/cpp`, `docker/java`) |
-| **Database** | PostgreSQL 16 — 11 migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks, resumes |
+| **Sandboxes** | Per-language images in `docker/sandboxes/` (python, c, cpp, java), unprivileged and resource-capped |
+| **Database** | PostgreSQL 16 — 14 raw-SQL migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks, resumes, indexes and session revocation |
 | **Vector store** | ChromaDB 0.5.5 |
 | **Orchestration** | Docker Compose (6 services) |
 
@@ -237,6 +241,8 @@ InterviewForge/
 │   └── src/app/            # App Router pages (dashboard, problems, interview, etc.)
 ├── backend/                # Express API server
 │   ├── src/routes/         # Auth, problems, submissions, interviews, assessments, etc.
+│   ├── src/services/       # ai.service (REST client for ai-service), interview state, test-case visibility
+│   ├── src/__tests__/      # unit + route-level tests; helpers/ holds the HTTP harness and fake Postgres
 │   ├── sql_migrations/     # 001_init.sql through 014_interview_report.sql
 │   ├── reference_solutions/# <slug>/solution.{py,c,cpp,java} — every problem, every language
 │   └── scripts/            # seed_problems.ts, seed_learning_paths.ts
@@ -249,12 +255,16 @@ InterviewForge/
 │   ├── seed_data/          # documents.json (RAG corpus)
 │   └── scripts/            # seed_rag.py
 ├── code-runner/            # Sandbox orchestration service
-├── docker/                 # Sandbox Dockerfiles (python, c, cpp, java)
-├── scripts/                # verify_problems.py, verify_phase7.py, problemgen/ (specs + oracles)
+├── docker/sandboxes/       # Sandbox Dockerfiles (python, c, cpp, java)
+├── scripts/                # verify_*.py (live-stack checks), problemgen/ (specs + oracles),
+│                           # ci/smoke_prod_images.sh
+├── .github/workflows/      # ci.yml: lint, tests, builds, prod-image smoke tests
 ├── docs/                   # DECISIONS, BACKLOG, PROJECT_CONTEXT, eval/, ui-ux/
 ├── docker-compose.yml      # Local development stack
 └── docker-compose.prod.yml # Production stack (AWS)
 ```
+
+Each service reads its own `.env` (gitignored); every one has a committed `.env.example` template.
 
 ---
 
@@ -272,14 +282,23 @@ InterviewForge/
 git clone https://github.com/Advait0801/InterviewForge.git
 cd InterviewForge
 
-# 2. Copy environment files and fill in your secrets
+# 2. Copy the environment templates and fill them in
+cp .env.postgres.example .env.postgres
 cp backend/.env.example backend/.env
 cp ai-service/.env.example ai-service/.env
 cp web/.env.example web/.env
 cp code-runner/.env.example code-runner/.env
-# Also configure .env.postgres with your Postgres credentials
+#    - backend/.env: set JWT_SECRET (>= 32 chars, e.g. `openssl rand -hex 32`);
+#      the backend refuses to start without one. Keep the DATABASE_URL password
+#      in step with POSTGRES_PASSWORD in .env.postgres.
+#    - ai-service/.env: add GEMINI_API_KEY and/or OPENAI_API_KEY.
 
-# 3. Start everything
+# 3. Build the code-execution sandboxes (code-runner starts one per run)
+for lang in python c cpp java; do
+  docker build -t interviewforge-$lang-sandbox:latest docker/sandboxes/$lang-sandbox/
+done
+
+# 4. Start everything
 docker compose up --build
 ```
 
@@ -304,8 +323,9 @@ for f in $(ls backend/sql_migrations/*.sql | sort); do
   docker compose exec -T postgres psql -U postgres -d interviewforge -f - < "$f"
 done
 
-# Seed coding problems
+# Seed coding problems and learning paths
 docker compose exec backend npx ts-node scripts/seed_problems.ts
+docker compose exec backend npx ts-node scripts/seed_learning_paths.ts
 
 # Seed RAG knowledge base
 docker compose exec ai-service python scripts/seed_rag.py
@@ -330,10 +350,23 @@ docker compose exec ai-service python -m app.eval.sufficiency --window 0 --windo
 ### Tests
 
 ```bash
-cd backend      && npm test    # Vitest
+cd backend      && npm test    # Vitest: unit + route-level tests over a strict fake Postgres
+cd web          && npm test    # Vitest + Testing Library
 cd code-runner  && npm test    # Vitest
 docker compose exec ai-service python -m pytest
+
+# Against the running stack
+python scripts/verify_phase7.py            # problems, filters, editorials, stats, streaks
+python scripts/verify_resume_isolation.py  # cross-user resume isolation and deletion
+python scripts/verify_problems.py          # every problem x 4 languages through the real sandbox
+
+# Production images: build each Dockerfile.prod tagged :ci first (see the script header)
+bash scripts/ci/smoke_prod_images.sh
 ```
+
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests and builds for every service, builds
+all four production images and the four sandboxes, and smoke-tests the production images: no
+`.env` baked in, required data files present, each image boots and answers its health check.
 
 ---
 
@@ -341,15 +374,15 @@ docker compose exec ai-service python -m pytest
 
 ### 1. Sign up / Log in
 
-Register with username, email, and password. Express hashes with **bcrypt**, returns a **JWT**. Email verification and password reset flows are built in. All protected routes require `Authorization: Bearer <token>`.
+Register with username, email, and password. Express hashes with **bcrypt**, returns a **JWT**. Email verification and password reset flows are built in. All protected routes require `Authorization: Bearer <token>`. Tokens carry a version that the backend checks on every request, so a password change or reset — or **Sign out everywhere** in Settings — ends other sessions immediately; the web app then returns to login.
 
 ### 2. Solve coding problems
 
-Browse the problem list with filters (difficulty, topic, solved status, search). Open a problem → write code in the **Monaco editor** → **Run** to test against sample cases → **Submit** to run the full test suite. Code executes inside an **isolated Docker container** — never on the host. Request an **AI code review** for complexity analysis and optimization suggestions.
+Browse the problem list with filters (difficulty, topic, company, solved status, search). Open a problem → write code in the **Monaco editor** → **Run** to test against the example cases → **Submit** to run the full suite, hidden cases included. Code executes inside an **isolated Docker container** — never on the host. Request an **AI code review** for complexity analysis and optimization suggestions.
 
 ### 3. Take a mock interview
 
-Select a company (**Amazon / Google / Meta / Apple**) and difficulty level. The platform creates a session and generates the first question using **RAG retrieval** from the company's interview knowledge base + **LLM generation** with company-specific style and difficulty calibration.
+Select one of the **10 companies** and a difficulty level. The platform creates a session and generates the first question using **RAG retrieval** from the company's interview knowledge base + **LLM generation** with company-specific style and difficulty calibration.
 
 Work through **4 stages**: Behavioral → Coding → System Design → Core CS. Each answer is evaluated; follow-up questions dig deeper. On completion, generate a **full report** with per-stage scores and download it as a **PDF**.
 
@@ -410,19 +443,28 @@ for f in $(ls backend/sql_migrations/*.sql | sort); do
   PGPASSWORD='<pass>' psql -h <RDS_ENDPOINT> -U postgres -d interviewforge -f "$f"
 done
 
-# Seed data
+# Seed data (the prod image ships compiled dist/ only, hence the one-off ts-node)
 docker compose -f docker-compose.prod.yml exec backend sh -c \
   "npm install -g ts-node typescript @types/node && \
    ln -s /app/dist /app/src 2>/dev/null; \
-   ts-node --skip-project --compiler-options '{\"module\":\"commonjs\"}' scripts/seed_problems.ts"
+   ts-node --skip-project --compiler-options '{\"module\":\"commonjs\"}' scripts/seed_problems.ts && \
+   ts-node --skip-project --compiler-options '{\"module\":\"commonjs\"}' scripts/seed_learning_paths.ts"
+docker compose -f docker-compose.prod.yml exec ai-service python scripts/seed_rag.py
 ```
 
 ### Update after code changes
 
 ```bash
 cd ~/InterviewForge && git pull origin main
+# Apply any migrations added since the last deploy (each is idempotent), then rebuild
+for f in $(ls backend/sql_migrations/*.sql | sort); do
+  PGPASSWORD='<pass>' psql -h <RDS_ENDPOINT> -U postgres -d interviewforge -f "$f"
+done
 docker compose -f docker-compose.prod.yml up -d --build
 ```
+
+> Upgrading from before migration 013: every existing login token stops working once, and
+> users sign in again (tokens now carry a revocation version).
 
 ---
 
@@ -430,7 +472,8 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 - [x] Production Docker Compose with multi-stage builds
 - [x] AWS deployment (EC2 + RDS + Nginx)
-- [x] CI pipeline (lint, typecheck, test, build) across all four services
+- [x] CI pipeline (lint, typecheck, test, build) across all four services, plus production-image
+      builds and smoke tests
 - [x] Test suites — 690 tests: 405 `ai-service`, 178 `backend` (incl. route-level tests for every
       core router), 59 `web`, 48 `code-runner`
 - [x] RAG evaluation harness with a committed baseline
@@ -443,6 +486,11 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [x] Problem set expanded 42 → 150, all verified executable in four languages
 - [x] UI/UX pass across every core workflow — honest resource states, responsive panes,
       accessible analytics, route-level error recovery
+- [x] End-to-end verification: correctness and resilience rounds (dependency outages degrade to
+      retryable 503s)
+- [x] Backend hardening — fail-closed JWT secret, per-user and auth rate limits, `helmet`, query
+      indexes, session revocation, transactional multi-write routes, server-enforced assessment
+      deadline, hidden test cases kept server-side
 - [ ] HTTPS via Let's Encrypt (requires domain)
 - [ ] Horizontal scaling for code-runner and ai-service
 - [ ] WebSocket reconnection and offline resilience
@@ -450,8 +498,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [ ] Interview session replay and sharing
 - [ ] Collaborative mock interviews (peer-to-peer)
 
-The fuller version, with effort and impact estimates, is in [`docs/BACKLOG.md`](docs/BACKLOG.md) —
-including the two full verification rounds that have not been run yet.
+The fuller version, with effort and impact estimates, is in [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
 ---
 
@@ -459,8 +506,8 @@ including the two full verification rounds that have not been run yet.
 
 | Doc | What it covers |
 |---|---|
-| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only log of every non-obvious decision and finding, with the reasoning (D-001 … D-052) |
-| [`docs/BACKLOG.md`](docs/BACKLOG.md) | What is deliberately not built yet, and the verification rounds still to run |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only log of every non-obvious decision and finding, with the reasoning (D-001 … D-057) |
+| [`docs/BACKLOG.md`](docs/BACKLOG.md) | What is deliberately not built yet, with effort and impact estimates |
 | [`docs/eval/`](docs/eval/) | Retrieval baselines and per-phase results, including the negative ones |
 | [`docs/ui-ux/`](docs/ui-ux/) | UI phase reports, route/state matrix, and re-runnable browser capture scripts |
 | [`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md) | Original product spec and long-term vision |

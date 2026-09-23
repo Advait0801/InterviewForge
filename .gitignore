@@ -52,6 +52,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the templates, which hold names and placeholders only.
+!.env.example
+!**/.env.example
+!.env.postgres.example
 
 # vercel
 .vercel
