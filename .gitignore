@@ -98,3 +98,8 @@ RESUME_*.md
 
 # Internal deep-dive notes -- kept locally, not tracked
 docs/INTERVIEW_NOTES.md
+
+# Working plans stay local, never in git (Advait, 2026-10-06). docs/ROADMAP.md is the active one.
+docs/ROADMAP.md
+docs/*PLAN*.md
+*_PLAN.md

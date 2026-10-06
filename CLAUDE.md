@@ -194,7 +194,8 @@ Code auto-discovers only the root `CLAUDE.md`.
 - `README.md` — public-facing overview, setup, deployment.
 - `docs/DECISIONS.md` — running log of decisions and findings. **Append to this** when a
   non-obvious call gets made; read it before re-litigating something.
-- `docs/ROADMAP.md` — **the active plan**: phase order, exit criteria, branch names, status.
+- `docs/ROADMAP.md` — **the active plan** (local only, gitignored — plans never go in git):
+  phase order, exit criteria, branch names, status.
   All `web/` changes are done by Advait in GPT 6 — Claude never edits `web/`; at a group's UI
   step, stop and hand over one prompt, then verify the result.
 - `docs/BACKLOG.md` — what is deliberately not built yet (shipped items are deleted from it

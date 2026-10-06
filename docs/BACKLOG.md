@@ -4,7 +4,6 @@ What is deliberately *not* built yet. Condensed from the two phase plans (`EXECU
 `UI_UX_PLAN.md`) when they were retired on 2026-09-20 — both remain in git history at `4083f5e`.
 Everything that shipped, including the end-to-end verification rounds (D-058), is in
 [`DECISIONS.md`](DECISIONS.md). When an item here ships, delete it and write the decision entry.
-The order these are being built in, and the status, is in [`ROADMAP.md`](ROADMAP.md).
 
 Effort: **S** hours · **M** a day or two · **L** a week+.
 **Loud** = an interviewer notices · **Quiet** = nobody praises it, everybody notices its absence.
