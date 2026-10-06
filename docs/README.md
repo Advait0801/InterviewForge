@@ -11,6 +11,7 @@ All project documentation lives here, except two files that must stay at the rep
 | Doc | What it's for |
 |---|---|
 | [`DECISIONS.md`](DECISIONS.md) | Running log of decisions and findings. **Append as we go.** The record of what was built and why |
+| [`ROADMAP.md`](ROADMAP.md) | The approved serial plan for the backlog: groups, phases, exit criteria, branches, status, and the GPT 6 handoff rules for `web/` |
 | [`BACKLOG.md`](BACKLOG.md) | What is deliberately not built yet, with effort and impact estimates |
 | [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) | Original product spec and long-term vision |
 | [`eval/`](eval) | Retrieval evaluation results per phase, with the raw JSON behind each number |
