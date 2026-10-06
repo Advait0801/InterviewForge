@@ -64,8 +64,5 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Carried over from the UI workstream
 
-- **Local production homepage warm load rose 24.2 ms → 35.1 ms and decoded script bytes grew
-  14.7%** across the UI phases (D-052). Directional local measurements, not field Web Vitals —
-  worth a profiling pass before they become real.
 - **Screen-reader and real-device microphone testing** were outside the automated pass;
   narrow-width checks cover the responsive site, not a native client.

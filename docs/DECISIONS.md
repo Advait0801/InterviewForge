@@ -7,6 +7,72 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-10-06
+
+### D-059 — The homepage regression is blur raster cost; UI A gates on FCP, not warm load
+
+**Why:** D-052 recorded a rise in local homepage warm load from 24.2 to 35.1 ms and 14.7% more
+decoded script, with no cause. Phase 0 investigated. The full write-up is in
+`docs/audits/phase-0.md`.
+
+**Found:**
+- **The extra bytes aren't on the critical path.** The homepage's own scripts grew 2.9%. The rest is
+  code for the 11 linked routes, which Next prefetches after load and which grew as the interview
+  and other pages were built out (`be6e344`, `cec060b`). They don't change load timing.
+- **The time arrived in one commit, `b6d4824` (the landing redesign).** HEAD with the old
+  `page.tsx` swapped in matches the baseline exactly. The cost is large `filter: blur()` layers
+  (two on-screen 384 px `blur-[130px]` blobs and a `blur-3xl` glow under the preview). They double
+  the raster work before first paint (66 → 130 ms), so FCP went from 36 to 60 ms cold.
+- **Warm `loadEventEnd` rose for a different reason.** The new page's heavier first layout makes
+  Chrome paint a frame before the last bootstrap chunk runs, and the load event waits for that
+  chunk. The page doesn't paint later because of this; the frame just lands inside the measured
+  window.
+
+**Decided:**
+- The fix is specified for UI A: draw the glows as `radial-gradient`s instead of blurred layers.
+  Prototyped, this takes raster to 27 ms and warm FCP to 32 ms (baseline 38).
+- **UI A's exit criterion is now "homepage warm FCP ≈ baseline (≤ 38 ms)", replacing "warm load ≈
+  baseline".** Warm `loadEventEnd` stays about 6 ms over the baseline even with the fix. Only
+  reverting to a lighter homepage removes it, and it isn't user-visible. Advait approved the change
+  on 2026-10-06.
+- Disabling prefetch of sign-in-only routes for guests is optional. It saves bytes, not time.
+
+**Method note:** measure builds side by side, interleaved, and report medians. Single runs of
+three navigations, as in Phase 7, can't separate a 4 ms effect from host noise. Phase 0's
+`measure.mjs` does it this way.
+
+### D-060 — A rejected recording is the caller's error, not an outage; transcription leaves the event loop
+
+**Why:** the Phase 0 microphone audit found that a recording the provider rejects (too short,
+unreadable, the wrong container) reached the browser as **503, `retryable: true`**. The ai-service
+mapped every provider exception to 503, and the backend's `sendAIServiceError` turned every AI error,
+including 4xx, into a retryable 503. Users were told to retry audio that can never succeed. The
+same audit found that `_transcribe_audio` makes a synchronous OpenAI call inside `async`
+endpoints, blocking the ai-service event loop, and with it every RAG and interview request on that
+worker, for the whole transcription.
+
+**Decided:**
+- ai-service: transcription runs in the threadpool. Provider errors are classified: rejected audio
+  → 422 with an actionable message, rate limit → 429, anything else → 503. An empty transcript →
+  422; a non-audio `mimeType` → 400; over 25 MB → 413, the last two before any provider call. The
+  upload filename's extension now follows `mimeType`, because Whisper detects the format from it and
+  a Safari `audio/mp4` recording named `.webm` is rejected.
+- backend: the two speech routes pass 400/413/422 through with `retryable: false`. Other AI errors
+  keep the existing 429/503 mapping. This is scoped to speech: elsewhere, a 4xx from the ai-service
+  would mean the backend sent bad input, a different problem.
+- The browser side (plain-language `getUserMedia` errors, sending the real `mimeType`, not
+  uploading empty recordings, honouring `retryable`) goes in the UI A handoff.
+
+**Verified:**
+- ai-service +11 tests (416); 9 of them fail against the old router. One asserts the provider call
+  runs off the event loop.
+- backend +5 route tests (183); 4 of them fail without the mapping. `tsc` clean.
+- Live through the backend: random bytes went to the real provider and came back as 422
+  non-retryable (previously 503). `text/html` → 400; bad base64 → 400.
+- Browser (Chromium 153): permission denied shows the raw "Permission denied" (copy fix specified).
+  Granted records, transcribes and releases the tracks, including when navigating away
+  mid-recording.
+
 ## 2026-09-22
 
 ### D-058 — Recorded: the end-to-end verification rounds and the README demo GIFs (2026-09-21)

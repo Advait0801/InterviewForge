@@ -13,6 +13,7 @@ All project documentation lives here, except two files that must stay at the rep
 | [`DECISIONS.md`](DECISIONS.md) | Running log of decisions and findings. **Append as we go.** The record of what was built and why |
 | [`BACKLOG.md`](BACKLOG.md) | What is deliberately not built yet, with effort and impact estimates |
 | [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) | Original product spec and long-term vision |
+| [`audits/`](audits) | Investigations with their evidence and harnesses: [`phase-0.md`](audits/phase-0.md) covers homepage performance, axe and microphone error paths |
 | [`eval/`](eval) | Retrieval evaluation results per phase, with the raw JSON behind each number |
 | [`ui-ux/phase-0.md`](ui-ux/phase-0.md) | UI baseline, route/state matrix, verification evidence, and test approach |
 | [`ui-ux/phase-1.md`](ui-ux/phase-1.md) | Shared UI, navigation, motion, authentication hydration, and browser verification evidence |
