@@ -1,0 +1,51 @@
+{
+  "missing": {
+    "stopVisible": true,
+    "gumError": null,
+    "alert": [],
+    "toasts": [
+      "Transcription appended"
+    ],
+    "liveTracksAfter": 0,
+    "recordButtonStill": true,
+    "transcribe": [
+      {
+        "status": 200,
+        "body": "<redacted: transcript of live audio>"
+      }
+    ],
+    "note": "Not a missing device: with permission granted, full Chromium on macOS used the host microphone. A missing device was not reproducible here."
+  },
+  "denied": {
+    "stopVisible": false,
+    "gumError": "NotAllowedError: Permission denied",
+    "alert": [
+      "Permission denied"
+    ],
+    "toasts": [
+      "Permission denied"
+    ],
+    "liveTracksAfter": 0,
+    "recordButtonStill": true,
+    "transcribe": []
+  },
+  "granted": {
+    "stopVisible": true,
+    "gumError": null,
+    "alert": [],
+    "toasts": [],
+    "liveTracksAfter": 0,
+    "recordButtonStill": true,
+    "transcribe": [
+      {
+        "status": 200,
+        "body": "<redacted: transcript of live audio>"
+      },
+      {
+        "status": 200,
+        "body": "<redacted: transcript of live audio>"
+      }
+    ],
+    "liveTracksAfterClientNav": 0
+  }
+}

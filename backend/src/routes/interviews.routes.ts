@@ -76,6 +76,20 @@ function sendAIServiceError(res: Response, err: AIServiceError) {
 }
 
 /**
+ * Speech errors the AI service attributes to the recording itself (unreadable, silent,
+ * too large, not audio). Retrying the same audio cannot succeed, so these keep their
+ * status and are marked non-retryable instead of being reported as an outage.
+ */
+const SPEECH_CLIENT_ERRORS = new Set([400, 413, 422]);
+
+function sendSpeechError(res: Response, err: AIServiceError) {
+  if (SPEECH_CLIENT_ERRORS.has(err.statusCode)) {
+    return res.status(err.statusCode).json({ error: getAIServiceMessage(err), retryable: false });
+  }
+  return sendAIServiceError(res, err);
+}
+
+/**
  * Whether this user has a resume indexed. Read from Postgres rather than asked
  * of the AI service: it is one indexed query on the request path, and it means
  * a user with no resume never causes a cross-service call at all.
@@ -579,7 +593,7 @@ router.post("/speech/transcribe", requireAuth, llmLimiter, async (req: AuthReque
     return res.json(result);
   } catch (err) {
     if (err instanceof AIServiceError) {
-      return sendAIServiceError(res, err);
+      return sendSpeechError(res, err);
     }
     console.error("Speech transcription error", err);
     return res.status(500).json({ error: "Internal server error" });
@@ -615,7 +629,7 @@ router.post("/speech/evaluate-explanation", requireAuth, llmLimiter, async (req:
     return res.json(result);
   } catch (err) {
     if (err instanceof AIServiceError) {
-      return sendAIServiceError(res, err);
+      return sendSpeechError(res, err);
     }
     console.error("Voice explanation evaluation error", err);
     return res.status(500).json({ error: "Internal server error" });

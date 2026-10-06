@@ -1,0 +1,343 @@
+{
+ "when": "2026-10-06T23:27:55.786Z",
+ "results": [
+  {
+   "theme": "dark",
+   "route": "/",
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "help": "Elements must only use permitted ARIA attributes",
+   "nodes": 1,
+   "targets": [
+    ".items-end"
+   ],
+   "summary": "Fix all of the following:   aria-label attribute cannot be used on a div with no valid role attribute."
+  },
+  {
+   "theme": "dark",
+   "route": "/",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".text-slate-500"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 4.07 (foreground color: #62748e, background color: #090d16, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/profile/axe1791329193380",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".h-16"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 15.0pt (20px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/dashboard",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/problems",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+   "id": "heading-order",
+   "impact": "moderate",
+   "help": "Heading levels should only increase by one",
+   "nodes": 1,
+   "targets": [
+    "h3"
+   ],
+   "summary": "Fix any of the following:   Heading order invalid"
+  },
+  {
+   "theme": "dark",
+   "route": "/interview",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".bg-teal-600"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/system-design",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/assessments",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/paths",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/paths/arrays-101",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/analytics",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "dark",
+   "route": "/settings",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".bg-teal-600.flex-shrink-0.w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/",
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "help": "Elements must only use permitted ARIA attributes",
+   "nodes": 1,
+   "targets": [
+    ".items-end"
+   ],
+   "summary": "Fix all of the following:   aria-label attribute cannot be used on a div with no valid role attribute."
+  },
+  {
+   "theme": "light",
+   "route": "/",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 2,
+   "targets": [
+    ".rounded-md",
+    ".text-slate-500"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.93 (foreground color: #6366f1, background color: #141635, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/profile/axe1791329193380",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".h-16"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 15.0pt (20px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/dashboard",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 9,
+   "targets": [
+    ".w-8",
+    ".border-warning\\/25 > .items-start.gap-4.justify-between > div > .font-medium.text-xs",
+    ".border-warning\\/25 > .items-start.gap-4.justify-between > div > .text-3xl.font-bold.tracking-tight > .ml-1.font-medium.text-xs",
+    ".border-warning\\/25 > .items-start.gap-4.justify-between > div > .text-\\[11px\\].mt-1"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/problems",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 601,
+   "targets": [
+    ".w-8",
+    "li:nth-child(1) > .border-l-accent > .gap-3.items-start > .focus-visible\\:ring-2.focus-visible\\:ring-primary.focus-visible\\:ring-offset-4 > .gap-2.flex-wrap.items-center > .bg-accent\\/15.text-accent.border-accent\\/25",
+    "li:nth-child(1) > .border-l-accent > .gap-3.items-start > .focus-visible\\:ring-2.focus-visible\\:ring-primary.focus-visible\\:ring-offset-4 > .mt-3.gap-1\\.5[aria-label=\"Problem tags\"] > .border-primary\\/20.bg-primary\\/5.px-2:nth-child(3)",
+    "li:nth-child(1) > .border-l-accent > .gap-3.items-start > .focus-visible\\:ring-2.focus-visible\\:ring-primary.focus-visible\\:ring-offset-4 > .mt-3.gap-1\\.5[aria-label=\"Problem tags\"] > .border-primary\\/20.bg-primary\\/5.px-2:nth-child(4)"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".rounded-full"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 4.22 (foreground color: #047857, background color: #d3e6e3, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+   "id": "heading-order",
+   "impact": "moderate",
+   "help": "Heading levels should only increase by one",
+   "nodes": 1,
+   "targets": [
+    "h3"
+   ],
+   "summary": "Fix any of the following:   Heading order invalid"
+  },
+  {
+   "theme": "light",
+   "route": "/interview",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 2,
+   "targets": [
+    ".bg-teal-600",
+    ".bg-warning\\/10"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/system-design",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/assessments",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/paths",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 7,
+   "targets": [
+    ".w-8",
+    "a[href$=\"arrays-101\"] > .p-4.backdrop-blur-sm.transition-\\[border-color\\,box-shadow\\,transform\\] > .flex-wrap.gap-2.items-center > .border-accent\\/25.bg-accent\\/15.text-accent",
+    "a[href$=\"dynamic-programming\"] > .p-4.backdrop-blur-sm.transition-\\[border-color\\,box-shadow\\,transform\\] > .flex-wrap.gap-2.items-center > .border-warning\\/25.bg-warning\\/15.text-warning",
+    "a[href$=\"linked-lists\"] > .p-4.backdrop-blur-sm.transition-\\[border-color\\,box-shadow\\,transform\\] > .flex-wrap.gap-2.items-center > .border-accent\\/25.bg-accent\\/15.text-accent"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/paths/arrays-101",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 8,
+   "targets": [
+    ".w-8",
+    ".py-1.border-accent\\/25.bg-accent\\/15",
+    "li:nth-child(1) > .min-h-20.gap-3.outline-none > .min-w-0.flex-1 > .flex-wrap.gap-2.flex > .border-accent\\/25.bg-accent\\/15.text-accent",
+    "li:nth-child(2) > .min-h-20.gap-3.outline-none > .min-w-0.flex-1 > .flex-wrap.gap-2.flex > .border-accent\\/25.bg-accent\\/15.text-accent"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/analytics",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  },
+  {
+   "theme": "light",
+   "route": "/settings",
+   "id": "color-contrast",
+   "impact": "serious",
+   "help": "Elements must meet minimum color contrast ratio thresholds",
+   "nodes": 1,
+   "targets": [
+    ".bg-teal-600.flex-shrink-0.w-8"
+   ],
+   "summary": "Fix any of the following:   Element has insufficient color contrast of 3.66 (foreground color: #ffffff, background color: #009689, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+  }
+ ]
+}

@@ -358,6 +358,30 @@ describe("speech and system design", () => {
     expect(r.status).toBe(400);
   });
 
+  it.each([
+    ["/api/interviews/speech/transcribe", ai.transcribeSpeech, {}],
+    ["/api/interviews/speech/evaluate-explanation", ai.evaluateVoiceExplanation, { question: "Why?" }],
+  ])("%s passes an unreadable recording through as a non-retryable 422", async (path, fn, extra) => {
+    fn.mockRejectedValue(new AIServiceError(422, "AI service error", { detail: "The recording could not be transcribed." }));
+    const r = await api.request("POST", path, { body: { audioBase64: "AAAA", ...extra } });
+    expect(r.status).toBe(422);
+    expect(r.body).toEqual({ error: "The recording could not be transcribed.", retryable: false });
+  });
+
+  it.each([400, 413])("speech keeps a %i about the audio as a non-retryable client error", async (status) => {
+    ai.transcribeSpeech.mockRejectedValue(new AIServiceError(status, "AI service error", { detail: "bad audio" }));
+    const r = await api.request("POST", "/api/interviews/speech/transcribe", { body: { audioBase64: "AAAA" } });
+    expect(r.status).toBe(status);
+    expect(r.body.retryable).toBe(false);
+  });
+
+  it("speech still reports a transcription outage as a retryable 503", async () => {
+    ai.transcribeSpeech.mockRejectedValue(new AIServiceError(500, "boom"));
+    const r = await api.request("POST", "/api/interviews/speech/transcribe", { body: { audioBase64: "AAAA" } });
+    expect(r.status).toBe(503);
+    expect(r.body.retryable).toBe(true);
+  });
+
   it("system design analysis maps an AI outage to a retryable 503", async () => {
     ai.analyzeSystemDesign.mockRejectedValue(new AIServiceError(500, "boom"));
     const r = await api.request("POST", "/api/interviews/system-design/analyze", {
