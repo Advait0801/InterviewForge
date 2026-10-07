@@ -1,0 +1,569 @@
+{
+  "browser": "153.0.8010.12",
+  "when": "2026-10-07T07:42:41.046Z",
+  "flows": [
+    {
+      "flow": "login",
+      "passed": true
+    },
+    {
+      "flow": "problem run + submit",
+      "publicCases": 4,
+      "submitCases": 50,
+      "passed": true
+    },
+    {
+      "flow": "320px workspace panes remain mounted",
+      "passed": true
+    },
+    {
+      "flow": "assessment solve/link/finish/reload",
+      "score": "100.00",
+      "passed": true
+    },
+    {
+      "flow": "paths list and detail",
+      "passed": true
+    },
+    {
+      "flow": "/analytics",
+      "passed": true
+    },
+    {
+      "flow": "/leaderboard",
+      "passed": true
+    },
+    {
+      "flow": "/profile/uia_muxsmday",
+      "passed": true
+    },
+    {
+      "flow": "/settings",
+      "passed": true
+    },
+    {
+      "flow": "settings wrong-password 401 preserves session + password change",
+      "passed": true
+    },
+    {
+      "flow": "avatar upload",
+      "passed": true
+    },
+    {
+      "flow": "voice transcription",
+      "transcript": "I would use a HashMap to store the numbers and find the complement in constant time. This uses linear space and takes linear time. I would use a HashMap to",
+      "request": {
+        "path": "/api/interviews/speech/transcribe",
+        "status": 200,
+        "method": "POST"
+      }
+    },
+    {
+      "flow": "interview voice/evaluation/all stages/report/PDF",
+      "stageScores": {
+        "behavioral": {
+          "score": "1",
+          "feedback": "The candidate failed to answer the prompt entirely, instead providing a canned response about interview strategy. Even after clarification, the candidate recited a methodology rather than providing a concrete, professional example."
+        },
+        "coding": {
+          "score": "1",
+          "feedback": "The candidate repeatedly provided a generic template response instead of engaging with the graph theory or algorithmic problems presented. There was zero attempt to write pseudocode or explain logic."
+        },
+        "system_design": {
+          "score": "1",
+          "feedback": "The candidate was unable to move past a pre-memorized script. No technical design, architectural trade-offs, or consensus protocol discussion took place."
+        },
+        "core_cs": {
+          "score": "1",
+          "feedback": "The candidate failed to demonstrate any theoretical knowledge of distributed systems, consistently ignoring specific technical questions about Raft and consistency models in favor of a repetitive, irrelevant script."
+        }
+      },
+      "passed": true
+    },
+    {
+      "flow": "voice transcription",
+      "transcript": "I would use a HashMap to store the numbers and find the complement in constant time. This uses linear space and takes linear time. I would use a HashMap to",
+      "request": {
+        "path": "/api/interviews/speech/transcribe",
+        "status": 200,
+        "method": "POST"
+      }
+    },
+    {
+      "flow": "system design voice/analysis/diagram",
+      "pageErrors": [],
+      "responses": [
+        {
+          "path": "/api/users/me",
+          "status": 200,
+          "method": "GET"
+        },
+        {
+          "path": "/api/users/me",
+          "status": 200,
+          "method": "GET"
+        },
+        {
+          "path": "/api/interviews/speech/transcribe",
+          "status": 200,
+          "method": "POST"
+        },
+        {
+          "path": "/api/interviews/system-design/analyze",
+          "status": 200,
+          "method": "POST"
+        }
+      ],
+      "audioUploads": [
+        {
+          "path": "/api/interviews/speech/transcribe",
+          "mimeType": "audio/webm;codecs=opus",
+          "filenamePresent": false,
+          "encodedBytes": 194884
+        }
+      ],
+      "transcript": "I would use a hash map to store the numbers and find the complement in constant time. This uses linear space and takes linear time. I would use a hash map to store the numbers and find the complement in constant time.",
+      "nodes": 6,
+      "durationMs": 58118,
+      "passed": true
+    }
+  ],
+  "responses": [
+    {
+      "path": "/api/auth/login",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/activity",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/problems",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/submissions",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/submissions/a9ac48f9-b35e-4a6b-a0d2-95416022b68f",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/submissions",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/submissions",
+      "status": 201,
+      "method": "POST"
+    },
+    {
+      "path": "/api/submissions",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/assessments",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/assessments",
+      "status": 201,
+      "method": "POST"
+    },
+    {
+      "path": "/api/assessments/a30dbd0f-88c0-4878-8d1e-8a45f37979ac",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/assessments/a30dbd0f-88c0-4878-8d1e-8a45f37979ac",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/problems/c6bf2771-90b0-490d-8c29-9956e3725186",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/problems/b223fffe-6faa-488b-88c1-21ba0a4bd268",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/submissions",
+      "status": 201,
+      "method": "POST"
+    },
+    {
+      "path": "/api/assessments/a30dbd0f-88c0-4878-8d1e-8a45f37979ac/solve",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/submissions",
+      "status": 201,
+      "method": "POST"
+    },
+    {
+      "path": "/api/assessments/a30dbd0f-88c0-4878-8d1e-8a45f37979ac/solve",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/assessments/a30dbd0f-88c0-4878-8d1e-8a45f37979ac/submit",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/assessments/a30dbd0f-88c0-4878-8d1e-8a45f37979ac",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/problems/c6bf2771-90b0-490d-8c29-9956e3725186",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/problems/b223fffe-6faa-488b-88c1-21ba0a4bd268",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/submissions/55f9f451-e525-4e4a-b38c-f29a9c84288f",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/submissions/50df3714-84a5-4af7-ba9c-124f7dc1381a",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/learning-paths",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/learning-paths/arrays-101",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/analytics",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/leaderboard",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/uia_muxsmday",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/change-password",
+      "status": 401,
+      "method": "POST"
+    },
+    {
+      "path": "/api/users/change-password",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/users/avatar",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews",
+      "status": 201,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/speech/transcribe",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/speech/evaluate-explanation",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33/answer",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33/answer",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33/answer",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33/answer",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33/answer",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33/answer",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33/answer",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33/answer",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/52f117df-18e6-4e7a-9c9a-6b699917cb33/report",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/speech/transcribe",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/interviews/speech/transcribe",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/interviews/system-design/analyze",
+      "status": 200,
+      "method": "POST"
+    }
+  ],
+  "pageErrors": [],
+  "notes": [
+    "Real local APIs, code-runner, AI interview/design/evaluation, and speech provider; synthetic account and synthesized spoken input. No response fixtures.",
+    "The final system-design case was repeated with a five-minute browser wait: the initial provider call completed successfully in 129 seconds, exceeding the harness’s original two-minute wait."
+  ],
+  "audioUploads": [
+    {
+      "path": "/api/interviews/speech/transcribe",
+      "mimeType": "audio/webm;codecs=opus",
+      "filenamePresent": false,
+      "encodedBytes": 194884
+    },
+    {
+      "path": "/api/interviews/speech/evaluate-explanation",
+      "mimeType": "audio/webm;codecs=opus",
+      "filenamePresent": false,
+      "encodedBytes": 194884
+    },
+    {
+      "path": "/api/interviews/speech/transcribe",
+      "mimeType": "audio/webm;codecs=opus",
+      "filenamePresent": false,
+      "encodedBytes": 194884
+    },
+    {
+      "path": "/api/interviews/speech/transcribe",
+      "mimeType": "audio/webm;codecs=opus",
+      "filenamePresent": false,
+      "encodedBytes": 194884
+    }
+  ]
+}

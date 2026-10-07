@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useReducedMotion } from "framer-motion";
 import {
   ReactFlow,
@@ -24,17 +24,10 @@ import {
   type SystemDesignNode,
 } from "@/lib/api";
 
-/* ── helpers ── */
+import { useSpeechRecording } from "@/hooks/use-speech-recording";
+import { VoiceRecordingFeedback } from "@/components/voice-recording-feedback";
 
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  let binary = "";
-  const bytes = new Uint8Array(buffer);
-  const chunkSize = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-  }
-  return btoa(binary);
-}
+/* ── helpers ── */
 
 const PRESET_PROMPTS = [
   "Design a URL shortener like bit.ly",
@@ -159,16 +152,11 @@ export default function SystemDesignPage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<SystemDesignAnalysis | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const [voiceError, setVoiceError] = useState<string | null>(null);
-
-  const [recording, setRecording] = useState(false);
-  const [transcribing, setTranscribing] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-
-  useEffect(() => () => {
-    mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
-  }, []);
+  const speech = useSpeechRecording((text) => {
+    setExplanation((previous) => previous ? `${previous}\n\n${text}` : text);
+    toast.success("Transcription appended");
+  });
+  const { recording, transcribing, toggleRecording } = speech;
 
   const [feedbackTab, setFeedbackTab] = useState<"summary" | "rubric" | "risks" | "improvements">("summary");
 
@@ -194,51 +182,6 @@ export default function SystemDesignPage() {
       setAnalyzing(false);
     }
   };
-
-  const toggleRecording = useCallback(async () => {
-    if (recording) {
-      mediaRecorderRef.current?.stop();
-      setRecording(false);
-      return;
-    }
-    try {
-      setVoiceError(null);
-      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-        throw new Error("Microphone recording is unavailable in this browser. You can still type your explanation.");
-      }
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      chunksRef.current = [];
-      recorder.ondataavailable = (ev) => {
-        if (ev.data.size > 0) chunksRef.current.push(ev.data);
-      };
-      recorder.onstop = async () => {
-        setTranscribing(true);
-        try {
-          const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-          const buffer = await blob.arrayBuffer();
-          const base64 = arrayBufferToBase64(buffer);
-          const res = await api.transcribeSpeech(base64);
-          setExplanation((prev) => (prev ? prev + "\n\n" : "") + res.transcript);
-          toast.success("Transcription appended");
-        } catch (err) {
-          const message = err instanceof Error ? err.message : "Transcription failed";
-          setVoiceError(message);
-          toast.error(message);
-        } finally {
-          setTranscribing(false);
-        }
-        stream.getTracks().forEach((t) => t.stop());
-      };
-      mediaRecorderRef.current = recorder;
-      recorder.start();
-      setRecording(true);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Could not access microphone";
-      setVoiceError(message);
-      toast.error(message);
-    }
-  }, [recording]);
 
   const reset = () => {
     setResult(null);
@@ -342,7 +285,7 @@ export default function SystemDesignPage() {
                   rows={10}
                   className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-sm leading-relaxed outline-none transition focus:border-primary placeholder:text-text-secondary/50"
                 />
-                {voiceError && <p role="alert" className="mt-2 text-sm text-error">{voiceError}</p>}
+                <VoiceRecordingFeedback speech={speech} disabled={analyzing} />
               </div>
 
               {/* Analyze */}

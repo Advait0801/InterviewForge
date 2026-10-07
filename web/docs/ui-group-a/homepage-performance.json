@@ -1,0 +1,591 @@
+{
+  "browser": "153.0.8010.12",
+  "rounds": 15,
+  "results": {
+    "ui-a": [
+      [
+        {
+          "fcp": 76,
+          "dcl": 58.100000001490116,
+          "load": 89.70000000298023,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 44,
+          "dcl": 10.199999999254942,
+          "load": 28.600000001490116,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 6.199999999254942,
+          "load": 18,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 26.300000000745058,
+          "load": 52.100000001490116,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 5.200000002980232,
+          "load": 20.5,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 6.199999999254942,
+          "load": 18.300000000745058,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 28,
+          "load": 52.80000000074506,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 6.199999999254942,
+          "load": 20.699999999254942,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 5.5,
+          "load": 16.699999999254942,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 52,
+          "dcl": 31.300000000745058,
+          "load": 58.80000000074506,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 6.100000001490116,
+          "load": 21.300000000745058,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 6.5,
+          "load": 17.299999997019768,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 44,
+          "dcl": 28.300000000745058,
+          "load": 54.30000000074506,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 6.300000000745058,
+          "load": 21.399999998509884,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 28,
+          "dcl": 5.199999999254942,
+          "load": 15.299999997019768,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 25,
+          "load": 50,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 5.600000001490116,
+          "load": 20.800000000745058,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 28,
+          "dcl": 5.399999998509884,
+          "load": 16.399999998509884,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 26.199999999254942,
+          "load": 51.30000000074506,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 5,
+          "load": 20,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 28,
+          "dcl": 5.5,
+          "load": 16.899999998509884,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 26.699999999254942,
+          "load": 52.19999999925494,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 6,
+          "load": 20.800000000745058,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 28,
+          "dcl": 4.699999999254942,
+          "load": 15.400000002235174,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 25.600000001490116,
+          "load": 51,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 5.5,
+          "load": 20.5,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 5.300000000745058,
+          "load": 16.199999999254942,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 52,
+          "dcl": 32.20000000298023,
+          "load": 70.20000000298023,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 6,
+          "load": 21.5,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 28,
+          "dcl": 5.100000001490116,
+          "load": 16.400000002235174,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 25.5,
+          "load": 50.69999999925494,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 5.699999999254942,
+          "load": 20.400000002235174,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 28,
+          "dcl": 5.199999999254942,
+          "load": 16,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 25.899999998509884,
+          "load": 51.099999997764826,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 5.5,
+          "load": 20.400000002235174,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 28,
+          "dcl": 5.199999999254942,
+          "load": 16.699999999254942,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 26,
+          "load": 51.19999999925494,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 5.300000000745058,
+          "load": 19.800000000745058,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 5.800000000745058,
+          "load": 17.5,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 25.699999999254942,
+          "load": 50.69999999925494,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 32,
+          "dcl": 5.5,
+          "load": 20,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 28,
+          "dcl": 5.199999999254942,
+          "load": 16.299999997019768,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ],
+      [
+        {
+          "fcp": 40,
+          "dcl": 25.300000000745058,
+          "load": 50.30000000074506,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 36,
+          "dcl": 5.700000002980232,
+          "load": 21.100000001490116,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        },
+        {
+          "fcp": 28,
+          "dcl": 5.299999997019768,
+          "load": 16.599999997764826,
+          "cls": 0.002550192901234568,
+          "scriptCount": 35,
+          "scriptBytes": 2382456
+        }
+      ]
+    ]
+  },
+  "scripts": {
+    "ui-a": [
+      {
+        "name": "/_next/static/chunks/02de0b1d875bbec2.js",
+        "bytes": 29697,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/aee6c7720838f8a2.js",
+        "bytes": 224413,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/fcf588a7302715c4.js",
+        "bytes": 111078,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/82abf2d65f5428ae.js",
+        "bytes": 33299,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/turbopack-2514f21a515e1d44.js",
+        "bytes": 10268,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/3649e490b6fc60da.js",
+        "bytes": 1800,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/aa71686c90f71c97.js",
+        "bytes": 42119,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/460fd64c06de2395.js",
+        "bytes": 35542,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/ff1a16fafef87110.js",
+        "bytes": 282,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/a2dfb6fc5208ab9b.js",
+        "bytes": 30681,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/3a73dc63baa9941d.js",
+        "bytes": 11372,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/43d785b1037ab0b8.js",
+        "bytes": 35533,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/f774dde0838ffd25.js",
+        "bytes": 139344,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/e553d738e3dba323.js",
+        "bytes": 31811,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/b20a276f9e25bf62.js",
+        "bytes": 32156,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/932d9bf3623e3b7e.js",
+        "bytes": 23879,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/b313b25614d07429.js",
+        "bytes": 37684,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/9b0608b4660ffc7a.js",
+        "bytes": 423596,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/288661017e9b6913.js",
+        "bytes": 23878,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/ccd40f62c8198742.js",
+        "bytes": 28745,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/05da5365d0416983.js",
+        "bytes": 23681,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/ef7e741b59846caa.js",
+        "bytes": 32202,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/8088172becbb9c2a.js",
+        "bytes": 23878,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/0f2b999b89b41d69.js",
+        "bytes": 31509,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/56fcaa1eeaf6717f.js",
+        "bytes": 42588,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/eea05b8c00442d02.js",
+        "bytes": 171233,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/8d941146c563cc80.js",
+        "bytes": 139344,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/d19ff391b2a02cb5.js",
+        "bytes": 23883,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/862c8b9e4c86f93f.js",
+        "bytes": 23681,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/63987980eecefbc9.js",
+        "bytes": 31361,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/14a86bdf0cca21dd.js",
+        "bytes": 399408,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/4559421ee1b21dd4.js",
+        "bytes": 23684,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/548d1075287c6b41.js",
+        "bytes": 39708,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/bac43fafd3452f02.js",
+        "bytes": 23672,
+        "dur": 0
+      },
+      {
+        "name": "/_next/static/chunks/542a99b2098175e0.js",
+        "bytes": 45447,
+        "dur": 0
+      }
+    ]
+  },
+  "summary": {
+    "ui-a": {
+      "warmLoadMeanFirstRound": 23.3,
+      "warmLoadMedian": 18.6,
+      "warmLoadMean": 18.9,
+      "warmMin": 18.1,
+      "warmMax": 23.3,
+      "coldLoadMedian": 51.3,
+      "warmFcpMedian": 32,
+      "scriptCount": 35,
+      "scriptBytes": 2382456,
+      "cls": 0.00255
+    }
+  }
+}

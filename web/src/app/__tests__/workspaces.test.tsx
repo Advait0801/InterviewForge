@@ -76,6 +76,8 @@ vi.mock("@/lib/api", async (importOriginal) => {
 });
 
 const problem: ProblemDetail = {
+  created_at: "2026-09-16T12:00:00.000Z",
+  test_case_count: 1,
   id: "problem-1",
   slug: "two-sum",
   title: "Two Sum",
@@ -97,6 +99,7 @@ const problem: ProblemDetail = {
 };
 
 const assessment: Assessment = {
+  user_id: "test-user",
   id: "problem-1",
   status: "active",
   time_limit_minutes: 60,

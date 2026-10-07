@@ -19,8 +19,8 @@ function getInitials(name: string | null | undefined): string {
 }
 
 const COLORS = [
-  "bg-blue-600", "bg-emerald-600", "bg-purple-600", "bg-amber-600",
-  "bg-rose-600", "bg-cyan-600", "bg-indigo-600", "bg-teal-600",
+  "bg-blue-700", "bg-emerald-700", "bg-purple-700", "bg-amber-700",
+  "bg-rose-700", "bg-cyan-700", "bg-indigo-700", "bg-teal-700",
 ];
 
 function colorFromName(name: string | null | undefined): string {

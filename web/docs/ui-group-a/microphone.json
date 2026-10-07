@@ -1,0 +1,131 @@
+{
+  "fixtures": "Device errors, interview session and provider responses; real Chromium MediaRecorder",
+  "results": [
+    {
+      "route": "/interview",
+      "test": "NotAllowedError",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/interview",
+      "test": "NotFoundError",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/interview",
+      "test": "NotReadableError",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/interview",
+      "test": "SecurityError",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/interview",
+      "test": "short",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/interview",
+      "test": "unusable",
+      "uploads": 1,
+      "mimeTypes": [
+        "audio/webm;codecs=opus"
+      ],
+      "passed": true
+    },
+    {
+      "route": "/interview",
+      "test": "retryable",
+      "uploads": 2,
+      "mimeTypes": [
+        "audio/webm;codecs=opus",
+        "audio/webm;codecs=opus"
+      ],
+      "passed": true
+    },
+    {
+      "route": "/interview",
+      "test": "confirm",
+      "uploads": 1,
+      "mimeTypes": [
+        "audio/webm;codecs=opus"
+      ],
+      "passed": true
+    },
+    {
+      "route": "/system-design",
+      "test": "NotAllowedError",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/system-design",
+      "test": "NotFoundError",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/system-design",
+      "test": "NotReadableError",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/system-design",
+      "test": "SecurityError",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/system-design",
+      "test": "short",
+      "uploads": 0,
+      "mimeTypes": [],
+      "passed": true
+    },
+    {
+      "route": "/system-design",
+      "test": "unusable",
+      "uploads": 1,
+      "mimeTypes": [
+        "audio/webm;codecs=opus"
+      ],
+      "passed": true
+    },
+    {
+      "route": "/system-design",
+      "test": "retryable",
+      "uploads": 2,
+      "mimeTypes": [
+        "audio/webm;codecs=opus",
+        "audio/webm;codecs=opus"
+      ],
+      "passed": true
+    },
+    {
+      "route": "/system-design",
+      "test": "confirm",
+      "uploads": 1,
+      "mimeTypes": [
+        "audio/webm;codecs=opus"
+      ],
+      "passed": true
+    }
+  ]
+}

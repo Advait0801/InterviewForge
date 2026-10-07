@@ -86,7 +86,7 @@ export function EditorialView({ text }: { text: string | null | undefined }) {
     <div className="space-y-4">
       {sections.map((s, i) => (
         <section key={i} className="rounded-xl border border-border bg-surface/60 p-4">
-          {s.heading && <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{s.heading}</h3>}
+          {s.heading && <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{s.heading}</h2>}
           <div className="text-sm leading-relaxed text-text-primary">
             <SectionBody lines={s.lines} />
           </div>

@@ -1,0 +1,369 @@
+{
+  "browser": "153.0.8010.12",
+  "width": 320,
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "observations": [
+    {
+      "theme": "light",
+      "route": "/",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/login",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/register",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/forgot-password",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/reset-password",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/verify-email",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/leaderboard",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/profile/narrow1791358663216",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/dashboard",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/problems",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/interview",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/system-design",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/assessments",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/assessments/8d590d0e-89f8-4627-b9f5-ed5e59aeff18",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/paths",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/paths/arrays-101",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/analytics",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "light",
+      "route": "/settings",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/login",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/register",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/forgot-password",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/reset-password",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/verify-email",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/leaderboard",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/profile/narrow1791358663216",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/dashboard",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/problems",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/interview",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/system-design",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/assessments",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/assessments/8d590d0e-89f8-4627-b9f5-ed5e59aeff18",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/paths",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/paths/arrays-101",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/analytics",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    },
+    {
+      "theme": "dark",
+      "route": "/settings",
+      "width": 320,
+      "documentWidth": 320,
+      "infiniteAnimations": 0
+    }
+  ],
+  "workspaceAxe": [
+    {
+      "theme": "light",
+      "route": "/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+      "pane": "Problem",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+      "pane": "Editor",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "/assessments/8d590d0e-89f8-4627-b9f5-ed5e59aeff18",
+      "pane": "Problem",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "/assessments/8d590d0e-89f8-4627-b9f5-ed5e59aeff18",
+      "pane": "Editor",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+      "pane": "Problem",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "/problems/6028cbe4-2cce-4995-a923-53589d111c5b",
+      "pane": "Editor",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "/assessments/8d590d0e-89f8-4627-b9f5-ed5e59aeff18",
+      "pane": "Problem",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "/assessments/8d590d0e-89f8-4627-b9f5-ed5e59aeff18",
+      "pane": "Editor",
+      "violations": []
+    }
+  ],
+  "pageErrors": [],
+  "avatarContrast": [
+    {
+      "color": "blue",
+      "background": "lab(36.9089 35.0961 -85.6872)",
+      "ratio": 6.832214471392099
+    },
+    {
+      "color": "emerald",
+      "background": "lab(44.4871 -41.0396 11.0361)",
+      "ratio": 5.363999913316052
+    },
+    {
+      "color": "purple",
+      "background": "lab(36.1758 69.8525 -80.0381)",
+      "ratio": 7.0658064446254745
+    },
+    {
+      "color": "amber",
+      "background": "lab(47.2709 42.9082 69.2966)",
+      "ratio": 5.030530556917215
+    },
+    {
+      "color": "rose",
+      "background": "lab(41.1651 71.6251 30.3087)",
+      "ratio": 6.031551664969671
+    },
+    {
+      "color": "cyan",
+      "background": "lab(44.7267 -21.5987 -26.118)",
+      "ratio": 5.278369731166806
+    },
+    {
+      "color": "indigo",
+      "background": "lab(32.4486 49.2217 -84.6695)",
+      "ratio": 8.091637084623738
+    },
+    {
+      "color": "teal",
+      "background": "lab(44.4134 -33.1436 -4.22149)",
+      "ratio": 5.3624399453379015
+    }
+  ]
+}

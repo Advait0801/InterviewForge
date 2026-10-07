@@ -16,7 +16,7 @@ export function WorkspacePaneSwitcher({
           aria-pressed={value === pane}
           onClick={() => onChange(pane)}
           className={`min-h-10 rounded-md px-3 text-sm font-semibold transition-colors ${
-            value === pane ? "bg-primary text-white shadow-sm" : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+            value === pane ? "if-action-gradient text-white shadow-sm" : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
           }`}
         >
           {pane === "problem" ? "Problem" : "Editor"}
