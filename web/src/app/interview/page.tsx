@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
@@ -10,18 +10,10 @@ import { StatePanel } from "@/components/ui/state-panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import { toast } from "sonner";
 import { api, InterviewMessage, InterviewReport, VoiceEvaluation } from "@/lib/api";
+import { useSpeechRecording } from "@/hooks/use-speech-recording";
+import { VoiceRecordingFeedback } from "@/components/voice-recording-feedback";
+import { speechError, type SpeechError } from "@/lib/speech";
 import { downloadInterviewPdf } from "@/lib/interviewPdf";
-
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  let binary = "";
-  const bytes = new Uint8Array(buffer);
-  const chunkSize = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.subarray(i, i + chunkSize);
-    binary += String.fromCharCode(...chunk);
-  }
-  return btoa(binary);
-}
 
 type Company = "amazon" | "google" | "meta" | "apple";
 type Difficulty = "easy" | "medium" | "hard";
@@ -97,24 +89,24 @@ export default function InterviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [startError, setStartError] = useState<string | null>(null);
   const [syncPending, setSyncPending] = useState(false);
-  const [transcribing, setTranscribing] = useState(false);
   const [evaluatingVoice, setEvaluatingVoice] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
-  const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState<string>("");
-  const [lastAudioBase64, setLastAudioBase64] = useState<string>("");
+  const [voiceEvaluationError, setVoiceEvaluationError] = useState<SpeechError | null>(null);
   const [voiceEval, setVoiceEval] = useState<VoiceEvaluation | null>(null);
   const [report, setReport] = useState<InterviewReport | null>(null);
   const [loadingReport, setLoadingReport] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
   const acceptedAnswerRef = useRef<string | null>(null);
   const sendInFlightRef = useRef(false);
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => () => {
-    mediaRecorderRef.current?.stream.getTracks().forEach((track) => track.stop());
-  }, []);
+  const speech = useSpeechRecording((text) => {
+    setTranscript(text);
+    setAnswer((previous) => previous ? `${previous}\n\n${text}` : text);
+    setVoiceEvaluationError(null);
+    setVoiceEval(null);
+  });
+  const { recording, transcribing, toggleRecording } = speech;
 
   const lastQuestion = useMemo(
     () =>
@@ -213,51 +205,6 @@ export default function InterviewPage() {
     } finally {
       sendInFlightRef.current = false;
       setTyping(false);
-    }
-  };
-
-  const toggleRecording = async () => {
-    if (recording) {
-      mediaRecorderRef.current?.stop();
-      setRecording(false);
-      return;
-    }
-    try {
-      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-        throw new Error("Microphone recording is unavailable in this browser. You can still type your answer.");
-      }
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      chunksRef.current = [];
-      recorder.ondataavailable = (ev) => {
-        if (ev.data.size > 0) chunksRef.current.push(ev.data);
-      };
-      recorder.onstop = async () => {
-        setTranscribing(true);
-        try {
-          const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-          const buffer = await blob.arrayBuffer();
-          const base64Audio = arrayBufferToBase64(buffer);
-          setLastAudioBase64(base64Audio);
-          const transcribed = await api.transcribeSpeech(base64Audio);
-          setTranscript(transcribed.transcript);
-          setAnswer((previous) => previous ? `${previous}\n\n${transcribed.transcript}` : transcribed.transcript);
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : "Transcription failed";
-          toast.error(msg);
-          setError(msg);
-        } finally {
-          setTranscribing(false);
-          stream.getTracks().forEach((track) => track.stop());
-        }
-      };
-      mediaRecorderRef.current = recorder;
-      recorder.start();
-      setRecording(true);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Could not access microphone";
-      toast.error(msg);
-      setError(msg);
     }
   };
 
@@ -519,35 +466,39 @@ export default function InterviewPage() {
                     />
                     <div className="flex flex-wrap gap-2">
                     <Button onClick={submitAnswer} loading={typing} loadingLabel="Processing answer" disabled={!answer.trim() || recording || transcribing}>{syncPending ? "Refresh conversation" : "Send answer"}</Button>
-                    <Button variant={recording ? "danger" : "ghost"} onClick={toggleRecording} disabled={typing || transcribing}>
+                    <Button variant={recording ? "danger" : "ghost"} onClick={toggleRecording} disabled={typing || transcribing || evaluatingVoice}>
                       {recording ? "Stop recording" : "Record voice"}
                     </Button>
                     {lastQuestion && (
                       <Button
                         variant="ghost"
                         onClick={async () => {
-                          if (!lastAudioBase64 || !lastQuestion) return;
+                          if (!speech.lastAudio || !lastQuestion) return;
                           setEvaluatingVoice(true);
+                          setVoiceEvaluationError(null);
                           try {
-                            const res = await api.evaluateExplanation(lastAudioBase64, lastQuestion.content);
+                            const res = await api.evaluateExplanation(speech.lastAudio.base64, lastQuestion.content, speech.lastAudio.mimeType);
                             setVoiceEval(res.evaluation);
                             toast.success("Voice evaluation complete");
                           } catch (err) {
-                            const msg = err instanceof Error ? err.message : "Evaluation failed";
-                            toast.error(msg);
-                            setError(msg);
+                            setVoiceEvaluationError(speechError(err));
                           } finally {
                             setEvaluatingVoice(false);
                           }
                         }}
-                        disabled={!lastAudioBase64 || evaluatingVoice || typing}
+                        disabled={!speech.lastAudio || speech.pendingTranscript !== null || voiceEvaluationError?.retryable === false || evaluatingVoice || typing || recording || transcribing}
                         loading={evaluatingVoice}
                         loadingLabel="Evaluating voice"
                       >
-                        Evaluate voice
+                        {voiceEvaluationError?.retryable ? "Retry voice evaluation" : "Evaluate voice"}
                       </Button>
                     )}
                     </div>
+                    <VoiceRecordingFeedback speech={speech} disabled={typing || evaluatingVoice} />
+                    {voiceEvaluationError && <div className="space-y-2">
+                      <p className="text-sm text-error" role="alert">{voiceEvaluationError.message}</p>
+                      {!voiceEvaluationError.retryable && <Button variant="ghost" disabled={typing || evaluatingVoice || recording || transcribing} onClick={() => { setVoiceEvaluationError(null); void toggleRecording(); }}>Record again</Button>}
+                    </div>}
                     {transcribing && <p className="text-sm text-text-secondary" role="status">Transcribing recording...</p>}
                     {syncPending && <p className="text-sm text-warning" role="status">The send outcome is being checked. Refresh the conversation to continue; this answer will not be sent twice.</p>}
                   </div>
@@ -592,7 +543,8 @@ export default function InterviewPage() {
                           setCurrentStage("behavioral");
                           setSessionStatus("active");
                           setTranscript("");
-                          setLastAudioBase64("");
+                          speech.reset();
+                          setVoiceEvaluationError(null);
                           setError(null);
                           setReport(null);
                           setReportError(null);

@@ -28,6 +28,13 @@ function endSession() {
   }
 }
 
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number, public readonly retryable?: boolean) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -53,7 +60,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   if (!res.ok) {
     if (res.status === 401 && sentToken && payload?.code === SESSION_INVALID) endSession();
     const message = payload?.error || payload?.detail || `Request failed (${res.status})`;
-    throw new Error(message);
+    throw new ApiError(message, res.status, payload?.retryable);
   }
 
   return payload as T;
@@ -432,7 +439,7 @@ export const api = {
       auth: true,
       body: { answer },
     }),
-  transcribeSpeech: (audioBase64: string, mimeType = "audio/webm", filename = "recording.webm") =>
+  transcribeSpeech: (audioBase64: string, mimeType = "audio/webm", filename?: string) =>
     request<{ transcript: string }>("/interviews/speech/transcribe", {
       method: "POST",
       auth: true,
@@ -442,7 +449,7 @@ export const api = {
     audioBase64: string,
     question: string,
     mimeType = "audio/webm",
-    filename = "recording.webm",
+    filename?: string,
   ) =>
     request<{ transcript: string; evaluation: VoiceEvaluation }>("/interviews/speech/evaluate-explanation", {
       method: "POST",

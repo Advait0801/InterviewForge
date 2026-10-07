@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import InterviewPage from "../interview/page";
@@ -71,6 +71,7 @@ beforeEach(() => {
   mocks.reducedMotion = false;
   mocks.graphProps = null;
   Object.defineProperty(window, "matchMedia", { configurable: true, value: (query: string) => ({ matches: query.includes("min-width"), addEventListener: vi.fn(), removeEventListener: vi.fn() }) });
+  Object.defineProperty(window, "isSecureContext", { configurable: true, value: true });
   Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: undefined });
   Object.defineProperty(globalThis, "MediaRecorder", { configurable: true, value: undefined });
   Element.prototype.scrollIntoView = vi.fn();
@@ -167,7 +168,7 @@ describe("interview flow", () => {
     await startInterview(user);
     const stopTrack = vi.fn();
     const getUserMedia = vi.fn()
-      .mockRejectedValueOnce(new Error("Permission denied"))
+      .mockRejectedValueOnce(new DOMException("Raw permission failure", "NotAllowedError"))
       .mockResolvedValueOnce({ getTracks: () => [{ stop: stopTrack }] });
     Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia } });
     class FakeRecorder {
@@ -175,8 +176,11 @@ describe("interview flow", () => {
       ondataavailable: ((event: { data: Blob }) => void) | null = null;
       onstop: (() => void) | null = null;
       constructor(stream: { getTracks: () => Array<{ stop: () => void }> }) { this.stream = stream; }
-      start() {}
-      stop() { this.ondataavailable?.({ data: new Blob(["audio"]) }); this.onstop?.(); }
+      static isTypeSupported(type: string) { return type === "audio/mp4"; }
+      mimeType = "audio/mp4";
+      state = "inactive";
+      start() { this.state = "recording"; }
+      stop() { this.state = "inactive"; this.ondataavailable?.({ data: new Blob(["a".repeat(2048)]) }); this.onstop?.(); }
     }
     Object.defineProperty(globalThis, "MediaRecorder", { configurable: true, value: FakeRecorder });
     Object.defineProperty(Blob.prototype, "arrayBuffer", { configurable: true, value: async () => new TextEncoder().encode("audio").buffer });
@@ -184,14 +188,16 @@ describe("interview flow", () => {
     mocks.evaluateExplanation.mockResolvedValueOnce({ evaluation: { overallScore: 7, technicalCorrectness: { score: 7, notes: "Clear" }, communicationClarity: { score: 7, notes: "Clear" }, completeness: { score: 7, notes: "Clear" }, strengths: [], weaknesses: [], suggestions: [] } });
 
     await user.click(screen.getByRole("button", { name: "Record voice" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Permission denied");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Microphone access is blocked");
     await user.click(screen.getByRole("button", { name: "Record voice" }));
+    await new Promise((resolve) => setTimeout(resolve, 550));
     await user.click(screen.getByRole("button", { name: "Stop recording" }));
+    await waitFor(() => expect(screen.getByRole("textbox", { name: "Your answer" })).toHaveValue("I would measure latency."));
     expect(await screen.findByRole("textbox", { name: "Your answer" })).toHaveValue("I would measure latency.");
     expect(stopTrack).toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Evaluate voice" }));
     expect(await screen.findByText("Voice Evaluation")).toBeInTheDocument();
-    expect(mocks.evaluateExplanation).toHaveBeenCalledWith(expect.any(String), "behavioral question q1");
+    expect(mocks.evaluateExplanation).toHaveBeenCalledWith(expect.any(String), "behavioral question q1", "audio/mp4");
   });
 });
 
