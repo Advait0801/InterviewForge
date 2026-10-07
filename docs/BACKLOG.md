@@ -37,12 +37,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Engineering credibility
 
-- **Redis + BullMQ worker pool** *(L, Loud)* — bounded concurrency in front of code-runner,
-  distributed rate limiting, leaderboard caching. Three wins from one component, and it fixes
-  the in-process limiter counters (F-19).
-- **Leaderboard caching** *(S–M, Quiet)* — the leaderboard aggregates every submission on each
-  request; no index helps (measured in D-053). Cache it, or keep a materialised view refreshed on
-  submit. Pairs naturally with the Redis item above.
 - **More languages** *(M)* — JS, Go, Rust: a Dockerfile and harness each.
 - **Custom test cases + failing-case diff view** *(S)* — the gap between "toy judge" and "tool
   I'd actually use".

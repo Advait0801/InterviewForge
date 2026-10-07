@@ -1,10 +1,35 @@
-import rateLimit, { ipKeyGenerator } from "express-rate-limit";
+import rateLimit, { ipKeyGenerator, type Store } from "express-rate-limit";
+import { RedisStore, type RedisReply } from "rate-limit-redis";
 import type { Request } from "express";
 import type { AuthRequest } from "./auth.middleware";
+import { getRedis } from "../redis";
+import { FallbackStore } from "./fallback-rate-limit-store";
 
 function intFromEnv(name: string, fallback: number): number {
   const parsed = Number.parseInt(process.env[name] ?? "", 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+/**
+ * Shared counters in Redis when REDIS_URL is set, so every backend instance enforces one
+ * limit rather than each keeping its own (F-19, D-063). Falls back to memory while Redis
+ * is unreachable; with no REDIS_URL (tests, minimal dev) it's the in-memory default.
+ */
+function sharedStore(name: string): Store | undefined {
+  const redis = getRedis();
+  if (!redis) return undefined;
+  const prefix = `rl:${name}:`;
+  const primary = new RedisStore({
+    prefix,
+    sendCommand: (command: string, ...args: string[]) => redis.call(command, ...args) as Promise<RedisReply>,
+  });
+  // The store starts loading its Lua scripts in the constructor. If Redis is unreachable at
+  // boot those promises reject with no handler, and Node exits on an unhandled rejection.
+  // Its own retry path reloads them on first use, so a no-op handler is all that's needed.
+  for (const value of Object.values(primary)) {
+    if (value instanceof Promise) value.catch(() => undefined);
+  }
+  return new FallbackStore(primary, prefix);
 }
 
 /**
@@ -30,6 +55,7 @@ export function userOrIpKey(req: Request): string {
  * back to the IP key, so a caller can't pick someone else's bucket.
  */
 export const apiLimiter = rateLimit({
+  store: sharedStore("api"),
   windowMs: intFromEnv("API_RATE_LIMIT_WINDOW_MS", 15 * 60 * 1000),
   max: intFromEnv("API_RATE_LIMIT_MAX", 500),
   standardHeaders: true,
@@ -49,6 +75,7 @@ export const apiLimiter = rateLimit({
  * code reviews fit comfortably, while a script does not.
  */
 export const llmLimiter = rateLimit({
+  store: sharedStore("llm"),
   windowMs: intFromEnv("LLM_RATE_LIMIT_WINDOW_MS", 15 * 60 * 1000),
   max: intFromEnv("LLM_RATE_LIMIT_MAX", 40),
   standardHeaders: true,
@@ -68,6 +95,7 @@ export const llmLimiter = rateLimit({
  * limiter allowed 500 guesses per 15 minutes.
  */
 export const loginLimiter = rateLimit({
+  store: sharedStore("login"),
   windowMs: intFromEnv("AUTH_LOGIN_RATE_LIMIT_WINDOW_MS", 15 * 60 * 1000),
   max: intFromEnv("AUTH_LOGIN_RATE_LIMIT_MAX", 10),
   standardHeaders: true,
@@ -82,6 +110,7 @@ export const loginLimiter = rateLimit({
  * apiLimiter bucket) and reset-email spam against someone else's address.
  */
 export const authWriteLimiter = rateLimit({
+  store: sharedStore("auth-write"),
   windowMs: intFromEnv("AUTH_WRITE_RATE_LIMIT_WINDOW_MS", 60 * 60 * 1000),
   max: intFromEnv("AUTH_WRITE_RATE_LIMIT_MAX", 20),
   standardHeaders: true,

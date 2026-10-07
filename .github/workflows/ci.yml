@@ -22,6 +22,14 @@ jobs:
     defaults:
       run:
         working-directory: ${{ matrix.service }}
+    services:
+      # For the backend's queue and cache integration tests (D-063).
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
     steps:
       - uses: actions/checkout@v5
 
@@ -48,6 +56,9 @@ jobs:
       - name: Test
         # No test script in web yet; --if-present keeps the matrix uniform.
         run: npm test --if-present
+        env:
+          # Only the backend has Redis integration tests; they skip when this is empty.
+          REDIS_TEST_URL: ${{ matrix.service == 'backend' && 'redis://localhost:6379' || '' }}
 
       - name: API contract
         # Generated API types must match their specs (D-062).

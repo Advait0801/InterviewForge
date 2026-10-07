@@ -161,7 +161,11 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 │   Next.js      │ ◄────────────────► │  Express backend │ ◄────► │  PostgreSQL    │
 │   :3000        │      /api/*        │  :4000           │        │                │
 │                │                    │                  │        └────────────────┘
-└────────────────┘                    └────────┬─────────┘
+│                │                    │                  │        ┌────────────────┐
+│                │                    │                  │ ◄────► │  Redis: limits,│
+│                │                    │                  │        │  run queue,    │
+│                │                    │                  │        │  cache         │
+└────────────────┘                    └────────┬─────────┘        └────────────────┘
                                    REST │      │ REST
                           ┌─────────────┘      └──────────────┐
                           ▼                                   ▼
@@ -181,7 +185,7 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 ### 🔄 Data flow
 
 1. **Auth** — Web client → Express (bcrypt + JWT) → PostgreSQL `users`
-2. **Code submit** — Web client → Express → code-runner → ephemeral Docker container → test results → response
+2. **Code submit** — Web client → Express → BullMQ queue (Redis; at most `CODE_RUN_CONCURRENCY` runs at once) → code-runner → ephemeral Docker container → test results → response
 3. **Interview question** — Express → FastAPI → Chroma retrieval + LLM chain → structured question → stored in `interview_messages`
 4. **RAG pipeline** — Seed documents → chunking → embeddings → Chroma → filtered retrieval by company + stage + difficulty calibration
 
@@ -229,7 +233,8 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 | **Sandboxes** | Per-language images in `docker/sandboxes/` (python, c, cpp, java), unprivileged and resource-capped |
 | **Database** | PostgreSQL 16 — 14 raw-SQL migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks, resumes, indexes and session revocation |
 | **Vector store** | ChromaDB 0.5.5 |
-| **Orchestration** | Docker Compose (6 services) |
+| **Shared state** | Redis 7: rate-limit counters (backend and the ai-service's live-fetch limits), the BullMQ code-run queue with a global concurrency cap, and the leaderboard cache |
+| **Orchestration** | Docker Compose (7 services) |
 
 ---
 
@@ -413,7 +418,7 @@ The production setup uses `docker-compose.prod.yml` with multi-stage `Dockerfile
 
 - **Compiled builds** — TypeScript compiled to JS, Next.js pre-built, no hot-reload
 - **Multi-stage images** — dev dependencies stripped from final images
-- **Memory limits** — backend 200m, ai-service 300m, code-runner 150m, web 250m, chromadb 200m
+- **Memory limits** — backend 200m, ai-service 300m, code-runner 150m, web 250m, chromadb 200m, redis 64m
 - **Restart policies** — `unless-stopped` on all containers
 - **Localhost-bound ports** — Nginx handles all public traffic on port 80
 

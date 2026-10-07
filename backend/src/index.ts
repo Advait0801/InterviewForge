@@ -14,6 +14,8 @@ import {
 import { Server } from "socket.io";
 import { API_ROUTES } from "./routes";
 import { validateResponses } from "./openapi/validate-responses.middleware";
+import { redisUrl } from "./redis";
+import { RUN_CONCURRENCY, startRunQueue, stopRunQueue } from "./services/run-queue";
 
 dotenv.config();
 
@@ -102,3 +104,18 @@ server.listen(PORT, () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
   console.log(`🔌 Socket.IO listening on the same port`);
 });
+
+// Bounded code execution (D-063). Until the queue is ready (it waits for Redis), runs answer
+// a retryable 503 rather than bypassing the cap; see runQueued.
+if (redisUrl()) {
+  startRunQueue()
+    .then(() => console.log(`🧵 Code-run queue ready (global concurrency ${RUN_CONCURRENCY})`))
+    .catch((err) => console.error(`[startup] code-run queue failed to start: ${(err as Error).message}`));
+}
+
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+  process.once(signal, () => {
+    // Let running jobs finish so no sandbox is orphaned mid-run.
+    stopRunQueue().finally(() => process.exit(0));
+  });
+}

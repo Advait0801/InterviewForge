@@ -14,6 +14,7 @@ services:
     restart: unless-stopped
     depends_on:
       - code-runner
+      - redis
 
   ai-service:
     build:
@@ -28,6 +29,7 @@ services:
     restart: unless-stopped
     depends_on:
       - chromadb
+      - redis
 
   code-runner:
     build:
@@ -53,6 +55,14 @@ services:
       - "127.0.0.1:3000:3000"
     env_file: ./web/.env
     mem_limit: 250m
+    restart: unless-stopped
+
+  redis:
+    # Rate limits, the code-run queue and the leaderboard cache (D-063). Not exposed.
+    image: redis:7-alpine
+    container_name: interviewforge-redis
+    command: ["redis-server", "--maxmemory", "48mb", "--maxmemory-policy", "noeviction", "--save", "", "--appendonly", "no"]
+    mem_limit: 64m
     restart: unless-stopped
 
   chromadb:

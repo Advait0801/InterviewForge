@@ -2,7 +2,9 @@ import * as submissions from "../repositories/submissions.repository";
 import { findProblemForExecution } from "../repositories/problems.repository";
 import { markCompletedInEveryPath } from "../repositories/learning-paths.repository";
 import { reviewCode } from "./ai.service";
-import { CodeRunnerFailedError, CodeRunnerUnreachableError, runCode } from "./code-runner.client";
+import { CodeRunnerFailedError, CodeRunnerUnreachableError } from "./code-runner.client";
+import { RunQueueBusyError, RunQueueUnavailableError, runQueued } from "./run-queue";
+import { bumpCacheVersion } from "./cache";
 import { DomainError, notFound } from "./errors";
 import { clientSubmitResults, exampleCases } from "./test-cases";
 
@@ -59,12 +61,16 @@ export async function executeSubmission(input: {
 
   let runResult;
   try {
-    runResult = await runCode({ language: input.language, code: input.code, testCases, slug: problem.slug });
+    // Through the bounded queue (D-063): at most CODE_RUN_CONCURRENCY sandboxes at once.
+    runResult = await runQueued({ language: input.language, code: input.code, testCases, slug: problem.slug });
   } catch (err) {
     // A dependency being down is a retryable 503, not a 500 that implies a bug here --
     // the same shape as the ai-service's Chroma-down response.
-    if (err instanceof CodeRunnerUnreachableError) {
+    if (err instanceof CodeRunnerUnreachableError || err instanceof RunQueueUnavailableError) {
       throw new DomainError(503, "Code runner unavailable", { retryable: true });
+    }
+    if (err instanceof RunQueueBusyError) {
+      throw new DomainError(503, "Code runner is busy. Try again in a moment.", { retryable: true });
     }
     if (err instanceof CodeRunnerFailedError) throw new DomainError(502, "Code runner unavailable");
     throw err;
@@ -97,6 +103,8 @@ export async function executeSubmission(input: {
   if (status === "passed") {
     await markCompletedInEveryPath(input.userId, input.problemId);
   }
+  // Any new submission can change rankings and acceptance rates.
+  await bumpCacheVersion("leaderboard");
 
   return {
     status: 201,

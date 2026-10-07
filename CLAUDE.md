@@ -29,6 +29,7 @@ FastAPI `ai-service`. Do not add LLM calls, prompts, or embedding code to `backe
 | `code-runner/` | Node + dockerode | 5000 (5050 host in dev) | Ephemeral Docker sandboxes for user code |
 | `postgres` | PostgreSQL 16 | 5432 (5433 host in dev) | Relational data |
 | `chromadb` | Chroma 0.5.5 | 8000 (8001 host) | RAG vector store |
+| `redis` | Redis 7 | 6379 (6380 host) | Rate limits, code-run queue, leaderboard cache (D-063) |
 
 A native SwiftUI iOS client was removed in Sep 2026 (see `docs/DECISIONS.md` D-007). It
 remains in git history at commits `e24baf6` and `b19f09d` if it's ever needed.
@@ -75,7 +76,7 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   never put a secret there. A new data file the backend reads at runtime must also be
   added to `backend/Dockerfile.prod`, or the CI smoke test (and prod) will miss it.
 - Services talk over the compose network by hostname (`postgres`, `code-runner`,
-  `ai-service`, `chromadb`), not `localhost`. Host port bindings exist only for tools
+  `ai-service`, `chromadb`, `redis`), not `localhost`. Host port bindings exist only for tools
   run from the host, so remapping them never affects service-to-service traffic.
   This machine runs another project on 3000/8000/5432, so InterviewForge's host
   bindings are offset: **web 3002, ai-service 8010, postgres 5433** (D-024, D-031, D-041).
@@ -122,6 +123,17 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   silently drops unknown fields, so never pass a spread or untyped object.
 - `OPENAPI_VALIDATE_RESPONSES=1` in `backend/.env` logs live contract violations
   (`openapi_violation`). Dev only.
+
+**Redis (D-063)**
+- `REDIS_URL` unset (unit tests) = in-memory limits, no queue, no cache: today's behaviour.
+  Set but unreachable = limits fall back to memory, the cache is bypassed, the ai-service
+  denies live fetches, and code runs return a retryable 503. Code runs never bypass the
+  queue while `REDIS_URL` is set, or an outage would remove the concurrency cap.
+- Code runs go through `services/run-queue.ts` (`CODE_RUN_CONCURRENCY`, global across
+  instances). A job holds the hidden test cases, so it's deleted once its result is read.
+- Redis runs with `noeviction` (BullMQ requires it) and no persistence.
+- Integration tests need `REDIS_TEST_URL` (e.g. `redis://localhost:6380`); they skip without
+  it. CI provides one.
 
 **Multi-write routes**
 - Writes that must land together go through `db.withTransaction` (D-057). Keep LLM calls and
@@ -185,6 +197,8 @@ docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tun
 
 bash scripts/ci/smoke_prod_images.sh  # prod image contents + boot; build tags first (see its header)
 bash scripts/ci/check_api_contract.sh # generated API types match their specs
+python scripts/load_test_run_queue.py --requests 20 --cap 4   # Phase 3: the run cap holds (D-063)
+cd backend && REDIS_TEST_URL=redis://localhost:6380 npm test  # incl. queue/cache integration tests
 cd backend && npm run gen:ai-types     # after re-exporting ai-service/openapi.json
 cd backend && npm run gen:web-client   # writes web/src/lib/api/schema.d.ts (UI A / GPT)
 
