@@ -1,3 +1,4 @@
+import type { components } from "../generated/ai-service";
 import {
   Company,
   InterviewStage,
@@ -22,108 +23,33 @@ export class AIServiceError extends Error {
   }
 }
 
-export interface StructuredEvaluation {
-  score: number;
-  strengths: string[];
-  weaknesses: string[];
-  suggestions: string[];
-  shouldAskFollowup: boolean;
-  followupFocus: string;
-}
+// The ai-service contract, generated from ai-service/openapi.json (D-062). Never edit these
+// by hand: change the FastAPI model, re-export the spec, then `npm run gen:ai-types`.
+type Schemas = components["schemas"];
 
-export interface RetrievalConfidence {
-  confident: boolean;
-  reason: string;
-  top_distance: number | null;
-  good_hits: number;
-  company_matched: boolean;
-}
-
-export interface LiveIngestionOutcome {
-  triggered: boolean;
-  reason: string;
-  urls_considered: string[];
-  pages_ingested: number;
-  chunks_written: number;
-  skipped: { url: string; why: string }[];
-  error: string | null;
-}
-
-export interface ResumeEvidence {
-  section: string;
-  excerpt: string;
-  distance: number | null;
-}
-
-export interface StructuredQuestion {
-  question: string;
-  reasoningFocus: string;
-  expectedCompetencies: string[];
-  retrievalHits: number;
-  context: string;
-  // Present only on resume-grounded questions. `resumeGrounded` reflects what
-  // actually happened, not what was requested: asking for grounding with no
-  // resume indexed yields a normal question with this false.
-  resumeGrounded?: boolean;
-  resumeHits?: number;
-  resumeEvidence?: ResumeEvidence[];
-  groundedIn?: string;
-  // Which retrieval path served this question. `liveIngestion.triggered` is how
-  // the write-back cache is observed from outside the AI service.
-  retrievalConfidence?: RetrievalConfidence | null;
-  liveIngestion?: LiveIngestionOutcome | null;
-}
-
-export interface StructuredFollowup {
-  question: string;
-  focus: string;
-  reason: string;
-}
-
-export interface VoiceRubricSection {
-  score: number;
-  notes: string;
-}
-
-export interface VoiceEvaluation {
-  overallScore: number;
-  technicalCorrectness: VoiceRubricSection;
-  communicationClarity: VoiceRubricSection;
-  completeness: VoiceRubricSection;
-  strengths: string[];
-  weaknesses: string[];
-  suggestions: string[];
-}
-
-export interface SpeechTranscriptionResult {
-  transcript: string;
-}
-
-export interface VoiceEvaluationResult {
-  transcript: string;
-  evaluation: VoiceEvaluation;
-}
-
-export interface SystemDesignNode {
-  id: string;
-  label: string;
-  type: string;
-}
-
-export interface SystemDesignEdge {
-  source: string;
-  target: string;
-  label: string;
-}
-
-export interface SystemDesignAnalysis {
-  summary: string;
-  nodes: SystemDesignNode[];
-  edges: SystemDesignEdge[];
-  risks: string[];
-  improvements: string[];
-  rubric: Record<string, VoiceRubricSection>;
-}
+export type StructuredEvaluation = Schemas["StructuredEvaluationOutput"];
+export type RetrievalConfidence = Schemas["RetrievalConfidence"];
+export type LiveIngestionOutcome = Schemas["LiveIngestion"];
+export type ResumeEvidence = Schemas["ResumeEvidence"];
+/**
+ * `resumeGrounded` reflects what actually happened, not what was requested: asking for
+ * grounding with no resume indexed yields a normal question with it false.
+ * `liveIngestion.triggered` is how the write-back cache is observed from outside.
+ */
+export type StructuredQuestion = Schemas["NextQuestionResponse"];
+export type StructuredFollowup = Schemas["StructuredFollowupOutput"];
+export type VoiceRubricSection = Schemas["RubricSectionScore"];
+export type VoiceEvaluation = Schemas["VoiceRubricOutput"];
+export type SpeechTranscriptionResult = Schemas["TranscriptResponse"];
+export type VoiceEvaluationResult = Schemas["VoiceEvaluationResponse"];
+export type SystemDesignNode = Schemas["ArchitectureNode"];
+export type SystemDesignEdge = Schemas["ArchitectureEdge"];
+export type SystemDesignAnalysis = Schemas["SystemDesignAnalysisOutput"];
+export type ResumeIngestResult = Schemas["ResumeIngestResponse"];
+export type ResumePurgeResult = Schemas["ResumePurgeResponse"];
+export type InterviewReport = Schemas["InterviewReportResponse"];
+export type CodeReviewResult = Schemas["CodeReviewOutput"];
+export type RecommendationAIResult = Schemas["RecommendationOutput"];
 
 async function sendJson<T>(
   method: "POST" | "DELETE",
@@ -192,7 +118,11 @@ async function sendJson<T>(
   return response.json() as Promise<T>;
 }
 
-async function postJson<T>(path: string, payload: unknown): Promise<T> {
+/**
+ * POST a request body typed by the ai-service spec. Callers pass an object literal, so an
+ * unknown field (a renamed or misspelled key that FastAPI would silently drop) fails tsc.
+ */
+async function postJson<T, K extends keyof Schemas>(path: string, payload: Schemas[K]): Promise<T> {
   return sendJson<T>("POST", path, payload);
 }
 
@@ -200,32 +130,21 @@ export async function generateNextQuestion(params: {
   company: Company;
   stage: InterviewStage;
   difficulty: string;
-  previousAnswer?: string | null;
-  // snake_case because the ai-service request model uses it; the rest of this
-  // payload predates that and is left alone rather than renamed on both sides.
   user_id?: string;
   resume_grounded?: boolean;
   session_id?: string;
 }): Promise<StructuredQuestion> {
-  return postJson<StructuredQuestion>("/api/interview/next-question", params);
-}
-
-export interface ResumeIngestResult {
-  userId: string;
-  namespace: string;
-  chunkCount: number;
-  sections: string[];
-  pageCount: number;
-  charCount: number;
-  parsedSections: string[];
-}
-
-export interface ResumePurgeResult {
-  namespace: string;
-  deletedChunks: number;
-  namespaceDropped: boolean;
-  remainingChunks: number;
-  verified: boolean;
+  // previous_answer is deliberately not sent. The backend used to send it as
+  // `previousAnswer`, which FastAPI dropped, so the ai-service has never seen it; turning it
+  // on changes every later stage's retrieval query and needs the eval harness (D-062).
+  return postJson<StructuredQuestion, "NextQuestionRequest">("/api/interview/next-question", {
+    company: params.company,
+    stage: params.stage,
+    difficulty: params.difficulty,
+    user_id: params.user_id,
+    resume_grounded: params.resume_grounded,
+    session_id: params.session_id,
+  });
 }
 
 export async function ingestResume(params: {
@@ -234,7 +153,12 @@ export async function ingestResume(params: {
   content_base64: string;
   filename: string;
 }): Promise<ResumeIngestResult> {
-  return postJson<ResumeIngestResult>("/api/resume/ingest", params);
+  return postJson<ResumeIngestResult, "IngestResumeRequest">("/api/resume/ingest", {
+    user_id: params.user_id,
+    resume_id: params.resume_id,
+    content_base64: params.content_base64,
+    filename: params.filename,
+  });
 }
 
 export async function deleteResumeVectors(userId: string): Promise<ResumePurgeResult> {
@@ -248,7 +172,13 @@ export async function evaluateAnswer(params: {
   answer: string;
   context?: string;
 }): Promise<StructuredEvaluation> {
-  return postJson<StructuredEvaluation>("/api/interview/evaluate-answer", params);
+  return postJson<StructuredEvaluation, "EvaluateAnswerRequest">("/api/interview/evaluate-answer", {
+    company: params.company,
+    stage: params.stage,
+    question: params.question,
+    answer: params.answer,
+    context: params.context,
+  });
 }
 
 export async function generateFollowup(params: {
@@ -258,7 +188,13 @@ export async function generateFollowup(params: {
   answer: string;
   evaluation: StructuredEvaluation;
 }): Promise<StructuredFollowup> {
-  return postJson<StructuredFollowup>("/api/interview/generate-followup", params);
+  return postJson<StructuredFollowup, "GenerateFollowupRequest">("/api/interview/generate-followup", {
+    company: params.company,
+    stage: params.stage,
+    question: params.question,
+    answer: params.answer,
+    evaluation: params.evaluation,
+  });
 }
 
 export async function transcribeSpeech(params: {
@@ -267,7 +203,12 @@ export async function transcribeSpeech(params: {
   filename?: string;
   language?: string;
 }): Promise<SpeechTranscriptionResult> {
-  return postJson<SpeechTranscriptionResult>("/api/speech/transcribe", params);
+  return postJson<SpeechTranscriptionResult, "TranscribeRequest">("/api/speech/transcribe", {
+    audioBase64: params.audioBase64,
+    mimeType: params.mimeType,
+    filename: params.filename,
+    language: params.language,
+  });
 }
 
 export async function evaluateVoiceExplanation(params: {
@@ -278,22 +219,24 @@ export async function evaluateVoiceExplanation(params: {
   question: string;
   context?: string;
 }): Promise<VoiceEvaluationResult> {
-  return postJson<VoiceEvaluationResult>("/api/speech/evaluate-explanation", params);
-}
-
-export interface InterviewReport {
-  overallScore: number;
-  stageScores: Record<string, { score: number; feedback: string }>;
-  strengths: string[];
-  weaknesses: string[];
-  recommendations: string[];
+  return postJson<VoiceEvaluationResult, "EvaluateExplanationRequest">("/api/speech/evaluate-explanation", {
+    audioBase64: params.audioBase64,
+    mimeType: params.mimeType,
+    filename: params.filename,
+    language: params.language,
+    question: params.question,
+    context: params.context,
+  });
 }
 
 export async function generateReport(params: {
   company: string;
   conversation: string;
 }): Promise<InterviewReport> {
-  return postJson<InterviewReport>("/api/interview/generate-report", params);
+  return postJson<InterviewReport, "GenerateReportRequest">("/api/interview/generate-report", {
+    company: params.company,
+    conversation: params.conversation,
+  });
 }
 
 export async function analyzeSystemDesign(params: {
@@ -301,17 +244,11 @@ export async function analyzeSystemDesign(params: {
   explanation: string;
   company?: string;
 }): Promise<SystemDesignAnalysis> {
-  return postJson<SystemDesignAnalysis>("/api/system-design/analyze", params);
-}
-
-export interface CodeReviewResult {
-  timeComplexity: string;
-  spaceComplexity: string;
-  qualityScore: number;
-  strengths: string[];
-  issues: string[];
-  optimizations: string[];
-  summary: string;
+  return postJson<SystemDesignAnalysis, "SystemDesignAnalysisRequest">("/api/system-design/analyze", {
+    prompt: params.prompt,
+    explanation: params.explanation,
+    company: params.company,
+  });
 }
 
 export async function reviewCode(params: {
@@ -321,14 +258,13 @@ export async function reviewCode(params: {
   problem_description: string;
   problem_difficulty: string;
 }): Promise<CodeReviewResult> {
-  return postJson<CodeReviewResult>("/api/code-review/review", params);
-}
-
-export interface RecommendationAIResult {
-  recommendedTopics: string[];
-  reasoning: string;
-  focusAreas: string[];
-  difficultySuggestion: string;
+  return postJson<CodeReviewResult, "CodeReviewRequest">("/api/code-review/review", {
+    code: params.code,
+    language: params.language,
+    problem_title: params.problem_title,
+    problem_description: params.problem_description,
+    problem_difficulty: params.problem_difficulty,
+  });
 }
 
 export async function recommendTopics(params: {
@@ -338,5 +274,11 @@ export async function recommendTopics(params: {
   weak_topics: string[];
   recent_notes?: string | null;
 }): Promise<RecommendationAIResult> {
-  return postJson<RecommendationAIResult>("/api/recommendations/recommend", params);
+  return postJson<RecommendationAIResult, "RecommendRequest">("/api/recommendations/recommend", {
+    total_solved: params.total_solved,
+    difficulty_distribution: params.difficulty_distribution,
+    topic_counts: params.topic_counts,
+    weak_topics: params.weak_topics,
+    recent_notes: params.recent_notes,
+  });
 }

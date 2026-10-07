@@ -1,0 +1,2282 @@
+{
+  "components": {
+    "schemas": {
+      "ArchitectureEdge": {
+        "properties": {
+          "label": {
+            "description": "Connection description.",
+            "title": "Label",
+            "type": "string"
+          },
+          "source": {
+            "description": "Source node id.",
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "description": "Target node id.",
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "label"
+        ],
+        "title": "ArchitectureEdge",
+        "type": "object"
+      },
+      "ArchitectureNode": {
+        "properties": {
+          "id": {
+            "description": "Stable node identifier in snake_case.",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "description": "Human-readable component label.",
+            "title": "Label",
+            "type": "string"
+          },
+          "type": {
+            "description": "Component type, e.g. client, service, db, queue.",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type"
+        ],
+        "title": "ArchitectureNode",
+        "type": "object"
+      },
+      "CodeReviewOutput": {
+        "properties": {
+          "issues": {
+            "description": "Bugs, style issues, or correctness concerns.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "optimizations": {
+            "description": "Concrete optimization or refactor suggestions.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Optimizations",
+            "type": "array"
+          },
+          "qualityScore": {
+            "description": "Code quality score from 1 to 10.",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Qualityscore",
+            "type": "integer"
+          },
+          "spaceComplexity": {
+            "description": "Big-O auxiliary space complexity.",
+            "title": "Spacecomplexity",
+            "type": "string"
+          },
+          "strengths": {
+            "description": "What the code does well.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Strengths",
+            "type": "array"
+          },
+          "summary": {
+            "description": "One short paragraph summarizing the review.",
+            "title": "Summary",
+            "type": "string"
+          },
+          "timeComplexity": {
+            "description": "Big-O time complexity of the solution (e.g. O(n)).",
+            "title": "Timecomplexity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "timeComplexity",
+          "spaceComplexity",
+          "qualityScore",
+          "strengths",
+          "issues",
+          "optimizations",
+          "summary"
+        ],
+        "title": "CodeReviewOutput",
+        "type": "object"
+      },
+      "CodeReviewRequest": {
+        "properties": {
+          "code": {
+            "description": "Source code to review.",
+            "title": "Code",
+            "type": "string"
+          },
+          "language": {
+            "description": "Language identifier (e.g. python3, cpp).",
+            "title": "Language",
+            "type": "string"
+          },
+          "problem_description": {
+            "description": "Problem statement.",
+            "title": "Problem Description",
+            "type": "string"
+          },
+          "problem_difficulty": {
+            "default": "medium",
+            "description": "easy, medium, or hard.",
+            "title": "Problem Difficulty",
+            "type": "string"
+          },
+          "problem_title": {
+            "description": "Problem title.",
+            "title": "Problem Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "language",
+          "problem_title",
+          "problem_description"
+        ],
+        "title": "CodeReviewRequest",
+        "type": "object"
+      },
+      "EvaluateAnswerRequest": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "company": {
+            "examples": [
+              "google"
+            ],
+            "title": "Company",
+            "type": "string"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "",
+            "title": "Context"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "stage": {
+            "examples": [
+              "coding"
+            ],
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "company",
+          "stage",
+          "question",
+          "answer"
+        ],
+        "title": "EvaluateAnswerRequest",
+        "type": "object"
+      },
+      "EvaluateExplanationRequest": {
+        "properties": {
+          "audioBase64": {
+            "description": "Base64-encoded audio bytes.",
+            "title": "Audiobase64",
+            "type": "string"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "",
+            "description": "Optional reference context.",
+            "title": "Context"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Defaults to recording.<ext> for mimeType.",
+            "title": "Filename"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional BCP-47 language hint, e.g. en.",
+            "title": "Language"
+          },
+          "mimeType": {
+            "default": "audio/webm",
+            "title": "Mimetype",
+            "type": "string"
+          },
+          "question": {
+            "description": "Interview question being answered.",
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "audioBase64",
+          "question"
+        ],
+        "title": "EvaluateExplanationRequest",
+        "type": "object"
+      },
+      "EvaluateRequest": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "",
+            "title": "Context"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "answer"
+        ],
+        "title": "EvaluateRequest",
+        "type": "object"
+      },
+      "FollowUpRequest": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "evaluation": {
+            "title": "Evaluation",
+            "type": "string"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "answer",
+          "evaluation"
+        ],
+        "title": "FollowUpRequest",
+        "type": "object"
+      },
+      "GenerateFollowupRequest": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "company": {
+            "examples": [
+              "meta"
+            ],
+            "title": "Company",
+            "type": "string"
+          },
+          "evaluation": {
+            "title": "Evaluation",
+            "type": "object"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "stage": {
+            "examples": [
+              "system_design"
+            ],
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "company",
+          "stage",
+          "question",
+          "answer",
+          "evaluation"
+        ],
+        "title": "GenerateFollowupRequest",
+        "type": "object"
+      },
+      "GenerateQuestionRequest": {
+        "properties": {
+          "difficulty": {
+            "examples": [
+              "medium"
+            ],
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "top_k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top K"
+          },
+          "topic": {
+            "examples": [
+              "system design"
+            ],
+            "title": "Topic",
+            "type": "string"
+          }
+        },
+        "required": [
+          "topic",
+          "difficulty"
+        ],
+        "title": "GenerateQuestionRequest",
+        "type": "object"
+      },
+      "GenerateReportRequest": {
+        "properties": {
+          "company": {
+            "examples": [
+              "google"
+            ],
+            "title": "Company",
+            "type": "string"
+          },
+          "conversation": {
+            "description": "Full interview conversation text.",
+            "title": "Conversation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "company",
+          "conversation"
+        ],
+        "title": "GenerateReportRequest",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "IngestDoc": {
+        "properties": {
+          "metadata": {
+            "title": "Metadata",
+            "type": "object"
+          },
+          "source": {
+            "examples": [
+              "system_design_blog"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "text"
+        ],
+        "title": "IngestDoc",
+        "type": "object"
+      },
+      "IngestRequest": {
+        "properties": {
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/IngestDoc"
+            },
+            "title": "Documents",
+            "type": "array"
+          }
+        },
+        "required": [
+          "documents"
+        ],
+        "title": "IngestRequest",
+        "type": "object"
+      },
+      "IngestResumeRequest": {
+        "properties": {
+          "content_base64": {
+            "minLength": 1,
+            "title": "Content Base64",
+            "type": "string"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename"
+          },
+          "resume_id": {
+            "minLength": 1,
+            "title": "Resume Id",
+            "type": "string"
+          },
+          "user_id": {
+            "minLength": 1,
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "resume_id",
+          "content_base64"
+        ],
+        "title": "IngestResumeRequest",
+        "type": "object"
+      },
+      "InterviewReportResponse": {
+        "properties": {
+          "overallScore": {
+            "title": "Overallscore",
+            "type": "integer"
+          },
+          "recommendations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Recommendations",
+            "type": "array"
+          },
+          "stageScores": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ReportStageScore"
+            },
+            "title": "Stagescores",
+            "type": "object"
+          },
+          "strengths": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Strengths",
+            "type": "array"
+          },
+          "weaknesses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Weaknesses",
+            "type": "array"
+          }
+        },
+        "required": [
+          "overallScore",
+          "stageScores",
+          "strengths",
+          "weaknesses",
+          "recommendations"
+        ],
+        "title": "InterviewReportResponse",
+        "type": "object"
+      },
+      "LiveIngestion": {
+        "description": "`triggered` and `reason` always; the rest only once a live fetch was attempted.",
+        "properties": {
+          "chunks_written": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunks Written"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "pages_ingested": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages Ingested"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "skipped": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LiveIngestionSkip"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skipped"
+          },
+          "triggered": {
+            "title": "Triggered",
+            "type": "boolean"
+          },
+          "urls_considered": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Urls Considered"
+          }
+        },
+        "required": [
+          "triggered",
+          "reason"
+        ],
+        "title": "LiveIngestion",
+        "type": "object"
+      },
+      "LiveIngestionSkip": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "why": {
+            "title": "Why",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "why"
+        ],
+        "title": "LiveIngestionSkip",
+        "type": "object"
+      },
+      "NextQuestionRequest": {
+        "properties": {
+          "company": {
+            "examples": [
+              "amazon"
+            ],
+            "title": "Company",
+            "type": "string"
+          },
+          "difficulty": {
+            "default": "medium",
+            "examples": [
+              "medium"
+            ],
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "previous_answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Answer"
+          },
+          "resume_grounded": {
+            "default": false,
+            "title": "Resume Grounded",
+            "type": "boolean"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "stage": {
+            "examples": [
+              "behavioral"
+            ],
+            "title": "Stage",
+            "type": "string"
+          },
+          "top_k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top K"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          }
+        },
+        "required": [
+          "company",
+          "stage"
+        ],
+        "title": "NextQuestionRequest",
+        "type": "object"
+      },
+      "NextQuestionResponse": {
+        "properties": {
+          "context": {
+            "title": "Context",
+            "type": "string"
+          },
+          "expectedCompetencies": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Expectedcompetencies",
+            "type": "array"
+          },
+          "groundedIn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Groundedin"
+          },
+          "liveIngestion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LiveIngestion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "reasoningFocus": {
+            "title": "Reasoningfocus",
+            "type": "string"
+          },
+          "resumeEvidence": {
+            "items": {
+              "$ref": "#/components/schemas/ResumeEvidence"
+            },
+            "title": "Resumeevidence",
+            "type": "array"
+          },
+          "resumeGrounded": {
+            "title": "Resumegrounded",
+            "type": "boolean"
+          },
+          "resumeHits": {
+            "title": "Resumehits",
+            "type": "integer"
+          },
+          "retrievalConfidence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RetrievalConfidence"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "retrievalHits": {
+            "title": "Retrievalhits",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "question",
+          "reasoningFocus",
+          "expectedCompetencies",
+          "retrievalHits",
+          "context",
+          "retrievalConfidence",
+          "liveIngestion",
+          "resumeGrounded",
+          "resumeHits",
+          "resumeEvidence"
+        ],
+        "title": "NextQuestionResponse",
+        "type": "object"
+      },
+      "QueryRequest": {
+        "properties": {
+          "answer": {
+            "default": true,
+            "title": "Answer",
+            "type": "boolean"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "top_k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top K"
+          },
+          "where": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Where"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "QueryRequest",
+        "type": "object"
+      },
+      "RecommendRequest": {
+        "properties": {
+          "difficulty_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Counts per difficulty for solved problems.",
+            "title": "Difficulty Distribution",
+            "type": "object"
+          },
+          "recent_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional short summary for the model.",
+            "title": "Recent Notes"
+          },
+          "topic_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Topic -> count from solved problems.",
+            "title": "Topic Counts",
+            "type": "object"
+          },
+          "total_solved": {
+            "minimum": 0.0,
+            "title": "Total Solved",
+            "type": "integer"
+          },
+          "weak_topics": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Weak Topics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "total_solved"
+        ],
+        "title": "RecommendRequest",
+        "type": "object"
+      },
+      "RecommendationOutput": {
+        "properties": {
+          "difficultySuggestion": {
+            "description": "Suggested next difficulty band: easy, medium, or hard, with one sentence rationale.",
+            "title": "Difficultysuggestion",
+            "type": "string"
+          },
+          "focusAreas": {
+            "description": "Specific skills or patterns to drill.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Focusareas",
+            "type": "array"
+          },
+          "reasoning": {
+            "description": "Brief explanation of why these topics fit this user.",
+            "title": "Reasoning",
+            "type": "string"
+          },
+          "recommendedTopics": {
+            "description": "2-5 DSA or topic areas the user should prioritize next (e.g. binary search, graphs).",
+            "items": {
+              "type": "string"
+            },
+            "title": "Recommendedtopics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "recommendedTopics",
+          "reasoning",
+          "focusAreas",
+          "difficultySuggestion"
+        ],
+        "title": "RecommendationOutput",
+        "type": "object"
+      },
+      "ReportStageScore": {
+        "properties": {
+          "feedback": {
+            "title": "Feedback",
+            "type": "string"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Score"
+          }
+        },
+        "required": [
+          "score",
+          "feedback"
+        ],
+        "title": "ReportStageScore",
+        "type": "object"
+      },
+      "ResumeEvidence": {
+        "properties": {
+          "distance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance"
+          },
+          "excerpt": {
+            "title": "Excerpt",
+            "type": "string"
+          },
+          "section": {
+            "title": "Section",
+            "type": "string"
+          }
+        },
+        "required": [
+          "section",
+          "excerpt",
+          "distance"
+        ],
+        "title": "ResumeEvidence",
+        "type": "object"
+      },
+      "ResumeIngestResponse": {
+        "properties": {
+          "charCount": {
+            "title": "Charcount",
+            "type": "integer"
+          },
+          "chunkCount": {
+            "title": "Chunkcount",
+            "type": "integer"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "pageCount": {
+            "title": "Pagecount",
+            "type": "integer"
+          },
+          "parsedSections": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Parsedsections",
+            "type": "array"
+          },
+          "sections": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sections",
+            "type": "array"
+          },
+          "userId": {
+            "title": "Userid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "namespace",
+          "chunkCount",
+          "sections",
+          "pageCount",
+          "charCount",
+          "parsedSections",
+          "filename"
+        ],
+        "title": "ResumeIngestResponse",
+        "type": "object"
+      },
+      "ResumePurgeResponse": {
+        "properties": {
+          "deletedChunks": {
+            "title": "Deletedchunks",
+            "type": "integer"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "namespaceDropped": {
+            "title": "Namespacedropped",
+            "type": "boolean"
+          },
+          "remainingChunks": {
+            "title": "Remainingchunks",
+            "type": "integer"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "namespace",
+          "deletedChunks",
+          "namespaceDropped",
+          "remainingChunks",
+          "verified"
+        ],
+        "title": "ResumePurgeResponse",
+        "type": "object"
+      },
+      "RetrievalConfidence": {
+        "properties": {
+          "company_matched": {
+            "title": "Company Matched",
+            "type": "boolean"
+          },
+          "confident": {
+            "title": "Confident",
+            "type": "boolean"
+          },
+          "good_hits": {
+            "title": "Good Hits",
+            "type": "integer"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "top_distance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Distance"
+          }
+        },
+        "required": [
+          "confident",
+          "reason",
+          "top_distance",
+          "good_hits",
+          "company_matched"
+        ],
+        "title": "RetrievalConfidence",
+        "type": "object"
+      },
+      "RetrieveResumeRequest": {
+        "properties": {
+          "company": {
+            "default": "amazon",
+            "title": "Company",
+            "type": "string"
+          },
+          "stage": {
+            "default": "behavioral",
+            "title": "Stage",
+            "type": "string"
+          },
+          "top_k": {
+            "default": 4,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "type": "integer"
+          },
+          "user_id": {
+            "minLength": 1,
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id"
+        ],
+        "title": "RetrieveResumeRequest",
+        "type": "object"
+      },
+      "RubricSectionScore": {
+        "properties": {
+          "notes": {
+            "description": "Short rationale for the section score.",
+            "title": "Notes",
+            "type": "string"
+          },
+          "score": {
+            "description": "Section score from 1 to 10.",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Score",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "score",
+          "notes"
+        ],
+        "title": "RubricSectionScore",
+        "type": "object"
+      },
+      "StructuredEvaluationOutput": {
+        "properties": {
+          "followupFocus": {
+            "description": "The main concept to probe in a follow-up.",
+            "title": "Followupfocus",
+            "type": "string"
+          },
+          "score": {
+            "description": "Overall score from 1 to 10.",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Score",
+            "type": "integer"
+          },
+          "shouldAskFollowup": {
+            "description": "Whether a follow-up question should be asked.",
+            "title": "Shouldaskfollowup",
+            "type": "boolean"
+          },
+          "strengths": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Strengths",
+            "type": "array"
+          },
+          "suggestions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Suggestions",
+            "type": "array"
+          },
+          "weaknesses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Weaknesses",
+            "type": "array"
+          }
+        },
+        "required": [
+          "score",
+          "strengths",
+          "weaknesses",
+          "suggestions",
+          "shouldAskFollowup",
+          "followupFocus"
+        ],
+        "title": "StructuredEvaluationOutput",
+        "type": "object"
+      },
+      "StructuredFollowupOutput": {
+        "properties": {
+          "focus": {
+            "description": "The weak area or concept being probed.",
+            "title": "Focus",
+            "type": "string"
+          },
+          "question": {
+            "description": "A single follow-up interview question.",
+            "title": "Question",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why this follow-up is appropriate.",
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "focus",
+          "reason"
+        ],
+        "title": "StructuredFollowupOutput",
+        "type": "object"
+      },
+      "SystemDesignAnalysisOutput": {
+        "properties": {
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/ArchitectureEdge"
+            },
+            "title": "Edges",
+            "type": "array"
+          },
+          "improvements": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Improvements",
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/ArchitectureNode"
+            },
+            "title": "Nodes",
+            "type": "array"
+          },
+          "risks": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Risks",
+            "type": "array"
+          },
+          "rubric": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RubricSectionScore"
+            },
+            "title": "Rubric",
+            "type": "object"
+          },
+          "summary": {
+            "description": "Concise architecture summary.",
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary",
+          "nodes",
+          "edges",
+          "risks",
+          "improvements",
+          "rubric"
+        ],
+        "title": "SystemDesignAnalysisOutput",
+        "type": "object"
+      },
+      "SystemDesignAnalysisRequest": {
+        "properties": {
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional company context.",
+            "title": "Company"
+          },
+          "explanation": {
+            "description": "Candidate explanation text or transcript.",
+            "title": "Explanation",
+            "type": "string"
+          },
+          "prompt": {
+            "description": "System design interview prompt.",
+            "title": "Prompt",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prompt",
+          "explanation"
+        ],
+        "title": "SystemDesignAnalysisRequest",
+        "type": "object"
+      },
+      "TranscribeRequest": {
+        "properties": {
+          "audioBase64": {
+            "description": "Base64-encoded audio bytes.",
+            "title": "Audiobase64",
+            "type": "string"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Defaults to recording.<ext> for mimeType.",
+            "title": "Filename"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional BCP-47 language hint, e.g. en.",
+            "title": "Language"
+          },
+          "mimeType": {
+            "default": "audio/webm",
+            "title": "Mimetype",
+            "type": "string"
+          }
+        },
+        "required": [
+          "audioBase64"
+        ],
+        "title": "TranscribeRequest",
+        "type": "object"
+      },
+      "TranscriptResponse": {
+        "properties": {
+          "transcript": {
+            "title": "Transcript",
+            "type": "string"
+          }
+        },
+        "required": [
+          "transcript"
+        ],
+        "title": "TranscriptResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VoiceEvaluationResponse": {
+        "properties": {
+          "evaluation": {
+            "$ref": "#/components/schemas/VoiceRubricOutput"
+          },
+          "transcript": {
+            "title": "Transcript",
+            "type": "string"
+          }
+        },
+        "required": [
+          "transcript",
+          "evaluation"
+        ],
+        "title": "VoiceEvaluationResponse",
+        "type": "object"
+      },
+      "VoiceRubricOutput": {
+        "properties": {
+          "communicationClarity": {
+            "$ref": "#/components/schemas/RubricSectionScore"
+          },
+          "completeness": {
+            "$ref": "#/components/schemas/RubricSectionScore"
+          },
+          "overallScore": {
+            "description": "Overall score from 1 to 10.",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Overallscore",
+            "type": "integer"
+          },
+          "strengths": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Strengths",
+            "type": "array"
+          },
+          "suggestions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Suggestions",
+            "type": "array"
+          },
+          "technicalCorrectness": {
+            "$ref": "#/components/schemas/RubricSectionScore"
+          },
+          "weaknesses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Weaknesses",
+            "type": "array"
+          }
+        },
+        "required": [
+          "overallScore",
+          "technicalCorrectness",
+          "communicationClarity",
+          "completeness",
+          "strengths",
+          "weaknesses",
+          "suggestions"
+        ],
+        "title": "VoiceRubricOutput",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "InterviewForge AI Service",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Root"
+      }
+    },
+    "/api/code-review/review": {
+      "post": {
+        "operationId": "review_code_api_code_review_review_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeReviewOutput"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review Code",
+        "tags": [
+          "code-review"
+        ]
+      }
+    },
+    "/api/interview/evaluate": {
+      "post": {
+        "operationId": "evaluate_api_interview_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Evaluate",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
+    "/api/interview/evaluate-answer": {
+      "post": {
+        "operationId": "evaluate_answer_api_interview_evaluate_answer_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateAnswerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructuredEvaluationOutput"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Evaluate Answer",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
+    "/api/interview/followup": {
+      "post": {
+        "operationId": "followup_api_interview_followup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Followup",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
+    "/api/interview/generate-followup": {
+      "post": {
+        "operationId": "generate_followup_api_interview_generate_followup_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateFollowupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructuredFollowupOutput"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Followup",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
+    "/api/interview/generate-question": {
+      "post": {
+        "operationId": "generate_question_api_interview_generate_question_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Question",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
+    "/api/interview/generate-report": {
+      "post": {
+        "operationId": "generate_report_api_interview_generate_report_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InterviewReportResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Report",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
+    "/api/interview/next-question": {
+      "post": {
+        "operationId": "next_question_api_interview_next_question_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NextQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextQuestionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Next Question",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
+    "/api/rag/ingest": {
+      "post": {
+        "operationId": "ingest_api_rag_ingest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ingest",
+        "tags": [
+          "rag"
+        ]
+      }
+    },
+    "/api/rag/query": {
+      "post": {
+        "operationId": "query_api_rag_query_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Query",
+        "tags": [
+          "rag"
+        ]
+      }
+    },
+    "/api/recommendations/recommend": {
+      "post": {
+        "operationId": "recommend_api_recommendations_recommend_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationOutput"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Recommend",
+        "tags": [
+          "recommendations"
+        ]
+      }
+    },
+    "/api/resume/ingest": {
+      "post": {
+        "operationId": "ingest_resume_api_resume_ingest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestResumeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeIngestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ingest Resume",
+        "tags": [
+          "resume"
+        ]
+      }
+    },
+    "/api/resume/retrieve": {
+      "post": {
+        "operationId": "retrieve_resume_api_resume_retrieve_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrieveResumeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retrieve Resume",
+        "tags": [
+          "resume"
+        ]
+      }
+    },
+    "/api/resume/{user_id}": {
+      "delete": {
+        "operationId": "delete_resume_api_resume__user_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumePurgeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Resume",
+        "tags": [
+          "resume"
+        ]
+      }
+    },
+    "/api/resume/{user_id}/stats": {
+      "get": {
+        "operationId": "resume_stats_api_resume__user_id__stats_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resume Stats",
+        "tags": [
+          "resume"
+        ]
+      }
+    },
+    "/api/speech/evaluate-explanation": {
+      "post": {
+        "operationId": "evaluate_explanation_api_speech_evaluate_explanation_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateExplanationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceEvaluationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Evaluate Explanation",
+        "tags": [
+          "speech"
+        ]
+      }
+    },
+    "/api/speech/transcribe": {
+      "post": {
+        "operationId": "transcribe_api_speech_transcribe_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscribeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscriptResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Transcribe",
+        "tags": [
+          "speech"
+        ]
+      }
+    },
+    "/api/system-design/analyze": {
+      "post": {
+        "operationId": "analyze_api_system_design_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemDesignAnalysisRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemDesignAnalysisOutput"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Analyze",
+        "tags": [
+          "system-design"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/metrics/llm": {
+      "get": {
+        "description": "Token, latency and estimated-cost totals for this process.\n\nIn-memory by design: a restart resets them, and a multi-instance deployment\nwould need a real metrics backend. Enough to answer \"what does one interview\ncost\" without adding infrastructure.",
+        "operationId": "llm_metrics_metrics_llm_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Llm Metrics"
+      }
+    }
+  }
+}

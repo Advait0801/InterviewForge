@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from app.core import config
 from app.llm.chains import invoke_with_fallback, voice_explanation_rubric_chain
+from app.api.schemas import TranscriptResponse, VoiceEvaluationResponse, documented
 
 router = APIRouter(prefix="/api/speech", tags=["speech"])
 
@@ -105,7 +106,7 @@ def _transcribe_audio(req: TranscribeRequest) -> str:
     return text
 
 
-@router.post("/transcribe")
+@router.post("/transcribe", responses=documented(TranscriptResponse))
 async def transcribe(req: TranscribeRequest):
     # The provider call is synchronous; on the event loop it would stall every other
     # request this worker is serving for the length of the transcription.
@@ -113,7 +114,7 @@ async def transcribe(req: TranscribeRequest):
     return {"transcript": transcript}
 
 
-@router.post("/evaluate-explanation")
+@router.post("/evaluate-explanation", responses=documented(VoiceEvaluationResponse))
 async def evaluate_explanation(req: EvaluateExplanationRequest):
     transcript = await run_in_threadpool(_transcribe_audio, req)
 

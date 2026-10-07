@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.llm.chains import invoke_with_fallback, recommendation_chain
+from app.api.schemas import RecommendationOutput, documented
 
 router = APIRouter(prefix="/api/recommendations", tags=["recommendations"])
 
@@ -42,7 +43,7 @@ def _format_topic_counts(d: Dict[str, int]) -> str:
     return ", ".join(f"{k}: {v}" for k, v in sorted(d.items(), key=lambda x: -x[1]))
 
 
-@router.post("/recommend")
+@router.post("/recommend", responses=documented(RecommendationOutput))
 async def recommend(req: RecommendRequest):
     try:
         result = await invoke_with_fallback(

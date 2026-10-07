@@ -12,17 +12,8 @@ import {
   type CorrelatedRequest,
 } from "./middleware/correlation.middleware";
 import { Server } from "socket.io";
-import authRoutes from "./routes/auth.routes";
-import usersRoutes from "./routes/users.routes";
-import problemsRoutes from "./routes/problems.routes";
-import problemBookmarksRoutes from "./routes/problemBookmarks.routes";
-import submissionRoutes from "./routes/submission.routes";
-import interviewsRoutes from "./routes/interviews.routes";
-import assessmentsRoutes from "./routes/assessments.routes";
-import leaderboardRoutes from "./routes/leaderboard.routes";
-import learningPathsRoutes from "./routes/learningPaths.routes";
-import recommendationsRoutes from "./routes/recommendations.routes";
-import resumesRoutes from "./routes/resumes.routes";
+import { API_ROUTES } from "./routes";
+import { validateResponses } from "./openapi/validate-responses.middleware";
 
 dotenv.config();
 
@@ -67,6 +58,11 @@ app.use((req, _res, next) => {
   next();
 });
 
+// Dev-only contract check against real data (D-062); see the middleware.
+if (process.env.OPENAPI_VALIDATE_RESPONSES === "1") {
+  app.use("/api", validateResponses());
+}
+
 app.use("/api", optionalAuth, apiLimiter);
 
 app.get("/health", (req, res) => {
@@ -81,17 +77,9 @@ app.get("/", (req, res) => {
   res.json({ message: "InterviewForge Backend API" });
 });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", usersRoutes);
-app.use("/api/problems", problemsRoutes);
-app.use("/api/problem-bookmarks", problemBookmarksRoutes);
-app.use("/api/submissions", submissionRoutes);
-app.use("/api/interviews", interviewsRoutes);
-app.use("/api/assessments", assessmentsRoutes);
-app.use("/api/leaderboard", leaderboardRoutes);
-app.use("/api/learning-paths", learningPathsRoutes);
-app.use("/api/recommendations", recommendationsRoutes);
-app.use("/api/resumes", resumesRoutes);
+for (const [mountPath, router] of API_ROUTES) {
+  app.use(`/api${mountPath}`, router);
+}
 
 const server = http.createServer(app);
 

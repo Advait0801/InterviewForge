@@ -28,15 +28,22 @@ vi.mock("../services/ai.service", async (importOriginal) => ({
   ...ai,
 }));
 
-import { AIServiceError } from "../services/ai.service";
+import { AIServiceError, type InterviewReport, type StructuredQuestion } from "../services/ai.service";
 import interviewsRouter from "../routes/interviews.routes";
 
 const SESSION = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
-const QUESTION = {
+// Typed by the generated ai-service contract (D-062), so it stays as complete as a real reply.
+const QUESTION: StructuredQuestion = {
   question: "Tell me about a time you disagreed with your manager.",
   reasoningFocus: "conflict",
   expectedCompetencies: ["ownership"],
   context: "retrieved context",
+  retrievalHits: 3,
+  retrievalConfidence: null,
+  liveIngestion: { triggered: false, reason: "not attempted" },
+  resumeGrounded: false,
+  resumeHits: 0,
+  resumeEvidence: [],
 };
 const EVAL = (shouldAskFollowup: boolean) => ({
   score: 7,
@@ -173,7 +180,20 @@ describe("GET /api/interviews/:id", () => {
 
   it("returns the session with its transcript", async () => {
     sessionLookup(session());
-    db.handlers.push({ match: "FROM interview_messages WHERE session_id = $1 ORDER BY", reply: [{ id: "m1" }] });
+    db.handlers.push({
+      match: "FROM interview_messages WHERE session_id = $1 ORDER BY",
+      reply: [
+        {
+          id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+          session_id: SESSION,
+          role: "assistant",
+          stage: "behavioral",
+          content: QUESTION.question,
+          metadata_json: { kind: "question" },
+          created_at: "2026-09-22T00:00:01Z",
+        },
+      ],
+    });
     const r = await api.request("GET", `/api/interviews/${SESSION}`);
     expect(r.status).toBe(200);
     expect(r.body.messages).toHaveLength(1);
@@ -304,9 +324,14 @@ describe("POST /api/interviews/:id/answer", () => {
 });
 
 describe("GET /api/interviews/:id/report", () => {
-  const REPORT = {
+  // `coding` scores as a string on purpose: the parser model allows it and the scores
+  // insert must cope. `summary` is an extra key, as LLM output can carry.
+  const REPORT: InterviewReport & { summary: string } = {
     overallScore: 7,
-    stageScores: { behavioral: { score: 8 }, coding: { score: "6" } },
+    stageScores: { behavioral: { score: 8, feedback: "clear" }, coding: { score: "6", feedback: "slow" } },
+    strengths: ["structure"],
+    weaknesses: ["edge cases"],
+    recommendations: ["practice graphs"],
     summary: "Solid.",
   };
 

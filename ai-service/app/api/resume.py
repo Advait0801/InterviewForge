@@ -17,6 +17,7 @@ from pydantic import BaseModel, Field
 
 from app.resume.parser import ResumeParseError, parse_resume_pdf
 from app.resume.store import ResumeStore
+from app.api.schemas import ResumeIngestResponse, ResumePurgeResponse, documented
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class RetrieveResumeRequest(BaseModel):
     top_k: int = Field(default=4, ge=1, le=20)
 
 
-@router.post("/ingest")
+@router.post("/ingest", responses=documented(ResumeIngestResponse))
 def ingest_resume(req: IngestResumeRequest):
     try:
         data = base64.b64decode(req.content_base64, validate=True)
@@ -126,7 +127,7 @@ def resume_stats(user_id: str):
     return _get_store().stats(user_id).as_dict()
 
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", responses=documented(ResumePurgeResponse))
 def delete_resume(user_id: str):
     if not user_id.strip():
         raise HTTPException(status_code=400, detail="user_id is required")

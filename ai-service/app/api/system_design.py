@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.llm.chains import invoke_with_fallback, system_design_analysis_chain
+from app.api.schemas import SystemDesignAnalysisOutput, documented
 
 router = APIRouter(prefix="/api/system-design", tags=["system-design"])
 
@@ -22,7 +23,7 @@ def _raise_llm_http_error(exc: Exception) -> None:
     raise HTTPException(status_code=503, detail=f"LLM unavailable: {text}")
 
 
-@router.post("/analyze")
+@router.post("/analyze", responses=documented(SystemDesignAnalysisOutput))
 async def analyze(req: SystemDesignAnalysisRequest):
     if not req.prompt.strip():
         raise HTTPException(status_code=400, detail="prompt is required")

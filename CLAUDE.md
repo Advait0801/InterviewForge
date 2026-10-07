@@ -41,6 +41,8 @@ backend/src/services/        # business rules + orchestration; ai.service.ts (AI
 #                              code-runner.client.ts, errors.ts (DomainError), *.service.ts
 backend/src/repositories/    # all SQL, one file per table group; take a Queryable for transactions
 backend/src/db.ts            # query() over a pg Pool, plus withTransaction()
+backend/openapi/openapi.yaml # the Express API contract (D-062); served at /api/openapi.json
+backend/src/generated/       # ai-service types generated from ai-service/openapi.json — never hand-edit
 backend/sql_migrations/      # 001_init.sql … 014_interview_report.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
@@ -109,6 +111,18 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - Repository writes that can run inside a transaction take `db: Queryable` as the first
   argument; the service owns the `withTransaction` call.
 
+**API contract (D-062)**
+- Changing an Express endpoint means changing `backend/openapi/openapi.yaml` in the same
+  commit: the route-test harness validates every response against it and
+  `openapi-contract.test.ts` fails if a route and the spec disagree.
+- Changing a FastAPI request/response model: `docker compose exec ai-service python
+  scripts/export_openapi.py`, then `cd backend && npm run gen:ai-types`, and commit both.
+  pytest and `scripts/ci/check_api_contract.sh` fail otherwise.
+- Request bodies to the ai-service are typed object literals in `ai.service.ts`; FastAPI
+  silently drops unknown fields, so never pass a spread or untyped object.
+- `OPENAPI_VALIDATE_RESPONSES=1` in `backend/.env` logs live contract violations
+  (`openapi_violation`). Dev only.
+
 **Multi-write routes**
 - Writes that must land together go through `db.withTransaction` (D-057). Keep LLM calls and
   code execution *outside* it. Inside a transaction `NOW()` is frozen — use
@@ -170,6 +184,9 @@ python scripts/problemgen/apply_curation.py # write curated company tags into le
 docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tune the live-fetch gate
 
 bash scripts/ci/smoke_prod_images.sh  # prod image contents + boot; build tags first (see its header)
+bash scripts/ci/check_api_contract.sh # generated API types match their specs
+cd backend && npm run gen:ai-types     # after re-exporting ai-service/openapi.json
+cd backend && npm run gen:web-client   # writes web/src/lib/api/schema.d.ts (UI A / GPT)
 
 cd backend && npm run build     # tsc
 cd web && npm run build         # next build
