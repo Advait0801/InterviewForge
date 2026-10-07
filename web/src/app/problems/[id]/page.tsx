@@ -728,7 +728,7 @@ export default function WorkspacePage() {
 
                 {exampleCases.length > 0 && (
                   <div className="mt-6">
-                    <h3 className="mb-3 text-sm font-semibold text-text-primary">Examples</h3>
+                    <h2 className="mb-3 text-sm font-semibold text-text-primary">Examples</h2>
                     {exampleCases.map((tc, idx) => (
                       <div key={idx} className="mb-3 rounded-xl border border-border bg-surface/60 p-4">
                         <p className="mb-1.5 text-xs font-semibold text-text-secondary">Example {idx + 1}:</p>
