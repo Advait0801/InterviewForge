@@ -13,5 +13,6 @@ __pycache__
 *.pyc
 .venv
 venv
-requirements-dev.txt
+# requirements-dev.txt must stay in the context: the dev Dockerfile installs it. Excluding it
+# (D-054) broke `docker compose up --build` for the ai-service on a fresh clone (D-063).
 .DS_Store

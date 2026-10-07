@@ -9,6 +9,73 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-06
 
+### D-063 — Redis: shared rate limits, a bounded code-run queue, a cached leaderboard (closes F-19)
+
+**Why:** three problems that needed shared state. Code-runner had no concurrency limit, so N
+simultaneous submissions started N sandbox containers. Every limiter counted per process,
+so a second instance would double every limit (F-19). And the leaderboard aggregated every
+submission on each request, which no index helps (D-053). Redis is the 7th service,
+approved in the roadmap.
+
+**Decided:**
+- **Redis 7** with `noeviction` (BullMQ requires it) and no persistence. Everything in it can
+  be rebuilt; a restart only resets counters. 128 MB in dev, 48 MB / `mem_limit` 64m in prod.
+  The host binding is 127.0.0.1:6380, kept off 6379 by the same convention as the other
+  ports.
+- **Code runs** go through BullMQ (`services/run-queue.ts`). There's a global concurrency cap
+  (`CODE_RUN_CONCURRENCY`, default 4, `setGlobalConcurrency`), so adding backend instances
+  doesn't raise it. The HTTP request still waits for its job, so the API and `web/` are
+  unchanged. A job carries the hidden test cases, so it's deleted as soon as its result is
+  read. BullMQ's age purge only runs when another job completes, so it would otherwise have
+  left the last jobs' data in Redis indefinitely. A saturated queue (90 s) or an unreachable
+  Redis is a retryable 503. With `REDIS_URL` set, runs never bypass the queue, or an outage
+  would silently remove the cap.
+- **Backend rate limits** use a Redis store behind `FallbackStore`: while Redis is unreachable
+  they count in memory, which is the old per-instance behaviour. Not failing open (no login
+  limit at all) and not failing closed (everything a 429). `rate-limit-redis` loads its Lua
+  scripts in its constructor, so Redis being down at boot was an unhandled rejection that
+  exited Node. Seen live; handled, and pinned by a test.
+- **F-19:** `RedisFetchLimiter` in the ai-service has the same checks, order and messages as
+  the in-memory one, but check and reserve run as **one Lua script**, which also fixes a race
+  in the in-memory `acquire` (check, unlock, then increment). In-flight slots are leases that
+  expire, so a crashed worker can't hold one forever. If Redis is down, live fetching is
+  denied; it's optional, and the question uses local context.
+- **Leaderboard** pages are cached for 60 s under a version key. A new submission or an
+  avatar change bumps the version, and any Redis failure falls through to the query.
+
+**Found:** the ai-service dev image couldn't be built from scratch. D-054's `.dockerignore`
+excluded `requirements-dev.txt`, which the dev `Dockerfile` installs, so
+`docker compose up --build` failed for the ai-service on a fresh clone. CI only builds prod
+images, so nothing noticed. Fixed.
+
+**Verified:**
+- **Load test** (`scripts/load_test_run_queue.py`): 20 simultaneous runs of a solution that
+  sleeps 1.5 s. Live sandboxes were sampled by `docker ps` every 100 ms, independently of the
+  backend.
+
+  | | Peak sandboxes | Wall time | p50 latency |
+  |---|---|---|---|
+  | `main`, no queue | **20** | 4.3 s | 2.3 s |
+  | Queue, cap 4 | **4** | 11.3 s | 6.3 s |
+
+  All 40 runs returned 200 with correct results. The cap costs burst latency by design.
+- **Redis stopped:** runs → 503 `retryable` in 5.0 s (the enqueue timeout); reads,
+  leaderboard and login → 200 (limits on memory); the backend stays up. Redis back → runs
+  recover with no restart. **Backend booted with Redis down:** no crash; the queue came up by
+  itself once Redis started, and the load test passed again.
+- **Leaderboard:** miss 29 ms, hit 3 ms. A Run leaves the version alone, a Submit bumps it,
+  and the new user is ranked on the next read.
+- **Real Redis 7:** the Lua limiter reserves, releases, enforces cooldown and the global cap.
+  0 job records left after a load run.
+- **Tests:**
+  - backend 241 (+13): queue cap, error mapping, saturation, job purge, cache, the fallback
+    store, and boot with Redis down. 235 + 6 skipped without `REDIS_TEST_URL`.
+  - ai-service 435 (+17): both limiter backends against one contract, two instances sharing
+    a budget, 20 threads racing for the last slot (exactly one wins), lease expiry, Redis
+    down.
+- **Live:** `verify_phase7.py` 46/46 and `verify_resume_isolation.py` 40/40 on the queued
+  stack, 0 OpenAPI violations. Prod image boots with and without `REDIS_URL`.
+
 ### D-062 — An OpenAPI contract for both APIs; generated types; the field FastAPI dropped
 
 **Why:** `web/` hand-mirrors the Express API and Express hand-mirrors the ai-service, so
@@ -1502,7 +1569,7 @@ Things observed in the code that need a call made on them.
 | F-08 | RAG corpus is 34 hand-written documents — the weakest point in the project's strongest story | `ai-service/seed_data/documents.json` |
 | F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed); contract and generated types added by D-062. Open until UI A switches `web/` to the generated client | `web/src/lib/api.ts` |
 | F-18 | `brendangregg` feed ingested four entries all titled "Brendan Gregg's Blog" — the feed appears to link to the index page rather than individual articles, so those chunks are low value | `ai-service/app/ingest/sources.py` |
-| F-19 | `FetchLimiter` counters are in-process, so limits are per-instance. A multi-instance deployment would multiply the global daily cap by the instance count; needs Redis | `ai-service/app/ingest/limits.py` |
+| F-19 | ~~`FetchLimiter` counters are in-process, so limits are per-instance. A multi-instance deployment would multiply the global daily cap by the instance count; needs Redis~~ — closed by D-063: Redis-backed, atomic check-and-reserve; the backend limiters moved to Redis too | `ai-service/app/ingest/limits.py` |
 | F-20 | Live *discovery* depends on Gemini search grounding, which returns 429 on the free tier — the live fetch degrades safely to local context but cannot write back until quota exists (D-038) | `ai-service/app/ingest/live.py` |
 | F-21 | ~~Company tags are too broad: Amazon 149/150, Microsoft 139, Google 125~~ — closed by D-044: curated 3–5 per problem in `curation.py`, Amazon now 91, no company below 20 | `scripts/problemgen/curation.py` |
 | F-22 | ~~The `editorial` column is never written; all 150 problems have none~~ — closed by D-044: `problem_editorials.json`, seeded and rendered as sections | `backend/problem_editorials.json` |

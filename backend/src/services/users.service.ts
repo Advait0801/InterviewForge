@@ -2,6 +2,7 @@ import { hashPassword, verifyPassword, signAccessToken } from "../auth";
 import * as users from "../repositories/users.repository";
 import * as activity from "../repositories/activity.repository";
 import { DomainError, badRequest, notFound } from "./errors";
+import { bumpCacheVersion } from "./cache";
 
 const acceptanceRate = (accepted: number, submissions: number) =>
   submissions > 0 ? Math.round((accepted / submissions) * 100) : 0;
@@ -29,12 +30,15 @@ export async function getAccount(userId: string) {
   return account;
 }
 
-export function setAvatar(userId: string, avatar: string): Promise<void> {
-  return users.setAvatar(userId, avatar);
+// Avatars appear on the cached leaderboard.
+export async function setAvatar(userId: string, avatar: string): Promise<void> {
+  await users.setAvatar(userId, avatar);
+  await bumpCacheVersion("leaderboard");
 }
 
-export function removeAvatar(userId: string): Promise<void> {
-  return users.setAvatar(userId, null);
+export async function removeAvatar(userId: string): Promise<void> {
+  await users.setAvatar(userId, null);
+  await bumpCacheVersion("leaderboard");
 }
 
 export async function getStats(userId: string) {

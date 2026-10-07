@@ -16,12 +16,14 @@ export class CodeRunnerFailedError extends Error {}
 /** Read per call, not at load: tests point it at a stand-in after import. */
 const codeRunnerUrl = () => process.env.CODE_RUNNER_URL || "http://code-runner:5000";
 
-export async function runCode(request: {
+export type RunRequest = {
   language: string;
   code: string;
   testCases: TestCase[];
   slug: string;
-}): Promise<RunResult> {
+};
+
+export async function runCode(request: RunRequest): Promise<RunResult> {
   let response: Response;
   try {
     response = await fetch(`${codeRunnerUrl()}/run`, {

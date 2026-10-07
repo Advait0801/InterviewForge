@@ -213,7 +213,7 @@ def maybe_fetch(
     """Run the live path, respecting every limit. Never raises."""
     key = query_key(query)
     try:
-        limiter.acquire(user_id=user_id, session_id=session_id, query_key=key)
+        lease = limiter.acquire(user_id=user_id, session_id=session_id, query_key=key)
     except LimitExceeded as exc:
         return LiveResult(triggered=False, reason=str(exc))
 
@@ -226,4 +226,4 @@ def maybe_fetch(
         log.exception("live fetch failed")
         return LiveResult(triggered=True, reason="live fetch failed", error=str(exc))
     finally:
-        limiter.release()
+        limiter.release(lease)
