@@ -21,11 +21,7 @@ const CodeWorkspaceEditor = dynamic(
 
 type Language = WorkspaceLanguage;
 type ConsoleTab = "result" | "testcases";
-type ExecutionResult = {
-  passed: boolean;
-  results: Array<{ passed: boolean; actualOutput?: string; error?: string; hidden?: boolean }>;
-  runtimeMs?: number;
-};
+type ExecutionResult = Awaited<ReturnType<typeof api.runCode>> | Awaited<ReturnType<typeof api.submitCode>>;
 
 const RUN_CASE_LIMIT = 4;
 const LANG_KEY = "if-preferred-lang";
@@ -200,7 +196,7 @@ export default function AssessmentWorkspacePage() {
     try {
       if (submissionPromiseRef.current) await submissionPromiseRef.current;
       const response = await api.submitAssessment(params.id);
-      setAssessment((previous) => previous ? { ...previous, status: "completed", score: response.score } : previous);
+      setAssessment((previous) => previous ? { ...previous, status: "completed", score: String(response.score) } : previous);
       setRemainingMs(0);
       if (timerRef.current) clearInterval(timerRef.current);
       toast.success(automatic ? `Time is up. Final score: ${response.score}%` : `Assessment complete. Score: ${response.score}%`);
@@ -408,7 +404,7 @@ export default function AssessmentWorkspacePage() {
               </button>
             ))}
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+          <div role="region" aria-label="Assessment problem content" tabIndex={0} className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
             {activeDetail ? (
               <ProblemStatement problem={activeDetail} />
             ) : (
@@ -458,7 +454,7 @@ export default function AssessmentWorkspacePage() {
                 Test cases
               </button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <div role="region" aria-label="Execution results and test cases" tabIndex={0} className="min-h-0 flex-1 overflow-y-auto p-4">
               {consoleTab === "result" ? (
                 <ExecutionPanel result={activeResult} error={executionError} loading={running || submitting} />
               ) : (
@@ -524,9 +520,9 @@ function ExecutionPanel({ result, error, loading }: { result: ExecutionResult | 
       </div>
       {result.results.map((caseResult, index) => (
         <div key={index} className={`rounded-lg border p-3 ${caseResult.passed ? "border-accent/30 bg-accent/5" : "border-error/30 bg-error/5"}`}>
-          <p className={`text-xs font-semibold ${caseResult.passed ? "text-accent" : "text-error"}`}>{caseResult.passed ? "Passed" : "Failed"} case {index + 1}{caseResult.hidden ? " (hidden)" : ""}</p>
-          {caseResult.actualOutput != null ? <pre className="mono mt-2 whitespace-pre-wrap break-all text-xs">{caseResult.actualOutput}</pre> : null}
-          {caseResult.error ? <pre className="mono mt-2 whitespace-pre-wrap break-all text-xs text-error">{caseResult.error}</pre> : null}
+          <p className={`text-xs font-semibold ${caseResult.passed ? "text-accent" : "text-error"}`}>{caseResult.passed ? "Passed" : "Failed"} case {index + 1}{"hidden" in caseResult && caseResult.hidden ? " (hidden)" : ""}</p>
+          {"actualOutput" in caseResult && caseResult.actualOutput != null ? <pre className="mono mt-2 whitespace-pre-wrap break-all text-xs">{caseResult.actualOutput}</pre> : null}
+          {"error" in caseResult && caseResult.error ? <pre className="mono mt-2 whitespace-pre-wrap break-all text-xs text-error">{caseResult.error}</pre> : null}
         </div>
       ))}
     </div>

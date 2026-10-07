@@ -45,7 +45,7 @@ export default function Home() {
 
   return (
     <PageShell>
-      <div className="relative isolate flex flex-1 flex-col py-4 sm:py-8">
+      <div className="relative isolate flex flex-1 flex-col py-4 sm:py-8 max-md:overflow-x-clip">
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
           <div className="absolute -left-32 -top-24 h-[40rem] w-[40rem] bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--primary)_14%,transparent),transparent)] animate-blob" />
           <div className="absolute -right-32 top-1/3 h-[40rem] w-[40rem] bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--secondary)_14%,transparent),transparent)] animate-blob [animation-delay:2s]" />

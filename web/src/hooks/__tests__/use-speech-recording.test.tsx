@@ -147,7 +147,7 @@ describe("shared microphone recording", () => {
 
   it("releases a permission request resolved after unmount", async () => {
     let resolve!: (value: typeof stream) => void;
-    navigator.mediaDevices.getUserMedia = vi.fn(() => new Promise((done) => { resolve = done; }));
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia: vi.fn(() => new Promise<typeof stream>((done) => { resolve = done; })) } });
     const { result, unmount } = renderHook(() => useSpeechRecording(vi.fn()));
     let pending!: Promise<void>;
     act(() => { pending = result.current.toggleRecording(); });

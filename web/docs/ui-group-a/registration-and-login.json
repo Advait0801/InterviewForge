@@ -1,0 +1,27 @@
+{
+  "when": "2026-10-07T07:35:36.922Z",
+  "browser": "153.0.8010.12",
+  "flows": [
+    {
+      "flow": "register",
+      "passed": true
+    },
+    {
+      "flow": "login",
+      "passed": true
+    }
+  ],
+  "responses": [
+    {
+      "path": "/api/auth/register",
+      "status": 201,
+      "method": "POST"
+    },
+    {
+      "path": "/api/auth/login",
+      "status": 200,
+      "method": "POST"
+    }
+  ],
+  "pageErrors": []
+}

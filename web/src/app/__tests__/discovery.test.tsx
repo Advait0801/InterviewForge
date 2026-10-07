@@ -41,6 +41,7 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 function problemFixture(index: number, overrides: Partial<Problem> = {}): Problem {
   return {
+    created_at: "2026-09-16T12:00:00.000Z",
     id: `problem-${index}`,
     slug: `problem-${index}`,
     title: `Problem ${index}`,

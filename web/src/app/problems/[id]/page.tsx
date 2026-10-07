@@ -106,26 +106,7 @@ function saveLanguage(lang: Language) {
   localStorage.setItem(LANG_KEY, lang);
 }
 
-type CaseResult = {
-  passed: boolean;
-  actualOutput?: string;
-  error?: string;
-  /** Submit only: present for examples and the first failing hidden case (D-057). */
-  input?: string;
-  expectedOutput?: string;
-  /** Submit only: a hidden case, reduced to pass/fail. */
-  hidden?: boolean;
-};
-
-type RunResponse = {
-  mode: "run" | "submit";
-  passed: boolean;
-  results: CaseResult[];
-  testCases?: Array<{ input: string; expectedOutput: string }>;
-  runtimeMs?: number;
-  submissionId?: string;
-  status?: string;
-};
+type RunResponse = Awaited<ReturnType<typeof api.runCode>> | Awaited<ReturnType<typeof api.submitCode>>;
 
 function DifficultyBadge({ d }: { d: string }) {
   const styles =
@@ -721,7 +702,7 @@ export default function WorkspacePage() {
               AI Review
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto p-5">
+          <div role="region" aria-label="Problem content" tabIndex={0} className="min-h-0 flex-1 overflow-y-auto p-5">
             {activeTab === "description" && (
               <div className="prose prose-sm max-w-none text-text-primary">
                 <div className="whitespace-pre-wrap text-sm leading-relaxed">{problem.description}</div>
@@ -913,7 +894,7 @@ export default function WorkspacePage() {
                   </button>
                 </div>
 
-                <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                <div role="region" aria-label="Execution results and test cases" tabIndex={0} className="min-h-0 flex-1 overflow-y-auto p-4">
                   {resultTab === "result" && (
                     <ResultPanel
                       result={runResult}
@@ -1035,7 +1016,7 @@ function ResultPanel({
   const caseFor = (idx: number) => {
     if (result.mode === "run") return result.testCases?.[idx];
     const r = result.results[idx];
-    return r.input != null ? { input: r.input, expectedOutput: r.expectedOutput ?? "" } : undefined;
+    return !r.hidden ? { input: r.input, expectedOutput: r.expectedOutput } : undefined;
   };
 
   const failedIndices: number[] = [];
@@ -1102,7 +1083,7 @@ function ResultPanel({
                 <span className={`text-xs font-semibold ${r.passed ? "text-accent" : "text-error"}`}>
                   {r.passed ? "✓" : "✗"} Case {idx + 1}
                 </span>
-                {r.hidden ? <span className="text-[11px] text-text-secondary">Hidden test case</span> : null}
+                {"hidden" in r && r.hidden ? <span className="text-[11px] text-text-secondary">Hidden test case</span> : null}
               </div>
               {caseFor(idx) && (
                 <div className="mono space-y-0.5 text-xs">
@@ -1114,13 +1095,13 @@ function ResultPanel({
                     <span className="text-text-secondary">Expected: </span>
                     <span className="text-text-primary">{caseFor(idx)!.expectedOutput}</span>
                   </div>
-                  {r.actualOutput != null && (
+                  {"actualOutput" in r && r.actualOutput != null && (
                     <div>
                       <span className="text-text-secondary">Output: </span>
                       <span className={r.passed ? "text-accent" : "text-error"}>{r.actualOutput}</span>
                     </div>
                   )}
-                  {r.error && (
+                  {"error" in r && r.error && (
                     <div>
                       <span className="text-text-secondary">Error: </span>
                       <span className="text-error">{r.error}</span>
