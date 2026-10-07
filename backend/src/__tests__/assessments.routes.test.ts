@@ -42,6 +42,21 @@ function assessment(overrides: Record<string, unknown> = {}) {
   };
 }
 
+/** An assessment_problems row joined with its problem, as the detail query selects it. */
+function assessmentProblem(problemId: string, order: number) {
+  return {
+    id: `aaaa1111-0000-4000-8000-00000000000${order}`,
+    assessment_id: ASSESSMENT,
+    problem_id: problemId,
+    problem_order: order,
+    submission_id: null,
+    title: `Problem ${order + 1}`,
+    slug: `problem-${order + 1}`,
+    difficulty: "easy",
+    submission_status: null,
+  };
+}
+
 function assessmentLookup(row: Record<string, unknown>) {
   db.handlers.push({
     match: "FROM assessments WHERE id = $1 AND user_id = $2",
@@ -98,7 +113,7 @@ describe("GET /api/assessments/:id", () => {
 
   it("reports time remaining while active", async () => {
     assessmentLookup(assessment());
-    db.handlers.push({ match: "FROM assessment_problems ap", reply: [{ id: "1" }, { id: "2" }] });
+    db.handlers.push({ match: "FROM assessment_problems ap", reply: [assessmentProblem(PROBLEM_A, 0), assessmentProblem(PROBLEM_B, 1)] });
     const r = await api.request("GET", `/api/assessments/${ASSESSMENT}`);
     expect(r.status).toBe(200);
     // 60-minute limit, started 10 minutes ago.

@@ -23,6 +23,9 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 - **SSE streaming** *(M, Loud)* — token-by-token through FastAPI → Express → browser. Real UX
   win and a genuine backpressure conversation across two hops.
 - **Interviewer personas** *(S)* — friendly / terse / adversarial as a prompt dimension.
+- **Previous-answer conditioning** *(S)* — the ai-service can append the candidate's last
+  answer to the next stage's retrieval query, but it never received it (D-062). Measure with
+  the eval harness before turning it on; it may help or add noise across stages.
 
 ## Alternative showpieces (considered and not chosen)
 
@@ -34,9 +37,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Engineering credibility
 
-- **OpenAPI contract + generated client** *(M, Quiet)* — FastAPI emits a spec free; add one
-  for Express and generate the TS client, which `web/` currently hand-mirrors so drift is
-  silent (F-09).
 - **Redis + BullMQ worker pool** *(L, Loud)* — bounded concurrency in front of code-runner,
   distributed rate limiting, leaderboard caching. Three wins from one component, and it fixes
   the in-process limiter counters (F-19).

@@ -61,6 +61,13 @@ for f in leetcode_problems.json problem_hints.json problem_editorials.json start
   fi
 done
 
+# Served at /api/openapi.json; without it that route 500s (D-062).
+if in_image backend "test -s /app/openapi/openapi.yaml"; then
+  pass "backend: openapi/openapi.yaml present"
+else
+  fail "backend: openapi/openapi.yaml missing from image"
+fi
+
 for f in tests .pytest_cache .corpus_cache; do
   if in_image ai-service "test ! -e /app/$f"; then
     pass "ai-service: $f excluded"
@@ -100,6 +107,8 @@ boot() {
 }
 
 boot backend 4000 /health -e JWT_SECRET="$(openssl rand -hex 32)"
+# Reads the spec off disk with no database: proves the file is where dist/ looks for it.
+boot backend 4000 /api/openapi.json -e JWT_SECRET="$(openssl rand -hex 32)"
 boot ai-service 8000 /health
 boot code-runner 5000 /health
 boot web 3000 /

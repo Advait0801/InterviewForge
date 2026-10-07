@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.llm.chains import code_review_chain, invoke_with_fallback
+from app.api.schemas import CodeReviewOutput, documented
 
 router = APIRouter(prefix="/api/code-review", tags=["code-review"])
 
@@ -22,7 +23,7 @@ def _raise_llm_http_error(exc: Exception) -> None:
     raise HTTPException(status_code=503, detail=f"LLM unavailable: {text}")
 
 
-@router.post("/review")
+@router.post("/review", responses=documented(CodeReviewOutput))
 async def review_code(req: CodeReviewRequest):
     if not req.code.strip():
         raise HTTPException(status_code=400, detail="code is required")

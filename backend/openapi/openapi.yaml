@@ -1,0 +1,1822 @@
+openapi: 3.1.0
+info:
+  title: InterviewForge API
+  version: 1.0.0
+  description: |
+    The Express backend's public API (D-062). This file is the contract: the route tests
+    validate every response against it, a coverage test keeps it in step with the mounted
+    routes, and web/ generates its client from it (`npm run gen:web-client` in backend/).
+
+    Conventions:
+    - Errors are `{ error, code?, retryable? }`. `code: "session_invalid"` on a 401 means the
+      token itself is dead and the client should sign out (D-055); any other 401 is a form
+      or request error.
+    - `retryable: true` marks a dependency outage (AI service, code-runner, database).
+    - Objects produced by the LLM (evaluations, reports, reviews) list the fields the
+      prompts ask for; they may carry extra keys.
+    - Timestamps and dates are ISO-8601 strings. NUMERIC columns (assessment `score`) arrive
+      as strings, as Postgres returns them.
+servers:
+  - url: http://localhost:4000/api
+security:
+  - bearer: []
+
+tags:
+  - name: auth
+  - name: users
+  - name: problems
+  - name: submissions
+  - name: interviews
+  - name: assessments
+  - name: learning-paths
+  - name: leaderboard
+  - name: recommendations
+  - name: resumes
+
+paths:
+  # ───────────────────────────── auth ─────────────────────────────
+  /auth/register:
+    post:
+      tags: [auth]
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username: { type: string, pattern: "^[a-zA-Z0-9_]{3,20}$" }
+                email: { type: string }
+                password: { type: string }
+                fullName: { type: string }
+      responses:
+        "201": { $ref: "#/components/responses/Token" }
+        "400": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identifier, password]
+              properties:
+                identifier: { type: string, description: Email or username. }
+                password: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/Token" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /auth/forgot-password:
+    post:
+      tags: [auth]
+      operationId: forgotPassword
+      description: Always 200 for a well-formed request, so it can't enumerate accounts.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "400": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /auth/reset-password:
+    post:
+      tags: [auth]
+      operationId: resetPassword
+      description: Revokes every session (D-055).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token: { type: string }
+                newPassword: { type: string, minLength: 6 }
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "400": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /auth/logout-all:
+    post:
+      tags: [auth]
+      operationId: logoutAll
+      description: Revokes every session, the caller's included.
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /auth/verify-email:
+    get:
+      tags: [auth]
+      operationId: verifyEmail
+      description: Opened from the emailed link; redirects to the web app's /verify-email page.
+      security: []
+      parameters:
+        - { name: token, in: query, schema: { type: string } }
+      responses:
+        "302":
+          description: Redirect to `/verify-email?verified=1` or `?error=missing|invalid|server`.
+
+  # ───────────────────────────── users ─────────────────────────────
+  /users/change-password:
+    post:
+      tags: [users]
+      operationId: changePassword
+      description: Revokes every other session and returns a token for this one (D-055).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string }
+                newPassword: { type: string, minLength: 6 }
+      responses:
+        "200":
+          description: Password changed.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [ok, token]
+                properties:
+                  ok: { type: boolean, const: true }
+                  token: { type: string }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /users/me:
+    get:
+      tags: [users]
+      operationId: getMe
+      responses:
+        "200":
+          description: The signed-in account.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [user]
+                properties:
+                  user: { $ref: "#/components/schemas/Account" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /users/avatar:
+    post:
+      tags: [users]
+      operationId: uploadAvatar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [avatar]
+              properties:
+                avatar: { type: string, description: "JPEG, PNG or WebP data URI, under 500KB." }
+      responses:
+        "200":
+          description: Avatar stored.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [ok, avatar_url]
+                properties:
+                  ok: { type: boolean, const: true }
+                  avatar_url: { type: string }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [users]
+      operationId: removeAvatar
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /users/stats:
+    get:
+      tags: [users]
+      operationId: getUserStats
+      responses:
+        "200":
+          description: Practice totals.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserStats" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /users/activity:
+    get:
+      tags: [users]
+      operationId: getUserActivity
+      responses:
+        "200":
+          description: Streaks and the last year's activity per day.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [currentStreak, bestStreak, activityMap]
+                properties:
+                  currentStreak: { type: integer }
+                  bestStreak: { type: integer }
+                  activityMap: { $ref: "#/components/schemas/ActivityMap" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /users/analytics:
+    get:
+      tags: [users]
+      operationId: getUserAnalytics
+      responses:
+        "200":
+          description: Charts for the analytics page.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [solvedOverTime, difficultyDistribution, topicStrengths, acceptanceTrend]
+                properties:
+                  solvedOverTime:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [day, count]
+                      properties:
+                        day: { type: string }
+                        count: { type: integer }
+                  difficultyDistribution:
+                    type: object
+                    additionalProperties: { type: integer }
+                  topicStrengths:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [topic, count]
+                      properties:
+                        topic: { type: string }
+                        count: { type: integer }
+                  acceptanceTrend:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [week, rate]
+                      properties:
+                        week: { type: string }
+                        rate: { type: integer }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /users/{username}:
+    get:
+      tags: [users]
+      operationId: getPublicProfile
+      description: Public. No email, no ids.
+      security: []
+      parameters:
+        - { name: username, in: path, required: true, schema: { type: string, pattern: "^[a-zA-Z0-9_]{3,32}$" } }
+      responses:
+        "200":
+          description: The public profile.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicProfile" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── problems ─────────────────────────────
+  /problems:
+    get:
+      tags: [problems]
+      operationId: listProblems
+      description: Public; `is_solved` and `is_bookmarked` are filled in for a signed-in caller.
+      security: [{}, { bearer: [] }]
+      parameters:
+        - { name: difficulty, in: query, schema: { type: string, enum: [all, easy, medium, hard] } }
+        - { name: topic, in: query, schema: { type: string } }
+        - { name: company, in: query, schema: { type: string, maxLength: 64 } }
+        - { name: search, in: query, schema: { type: string } }
+        - name: solved
+          in: query
+          description: Anything but `all` requires a signed-in caller.
+          schema: { type: string, enum: [all, solved, unsolved] }
+      responses:
+        "200":
+          description: Problems, easy first.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [problems]
+                properties:
+                  problems:
+                    type: array
+                    items: { $ref: "#/components/schemas/ProblemSummary" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /problems/{id}:
+    get:
+      tags: [problems]
+      operationId: getProblem
+      description: Only the public examples are returned; the hidden suite never leaves the server (D-057).
+      security: [{}, { bearer: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The problem.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [problem]
+                properties:
+                  problem: { $ref: "#/components/schemas/ProblemDetail" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /problem-bookmarks:
+    get:
+      tags: [problems]
+      operationId: listBookmarks
+      responses:
+        "200":
+          description: Bookmarked problem ids, newest first.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [bookmarks]
+                properties:
+                  bookmarks:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [problem_id]
+                      properties:
+                        problem_id: { $ref: "#/components/schemas/Uuid" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /problem-bookmarks/{problemId}:
+    parameters:
+      - { name: problemId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+    post:
+      tags: [problems]
+      operationId: addBookmark
+      description: Idempotent.
+      responses:
+        "201": { $ref: "#/components/responses/Ok" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [problems]
+      operationId: removeBookmark
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── submissions ─────────────────────────────
+  /submissions:
+    get:
+      tags: [submissions]
+      operationId: listSubmissions
+      parameters:
+        - { name: problemId, in: query, schema: { $ref: "#/components/schemas/Uuid" } }
+        - { name: status, in: query, schema: { type: string, enum: [passed, failed] } }
+        - { name: language, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+        - { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+      responses:
+        "200":
+          description: The caller's submissions, newest first.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [submissions, total, limit, offset]
+                properties:
+                  submissions:
+                    type: array
+                    items: { $ref: "#/components/schemas/SubmissionSummary" }
+                  total: { type: integer }
+                  limit: { type: integer }
+                  offset: { type: integer }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [submissions]
+      operationId: createSubmission
+      description: |
+        `run` executes the public examples and records nothing (200). `submit` runs the full
+        suite, records the submission, and on a pass completes the problem in every learning
+        path that contains it (201). Hidden cases come back as `{ passed, hidden: true }`,
+        except the first failing one (D-057).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [problemId, language, code]
+              properties:
+                problemId: { $ref: "#/components/schemas/Uuid" }
+                language: { $ref: "#/components/schemas/Language" }
+                code: { type: string }
+                mode: { type: string, enum: [run, submit], default: submit }
+      responses:
+        "200":
+          description: Run result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunResult" }
+        "201":
+          description: Submit result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubmitResult" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /submissions/{id}:
+    get:
+      tags: [submissions]
+      operationId: getSubmission
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: One of the caller's submissions, with its code.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [submission]
+                properties:
+                  submission: { $ref: "#/components/schemas/SubmissionDetail" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /submissions/{id}/review:
+    post:
+      tags: [submissions]
+      operationId: reviewSubmission
+      description: An AI review of one of the caller's submissions. Rate limited per user.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The review.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [review]
+                properties:
+                  review: { $ref: "#/components/schemas/CodeReview" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── interviews ─────────────────────────────
+  /interviews:
+    get:
+      tags: [interviews]
+      operationId: listInterviews
+      responses:
+        "200":
+          description: The caller's 50 most recent sessions.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [sessions]
+                properties:
+                  sessions:
+                    type: array
+                    items: { $ref: "#/components/schemas/InterviewSessionSummary" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [interviews]
+      operationId: startInterview
+      description: Generates the opening question. Rate limited per user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [company]
+              properties:
+                company: { $ref: "#/components/schemas/Company" }
+                difficulty: { type: string }
+                useResume:
+                  type: boolean
+                  default: true
+                  description: Ground questions in the caller's resume when one is indexed.
+      responses:
+        "201":
+          description: The new session and its opening question.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [session, openingQuestion]
+                properties:
+                  session:
+                    type: object
+                    additionalProperties: false
+                    required: [id, company, currentStage, status, resumeGrounded]
+                    properties:
+                      id: { $ref: "#/components/schemas/Uuid" }
+                      company: { $ref: "#/components/schemas/Company" }
+                      currentStage: { $ref: "#/components/schemas/InterviewStage" }
+                      status: { type: string, const: active }
+                      resumeGrounded: { type: boolean }
+                  openingQuestion: { $ref: "#/components/schemas/InterviewQuestion" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/{id}:
+    get:
+      tags: [interviews]
+      operationId: getInterview
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The session and its transcript, oldest message first.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [session, messages]
+                properties:
+                  session: { $ref: "#/components/schemas/InterviewSession" }
+                  messages:
+                    type: array
+                    items: { $ref: "#/components/schemas/InterviewMessage" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/{id}/report:
+    get:
+      tags: [interviews]
+      operationId: getInterviewReport
+      description: Generated on first request and stored; later requests are served from storage (D-056).
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The report.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InterviewReport" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/{id}/answer:
+    post:
+      tags: [interviews]
+      operationId: answerInterview
+      description: |
+        Evaluates the answer, then asks the stage's follow-up, advances to the next stage, or
+        completes the interview. A second answer to the same turn gets a 409 (D-057).
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answer]
+              properties:
+                answer: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: What happened next.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnswerOutcome" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/speech/transcribe:
+    post:
+      tags: [interviews]
+      operationId: transcribeSpeech
+      description: "400/413/422 mean the recording itself is unusable (`retryable: false`, D-060)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AudioUpload" }
+      responses:
+        "200":
+          description: The transcript.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [transcript]
+                properties:
+                  transcript: { type: string }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/speech/evaluate-explanation:
+    post:
+      tags: [interviews]
+      operationId: evaluateExplanation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: "#/components/schemas/AudioUpload" }
+                - type: object
+                  required: [question]
+                  properties:
+                    question: { type: string }
+                    context: { type: string }
+      responses:
+        "200":
+          description: The transcript and a rubric evaluation of it.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [transcript, evaluation]
+                properties:
+                  transcript: { type: string }
+                  evaluation: { $ref: "#/components/schemas/VoiceEvaluation" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/system-design/analyze:
+    post:
+      tags: [interviews]
+      operationId: analyzeSystemDesign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt, explanation]
+              properties:
+                prompt: { type: string }
+                explanation: { type: string }
+                company: { type: string }
+      responses:
+        "200":
+          description: Extracted architecture, risks and a rubric.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SystemDesignAnalysis" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── assessments ─────────────────────────────
+  /assessments:
+    get:
+      tags: [assessments]
+      operationId: listAssessments
+      responses:
+        "200":
+          description: The caller's 50 most recent assessments.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [assessments]
+                properties:
+                  assessments:
+                    type: array
+                    items: { $ref: "#/components/schemas/Assessment" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [assessments]
+      operationId: createAssessment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeLimitMinutes: { type: number, default: 60, description: Clamped to 15–180. }
+                problemCount: { type: number, default: 3, description: Clamped to 1–10. }
+                difficultyMix: { type: string, enum: [mixed, easy, medium, hard], default: mixed }
+      responses:
+        "201":
+          description: The new assessment.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [assessmentId, problemCount, timeLimitMinutes]
+                properties:
+                  assessmentId: { $ref: "#/components/schemas/Uuid" }
+                  problemCount: { type: integer }
+                  timeLimitMinutes: { type: integer }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /assessments/{id}:
+    get:
+      tags: [assessments]
+      operationId: getAssessment
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The assessment, its problems and the time left.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [assessment, problems, remainingMs]
+                properties:
+                  assessment: { $ref: "#/components/schemas/Assessment" }
+                  problems:
+                    type: array
+                    items: { $ref: "#/components/schemas/AssessmentProblem" }
+                  remainingMs: { type: number, minimum: 0 }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /assessments/{id}/solve:
+    post:
+      tags: [assessments]
+      operationId: linkAssessmentSubmission
+      description: |
+        Links one of the caller's own submissions for that problem. Refused after the
+        deadline plus a 30 s grace (D-057).
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [problemId, submissionId]
+              properties:
+                problemId: { $ref: "#/components/schemas/Uuid" }
+                submissionId: { $ref: "#/components/schemas/Uuid" }
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /assessments/{id}/submit:
+    post:
+      tags: [assessments]
+      operationId: submitAssessment
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The final score (percentage of problems with a passed linked submission).
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [score, passed, total, status]
+                properties:
+                  score: { type: number }
+                  passed: { type: integer }
+                  total: { type: integer }
+                  status: { type: string, const: completed }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── learning paths ─────────────────────────────
+  /learning-paths:
+    get:
+      tags: [learning-paths]
+      operationId: listLearningPaths
+      security: [{}, { bearer: [] }]
+      responses:
+        "200":
+          description: Every path, with the caller's progress when signed in.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [paths]
+                properties:
+                  paths:
+                    type: array
+                    items: { $ref: "#/components/schemas/LearningPathSummary" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /learning-paths/{slug}:
+    get:
+      tags: [learning-paths]
+      operationId: getLearningPath
+      security: [{}, { bearer: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/Slug" }
+      responses:
+        "200":
+          description: The path and its problems in order.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LearningPathDetail" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /learning-paths/{slug}/complete/{problemId}:
+    post:
+      tags: [learning-paths]
+      operationId: completePathProblem
+      parameters:
+        - { $ref: "#/components/parameters/Slug" }
+        - { name: problemId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── leaderboard ─────────────────────────────
+  /leaderboard:
+    get:
+      tags: [leaderboard]
+      operationId: getLeaderboard
+      security: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+      responses:
+        "200":
+          description: One page, ranked by distinct problems solved.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [leaderboard, total, page, limit]
+                properties:
+                  leaderboard:
+                    type: array
+                    items: { $ref: "#/components/schemas/LeaderboardEntry" }
+                  total: { type: integer }
+                  page: { type: integer }
+                  limit: { type: integer }
+        "500": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── recommendations ─────────────────────────────
+  /recommendations:
+    get:
+      tags: [recommendations]
+      operationId: getRecommendations
+      description: AI-chosen topics, matching unsolved problems, and problems worth revisiting. Rate limited per user.
+      responses:
+        "200":
+          description: Recommendations.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Recommendations" }
+        "401": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── resumes ─────────────────────────────
+  /resumes/me:
+    get:
+      tags: [resumes]
+      operationId: getResume
+      responses:
+        "200":
+          description: The caller's indexed resume, or null.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [resume]
+                properties:
+                  resume:
+                    oneOf:
+                      - { $ref: "#/components/schemas/Resume" }
+                      - { type: "null" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [resumes]
+      operationId: deleteResume
+      description: Purges the vectors first, then the row.
+      responses:
+        "200":
+          description: Deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [deleted, deletedChunks, remainingChunks]
+                properties:
+                  deleted: { type: boolean, const: true }
+                  deletedChunks: { type: integer }
+                  remainingChunks: { type: integer }
+        "401": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /resumes:
+    post:
+      tags: [resumes]
+      operationId: uploadResume
+      description: |
+        Indexes a PDF resume (max 5MB), replacing any previous one. A rejected upload changes
+        nothing. 422 carries a `code` such as `resume_unprocessable` or `no_content`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contentBase64]
+              properties:
+                contentBase64: { type: string, description: Base64 PDF, optionally a data URL. }
+                filename: { type: string }
+      responses:
+        "201":
+          description: The indexed resume.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [resume]
+                properties:
+                  resume: { $ref: "#/components/schemas/Resume" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "413": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── meta ─────────────────────────────
+  /openapi.json:
+    get:
+      operationId: getOpenApiSpec
+      description: This document, as JSON.
+      security: []
+      responses:
+        "200":
+          description: The OpenAPI document.
+          content:
+            application/json:
+              schema: { type: object }
+        "500": { $ref: "#/components/responses/Error" }
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { $ref: "#/components/schemas/Uuid" }
+    Slug:
+      name: slug
+      in: path
+      required: true
+      schema: { type: string, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
+
+  responses:
+    Error:
+      description: An error.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Ok:
+      description: Done.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [ok]
+            properties:
+              ok: { type: boolean, const: true }
+    Token:
+      description: An access token (JWT, 7 days).
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [token]
+            properties:
+              token: { type: string }
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+        code:
+          type: string
+          description: "`session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes."
+        retryable: { type: boolean }
+        details: {}
+
+    Uuid:
+      type: string
+      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    Timestamp:
+      type: string
+      description: ISO-8601.
+    Difficulty:
+      type: string
+      enum: [easy, medium, hard]
+    Language:
+      type: string
+      enum: [python3, c, cpp, java]
+    Company:
+      type: string
+      description: Case-insensitive on input; responses use the lower-case form.
+      enum: [amazon, google, meta, apple, microsoft, uber, bloomberg, adobe, linkedin, airbnb]
+    InterviewStage:
+      type: string
+      enum: [behavioral, coding, system_design, core_cs, report]
+    ActivityMap:
+      type: object
+      description: Activity count per day (YYYY-MM-DD).
+      additionalProperties: { type: integer }
+
+    Account:
+      type: object
+      additionalProperties: false
+      required: [id, email, username, name, avatar_url, created_at]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        email: { type: string }
+        username: { type: [string, "null"] }
+        name: { type: [string, "null"] }
+        avatar_url: { type: [string, "null"] }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+
+    UserStats:
+      type: object
+      additionalProperties: false
+      required: [problemsAttempted, problemsSolved, interviewsStarted, bestStreak, submissionsCount, acceptanceRate]
+      properties:
+        problemsAttempted: { type: integer }
+        problemsSolved: { type: integer }
+        interviewsStarted: { type: integer }
+        bestStreak: { type: integer }
+        submissionsCount: { type: integer }
+        acceptanceRate: { type: integer, minimum: 0, maximum: 100 }
+
+    PublicProfile:
+      type: object
+      additionalProperties: false
+      required: [profile, stats, recentActivity, activityMap]
+      properties:
+        profile:
+          type: object
+          additionalProperties: false
+          required: [username, name, avatar_url, createdAt]
+          properties:
+            username: { type: string }
+            name: { type: [string, "null"] }
+            avatar_url: { type: [string, "null"] }
+            createdAt: { $ref: "#/components/schemas/Timestamp" }
+        stats:
+          type: object
+          additionalProperties: false
+          required: [problemsAttempted, problemsSolved, interviewsStarted, submissionsCount, acceptanceRate]
+          properties:
+            problemsAttempted: { type: integer }
+            problemsSolved: { type: integer }
+            interviewsStarted: { type: integer }
+            submissionsCount: { type: integer }
+            acceptanceRate: { type: integer, minimum: 0, maximum: 100 }
+        recentActivity:
+          type: array
+          maxItems: 12
+          items:
+            type: object
+            additionalProperties: false
+            required: [type, title, status, created_at]
+            properties:
+              type: { type: string, enum: [submission, interview] }
+              title: { type: string }
+              status: { type: [string, "null"] }
+              created_at: { $ref: "#/components/schemas/Timestamp" }
+        activityMap: { $ref: "#/components/schemas/ActivityMap" }
+
+    ProblemSummary:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, description, difficulty, topics, companies, created_at, is_solved, is_bookmarked]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        slug: { type: string }
+        title: { type: string }
+        description: { type: string }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        topics: { type: array, items: { type: string } }
+        companies: { type: array, items: { type: string } }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+        is_solved: { type: boolean }
+        is_bookmarked: { type: boolean }
+
+    TestCase:
+      type: object
+      additionalProperties: false
+      required: [input, expectedOutput]
+      properties:
+        input: { type: string }
+        expectedOutput: { type: string }
+
+    ProblemDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - slug
+        - title
+        - description
+        - difficulty
+        - hints
+        - editorial
+        - topics
+        - companies
+        - test_cases
+        - test_case_count
+        - starter_code
+        - created_at
+        - is_solved
+        - is_bookmarked
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        slug: { type: string }
+        title: { type: string }
+        description: { type: string }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        hints: { type: [string, "null"] }
+        editorial: { type: [string, "null"] }
+        topics: { type: array, items: { type: string } }
+        companies: { type: array, items: { type: string } }
+        test_cases:
+          type: array
+          maxItems: 4
+          description: The public examples only (D-057).
+          items: { $ref: "#/components/schemas/TestCase" }
+        test_case_count: { type: integer, description: Every case Submit runs, hidden included. }
+        starter_code:
+          type: [object, "null"]
+          description: Starter code per language.
+          additionalProperties: { type: string }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+        is_solved: { type: boolean }
+        is_bookmarked: { type: boolean }
+
+    CaseResult:
+      type: object
+      required: [passed]
+      properties:
+        passed: { type: boolean }
+        actualOutput: { type: string }
+        error: { type: string }
+
+    RunResult:
+      type: object
+      additionalProperties: false
+      required: [mode, passed, results, testCases]
+      properties:
+        mode: { type: string, const: run }
+        passed: { type: boolean }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/CaseResult" }
+        testCases:
+          type: array
+          items: { $ref: "#/components/schemas/TestCase" }
+        runtimeMs: { type: number }
+
+    SubmitCaseResult:
+      oneOf:
+        - type: object
+          description: A public example, or the first failing hidden case.
+          required: [passed, input, expectedOutput, hidden]
+          properties:
+            passed: { type: boolean }
+            actualOutput: { type: string }
+            error: { type: string }
+            input: { type: string }
+            expectedOutput: { type: string }
+            hidden: { type: boolean, const: false }
+        - type: object
+          description: Any other hidden case.
+          additionalProperties: false
+          required: [passed, hidden]
+          properties:
+            passed: { type: boolean }
+            hidden: { type: boolean, const: true }
+
+    SubmitResult:
+      type: object
+      additionalProperties: false
+      required: [mode, submissionId, status, passed, results]
+      properties:
+        mode: { type: string, const: submit }
+        submissionId: { $ref: "#/components/schemas/Uuid" }
+        status: { type: string, enum: [passed, failed] }
+        passed: { type: boolean }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/SubmitCaseResult" }
+        runtimeMs: { type: number }
+
+    SubmissionSummary:
+      type: object
+      additionalProperties: false
+      required: [id, problem_id, problem_title, language, status, runtime_ms, memory_kb, created_at]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        problem_id: { $ref: "#/components/schemas/Uuid" }
+        problem_title: { type: string }
+        language: { type: string }
+        status: { type: string, enum: [passed, failed] }
+        runtime_ms: { type: [integer, "null"] }
+        memory_kb: { type: [integer, "null"] }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+
+    SubmissionDetail:
+      type: object
+      additionalProperties: false
+      required: [id, problem_id, language, code, status, runtime_ms, memory_kb, created_at]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        problem_id: { $ref: "#/components/schemas/Uuid" }
+        language: { type: string }
+        code: { type: string }
+        status: { type: string, enum: [passed, failed] }
+        runtime_ms: { type: [integer, "null"] }
+        memory_kb: { type: [integer, "null"] }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+
+    CodeReview:
+      type: object
+      description: LLM output; may carry extra keys.
+      required: [timeComplexity, spaceComplexity, qualityScore, strengths, issues, optimizations, summary]
+      properties:
+        timeComplexity: { type: string }
+        spaceComplexity: { type: string }
+        qualityScore: { type: integer, minimum: 1, maximum: 10 }
+        strengths: { type: array, items: { type: string } }
+        issues: { type: array, items: { type: string } }
+        optimizations: { type: array, items: { type: string } }
+        summary: { type: string }
+
+    InterviewSessionSummary:
+      type: object
+      additionalProperties: false
+      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, created_at, updated_at]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        user_id: { $ref: "#/components/schemas/Uuid" }
+        company: { type: string }
+        current_stage: { $ref: "#/components/schemas/InterviewStage" }
+        status: { type: string, enum: [active, completed] }
+        stage_turn_count: { type: integer }
+        resume_grounded: { type: boolean }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+        updated_at: { $ref: "#/components/schemas/Timestamp" }
+
+    InterviewSession:
+      type: object
+      additionalProperties: false
+      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, report_json, created_at, updated_at]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        user_id: { $ref: "#/components/schemas/Uuid" }
+        company: { type: string }
+        current_stage: { $ref: "#/components/schemas/InterviewStage" }
+        status: { type: string, enum: [active, completed] }
+        stage_turn_count: { type: integer }
+        resume_grounded: { type: boolean }
+        report_json:
+          type: [object, "null"]
+          description: The stored report once generated.
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+        updated_at: { $ref: "#/components/schemas/Timestamp" }
+
+    InterviewMessage:
+      type: object
+      additionalProperties: false
+      required: [id, session_id, role, stage, content, metadata_json, created_at]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        session_id: { $ref: "#/components/schemas/Uuid" }
+        role: { type: string, enum: [assistant, candidate, system] }
+        stage: { type: string }
+        content: { type: string }
+        metadata_json:
+          type: object
+          description: "`kind` is question, followup, answer or evaluation; the rest depends on it."
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+
+    RetrievalConfidence:
+      type: object
+      required: [confident, reason, top_distance, good_hits, company_matched]
+      properties:
+        confident: { type: boolean }
+        reason: { type: string }
+        top_distance: { type: [number, "null"] }
+        good_hits: { type: integer }
+        company_matched: { type: boolean }
+
+    LiveIngestion:
+      type: object
+      description: "`triggered` and `reason` always; the rest once a live fetch was attempted."
+      required: [triggered, reason]
+      properties:
+        triggered: { type: boolean }
+        reason: { type: string }
+        urls_considered: { type: array, items: { type: string } }
+        pages_ingested: { type: integer }
+        chunks_written: { type: integer }
+        skipped:
+          type: array
+          items:
+            type: object
+            required: [url, why]
+            properties:
+              url: { type: string }
+              why: { type: string }
+        error: { type: [string, "null"] }
+
+    InterviewQuestion:
+      type: object
+      description: The ai-service's next-question response, passed through.
+      required:
+        - question
+        - reasoningFocus
+        - expectedCompetencies
+        - retrievalHits
+        - context
+        - retrievalConfidence
+        - liveIngestion
+        - resumeGrounded
+        - resumeHits
+        - resumeEvidence
+      properties:
+        question: { type: string }
+        reasoningFocus: { type: string }
+        expectedCompetencies: { type: array, items: { type: string } }
+        groundedIn: { type: [string, "null"] }
+        retrievalHits: { type: integer }
+        context: { type: string }
+        retrievalConfidence:
+          oneOf:
+            - { $ref: "#/components/schemas/RetrievalConfidence" }
+            - { type: "null" }
+        liveIngestion:
+          oneOf:
+            - { $ref: "#/components/schemas/LiveIngestion" }
+            - { type: "null" }
+        resumeGrounded: { type: boolean }
+        resumeHits: { type: integer }
+        resumeEvidence:
+          type: array
+          items:
+            type: object
+            required: [section, excerpt, distance]
+            properties:
+              section: { type: string }
+              excerpt: { type: string }
+              distance: { type: [number, "null"] }
+
+    Evaluation:
+      type: object
+      description: LLM output; may carry extra keys.
+      required: [score, strengths, weaknesses, suggestions, shouldAskFollowup, followupFocus]
+      properties:
+        score: { type: integer, minimum: 1, maximum: 10 }
+        strengths: { type: array, items: { type: string } }
+        weaknesses: { type: array, items: { type: string } }
+        suggestions: { type: array, items: { type: string } }
+        shouldAskFollowup: { type: boolean }
+        followupFocus: { type: string }
+
+    Followup:
+      type: object
+      description: LLM output; may carry extra keys.
+      required: [question, focus, reason]
+      properties:
+        question: { type: string }
+        focus: { type: string }
+        reason: { type: string }
+
+    AnswerOutcome:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [action, sessionId, stage, evaluation, nextQuestion]
+          properties:
+            action: { type: string, const: followup }
+            sessionId: { $ref: "#/components/schemas/Uuid" }
+            stage: { $ref: "#/components/schemas/InterviewStage" }
+            evaluation: { $ref: "#/components/schemas/Evaluation" }
+            nextQuestion: { $ref: "#/components/schemas/Followup" }
+        - type: object
+          additionalProperties: false
+          required: [action, sessionId, previousStage, currentStage, evaluation, nextQuestion]
+          properties:
+            action: { type: string, const: advance_stage }
+            sessionId: { $ref: "#/components/schemas/Uuid" }
+            previousStage: { $ref: "#/components/schemas/InterviewStage" }
+            currentStage: { $ref: "#/components/schemas/InterviewStage" }
+            evaluation: { $ref: "#/components/schemas/Evaluation" }
+            nextQuestion: { $ref: "#/components/schemas/InterviewQuestion" }
+        - type: object
+          additionalProperties: false
+          required: [action, sessionId, evaluation]
+          properties:
+            action: { type: string, const: completed }
+            sessionId: { $ref: "#/components/schemas/Uuid" }
+            evaluation: { $ref: "#/components/schemas/Evaluation" }
+
+    InterviewReport:
+      type: object
+      description: LLM output plus `sessionId` and `company`; may carry extra keys.
+      required: [sessionId, company, overallScore, stageScores, strengths, weaknesses, recommendations]
+      properties:
+        sessionId: { $ref: "#/components/schemas/Uuid" }
+        company: { type: string }
+        overallScore: { type: integer, minimum: 1, maximum: 10 }
+        stageScores:
+          type: object
+          additionalProperties:
+            type: object
+            required: [score, feedback]
+            properties:
+              score: { type: [integer, string], description: Usually a number; the parser model allows a string. }
+              feedback: { type: string }
+        strengths: { type: array, items: { type: string } }
+        weaknesses: { type: array, items: { type: string } }
+        recommendations: { type: array, items: { type: string } }
+
+    AudioUpload:
+      type: object
+      required: [audioBase64]
+      properties:
+        audioBase64: { type: string }
+        mimeType: { type: string, default: audio/webm, description: "Must be audio/*; names the upload for the transcriber (D-060)." }
+        filename: { type: string }
+        language: { type: string, description: Optional BCP-47 hint, e.g. en. }
+
+    RubricSection:
+      type: object
+      required: [score, notes]
+      properties:
+        score: { type: integer, minimum: 1, maximum: 10 }
+        notes: { type: string }
+
+    VoiceEvaluation:
+      type: object
+      description: LLM output; may carry extra keys.
+      required: [overallScore, technicalCorrectness, communicationClarity, completeness, strengths, weaknesses, suggestions]
+      properties:
+        overallScore: { type: integer, minimum: 1, maximum: 10 }
+        technicalCorrectness: { $ref: "#/components/schemas/RubricSection" }
+        communicationClarity: { $ref: "#/components/schemas/RubricSection" }
+        completeness: { $ref: "#/components/schemas/RubricSection" }
+        strengths: { type: array, items: { type: string } }
+        weaknesses: { type: array, items: { type: string } }
+        suggestions: { type: array, items: { type: string } }
+
+    SystemDesignAnalysis:
+      type: object
+      description: LLM output; may carry extra keys.
+      required: [summary, nodes, edges, risks, improvements, rubric]
+      properties:
+        summary: { type: string }
+        nodes:
+          type: array
+          items:
+            type: object
+            required: [id, label, type]
+            properties:
+              id: { type: string }
+              label: { type: string }
+              type: { type: string }
+        edges:
+          type: array
+          items:
+            type: object
+            required: [source, target, label]
+            properties:
+              source: { type: string }
+              target: { type: string }
+              label: { type: string }
+        risks: { type: array, items: { type: string } }
+        improvements: { type: array, items: { type: string } }
+        rubric:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/RubricSection" }
+
+    Assessment:
+      type: object
+      additionalProperties: false
+      required: [id, user_id, status, time_limit_minutes, difficulty_mix, problem_count, started_at, finished_at, score, created_at]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        user_id: { $ref: "#/components/schemas/Uuid" }
+        status: { type: string, enum: [active, completed] }
+        time_limit_minutes: { type: integer }
+        difficulty_mix: { type: string, enum: [mixed, easy, medium, hard] }
+        problem_count: { type: integer }
+        started_at: { $ref: "#/components/schemas/Timestamp" }
+        finished_at: { oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }] }
+        score:
+          type: [string, "null"]
+          description: NUMERIC(5,2) as Postgres returns it, e.g. "66.67".
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+
+    AssessmentProblem:
+      type: object
+      additionalProperties: false
+      required: [id, assessment_id, problem_id, problem_order, submission_id, title, slug, difficulty, submission_status]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        assessment_id: { $ref: "#/components/schemas/Uuid" }
+        problem_id: { $ref: "#/components/schemas/Uuid" }
+        problem_order: { type: integer }
+        submission_id: { oneOf: [{ $ref: "#/components/schemas/Uuid" }, { type: "null" }] }
+        title: { type: string }
+        slug: { type: string }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        submission_status: { type: [string, "null"], enum: [passed, failed, null] }
+
+    LearningPathSummary:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, description, topic, difficultyLevel, problemCount, completedCount]
+      properties:
+        id: { type: string, description: The slug (kept for older clients). }
+        slug: { type: string }
+        title: { type: string }
+        description: { type: string }
+        topic: { type: string }
+        difficultyLevel: { type: string }
+        problemCount: { type: integer }
+        completedCount: { type: integer }
+
+    LearningPathDetail:
+      type: object
+      additionalProperties: false
+      required: [path, problems]
+      properties:
+        path:
+          type: object
+          additionalProperties: false
+          required: [slug, title, description, topic, difficultyLevel, problemCount, completedCount]
+          properties:
+            slug: { type: string }
+            title: { type: string }
+            description: { type: string }
+            topic: { type: string }
+            difficultyLevel: { type: string }
+            problemCount: { type: integer }
+            completedCount: { type: integer }
+        problems:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [problemId, position, title, slug, difficulty, isCompleted]
+            properties:
+              problemId: { $ref: "#/components/schemas/Uuid" }
+              position: { type: integer }
+              title: { type: string }
+              slug: { type: string }
+              difficulty: { $ref: "#/components/schemas/Difficulty" }
+              isCompleted: { type: boolean }
+
+    LeaderboardEntry:
+      type: object
+      additionalProperties: false
+      required: [rank, username, name, avatar_url, solved, acceptanceRate]
+      properties:
+        rank: { type: integer, minimum: 1 }
+        username: { type: string }
+        name: { type: [string, "null"] }
+        avatar_url: { type: [string, "null"] }
+        solved: { type: integer }
+        acceptanceRate: { type: integer, minimum: 0, maximum: 100 }
+
+    ProblemCard:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, difficulty, topics]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        slug: { type: string }
+        title: { type: string }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        topics: { type: array, items: { type: string } }
+
+    Recommendations:
+      type: object
+      additionalProperties: false
+      required: [recommended, revisit, focusAreas, reasoning, difficultySuggestion]
+      properties:
+        recommended:
+          type: array
+          items: { $ref: "#/components/schemas/ProblemCard" }
+        revisit:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, slug, title, difficulty, topics, lastAttemptedAt]
+            properties:
+              id: { $ref: "#/components/schemas/Uuid" }
+              slug: { type: string }
+              title: { type: string }
+              difficulty: { $ref: "#/components/schemas/Difficulty" }
+              topics: { type: array, items: { type: string } }
+              lastAttemptedAt: { $ref: "#/components/schemas/Timestamp" }
+        focusAreas: { type: array, items: { type: string } }
+        reasoning: { type: string }
+        difficultySuggestion: { type: string }
+
+    Resume:
+      type: object
+      additionalProperties: false
+      required: [id, user_id, filename, byte_size, page_count, char_count, chunk_count, sections, created_at, updated_at]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        user_id: { $ref: "#/components/schemas/Uuid" }
+        filename: { type: string }
+        byte_size: { type: integer }
+        page_count: { type: integer }
+        char_count: { type: integer }
+        chunk_count: { type: integer }
+        sections: { type: array, items: { type: string } }
+        created_at: { $ref: "#/components/schemas/Timestamp" }
+        updated_at: { $ref: "#/components/schemas/Timestamp" }

@@ -9,6 +9,64 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-06
 
+### D-062 — An OpenAPI contract for both APIs; generated types; the field FastAPI dropped
+
+**Why:** `web/` hand-mirrors the Express API and Express hand-mirrors the ai-service, so
+any rename was silent until something broke at runtime (F-09). Phase 2 of Group A.
+
+**Decided:**
+- **Express:** `backend/openapi/openapi.yaml` (OpenAPI 3.1, 45 operations) is the
+  contract, enforced from four sides:
+  1. The route-test harness validates **every response** it receives (status and body).
+  2. `openapi-contract.test.ts` checks the spec against the routes actually mounted
+     (`routes/index.ts`, now the single mount table), in both directions. It also checks the
+     spec is valid OpenAPI 3.1 and that every protected operation documents a 401.
+  3. `OPENAPI_VALIDATE_RESPONSES=1` (dev only) validates every live response as serialised
+     and logs `openapi_violation`.
+  4. The spec is served at `/api/openapi.json`; the prod image ships it and the smoke test
+     fetches it.
+  Objects the LLM produces require their documented fields and allow extras, because
+  `JsonOutputParser` doesn't enforce the model.
+- **FastAPI:** the 11 endpoints Express calls now document their 200 bodies with
+  `responses=`, not `response_model`, so nothing is filtered or re-validated. The spec is
+  committed as `ai-service/openapi.json`, and a pytest test fails when it's stale.
+- **Express ↔ FastAPI:** `backend/src/generated/ai-service.ts` is generated from that
+  snapshot (`npm run gen:ai-types`). `ai.service.ts` aliases its types to it and builds every
+  request body as a typed object literal, so an unknown or misspelled field fails `tsc`.
+  Test files weren't type-checked at all (`tsconfig.json` excludes them); `npm test` now runs
+  `tsc -p tsconfig.test.json` first, so typed fixtures guard the contract too.
+- **`web/`:** `npm run gen:web-client` writes `web/src/lib/api/schema.d.ts`, used with
+  `openapi-fetch`. I don't edit `web/`, so GPT runs it and adopts the client in UI A; until
+  that file exists, the CI check skips it with a notice.
+- **CI:** `scripts/ci/check_api_contract.sh` regenerates both outputs and fails on any diff.
+
+**Found:**
+- **The interviewer never received the previous answer.** The backend sent `previousAnswer`;
+  FastAPI's model is `previous_answer`, and pydantic drops unknown fields. Typing the body
+  produced exactly that compile error. It isn't switched on here: the ai-service appends
+  the answer to the retrieval query, which changes every later stage's retrieval relative to
+  the measured baseline. The field is now simply not sent, so behaviour is unchanged. Whether
+  to condition on it is in BACKLOG for Phase 5, measured with the eval harness.
+- Existing drift the spec now states correctly: `assessments.score` is a NUMERIC string
+  (`web/` types it `number | null`); `liveIngestion` is often just `{ triggered, reason }`;
+  report stage scores arrive as numbers although the parser model says string.
+- Four route-test fixtures returned rows or AI replies missing fields that real responses
+  always have. They're now complete. Test data changed; no assertion did.
+
+**Verified:**
+- backend 228 tests (+7 contract), typecheck of tests included; ai-service 418 (+2);
+  `tsc`, build and the CI drift script clean.
+- Live, with `OPENAPI_VALIDATE_RESPONSES=1`: the 82-check contract smoke, `verify_phase7.py`
+  46/46 and `verify_resume_isolation.py` 39/39. About 300 real responses, **0 violations**.
+- Each guard fails when its target is broken: a spec path removed (2 tests fail); an
+  unmounted-in-spec route added (1); a handler renaming `test_case_count` (1); a FastAPI
+  field renamed without re-export (snapshot test fails); renamed and regenerated (`npm test`
+  fails at the typed fixture); snapshot changed without regenerating types (drift script
+  exits 1).
+- The generated web client type-checks a sample `openapi-fetch` usage, narrows the answer
+  outcome by `action`, and rejects `language: "cobol"`.
+- Prod image: `openapi/openapi.yaml` present; `GET /api/openapi.json` → 200 with no database.
+
 ### D-061 — Routes, services, repositories: SQL and business rules leave the route files
 
 **Why:** the 11 route files (2,775 lines) held every SQL statement and most business rules
@@ -1442,7 +1500,7 @@ Things observed in the code that need a call made on them.
 | F-06 | Socket.IO is wired on both ends but only emits a `hello` — realtime is unused scaffolding | `backend/src/index.ts`, `web/src/lib/socket.ts` |
 | F-07 | Email verification and password reset generate valid tokens, but emails are only `console.log`ed — no SMTP | `backend/src/routes/auth.routes.ts` |
 | F-08 | RAG corpus is 34 hand-written documents — the weakest point in the project's strongest story | `ai-service/seed_data/documents.json` |
-| F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed). Still no generated contract between Express/FastAPI and `web/` | `web/src/lib/api.ts` |
+| F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed); contract and generated types added by D-062. Open until UI A switches `web/` to the generated client | `web/src/lib/api.ts` |
 | F-18 | `brendangregg` feed ingested four entries all titled "Brendan Gregg's Blog" — the feed appears to link to the index page rather than individual articles, so those chunks are low value | `ai-service/app/ingest/sources.py` |
 | F-19 | `FetchLimiter` counters are in-process, so limits are per-instance. A multi-instance deployment would multiply the global daily cap by the instance count; needs Redis | `ai-service/app/ingest/limits.py` |
 | F-20 | Live *discovery* depends on Gemini search grounding, which returns 429 on the free tier — the live fetch degrades safely to local context but cannot write back until quota exists (D-038) | `ai-service/app/ingest/live.py` |

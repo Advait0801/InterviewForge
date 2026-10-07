@@ -49,6 +49,12 @@ jobs:
         # No test script in web yet; --if-present keeps the matrix uniform.
         run: npm test --if-present
 
+      - name: API contract
+        # Generated API types must match their specs (D-062).
+        if: matrix.service == 'backend'
+        working-directory: .
+        run: bash scripts/ci/check_api_contract.sh
+
       - name: Build
         run: npm run build
         env:

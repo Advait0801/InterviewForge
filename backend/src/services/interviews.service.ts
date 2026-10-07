@@ -262,7 +262,6 @@ export async function submitAnswer(sessionId: string, userId: string, answer: st
     company: normalizedCompany,
     stage: nextStage,
     difficulty: getDefaultDifficulty(nextStage),
-    previousAnswer: answer,
     user_id: userId,
     // The session's own flag, not a fresh lookup: a resume deleted mid-
     // interview must stop grounding, and `resume_grounded` with no chunks

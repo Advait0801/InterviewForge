@@ -27,6 +27,7 @@ from app.llm.chains import (
 )
 from app.rag.service import RAGService
 from app.resume.store import ResumeStore
+from app.api.schemas import InterviewReportResponse, NextQuestionResponse, StructuredEvaluationOutput, StructuredFollowupOutput, documented
 
 router = APIRouter(prefix="/api/interview", tags=["interview"])
 
@@ -196,7 +197,7 @@ async def followup(req: FollowUpRequest):
     }
 
 
-@router.post("/next-question")
+@router.post("/next-question", responses=documented(NextQuestionResponse))
 async def next_question(req: NextQuestionRequest):
     try:
         get_company_profile(req.company)
@@ -275,7 +276,7 @@ async def next_question(req: NextQuestionRequest):
     }
 
 
-@router.post("/evaluate-answer")
+@router.post("/evaluate-answer", responses=documented(StructuredEvaluationOutput))
 async def evaluate_answer(req: EvaluateAnswerRequest):
     try:
         get_company_profile(req.company)
@@ -296,7 +297,7 @@ async def evaluate_answer(req: EvaluateAnswerRequest):
     return result
 
 
-@router.post("/generate-followup")
+@router.post("/generate-followup", responses=documented(StructuredFollowupOutput))
 async def generate_followup(req: GenerateFollowupRequest):
     try:
         get_company_profile(req.company)
@@ -317,7 +318,7 @@ async def generate_followup(req: GenerateFollowupRequest):
     return result
 
 
-@router.post("/generate-report")
+@router.post("/generate-report", responses=documented(InterviewReportResponse))
 async def generate_report(req: GenerateReportRequest):
     try:
         result = await invoke_with_fallback(interview_report_chain, {

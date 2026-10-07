@@ -16,6 +16,27 @@ import problemsRouter from "../routes/problems.routes";
 
 const PROBLEM = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 
+/** A problems row as the detail query selects it. */
+function problemRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: PROBLEM,
+    slug: "two-sum",
+    title: "Two Sum",
+    description: "Find two numbers that add up to target.",
+    difficulty: "easy",
+    hints: null,
+    editorial: null,
+    topics: ["arrays"],
+    companies: ["amazon"],
+    test_cases: [],
+    starter_code: { python3: "class Solution: ..." },
+    created_at: "2026-09-01T00:00:00Z",
+    is_solved: false,
+    is_bookmarked: false,
+    ...overrides,
+  };
+}
+
 let users: TestServer;
 let problems: TestServer;
 beforeAll(async () => {
@@ -141,7 +162,7 @@ describe("problems", () => {
 
   it("GET /:id sends only the example cases, never the hidden suite", async () => {
     const suite = Array.from({ length: 9 }, (_, i) => ({ input: `in${i}`, expectedOutput: `out${i}` }));
-    db.handlers.push({ match: "WHERE p.id = $1", reply: [{ id: PROBLEM, title: "t", test_cases: suite }] });
+    db.handlers.push({ match: "WHERE p.id = $1", reply: [problemRow({ test_cases: suite })] });
     const r = await problems.request("GET", `/api/problems/${PROBLEM}`);
     expect(r.body.problem.test_cases).toEqual(suite.slice(0, 4));
     expect(r.body.problem.test_case_count).toBe(9);

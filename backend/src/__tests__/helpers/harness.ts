@@ -16,11 +16,16 @@ import type { Server } from "node:http";
 import express, { type Router } from "express";
 import { signAccessToken } from "../../auth";
 import { optionalAuth } from "../../middleware/auth.middleware";
+import { createResponseValidator } from "../../openapi/spec";
 
 export * from "./fake-db";
 import { USER_ID } from "./fake-db";
 
 export const tokenFor = (userId = USER_ID) => signAccessToken({ userId, tokenVersion: 0 });
+
+// Every response a route test receives must match backend/openapi/openapi.yaml (D-062), so
+// a handler can't change its shape, or start returning an undocumented status, unnoticed.
+const checkResponse = createResponseValidator();
 
 export type TestServer = {
   request: (
@@ -56,7 +61,10 @@ export async function serve(mountPath: string, router: Router): Promise<TestServ
         body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
       });
       const text = await res.text();
-      return { status: res.status, body: text ? JSON.parse(text) : {} };
+      const body = text ? JSON.parse(text) : {};
+      const check = checkResponse(method, path, res.status, body);
+      if (!check.ok) throw new Error(`Response breaks the OpenAPI contract: ${check.problem}`);
+      return { status: res.status, body };
     },
     close: () => new Promise<void>((resolve) => server.close(() => resolve())),
   };
