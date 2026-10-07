@@ -7,7 +7,7 @@ const codeLines = ["function pairSum(nums, target) {", "  const seen = new Map()
 export function InterviewWorkspacePreview() {
   return (
     <figure aria-labelledby="workspace-preview-title" className="relative mx-auto w-full max-w-2xl lg:max-w-none">
-      <div className="absolute inset-8 rounded-full bg-gradient-to-r from-primary/25 via-secondary/15 to-accent/20 blur-3xl" aria-hidden />
+      <div className="absolute -inset-8 bg-[radial-gradient(ellipse_at_center,color-mix(in_srgb,var(--primary)_22%,transparent),color-mix(in_srgb,var(--secondary)_10%,transparent)_50%,transparent_75%)]" aria-hidden />
       <div className="relative [perspective:1200px]">
         <motion.div
           initial={{ opacity: 0, y: 24, rotateX: 3, rotateY: -3 }}
