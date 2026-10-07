@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { query } from "../db";
 import { optionalAuth, type AuthRequest } from "../middleware/auth.middleware";
-import { exampleCases, type TestCase } from "../services/test-cases";
+import { DomainError } from "../services/errors";
+import { getProblem, listProblems, type SolvedFilter } from "../services/problems.service";
+import { UUID_REGEX, sendDomainError, sendInternalError } from "./http";
 
 const router = Router();
-type SolvedFilter = "all" | "solved" | "unsolved";
 const MAX_COMPANY_LENGTH = 64;
 
 // optionalAuth rather than a local token decode: a hand-rolled check here skipped the
@@ -31,81 +31,19 @@ router.get("/", optionalAuth, async (req: AuthRequest, res) => {
   }
 
   try {
-    const conditions: string[] = [];
-    const params: (string | number)[] = [];
-    let userParamIdx: number | null = null;
-
-    if (difficulty !== "all") {
-      params.push(difficulty);
-      conditions.push(`p.difficulty = $${params.length}`);
-    }
-    if (topic) {
-      params.push(topic);
-      conditions.push(`$${params.length} = ANY(p.topics)`);
-    }
-    if (company && company.toLowerCase() !== "all") {
-      // Case-insensitive, so ?company=amazon and ?company=Amazon agree.
-      params.push(company.toLowerCase());
-      conditions.push(`EXISTS (SELECT 1 FROM unnest(p.companies) AS c WHERE LOWER(c) = $${params.length})`);
-    }
-    if (search) {
-      params.push(`%${search.toLowerCase()}%`);
-      conditions.push(`(LOWER(p.title) LIKE $${params.length} OR LOWER(p.description) LIKE $${params.length})`);
-    }
-    if (userId) {
-      params.push(userId);
-      userParamIdx = params.length;
-    }
-    if (userParamIdx && (solved as SolvedFilter) !== "all") {
-      const solvedCondition =
-        solved === "solved"
-          ? `EXISTS (SELECT 1 FROM submissions s WHERE s.user_id = $${userParamIdx} AND s.problem_id = p.id AND s.status = 'passed')`
-          : `NOT EXISTS (SELECT 1 FROM submissions s WHERE s.user_id = $${userParamIdx} AND s.problem_id = p.id AND s.status = 'passed')`;
-      conditions.push(solvedCondition);
-    }
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-
-    const solvedSelect = userParamIdx
-      ? `EXISTS (
-          SELECT 1 FROM submissions s
-          WHERE s.user_id = $${userParamIdx} AND s.problem_id = p.id AND s.status = 'passed'
-        ) AS is_solved`
-      : "false AS is_solved";
-    const bookmarkedSelect = userParamIdx
-      ? `EXISTS (
-          SELECT 1 FROM problem_bookmarks pb
-          WHERE pb.user_id = $${userParamIdx} AND pb.problem_id = p.id
-        ) AS is_bookmarked`
-      : "false AS is_bookmarked";
-
-    const result = await query<{
-      id: string;
-      slug: string;
-      title: string;
-      description: string;
-      difficulty: string;
-      topics: string[];
-      companies: string[];
-      created_at: string;
-      is_solved: boolean;
-      is_bookmarked: boolean;
-    }>(
-      `SELECT p.id, p.slug, p.title, p.description, p.difficulty, p.topics, p.companies, p.created_at,
-              ${solvedSelect},
-              ${bookmarkedSelect}
-       FROM problems p
-       ${whereClause}
-       ORDER BY CASE p.difficulty WHEN 'easy' THEN 1 WHEN 'medium' THEN 2 WHEN 'hard' THEN 3 ELSE 4 END, p.created_at`,
-      params
-    );
-    return res.json({ problems: result.rows });
+    const problems = await listProblems({
+      difficulty,
+      topic,
+      company,
+      search,
+      solved: solved as SolvedFilter,
+      userId,
+    });
+    return res.json({ problems });
   } catch (err) {
-    console.error("List problems error", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return sendInternalError(res, "List problems error", err);
   }
 });
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 router.get("/:id", optionalAuth, async (req: AuthRequest, res) => {
   // AuthRequest's params are string | string[]; an array fails the UUID check below.
@@ -114,56 +52,10 @@ router.get("/:id", optionalAuth, async (req: AuthRequest, res) => {
     return res.status(400).json({ error: "Invalid problem id" });
   }
   try {
-    const result = await query<{
-      id: string;
-      slug: string;
-      title: string;
-      description: string;
-      difficulty: string;
-      hints: string | null;
-      editorial: string | null;
-      topics: string[];
-      companies: string[];
-      test_cases: TestCase[] | null;
-      starter_code: unknown;
-      created_at: string;
-      is_solved: boolean;
-      is_bookmarked: boolean;
-    }>(
-      `SELECT p.id, p.slug, p.title, p.description, p.difficulty, p.hints, p.editorial, p.topics, p.companies,
-              p.test_cases, p.starter_code, p.created_at,
-              EXISTS (
-                SELECT 1 FROM submissions s
-                WHERE s.problem_id = p.id
-                AND s.status = 'passed'
-                AND s.user_id = COALESCE($2::uuid, '00000000-0000-0000-0000-000000000000'::uuid)
-              ) AS is_solved,
-              EXISTS (
-                SELECT 1 FROM problem_bookmarks pb
-                WHERE pb.problem_id = p.id
-                AND pb.user_id = COALESCE($2::uuid, '00000000-0000-0000-0000-000000000000'::uuid)
-              ) AS is_bookmarked
-       FROM problems p
-       WHERE p.id = $1`,
-      [id, req.user?.id ?? null]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Problem not found" });
-    }
-
-    // Only the public examples leave the server; the hidden suite stays here (D-057).
-    const { test_cases, ...problem } = result.rows[0];
-    return res.json({
-      problem: {
-        ...problem,
-        test_cases: exampleCases(test_cases),
-        test_case_count: test_cases?.length ?? 0,
-      },
-    });
+    return res.json({ problem: await getProblem(id, req.user?.id ?? null) });
   } catch (err) {
-    console.error("Get problem error", err);
-    return res.status(500).json({ error: "Internal server error" });
+    if (err instanceof DomainError) return sendDomainError(res, err);
+    return sendInternalError(res, "Get problem error", err);
   }
 });
 

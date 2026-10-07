@@ -9,37 +9,45 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-06
 
-### D-059 — The homepage regression is blur raster cost; UI A gates on FCP, not warm load
+### D-061 — Routes, services, repositories: SQL and business rules leave the route files
 
-**Why:** D-052 recorded a rise in local homepage warm load from 24.2 to 35.1 ms and 14.7% more
-decoded script, with no cause. Phase 0 investigated. The full write-up is in
-`docs/audits/phase-0.md`.
-
-**Found:**
-- **The extra bytes aren't on the critical path.** The homepage's own scripts grew 2.9%. The rest is
-  code for the 11 linked routes, which Next prefetches after load and which grew as the interview
-  and other pages were built out (`be6e344`, `cec060b`). They don't change load timing.
-- **The time arrived in one commit, `b6d4824` (the landing redesign).** HEAD with the old
-  `page.tsx` swapped in matches the baseline exactly. The cost is large `filter: blur()` layers
-  (two on-screen 384 px `blur-[130px]` blobs and a `blur-3xl` glow under the preview). They double
-  the raster work before first paint (66 → 130 ms), so FCP went from 36 to 60 ms cold.
-- **Warm `loadEventEnd` rose for a different reason.** The new page's heavier first layout makes
-  Chrome paint a frame before the last bootstrap chunk runs, and the load event waits for that
-  chunk. The page doesn't paint later because of this; the frame just lands inside the measured
-  window.
+**Why:** the 11 route files (2,775 lines) held every SQL statement and most business rules
+next to HTTP parsing. `interviews.routes.ts` alone was 669 lines with the interview state
+machine inline. That's the "if/else chain in a route file" the backlog called out, and it
+blocks what comes next: OpenAPI (Phase 2) wants thin, typed handlers, and Redis/BullMQ
+(Phase 3) needs a seam where caching and queueing go.
 
 **Decided:**
-- The fix is specified for UI A: draw the glows as `radial-gradient`s instead of blurred layers.
-  Prototyped, this takes raster to 27 ms and warm FCP to 32 ms (baseline 38).
-- **UI A's exit criterion is now "homepage warm FCP ≈ baseline (≤ 38 ms)", replacing "warm load ≈
-  baseline".** Warm `loadEventEnd` stays about 6 ms over the baseline even with the fix. Only
-  reverting to a lighter homepage removes it, and it isn't user-visible. Advait approved the change
-  on 2026-10-06.
-- Disabling prefetch of sign-in-only routes for guests is optional. It saves bytes, not time.
+- **`src/repositories/`** (11 files) holds all SQL, moved **verbatim**. The route tests' fake
+  DB matches SQL text, so an unchanged statement keeps every existing test meaningful.
+  Functions that can run in a transaction take `db: Queryable` first.
+- **`src/services/`** holds the rules and orchestration: the interview turn (claim, follow-up,
+  advance, complete), report storage and scoring, assessment deadlines and scoring,
+  submission run/submit/record, auth, stats. Services report expected failures as
+  `DomainError(status, message, extra)` and own every `withTransaction`.
+- **`src/routes/`** (1,032 lines) parse and validate input, call one service function, and
+  map errors. AI error mapping stays in the routes, because it differs by endpoint (speech
+  passes 4xx through, recommendations pass the status through, the rest return 503).
+- The code-runner call moved to `services/code-runner.client.ts`, which reads
+  `CODE_RUNNER_URL` per call, not at module load.
+- `architecture.test.ts` fails if a route imports `db` or contains SQL, if a service
+  contains SQL, or if a repository imports a service.
 
-**Method note:** measure builds side by side, interleaved, and report medians. Single runs of
-three navigations, as in Phase 7, can't separate a 4 ms effect from host noise. Phase 0's
-`measure.mjs` does it this way.
+**Not changed:** no endpoint, status code, message or response shape. Log labels changed in
+two places: the resume upload's three stage labels became one "Upload resume error", and the
+code-runner messages moved into the client.
+
+**Verified:**
+- backend 221 tests: the 183 existing ones **unmodified**, plus 38 layering checks. `tsc` and
+  build clean. The guard fails when the old leaderboard route is swapped back in.
+- Live: `verify_phase7.py` 46/46, `verify_resume_isolation.py` 37/37.
+- **Differential contract check:** one script hit every endpoint's happy and error paths
+  (82 checks: auth, problems, bookmarks, run/submit/review, paths, assessments, users,
+  interviews, recommendations, logout-all). It ran against `main` and this branch on the same
+  stack, recording status, error text, response shape and key values. Every check matched,
+  except the concurrent double-answer, which timed out client-side when a follow-up
+  generation took 112 s. Rerun with a longer timeout, it gave 200 + 409 with one turn
+  recorded, as on `main`.
 
 ### D-060 — A rejected recording is the caller's error, not an outage; transcription leaves the event loop
 
@@ -72,6 +80,38 @@ worker, for the whole transcription.
 - Browser (Chromium 153): permission denied shows the raw "Permission denied" (copy fix specified).
   Granted records, transcribes and releases the tracks, including when navigating away
   mid-recording.
+
+### D-059 — The homepage regression is blur raster cost; UI A gates on FCP, not warm load
+
+**Why:** D-052 recorded a rise in local homepage warm load from 24.2 to 35.1 ms and 14.7% more
+decoded script, with no cause. Phase 0 investigated. The full write-up is in
+`docs/audits/phase-0.md`.
+
+**Found:**
+- **The extra bytes aren't on the critical path.** The homepage's own scripts grew 2.9%. The rest is
+  code for the 11 linked routes, which Next prefetches after load and which grew as the interview
+  and other pages were built out (`be6e344`, `cec060b`). They don't change load timing.
+- **The time arrived in one commit, `b6d4824` (the landing redesign).** HEAD with the old
+  `page.tsx` swapped in matches the baseline exactly. The cost is large `filter: blur()` layers
+  (two on-screen 384 px `blur-[130px]` blobs and a `blur-3xl` glow under the preview). They double
+  the raster work before first paint (66 → 130 ms), so FCP went from 36 to 60 ms cold.
+- **Warm `loadEventEnd` rose for a different reason.** The new page's heavier first layout makes
+  Chrome paint a frame before the last bootstrap chunk runs, and the load event waits for that
+  chunk. The page doesn't paint later because of this; the frame just lands inside the measured
+  window.
+
+**Decided:**
+- The fix is specified for UI A: draw the glows as `radial-gradient`s instead of blurred layers.
+  Prototyped, this takes raster to 27 ms and warm FCP to 32 ms (baseline 38).
+- **UI A's exit criterion is now "homepage warm FCP ≈ baseline (≤ 38 ms)", replacing "warm load ≈
+  baseline".** Warm `loadEventEnd` stays about 6 ms over the baseline even with the fix. Only
+  reverting to a lighter homepage removes it, and it isn't user-visible. Advait approved the change
+  on 2026-10-06.
+- Disabling prefetch of sign-in-only routes for guests is optional. It saves bytes, not time.
+
+**Method note:** measure builds side by side, interleaved, and report medians. Single runs of
+three navigations, as in Phase 7, can't separate a 4 ms effect from host noise. Phase 0's
+`measure.mjs` does it this way.
 
 ## 2026-09-22
 
