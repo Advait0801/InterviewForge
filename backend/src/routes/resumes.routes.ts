@@ -1,13 +1,8 @@
-import { randomUUID } from "crypto";
 import { Response, Router } from "express";
-import { query } from "../db";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
-import {
-  AIServiceError,
-  deleteResumeVectors,
-  ingestResume,
-  type ResumeIngestResult,
-} from "../services/ai.service";
+import { AIServiceError } from "../services/ai.service";
+import { deleteResume, getResume, uploadResume } from "../services/resumes.service";
+import { sendInternalError } from "./http";
 
 const router = Router();
 
@@ -17,19 +12,6 @@ const router = Router();
 const MAX_PDF_BYTES = 5 * 1024 * 1024;
 const MAX_BASE64_CHARS = Math.ceil((MAX_PDF_BYTES * 4) / 3) + 1024;
 const MAX_FILENAME_LENGTH = 255;
-
-type ResumeRow = {
-  id: string;
-  user_id: string;
-  filename: string;
-  byte_size: number;
-  page_count: number;
-  char_count: number;
-  chunk_count: number;
-  sections: string[];
-  created_at: string;
-  updated_at: string;
-};
 
 /** Strip a `data:application/pdf;base64,` prefix if the browser sent one. */
 export function stripDataUrlPrefix(value: string): string {
@@ -77,21 +59,13 @@ function sendAIError(res: Response, err: AIServiceError) {
 
 router.get("/me", requireAuth, async (req: AuthRequest, res) => {
   try {
-    const result = await query<ResumeRow>(
-      `SELECT id, user_id, filename, byte_size, page_count, char_count, chunk_count,
-              sections, created_at, updated_at
-       FROM resumes WHERE user_id = $1`,
-      [req.user!.id]
-    );
-    return res.json({ resume: result.rows[0] ?? null });
+    return res.json({ resume: await getResume(req.user!.id) });
   } catch (err) {
-    console.error("Get resume error", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return sendInternalError(res, "Get resume error", err);
   }
 });
 
 router.post("/", requireAuth, async (req: AuthRequest, res) => {
-  const userId = req.user!.id;
   const { contentBase64, filename } = req.body as {
     contentBase64?: unknown;
     filename?: unknown;
@@ -106,100 +80,30 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
     return res.status(413).json({ error: "Resume exceeds the 5MB limit" });
   }
 
-  const byteSize = Buffer.byteLength(payload, "base64");
-  const safeName = sanitizeFilename(filename);
-
-  // Nothing is mutated until the new resume is successfully ingested.
-  //
-  // The obvious ordering -- upsert the row, ingest, roll back on failure -- was
-  // implemented first and is wrong: uploading a scanned or corrupt PDF then
-  // *destroys the good resume the user already had*, because the rollback
-  // deletes the row and purges the namespace. A rejected upload must be a no-op.
-  //
-  // The id is reused when a resume already exists so the row id stays stable
-  // across re-uploads, and minted here otherwise so the chunks can be labelled
-  // before the row is written.
-  let resumeId: string;
   try {
-    const existing = await query<{ id: string }>(
-      `SELECT id FROM resumes WHERE user_id = $1`,
-      [userId]
-    );
-    resumeId = existing.rows[0]?.id ?? randomUUID();
-  } catch (err) {
-    console.error("Look up resume row error", err);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-
-  let ingest: ResumeIngestResult;
-  try {
-    ingest = await ingestResume({
-      user_id: userId,
-      resume_id: resumeId,
-      content_base64: payload,
-      filename: safeName,
+    const resume = await uploadResume(req.user!.id, {
+      contentBase64: payload,
+      filename: sanitizeFilename(filename),
+      byteSize: Buffer.byteLength(payload, "base64"),
     });
+    return res.status(201).json({ resume });
   } catch (err) {
-    // Deliberately no rollback: the database was never touched, and the store
-    // only replaces a namespace after embedding has already succeeded.
     if (err instanceof AIServiceError) {
       return sendAIError(res, err);
     }
-    console.error("Resume ingest error", err);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-
-  try {
-    const saved = await query<ResumeRow>(
-      `INSERT INTO resumes (id, user_id, filename, byte_size, page_count, char_count, chunk_count, sections)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       ON CONFLICT (user_id) DO UPDATE
-         SET filename = EXCLUDED.filename,
-             byte_size = EXCLUDED.byte_size,
-             page_count = EXCLUDED.page_count,
-             char_count = EXCLUDED.char_count,
-             chunk_count = EXCLUDED.chunk_count,
-             sections = EXCLUDED.sections,
-             updated_at = NOW()
-       RETURNING id, user_id, filename, byte_size, page_count, char_count, chunk_count,
-                 sections, created_at, updated_at`,
-      [
-        resumeId,
-        userId,
-        safeName,
-        byteSize,
-        ingest.pageCount,
-        ingest.charCount,
-        ingest.chunkCount,
-        JSON.stringify(ingest.sections ?? []),
-      ]
-    );
-    return res.status(201).json({ resume: saved.rows[0] });
-  } catch (err) {
-    console.error("Save resume row error", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return sendInternalError(res, "Upload resume error", err);
   }
 });
 
 router.delete("/me", requireAuth, async (req: AuthRequest, res) => {
-  const userId = req.user!.id;
   try {
-    // Vectors first. If the row went first and the purge then failed, the user
-    // would see no resume while their chunks were still retrievable -- exactly
-    // the failure a deletion feature exists to prevent.
-    const purge = await deleteResumeVectors(userId);
-    await query(`DELETE FROM resumes WHERE user_id = $1`, [userId]);
-    return res.json({
-      deleted: true,
-      deletedChunks: purge.deletedChunks,
-      remainingChunks: purge.remainingChunks,
-    });
+    const purge = await deleteResume(req.user!.id);
+    return res.json({ deleted: true, ...purge });
   } catch (err) {
     if (err instanceof AIServiceError) {
       return sendAIError(res, err);
     }
-    console.error("Delete resume error", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return sendInternalError(res, "Delete resume error", err);
   }
 });
 

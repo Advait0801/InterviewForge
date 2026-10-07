@@ -36,9 +36,11 @@ remains in git history at commits `e24baf6` and `b19f09d` if it's ever needed.
 ## Layout that matters
 
 ```
-backend/src/routes/          # one file per resource; SQL lives directly in handlers
-backend/src/services/        # ai.service.ts (AI_SERVICE_URL), interview-state.service.ts
-backend/src/db.ts            # single query() helper over a pg Pool
+backend/src/routes/          # HTTP only: parse, validate, call a service, map errors (http.ts helpers)
+backend/src/services/        # business rules + orchestration; ai.service.ts (AI_SERVICE_URL),
+#                              code-runner.client.ts, errors.ts (DomainError), *.service.ts
+backend/src/repositories/    # all SQL, one file per table group; take a Queryable for transactions
+backend/src/db.ts            # query() over a pg Pool, plus withTransaction()
 backend/sql_migrations/      # 001_init.sql … 014_interview_report.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
@@ -97,6 +99,16 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   fallback. Behind a proxy, set `TRUST_PROXY` to the hop count (D-053).
 - Backend uses native `fetch` for outbound calls — no axios.
 
+**Layering (D-061)**
+- Routes → services → repositories. Routes never import `db` or hold SQL; services hold no
+  SQL; repositories don't import services (except `test-cases` types). `architecture.test.ts`
+  enforces this.
+- A service reports an expected failure by throwing `DomainError(status, message, extra)`;
+  routes send it as `{ error, ...extra }`. AI-service and code-runner failures propagate as
+  their own error types and are mapped in the route.
+- Repository writes that can run inside a transaction take `db: Queryable` as the first
+  argument; the service owns the `withTransaction` call.
+
 **Multi-write routes**
 - Writes that must land together go through `db.withTransaction` (D-057). Keep LLM calls and
   code execution *outside* it. Inside a transaction `NOW()` is frozen — use
@@ -109,6 +121,9 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   same middleware as `index.ts`, with Postgres replaced by a strict fake — any query no
   handler claims throws, so a route can't run unexpected SQL and still pass. Handlers match
   by substring in order, so put the more specific pattern first (D-056).
+- The fakes match SQL text (some with `startsWith`), so when moving a query, move it
+  verbatim. Some test files mock `db` with only `query`, so a repository should import only
+  what it uses.
 
 **AI service**
 - Every chain uses `JsonOutputParser(pydantic_object=…)` with `{format_instructions}`

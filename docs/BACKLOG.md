@@ -43,7 +43,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 - **Leaderboard caching** *(S–M, Quiet)* — the leaderboard aggregates every submission on each
   request; no index helps (measured in D-053). Cache it, or keep a materialised view refreshed on
   submit. Pairs naturally with the Redis item above.
-- **Repository/service layer** *(M, Quiet)* — routes currently hold SQL and business logic.
 - **More languages** *(M)* — JS, Go, Rust: a Dockerfile and harness each.
 - **Custom test cases + failing-case diff view** *(S)* — the gap between "toy judge" and "tool
   I'd actually use".
