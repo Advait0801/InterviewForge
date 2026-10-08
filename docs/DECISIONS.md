@@ -9,6 +9,41 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-06
 
+### D-064 — UI Group A shipped: homepage paint, accessibility, microphone states, generated client (closes F-09)
+
+**What:** the web half of Group A, built by GPT/Codex from one handoff (PR #15) and verified
+independently before merge.
+- Homepage glows use radial gradients instead of blur filters (D-059).
+- Contrast tokens, badge and avatar colours, preview semantics and heading order fixed.
+- Microphone errors are plain language; uploads carry the recorder's real MIME type; short
+  recordings are rejected locally; `retryable` decides between "Record again" and a retry
+  (D-060).
+- `web/src/lib/api.ts` runs on `openapi-fetch` over the generated
+  `web/src/lib/api/schema.d.ts` (D-062), keeping the `api` facade the tests mock.
+
+**Verified (by Claude, independently of the handoff's own report):**
+- web 96 tests, lint, `tsc`, build; `check_api_contract.sh` passes with the web client in it;
+  the only `fetch(` is the client adapter.
+- Homepage warm FCP **50 ms on `main` → 32 ms**, side by side with
+  `docs/audits/phase-0/measure.mjs` (gate ≤ 38). Initial script +7.6 KB; +143 KB of prefetched
+  route code after load.
+- axe: 0 violations at any impact, 18 routes × 2 themes.
+- Microphone in Chromium with **fake devices only**: denied, missing and busy each show plain
+  copy, never the raw DOMException; a short recording makes no request; a normal one uploads
+  `audio/webm;codecs=opus` with no filename; a one-word transcript asks for confirmation;
+  no live tracks afterwards.
+- A live walkthrough found no page errors, console errors or 5xx. It covered register and
+  login through the UI, Run, Submit (hidden cases shown as hidden), an assessment, paths,
+  analytics, leaderboard, profile, settings, system design and an interview turn.
+
+**Left open:**
+- `InterviewMessage.metadata_json` and `InterviewSession.report_json` are bare `type: object`
+  in the spec, so they generate as `Record<string, never>` and the UI reads `kind` through a
+  `never` type. Works at runtime; to be typed in Phase 4, which reworks interview messages.
+- A manual screen-reader pass and a real-device microphone check are Advait's; until done,
+  the BACKLOG item stays.
+- Codex's evidence lives in `web/docs/ui-group-a/` (1.2 MB; not in the prod image).
+
 ### D-063 — Redis: shared rate limits, a bounded code-run queue, a cached leaderboard (closes F-19)
 
 **Why:** three problems that needed shared state. Code-runner had no concurrency limit, so N
@@ -1567,7 +1602,7 @@ Things observed in the code that need a call made on them.
 | F-06 | Socket.IO is wired on both ends but only emits a `hello` — realtime is unused scaffolding | `backend/src/index.ts`, `web/src/lib/socket.ts` |
 | F-07 | Email verification and password reset generate valid tokens, but emails are only `console.log`ed — no SMTP | `backend/src/routes/auth.routes.ts` |
 | F-08 | RAG corpus is 34 hand-written documents — the weakest point in the project's strongest story | `ai-service/seed_data/documents.json` |
-| F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed); contract and generated types added by D-062. Open until UI A switches `web/` to the generated client | `web/src/lib/api.ts` |
+| F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed); contract and generated types by D-062; closed by D-064: `web/` uses the generated client | `web/src/lib/api.ts` |
 | F-18 | `brendangregg` feed ingested four entries all titled "Brendan Gregg's Blog" — the feed appears to link to the index page rather than individual articles, so those chunks are low value | `ai-service/app/ingest/sources.py` |
 | F-19 | ~~`FetchLimiter` counters are in-process, so limits are per-instance. A multi-instance deployment would multiply the global daily cap by the instance count; needs Redis~~ — closed by D-063: Redis-backed, atomic check-and-reserve; the backend limiters moved to Redis too | `ai-service/app/ingest/limits.py` |
 | F-20 | Live *discovery* depends on Gemini search grounding, which returns 429 on the free tier — the live fetch degrades safely to local context but cannot write back until quota exists (D-038) | `ai-service/app/ingest/live.py` |
