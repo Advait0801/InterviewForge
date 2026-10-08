@@ -96,22 +96,38 @@ export function createResponseValidator(spec = loadSpec()) {
     }
     const resolved = resolveResponse(declared);
     if (!resolved) return { ok: false, problem: `unresolvable response $ref ${declared.$ref}` };
-    if (!resolved.response.content?.["application/json"]) return { ok: true }; // e.g. a redirect
+    const content = resolved.response.content ?? {};
+    // A `text/event-stream` response is checked event by event: `body` is the array of
+    // each event's parsed `data`, and the schema describes one event (D-065).
+    const media = content["application/json"] ? "application/json" : content["text/event-stream"] ? "text/event-stream" : null;
+    if (!media) return { ok: true }; // e.g. a redirect
 
     const key = `${route.method} ${route.template} ${status}`;
     let validate = compiled.get(key);
     if (!validate) {
       const ref = resolved.ref.length
-        ? pointer(...resolved.ref, "content", "application/json", "schema")
-        : pointer("paths", route.template, route.method, "responses", String(status), "content", "application/json", "schema");
+        ? pointer(...resolved.ref, "content", media, "schema")
+        : pointer("paths", route.template, route.method, "responses", String(status), "content", media, "schema");
       validate = ajv.compile({ $ref: ref });
       compiled.set(key, validate);
     }
+    const describe = (v: ValidateFunction, where: string) =>
+      (v.errors ?? [])
+        .slice(0, 5)
+        .map((e) => `${where}${e.instancePath || "(body)"} ${e.message}${e.params && "additionalProperty" in e.params ? ` (${(e.params as { additionalProperty: string }).additionalProperty})` : ""}`)
+        .join("; ");
+
+    if (media === "text/event-stream") {
+      if (!Array.isArray(body)) return { ok: false, problem: `${method.toUpperCase()} ${route.template} ${status}: expected an event stream` };
+      for (const [index, event] of body.entries()) {
+        if (!validate(event)) {
+          return { ok: false, problem: `${method.toUpperCase()} ${route.template} ${status}: ${describe(validate, `event ${index} `)}` };
+        }
+      }
+      return { ok: true };
+    }
+
     if (validate(body)) return { ok: true };
-    const errors = (validate.errors ?? [])
-      .slice(0, 5)
-      .map((e) => `${e.instancePath || "(body)"} ${e.message}${e.params && "additionalProperty" in e.params ? ` (${(e.params as { additionalProperty: string }).additionalProperty})` : ""}`)
-      .join("; ");
-    return { ok: false, problem: `${method.toUpperCase()} ${route.template} ${status}: ${errors}` };
+    return { ok: false, problem: `${method.toUpperCase()} ${route.template} ${status}: ${describe(validate, "")}` };
   };
 }

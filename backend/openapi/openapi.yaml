@@ -607,27 +607,49 @@ paths:
           description: The new session and its opening question.
           content:
             application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required: [session, openingQuestion]
-                properties:
-                  session:
-                    type: object
-                    additionalProperties: false
-                    required: [id, company, currentStage, status, resumeGrounded]
-                    properties:
-                      id: { $ref: "#/components/schemas/Uuid" }
-                      company: { $ref: "#/components/schemas/Company" }
-                      currentStage: { $ref: "#/components/schemas/InterviewStage" }
-                      status: { type: string, const: active }
-                      resumeGrounded: { type: boolean }
-                  openingQuestion: { $ref: "#/components/schemas/InterviewQuestion" }
+              schema: { $ref: "#/components/schemas/InterviewStart" }
         "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/stream:
+    post:
+      tags: [interviews]
+      operationId: startInterviewStream
+      description: |
+        `POST /interviews` with the opening question streamed as it is generated (D-065).
+        Invalid input is an ordinary JSON error. Otherwise the response is a
+        `text/event-stream`: `question`, then `delta`s whose concatenated `text` is the
+        question so far, then exactly one `done` (the body `POST /interviews` returns;
+        its `question` is authoritative) or `error` (the status `POST /interviews` would
+        have used). The session is stored only if the stream reaches `done`; closing the
+        connection earlier cancels generation and stores nothing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [company]
+              properties:
+                company: { $ref: "#/components/schemas/Company" }
+                difficulty: { type: string }
+                useResume:
+                  type: boolean
+                  default: true
+                  description: Ground questions in the caller's resume when one is indexed.
+      responses:
+        "200":
+          description: An event stream; the schema describes one event's `data`.
+          content:
+            text/event-stream:
+              schema: { $ref: "#/components/schemas/InterviewStartStreamEvent" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
 
   /interviews/{id}:
     get:
@@ -706,6 +728,42 @@ paths:
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/{id}/answer/stream:
+    post:
+      tags: [interviews]
+      operationId: answerInterviewStream
+      description: |
+        `POST /interviews/{id}/answer` with the next question streamed (D-065). An invalid
+        id or answer, an unknown session, or one that isn't active is an ordinary JSON
+        error. Otherwise the response is a `text/event-stream`: `evaluation`, then (unless
+        the interview completes) `question` and `delta`s, then exactly one `done` (the
+        `AnswerOutcome` the JSON endpoint returns) or `error` (its status, e.g. 409 for a
+        turn already answered). The turn is recorded only if the stream reaches `done`;
+        closing the connection earlier cancels generation and records nothing, so the
+        same answer can be sent again.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [answer]
+              properties:
+                answer: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: An event stream; the schema describes one event's `data`.
+          content:
+            text/event-stream:
+              schema: { $ref: "#/components/schemas/InterviewAnswerStreamEvent" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
 
   /interviews/speech/transcribe:
     post:
@@ -1459,8 +1517,10 @@ components:
         stage_turn_count: { type: integer }
         resume_grounded: { type: boolean }
         report_json:
-          type: [object, "null"]
           description: The stored report once generated.
+          oneOf:
+            - { $ref: "#/components/schemas/StoredInterviewReport" }
+            - { type: "null" }
         created_at: { $ref: "#/components/schemas/Timestamp" }
         updated_at: { $ref: "#/components/schemas/Timestamp" }
 
@@ -1474,9 +1534,7 @@ components:
         role: { type: string, enum: [assistant, candidate, system] }
         stage: { type: string }
         content: { type: string }
-        metadata_json:
-          type: object
-          description: "`kind` is question, followup, answer or evaluation; the rest depends on it."
+        metadata_json: { $ref: "#/components/schemas/InterviewMessageMetadata" }
         created_at: { $ref: "#/components/schemas/Timestamp" }
 
     RetrievalConfidence:
@@ -1540,15 +1598,16 @@ components:
             - { type: "null" }
         resumeGrounded: { type: boolean }
         resumeHits: { type: integer }
-        resumeEvidence:
-          type: array
-          items:
-            type: object
-            required: [section, excerpt, distance]
-            properties:
-              section: { type: string }
-              excerpt: { type: string }
-              distance: { type: [number, "null"] }
+        resumeEvidence: { type: array, items: { $ref: "#/components/schemas/ResumeEvidence" } }
+
+    ResumeEvidence:
+      type: object
+      description: A resume excerpt the question was grounded in.
+      required: [section, excerpt, distance]
+      properties:
+        section: { type: string }
+        excerpt: { type: string }
+        distance: { type: [number, "null"] }
 
     Evaluation:
       type: object
@@ -1600,13 +1659,11 @@ components:
             sessionId: { $ref: "#/components/schemas/Uuid" }
             evaluation: { $ref: "#/components/schemas/Evaluation" }
 
-    InterviewReport:
+    StoredInterviewReport:
       type: object
-      description: LLM output plus `sessionId` and `company`; may carry extra keys.
-      required: [sessionId, company, overallScore, stageScores, strengths, weaknesses, recommendations]
+      description: The report as generated and stored (`report_json`). LLM output; may carry extra keys.
+      required: [overallScore, stageScores, strengths, weaknesses, recommendations]
       properties:
-        sessionId: { $ref: "#/components/schemas/Uuid" }
-        company: { type: string }
         overallScore: { type: integer, minimum: 1, maximum: 10 }
         stageScores:
           type: object
@@ -1619,6 +1676,177 @@ components:
         strengths: { type: array, items: { type: string } }
         weaknesses: { type: array, items: { type: string } }
         recommendations: { type: array, items: { type: string } }
+
+    InterviewReport:
+      description: The stored report plus `sessionId` and `company`.
+      allOf:
+        - { $ref: "#/components/schemas/StoredInterviewReport" }
+        - type: object
+          required: [sessionId, company]
+          properties:
+            sessionId: { $ref: "#/components/schemas/Uuid" }
+            company: { type: string }
+
+    InterviewMessageMetadata:
+      description: "`metadata_json` of an interview message; `kind` says which."
+      oneOf:
+        - { $ref: "#/components/schemas/QuestionMetadata" }
+        - { $ref: "#/components/schemas/FollowupMetadata" }
+        - { $ref: "#/components/schemas/AnswerMetadata" }
+        - { $ref: "#/components/schemas/EvaluationMetadata" }
+      discriminator:
+        propertyName: kind
+        mapping:
+          question: "#/components/schemas/QuestionMetadata"
+          followup: "#/components/schemas/FollowupMetadata"
+          answer: "#/components/schemas/AnswerMetadata"
+          evaluation: "#/components/schemas/EvaluationMetadata"
+
+    QuestionMetadata:
+      type: object
+      description: A stage's opening question (role `assistant`), with how it was grounded.
+      required:
+        - kind
+        - company
+        - stage
+        - reasoningFocus
+        - expectedCompetencies
+        - context
+        - resumeGrounded
+        - groundedIn
+        - resumeEvidence
+        - retrievalConfidence
+        - liveIngestion
+      properties:
+        kind: { type: string, const: question }
+        company: { type: string }
+        stage: { $ref: "#/components/schemas/InterviewStage" }
+        reasoningFocus: { type: string }
+        expectedCompetencies: { type: array, items: { type: string } }
+        context: { type: string, description: The retrieved context the question was generated from. }
+        resumeGrounded: { type: boolean }
+        groundedIn: { type: [string, "null"] }
+        resumeEvidence: { type: array, items: { $ref: "#/components/schemas/ResumeEvidence" } }
+        retrievalConfidence:
+          oneOf:
+            - { $ref: "#/components/schemas/RetrievalConfidence" }
+            - { type: "null" }
+        liveIngestion:
+          oneOf:
+            - { $ref: "#/components/schemas/LiveIngestion" }
+            - { type: "null" }
+
+    FollowupMetadata:
+      type: object
+      description: The stage's follow-up question (role `assistant`).
+      required: [kind, focus, reason]
+      properties:
+        kind: { type: string, const: followup }
+        focus: { type: string }
+        reason: { type: string }
+
+    AnswerMetadata:
+      type: object
+      description: The candidate's answer (role `candidate`).
+      additionalProperties: false
+      required: [kind]
+      properties:
+        kind: { type: string, const: answer }
+
+    EvaluationMetadata:
+      description: The answer's evaluation (role `system`). LLM output; may carry extra keys.
+      allOf:
+        - { $ref: "#/components/schemas/Evaluation" }
+        - type: object
+          required: [kind]
+          properties:
+            kind: { type: string, const: evaluation }
+
+    InterviewStart:
+      type: object
+      additionalProperties: false
+      required: [session, openingQuestion]
+      properties:
+        session:
+          type: object
+          additionalProperties: false
+          required: [id, company, currentStage, status, resumeGrounded]
+          properties:
+            id: { $ref: "#/components/schemas/Uuid" }
+            company: { $ref: "#/components/schemas/Company" }
+            currentStage: { $ref: "#/components/schemas/InterviewStage" }
+            status: { type: string, const: active }
+            resumeGrounded: { type: boolean }
+        openingQuestion: { $ref: "#/components/schemas/InterviewQuestion" }
+
+    StreamQuestionStart:
+      type: object
+      description: A question's text starts; `delta`s follow.
+      additionalProperties: false
+      required: [type, kind, stage]
+      properties:
+        type: { type: string, const: question }
+        kind: { type: string, enum: [question, followup] }
+        stage: { $ref: "#/components/schemas/InterviewStage" }
+
+    StreamDelta:
+      type: object
+      description: More of the question's text, in order. The `done` event's copy is authoritative.
+      additionalProperties: false
+      required: [type, text]
+      properties:
+        type: { type: string, const: delta }
+        text: { type: string, minLength: 1 }
+
+    StreamEvaluation:
+      type: object
+      description: The answer's evaluation, sent as soon as it exists.
+      additionalProperties: false
+      required: [type, evaluation]
+      properties:
+        type: { type: string, const: evaluation }
+        evaluation: { $ref: "#/components/schemas/Evaluation" }
+
+    StreamError:
+      type: object
+      description: |
+        The stream failed; nothing was recorded. `status` and `error` are what the JSON
+        endpoint would have returned, and `retryable` says whether sending the same request
+        again can succeed (an AI-service outage or rate limit) or not (e.g. 409).
+      additionalProperties: false
+      required: [type, status, error, retryable]
+      properties:
+        type: { type: string, const: error }
+        status: { type: integer }
+        error: { type: string }
+        retryable: { type: boolean }
+
+    InterviewStartStreamEvent:
+      description: One event of `POST /interviews/stream`.
+      oneOf:
+        - { $ref: "#/components/schemas/StreamQuestionStart" }
+        - { $ref: "#/components/schemas/StreamDelta" }
+        - type: object
+          additionalProperties: false
+          required: [type, result]
+          properties:
+            type: { type: string, const: done }
+            result: { $ref: "#/components/schemas/InterviewStart" }
+        - { $ref: "#/components/schemas/StreamError" }
+
+    InterviewAnswerStreamEvent:
+      description: One event of `POST /interviews/{id}/answer/stream`.
+      oneOf:
+        - { $ref: "#/components/schemas/StreamEvaluation" }
+        - { $ref: "#/components/schemas/StreamQuestionStart" }
+        - { $ref: "#/components/schemas/StreamDelta" }
+        - type: object
+          additionalProperties: false
+          required: [type, result]
+          properties:
+            type: { type: string, const: done }
+            result: { $ref: "#/components/schemas/AnswerOutcome" }
+        - { $ref: "#/components/schemas/StreamError" }
 
     AudioUpload:
       type: object

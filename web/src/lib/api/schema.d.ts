@@ -359,6 +359,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/interviews/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `POST /interviews` with the opening question streamed as it is generated (D-065).
+         *     Invalid input is an ordinary JSON error. Otherwise the response is a
+         *     `text/event-stream`: `question`, then `delta`s whose concatenated `text` is the
+         *     question so far, then exactly one `done` (the body `POST /interviews` returns;
+         *     its `question` is authoritative) or `error` (the status `POST /interviews` would
+         *     have used). The session is stored only if the stream reaches `done`; closing the
+         *     connection earlier cancels generation and stores nothing.
+         */
+        post: operations["startInterviewStream"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/interviews/{id}": {
         parameters: {
             query?: never;
@@ -406,6 +431,32 @@ export interface paths {
          *     completes the interview. A second answer to the same turn gets a 409 (D-057).
          */
         post: operations["answerInterview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/interviews/{id}/answer/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `POST /interviews/{id}/answer` with the next question streamed (D-065). An invalid
+         *     id or answer, an unknown session, or one that isn't active is an ordinary JSON
+         *     error. Otherwise the response is a `text/event-stream`: `evaluation`, then (unless
+         *     the interview completes) `question` and `delta`s, then exactly one `done` (the
+         *     `AnswerOutcome` the JSON endpoint returns) or `error` (its status, e.g. 409 for a
+         *     turn already answered). The turn is recorded only if the stream reaches `done`;
+         *     closing the connection earlier cancels generation and records nothing, so the
+         *     same answer can be sent again.
+         */
+        post: operations["answerInterviewStream"];
         delete?: never;
         options?: never;
         head?: never;
@@ -860,7 +911,7 @@ export interface components {
             stage_turn_count: number;
             resume_grounded: boolean;
             /** @description The stored report once generated. */
-            report_json: Record<string, never> | null;
+            report_json: components["schemas"]["StoredInterviewReport"] | null;
             created_at: components["schemas"]["Timestamp"];
             updated_at: components["schemas"]["Timestamp"];
         };
@@ -871,8 +922,7 @@ export interface components {
             role: "assistant" | "candidate" | "system";
             stage: string;
             content: string;
-            /** @description `kind` is question, followup, answer or evaluation; the rest depends on it. */
-            metadata_json: Record<string, never>;
+            metadata_json: components["schemas"]["InterviewMessageMetadata"];
             created_at: components["schemas"]["Timestamp"];
         };
         RetrievalConfidence: {
@@ -907,11 +957,13 @@ export interface components {
             liveIngestion: components["schemas"]["LiveIngestion"] | null;
             resumeGrounded: boolean;
             resumeHits: number;
-            resumeEvidence: {
-                section: string;
-                excerpt: string;
-                distance: number | null;
-            }[];
+            resumeEvidence: components["schemas"]["ResumeEvidence"][];
+        };
+        /** @description A resume excerpt the question was grounded in. */
+        ResumeEvidence: {
+            section: string;
+            excerpt: string;
+            distance: number | null;
         };
         /** @description LLM output; may carry extra keys. */
         Evaluation: {
@@ -949,10 +1001,8 @@ export interface components {
             sessionId: components["schemas"]["Uuid"];
             evaluation: components["schemas"]["Evaluation"];
         };
-        /** @description LLM output plus `sessionId` and `company`; may carry extra keys. */
-        InterviewReport: {
-            sessionId: components["schemas"]["Uuid"];
-            company: string;
+        /** @description The report as generated and stored (`report_json`). LLM output; may carry extra keys. */
+        StoredInterviewReport: {
             overallScore: number;
             stageScores: {
                 [key: string]: {
@@ -965,6 +1015,116 @@ export interface components {
             weaknesses: string[];
             recommendations: string[];
         };
+        /** @description The stored report plus `sessionId` and `company`. */
+        InterviewReport: components["schemas"]["StoredInterviewReport"] & {
+            sessionId: components["schemas"]["Uuid"];
+            company: string;
+        };
+        /** @description `metadata_json` of an interview message; `kind` says which. */
+        InterviewMessageMetadata: components["schemas"]["QuestionMetadata"] | components["schemas"]["FollowupMetadata"] | components["schemas"]["AnswerMetadata"] | components["schemas"]["EvaluationMetadata"];
+        /** @description A stage's opening question (role `assistant`), with how it was grounded. */
+        QuestionMetadata: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "question";
+            company: string;
+            stage: components["schemas"]["InterviewStage"];
+            reasoningFocus: string;
+            expectedCompetencies: string[];
+            /** @description The retrieved context the question was generated from. */
+            context: string;
+            resumeGrounded: boolean;
+            groundedIn: string | null;
+            resumeEvidence: components["schemas"]["ResumeEvidence"][];
+            retrievalConfidence: components["schemas"]["RetrievalConfidence"] | null;
+            liveIngestion: components["schemas"]["LiveIngestion"] | null;
+        };
+        /** @description The stage's follow-up question (role `assistant`). */
+        FollowupMetadata: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "followup";
+            focus: string;
+            reason: string;
+        };
+        /** @description The candidate's answer (role `candidate`). */
+        AnswerMetadata: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "answer";
+        };
+        /** @description The answer's evaluation (role `system`). LLM output; may carry extra keys. */
+        EvaluationMetadata: components["schemas"]["Evaluation"] & {
+            /** @constant */
+            kind: "evaluation";
+        } & {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "evaluation";
+        };
+        InterviewStart: {
+            session: {
+                id: components["schemas"]["Uuid"];
+                company: components["schemas"]["Company"];
+                currentStage: components["schemas"]["InterviewStage"];
+                /** @constant */
+                status: "active";
+                resumeGrounded: boolean;
+            };
+            openingQuestion: components["schemas"]["InterviewQuestion"];
+        };
+        /** @description A question's text starts; `delta`s follow. */
+        StreamQuestionStart: {
+            /** @constant */
+            type: "question";
+            /** @enum {string} */
+            kind: "question" | "followup";
+            stage: components["schemas"]["InterviewStage"];
+        };
+        /** @description More of the question's text, in order. The `done` event's copy is authoritative. */
+        StreamDelta: {
+            /** @constant */
+            type: "delta";
+            text: string;
+        };
+        /** @description The answer's evaluation, sent as soon as it exists. */
+        StreamEvaluation: {
+            /** @constant */
+            type: "evaluation";
+            evaluation: components["schemas"]["Evaluation"];
+        };
+        /**
+         * @description The stream failed; nothing was recorded. `status` and `error` are what the JSON
+         *     endpoint would have returned, and `retryable` says whether sending the same request
+         *     again can succeed (an AI-service outage or rate limit) or not (e.g. 409).
+         */
+        StreamError: {
+            /** @constant */
+            type: "error";
+            status: number;
+            error: string;
+            retryable: boolean;
+        };
+        /** @description One event of `POST /interviews/stream`. */
+        InterviewStartStreamEvent: components["schemas"]["StreamQuestionStart"] | components["schemas"]["StreamDelta"] | {
+            /** @constant */
+            type: "done";
+            result: components["schemas"]["InterviewStart"];
+        } | components["schemas"]["StreamError"];
+        /** @description One event of `POST /interviews/{id}/answer/stream`. */
+        InterviewAnswerStreamEvent: components["schemas"]["StreamEvaluation"] | components["schemas"]["StreamQuestionStart"] | components["schemas"]["StreamDelta"] | {
+            /** @constant */
+            type: "done";
+            result: components["schemas"]["AnswerOutcome"];
+        } | components["schemas"]["StreamError"];
         AudioUpload: {
             audioBase64: string;
             /**
@@ -1822,17 +1982,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        session: {
-                            id: components["schemas"]["Uuid"];
-                            company: components["schemas"]["Company"];
-                            currentStage: components["schemas"]["InterviewStage"];
-                            /** @constant */
-                            status: "active";
-                            resumeGrounded: boolean;
-                        };
-                        openingQuestion: components["schemas"]["InterviewQuestion"];
-                    };
+                    "application/json": components["schemas"]["InterviewStart"];
                 };
             };
             400: components["responses"]["Error"];
@@ -1840,6 +1990,42 @@ export interface operations {
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
             503: components["responses"]["Error"];
+        };
+    };
+    startInterviewStream: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    company: components["schemas"]["Company"];
+                    difficulty?: string;
+                    /**
+                     * @description Ground questions in the caller's resume when one is indexed.
+                     * @default true
+                     */
+                    useResume?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description An event stream; the schema describes one event's `data`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["InterviewStartStreamEvent"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
         };
     };
     getInterview: {
@@ -1933,6 +2119,39 @@ export interface operations {
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
             503: components["responses"]["Error"];
+        };
+    };
+    answerInterviewStream: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    answer: string;
+                };
+            };
+        };
+        responses: {
+            /** @description An event stream; the schema describes one event's `data`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["InterviewAnswerStreamEvent"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
         };
     };
     transcribeSpeech: {

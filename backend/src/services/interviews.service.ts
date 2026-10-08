@@ -7,6 +7,10 @@ import {
   generateFollowup,
   generateNextQuestion,
   generateReport,
+  streamFollowup,
+  streamNextQuestion,
+  type StructuredEvaluation,
+  type StructuredFollowup,
   type StructuredQuestion,
 } from "./ai.service";
 import { DomainError, badRequest, notFound } from "./errors";
@@ -26,7 +30,46 @@ import { userHasResume } from "./resumes.service";
  * The interview loop: behavioral → coding → system_design → core_cs → report, with at
  * most one follow-up per stage. Model calls (ai.service) always happen before a
  * transaction opens, never inside one (D-057). AIServiceError propagates to the route.
+ *
+ * Starting an interview and answering a turn can also run streamed (D-065): given a
+ * `TurnStream`, they report progress through it and generate the question with the
+ * ai-service's stream endpoints. What they record, and when, is identical either way:
+ * the turn commits in one transaction once the whole question exists. If the client
+ * leaves first, `signal` aborts the model calls and nothing is written.
  */
+
+/** Progress a streamed turn reports before its result; the route sends each as an event. */
+export type InterviewStreamEvent =
+  | { type: "evaluation"; evaluation: StructuredEvaluation }
+  | { type: "question"; kind: "question" | "followup"; stage: InterviewStage }
+  | { type: "delta"; text: string };
+
+export type TurnStream = {
+  signal: AbortSignal;
+  /** Resolves once the event is on its way to the client (backpressure). */
+  emit: (event: InterviewStreamEvent) => Promise<void>;
+};
+
+type NextQuestionInput = Parameters<typeof generateNextQuestion>[0];
+type FollowupInput = Parameters<typeof generateFollowup>[0];
+
+async function askQuestion(input: NextQuestionInput, stream?: TurnStream): Promise<StructuredQuestion> {
+  if (!stream) return generateNextQuestion(input);
+  await stream.emit({ type: "question", kind: "question", stage: input.stage });
+  return streamNextQuestion(input, {
+    signal: stream.signal,
+    onDelta: (text) => stream.emit({ type: "delta", text }),
+  });
+}
+
+async function askFollowup(input: FollowupInput, stream?: TurnStream): Promise<StructuredFollowup> {
+  if (!stream) return generateFollowup(input);
+  await stream.emit({ type: "question", kind: "followup", stage: input.stage });
+  return streamFollowup(input, {
+    signal: stream.signal,
+    onDelta: (text) => stream.emit({ type: "delta", text }),
+  });
+}
 
 const sessionNotFound = () => notFound("Interview session not found");
 
@@ -50,12 +93,15 @@ export function listSessions(userId: string) {
   return interviews.listSessions(userId);
 }
 
-export async function startInterview(input: {
-  userId: string;
-  company: Company;
-  difficulty?: string;
-  useResume?: boolean;
-}) {
+export async function startInterview(
+  input: {
+    userId: string;
+    company: Company;
+    difficulty?: string;
+    useResume?: boolean;
+  },
+  stream?: TurnStream
+) {
   const startingStage: InterviewStage = "behavioral";
   const stageDifficulty = input.difficulty ?? getDefaultDifficulty(startingStage);
 
@@ -70,14 +116,17 @@ export async function startInterview(input: {
   // inserting after is deliberate: a failed generation leaves no orphan row.
   const sessionId = randomUUID();
 
-  const nextQuestion = await generateNextQuestion({
-    company: input.company,
-    stage: startingStage,
-    difficulty: stageDifficulty,
-    user_id: input.userId,
-    resume_grounded: resumeGrounded,
-    session_id: sessionId,
-  });
+  const nextQuestion = await askQuestion(
+    {
+      company: input.company,
+      stage: startingStage,
+      difficulty: stageDifficulty,
+      user_id: input.userId,
+      resume_grounded: resumeGrounded,
+      session_id: sessionId,
+    },
+    stream
+  );
 
   // One transaction (D-057): a session row without its opening question is a dead
   // interview the user can't answer.
@@ -166,10 +215,10 @@ export async function getReport(sessionId: string, userId: string) {
 }
 
 /**
- * Evaluate an answer, then either ask the stage's follow-up, advance to the next stage
- * with a new question, or complete the interview.
+ * Load and check the turn an answer responds to. Separate from `answerTurn` so a streamed
+ * answer can report these failures as ordinary HTTP errors before its stream opens.
  */
-export async function submitAnswer(sessionId: string, userId: string, answer: string) {
+export async function loadTurn(sessionId: string, userId: string) {
   const session = await interviews.findSession(sessionId, userId);
   if (!session) throw sessionNotFound();
   if (!isValidInterviewStage(session.current_stage)) {
@@ -180,17 +229,36 @@ export async function submitAnswer(sessionId: string, userId: string, answer: st
   const latestQuestion = await interviews.findLatestQuestion(sessionId, session.current_stage);
   if (!latestQuestion) throw badRequest("No active interview question found");
 
-  const normalizedCompany = normalizeCompany(session.company);
-  if (!normalizedCompany) throw new DomainError(500, "Interview session has an invalid company");
+  const company = normalizeCompany(session.company);
+  if (!company) throw new DomainError(500, "Interview session has an invalid company");
 
-  const stage = session.current_stage;
-  const evaluation = await evaluateAnswer({
-    company: normalizedCompany,
-    stage,
-    question: latestQuestion.content,
-    answer,
-    context: String(latestQuestion.metadata_json.context ?? ""),
-  });
+  return { session, stage: session.current_stage, latestQuestion, company };
+}
+
+export type Turn = Awaited<ReturnType<typeof loadTurn>>;
+
+/**
+ * Evaluate an answer, then either ask the stage's follow-up, advance to the next stage
+ * with a new question, or complete the interview.
+ */
+export async function submitAnswer(sessionId: string, userId: string, answer: string) {
+  return answerTurn(await loadTurn(sessionId, userId), userId, answer);
+}
+
+export async function answerTurn(turn: Turn, userId: string, answer: string, stream?: TurnStream) {
+  const { session, stage, latestQuestion, company: normalizedCompany } = turn;
+  const sessionId = session.id;
+  const evaluation = await evaluateAnswer(
+    {
+      company: normalizedCompany,
+      stage,
+      question: latestQuestion.content,
+      answer,
+      context: String(latestQuestion.metadata_json.context ?? ""),
+    },
+    stream?.signal
+  );
+  await stream?.emit({ type: "evaluation", evaluation });
 
   const answerMessage: NewMessage = {
     sessionId,
@@ -226,13 +294,16 @@ export async function submitAnswer(sessionId: string, userId: string, answer: st
     });
 
   if (shouldAskFollowup(session.stage_turn_count) && evaluation.shouldAskFollowup) {
-    const followup = await generateFollowup({
-      company: normalizedCompany,
-      stage,
-      question: latestQuestion.content,
-      answer,
-      evaluation,
-    });
+    const followup = await askFollowup(
+      {
+        company: normalizedCompany,
+        stage,
+        question: latestQuestion.content,
+        answer,
+        evaluation,
+      },
+      stream
+    );
 
     await commitTurn({ set: "stage_turn_count = stage_turn_count + 1", params: [] }, [
       answerMessage,
@@ -258,17 +329,20 @@ export async function submitAnswer(sessionId: string, userId: string, answer: st
     return { action: "completed", sessionId, evaluation };
   }
 
-  const nextQuestion = await generateNextQuestion({
-    company: normalizedCompany,
-    stage: nextStage,
-    difficulty: getDefaultDifficulty(nextStage),
-    user_id: userId,
-    // The session's own flag, not a fresh lookup: a resume deleted mid-
-    // interview must stop grounding, and `resume_grounded` with no chunks
-    // degrades to an ordinary question on the AI service side.
-    resume_grounded: session.resume_grounded === true,
-    session_id: sessionId,
-  });
+  const nextQuestion = await askQuestion(
+    {
+      company: normalizedCompany,
+      stage: nextStage,
+      difficulty: getDefaultDifficulty(nextStage),
+      user_id: userId,
+      // The session's own flag, not a fresh lookup: a resume deleted mid-
+      // interview must stop grounding, and `resume_grounded` with no chunks
+      // degrades to an ordinary question on the AI service side.
+      resume_grounded: session.resume_grounded === true,
+      session_id: sessionId,
+    },
+    stream
+  );
 
   await commitTurn({ set: "current_stage = $4, stage_turn_count = 0", params: [nextStage] }, [
     answerMessage,

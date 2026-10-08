@@ -43,3 +43,12 @@ def test_every_endpoint_the_backend_calls_has_a_typed_200():
     for method, path in called:
         schema = paths[path][method]["responses"]["200"]["content"]["application/json"]["schema"]
         assert "$ref" in schema, f"{method.upper()} {path} has an untyped 200"
+
+
+def test_stream_endpoints_document_their_events():
+    """Each event's data is typed, and nothing claims the stream is a plain string."""
+    paths = _exporter().app.openapi()["paths"]
+    for path in ("/api/interview/next-question/stream", "/api/interview/generate-followup/stream"):
+        content = paths[path]["post"]["responses"]["200"]["content"]
+        assert list(content) == ["text/event-stream"], path
+        assert set(content["text/event-stream"]["schema"]) == {"$ref"}, path

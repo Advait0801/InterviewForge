@@ -135,6 +135,18 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - Integration tests need `REDIS_TEST_URL` (e.g. `redis://localhost:6380`); they skip without
   it. CI provides one.
 
+**Streaming (D-065)**
+- `POST /interviews/stream` and `/interviews/{id}/answer/stream` stream the question as SSE;
+  the JSON endpoints stay. Input errors are JSON before the stream opens; after, the outcome is
+  a `done` event (the JSON endpoint's body) or an `error` event (its status).
+- The turn commits only once the whole question exists; a client leaving earlier aborts every
+  ai-service call (`TurnStream.signal`) and nothing is written. Keep it that way: never commit a
+  partial question.
+- Every write to the client goes through `routes/sse.ts`, which waits for `drain`. Don't
+  `res.write` directly, or a slow client is buffered in memory.
+- `web/src/lib/api/schema.d.ts` is regenerated (never hand-edited) in the backend commit that
+  changes the spec, so CI's drift check stays green.
+
 **Multi-write routes**
 - Writes that must land together go through `db.withTransaction` (D-057). Keep LLM calls and
   code execution *outside* it. Inside a transaction `NOW()` is frozen — use
@@ -191,6 +203,8 @@ docker compose exec ai-service python scripts/seed_rag.py              # seed RA
 python scripts/verify_resume_isolation.py   # Phase 5: cross-user isolation + deletion, live stack
 python scripts/verify_problems.py           # Phase 7: every problem x 4 languages via the real code-runner
 python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
+python scripts/verify_streaming.py          # SSE interview streams, disconnect, 409, timings (D-065); live stack
+python scripts/verify_streaming.py --measure 6  # JSON vs stream latency medians at the ai-service
 python scripts/problemgen/batch1_easy.py    # regenerate a batch's data (idempotent; see D-042)
 python scripts/problemgen/apply_curation.py # write curated company tags into leetcode_problems.json
 docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tune the live-fetch gate
@@ -222,7 +236,8 @@ still accurate and redeployable.
   (`docker/sandboxes/*`, see README) or every code run fails.
 - Prod seeding needs a one-off global `ts-node` (the backend image ships `dist/` only);
   the README deploy section has the command.
-- Socket.IO is scaffolded on both ends but only emits a `hello` — realtime is unused.
+- Socket.IO is scaffolded on both ends but only emits a `hello` — realtime is unused
+  (interview streaming is SSE over plain HTTP, D-065).
 - Email verification / password reset tokens work, but emails are only `console.log`ed.
 - ~~Sandbox runs as root with no capability/pid/cpu limits~~ — fixed in Phase 6.
   Containers now run as the unprivileged `runner` user with `CapDrop: ALL`,

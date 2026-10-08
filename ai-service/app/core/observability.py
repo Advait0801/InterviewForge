@@ -11,6 +11,7 @@ every signature.
 """
 from __future__ import annotations
 
+import asyncio
 import contextvars
 import json
 import logging
@@ -65,6 +66,9 @@ class LLMCall:
     output_tokens: int = 0
     ok: bool = True
     error: str = ""
+    # A streamed call stopped early because the client left (D-065). Not a failure: the
+    # provider was fine. Its tokens still count toward cost.
+    cancelled: bool = False
 
     @property
     def cost_usd(self) -> float:
@@ -81,6 +85,7 @@ class LLMCall:
             "outputTokens": self.output_tokens,
             "costUsd": round(self.cost_usd, 6),
             "ok": self.ok,
+            "cancelled": self.cancelled,
             "error": self.error[:200],
             "correlationId": get_correlation_id(),
         }
@@ -90,6 +95,7 @@ class LLMCall:
 class Totals:
     calls: int = 0
     failures: int = 0
+    cancelled: int = 0
     duration_ms: float = 0.0
     input_tokens: int = 0
     output_tokens: int = 0
@@ -103,7 +109,9 @@ _totals = Totals()
 def record(call: LLMCall) -> None:
     """Log one call and fold it into the process totals."""
     _totals.calls += 1
-    if not call.ok:
+    if call.cancelled:
+        _totals.cancelled += 1
+    elif not call.ok:
         _totals.failures += 1
     _totals.duration_ms += call.duration_ms
     _totals.input_tokens += call.input_tokens
@@ -120,6 +128,7 @@ def snapshot() -> Dict[str, Any]:
     return {
         "calls": _totals.calls,
         "failures": _totals.failures,
+        "cancelled": _totals.cancelled,
         "meanDurationMs": round(_totals.duration_ms / calls, 1),
         "inputTokens": _totals.input_tokens,
         "outputTokens": _totals.output_tokens,
@@ -147,7 +156,9 @@ class timed:
 
     def __exit__(self, exc_type, exc, tb) -> bool:
         self.call.duration_ms = (time.perf_counter() - self._start) * 1000
-        if exc is not None:
+        if exc_type is not None and issubclass(exc_type, (GeneratorExit, asyncio.CancelledError)):
+            self.call.cancelled = True
+        elif exc is not None:
             self.call.ok = False
             self.call.error = f"{exc_type.__name__}: {exc}"
         record(self.call)
