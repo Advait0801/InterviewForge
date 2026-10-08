@@ -28,13 +28,33 @@ export const tokenFor = (userId = USER_ID) => signAccessToken({ userId, tokenVer
 const checkResponse = createResponseValidator();
 
 export type TestServer = {
+  /**
+   * `events` is set for a `text/event-stream` response: each event's parsed `data`, every
+   * one checked against the spec (D-065). `body` is then empty.
+   */
   request: (
     method: string,
     path: string,
     opts?: { body?: unknown; token?: string | null }
-  ) => Promise<{ status: number; body: Record<string, any> }>;
+  ) => Promise<{ status: number; body: Record<string, any>; events?: Record<string, any>[] }>;
+  /** The server's origin, for tests that need a raw connection (disconnects, slow readers). */
+  url: string;
   close: () => Promise<void>;
 };
+
+/** Parse a whole `text/event-stream` body; `event:` must agree with the data's `type`. */
+export function parseEventStream(text: string): Record<string, any>[] {
+  return text
+    .split("\n\n")
+    .map((block) => block.split("\n").filter((line) => line && !line.startsWith(":")))
+    .filter((lines) => lines.length)
+    .map((lines) => {
+      const field = (name: string) => lines.find((l) => l.startsWith(`${name}: `))?.slice(name.length + 2);
+      const data = JSON.parse(field("data") ?? "null");
+      if (field("event") !== data?.type) throw new Error(`event ${field("event")} carries type ${data?.type}`);
+      return data;
+    });
+}
 
 /**
  * Serve `router` at `mountPath`. Requests carry a token for USER_ID unless
@@ -61,11 +81,18 @@ export async function serve(mountPath: string, router: Router): Promise<TestServ
         body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
       });
       const text = await res.text();
+      if (res.headers.get("content-type")?.startsWith("text/event-stream")) {
+        const events = parseEventStream(text);
+        const check = checkResponse(method, path, res.status, events);
+        if (!check.ok) throw new Error(`Response breaks the OpenAPI contract: ${check.problem}`);
+        return { status: res.status, body: {}, events };
+      }
       const body = text ? JSON.parse(text) : {};
       const check = checkResponse(method, path, res.status, body);
       if (!check.ok) throw new Error(`Response breaks the OpenAPI contract: ${check.problem}`);
       return { status: res.status, body };
     },
+    url: base,
     close: () => new Promise<void>((resolve) => server.close(() => resolve())),
   };
 }

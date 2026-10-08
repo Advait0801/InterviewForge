@@ -7,6 +7,94 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-10-07
+
+### D-065 — Interview questions stream over SSE, ai-service → Express → client; message metadata and the report get real schemas
+
+**Why:** Phase 4 (Group B). An interview turn was one opaque request: the candidate waited for
+evaluation, retrieval and generation to finish before seeing a word. Streaming has to cross two
+hops and still keep D-057's guarantee that a turn is recorded whole or not at all.
+
+**Decided:**
+- **ai-service:** `POST /api/interview/next-question/stream` and `/generate-followup/stream`.
+  They share their preparation with the JSON endpoints (`_prepare_next_question`,
+  `_followup_payload`), so the two can't drift. Retrieval, bad input and a provider failing
+  before its first token are still ordinary HTTP errors: the first partial is awaited *before*
+  the response starts, so provider fallback works exactly as on the JSON path. After that,
+  `delta` events carry the `question` field as LangChain's JSON parser grows it, and one `done`
+  (the JSON endpoint's exact body, schema-validated) or `error` ends the stream. A partial that
+  would rewrite text already sent is skipped; `done` is authoritative.
+  `astream_with_fallback` only switches provider before anything was yielded, because splicing
+  two models' text would be worse than failing.
+- **Express:** `POST /api/interviews/stream` and `POST /api/interviews/{id}/answer/stream`.
+  Input, unknown session and inactive session are JSON 4xx before the stream opens
+  (`loadTurn`). Then: `evaluation` (answers only), `question` (kind + stage), `delta`s, and
+  `done` (the JSON endpoint's body) or `error` (`{status, error, retryable}`, the same status
+  the JSON endpoint would have used; 409 is `retryable: false`). The JSON endpoints are
+  unchanged, so this is additive until UI B switches over.
+- **The turn is recorded only once the whole question exists.** `answerTurn` and
+  `startInterview` take an optional `TurnStream`. The streamed and JSON paths differ only in
+  which ai-service call generates the question, and they commit in the same transaction.
+- **Disconnect:** the client closing the connection aborts an `AbortSignal` passed to every
+  ai-service call. The upstream fetch closes, Starlette cancels the generator, and the
+  cancellation reaches the provider's stream, so generation stops. Nothing is written, and the
+  same answer can be sent again. If generation had already finished, the turn still commits:
+  it's paid for, and the user sees it on reload. A non-streamed evaluation in flight still runs
+  to completion at the ai-service (FastAPI doesn't cancel plain handlers).
+- **Backpressure is pull-based end to end.** Express awaits `drain` before reading the next
+  upstream event. The upstream reader is pull-based (`sse-reader.ts`), and uvicorn's `send`
+  blocks while its socket is full. So a client that stops reading stops the model instead of
+  growing a buffer.
+- **Proxies:** `X-Accel-Buffering: no` on both hops, and a `: keepalive` comment every 15 s on
+  the Express stream (an evaluation has taken 112 s before, D-061), so Nginx's default 60 s read
+  timeout doesn't cut it.
+- **Cancelled model calls** count as `cancelled` in `/metrics/llm`, not as failures, and their
+  tokens still count toward cost. The ai-service drops INFO logs, so the log line alone was
+  invisible.
+- **Contract:** both stream endpoints are in `openapi.yaml`, with one schema per event's
+  `data`. The validator checks `text/event-stream` responses event by event: the route-test
+  harness parses every stream it receives, and `OPENAPI_VALIDATE_RESPONSES` checks each event
+  as it's sent. FastAPI documents the event unions via an `EventStreamResponse` response class.
+  `main.py` drops the `"type": "string"` FastAPI adds beside the `$ref`.
+- **`metadata_json` and `report_json` have real schemas** (closes D-064's open item):
+  `InterviewMessageMetadata` is a `oneOf` over `kind` (question, followup, answer, evaluation),
+  and `report_json` is `StoredInterviewReport`. `InterviewReport` is now that plus `sessionId`
+  and `company`, and `InterviewStart` and `ResumeEvidence` are named. One route-test fixture
+  stored `{ kind: "question" }` alone, which no real row looks like. It's now complete; no
+  assertion changed.
+- **Generated web types:** `web/src/lib/api/schema.d.ts` is regenerated in this backend commit
+  (Advait approved). It's generated output, never hand-edited, and the D-062 drift check would
+  otherwise fail until UI B. Web tests, lint and `tsc` pass on it unchanged.
+
+**Measured** (`scripts/verify_streaming.py --measure 6`: interleaved pairs, same request, at
+the ai-service, medians):
+
+| | JSON endpoint | Stream: first text | Stream: done |
+|---|---|---|---|
+| `next-question` | 2,167 ms | **1,316 ms** (−39%) | 2,099 ms |
+
+Gemini flash-lite writes a question in only ~4 chunks within ~0.5–1 s, so most of a turn's
+wait is retrieval and time to first token. Streaming shows the question ~40% sooner; it
+doesn't make the turn shorter. Outliers on both sides were provider 429 retries (free tier,
+15 requests/min).
+
+**Verified:**
+- Tests: ai-service 449 (+14), backend 264 (+23, with `REDIS_TEST_URL`), web 96 and
+  code-runner 48 unchanged. `tsc`, build, the drift check.
+- Both guards fail when broken: the disconnect test times out if the close handler doesn't
+  abort, and the slow-reader test fails if `send` stops waiting for `drain` (12.8 MB would be
+  buffered). The ai-service disconnect and backpressure tests drive the real ASGI stack,
+  middleware included.
+- Live (`scripts/verify_streaming.py`, 22/22): both hops stream; `done` matches the JSON body
+  and the stored transcript. Leaving mid-question at the ai-service bumps `cancelled`; leaving
+  through Express aborts upstream (`"outcome":"aborted"`), records nothing, and the model was
+  still generating; resending works. Two simultaneous answers give one `done` and one 409
+  `error`. A client paused for 3 s still gets a complete stream. Input errors are JSON 400/404.
+- `verify_phase7.py` 46/46 and `verify_resume_isolation.py` 41/41 on the branch, 0
+  `openapi_violation` across all live runs since the restart. All 28 stored sessions (166
+  messages, 3 reports) in the local DB validate against the new schemas. A single mutated
+  evaluation score is rejected.
+
 ## 2026-10-06
 
 ### D-064 — UI Group A shipped: homepage paint, accessibility, microphone states, generated client (closes F-09)

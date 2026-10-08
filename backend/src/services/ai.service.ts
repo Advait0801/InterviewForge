@@ -4,6 +4,7 @@ import {
   InterviewStage,
 } from "./interview-state.service";
 
+import { readEvents } from "./sse-reader";
 import {
   CORRELATION_HEADER,
   getCurrentCorrelationId,
@@ -51,11 +52,17 @@ export type InterviewReport = Schemas["InterviewReportResponse"];
 export type CodeReviewResult = Schemas["CodeReviewOutput"];
 export type RecommendationAIResult = Schemas["RecommendationOutput"];
 
-async function sendJson<T>(
+/**
+ * Send a request and return the response once its status is OK; a non-OK status becomes an
+ * AIServiceError carrying FastAPI's `detail`. Aborting `signal` (the client went away) rejects
+ * with the abort reason itself, not an AIServiceError: nothing failed, nobody is waiting.
+ */
+async function send(
   method: "POST" | "DELETE",
   path: string,
-  payload?: unknown
-): Promise<T> {
+  payload: unknown,
+  signal?: AbortSignal
+): Promise<globalThis.Response> {
   let response: globalThis.Response;
   const correlationId = getCurrentCorrelationId();
   const startedAt = Date.now();
@@ -68,8 +75,10 @@ async function sendJson<T>(
         ...(correlationId ? { [CORRELATION_HEADER]: correlationId } : {}),
       },
       body: payload === undefined ? undefined : JSON.stringify(payload),
+      signal,
     });
   } catch (error) {
+    if (signal?.aborted) throw signal.reason;
     console.error(
       JSON.stringify({
         level: "error",
@@ -115,36 +124,120 @@ async function sendJson<T>(
     throw new AIServiceError(response.status, message, parsed);
   }
 
+  return response;
+}
+
+async function sendJson<T>(
+  method: "POST" | "DELETE",
+  path: string,
+  payload?: unknown,
+  signal?: AbortSignal
+): Promise<T> {
+  const response = await send(method, path, payload, signal);
   return response.json() as Promise<T>;
+}
+
+/** How a streamed question reaches its caller. `onDelta` is awaited before more is read. */
+export type QuestionStreamOptions = {
+  signal: AbortSignal;
+  onDelta: (text: string) => Promise<void>;
+};
+
+type StreamEvent = Schemas["NextQuestionStreamEvent"] | Schemas["FollowupStreamEvent"];
+
+/**
+ * POST to one of the ai-service's `/stream` endpoints (D-065) and resolve with the `done`
+ * event's result, which is exactly what the JSON endpoint returns. Failures before the stream
+ * opens are AIServiceErrors from `send`, as on the JSON path; an `error` event, or a stream
+ * that ends without `done`, becomes one too.
+ *
+ * Each delta is awaited before the next chunk is read, so a slow browser holds the read here
+ * and the backpressure reaches the model (see `readEvents`).
+ */
+async function streamQuestion<T>(path: string, payload: unknown, options: QuestionStreamOptions): Promise<T> {
+  const startedAt = Date.now();
+  let firstDeltaMs: number | null = null;
+  let outcome = "aborted";
+  try {
+    const response = await send("POST", path, payload, options.signal);
+    if (!response.body) throw new AIServiceError(503, "AI service stream had no body");
+    for await (const message of readEvents(response.body)) {
+      const event = JSON.parse(message.data) as StreamEvent;
+      if (event.type === "delta") {
+        firstDeltaMs ??= Date.now() - startedAt;
+        await options.onDelta(event.text);
+      } else if (event.type === "done") {
+        outcome = "done";
+        return event.result as T;
+      } else if (event.type === "error") {
+        outcome = "error";
+        throw new AIServiceError(event.status, event.detail, { detail: event.detail });
+      }
+    }
+    outcome = "truncated";
+    throw new AIServiceError(503, "AI service stream ended before the question was complete");
+  } catch (err) {
+    if (options.signal.aborted) throw options.signal.reason;
+    if (outcome === "aborted") outcome = "failed";
+    throw err;
+  } finally {
+    console.info(
+      JSON.stringify({
+        level: "info",
+        event: "ai_service_stream",
+        path,
+        outcome,
+        correlationId: getCurrentCorrelationId(),
+        firstDeltaMs,
+        durationMs: Date.now() - startedAt,
+      })
+    );
+  }
 }
 
 /**
  * POST a request body typed by the ai-service spec. Callers pass an object literal, so an
  * unknown field (a renamed or misspelled key that FastAPI would silently drop) fails tsc.
  */
-async function postJson<T, K extends keyof Schemas>(path: string, payload: Schemas[K]): Promise<T> {
-  return sendJson<T>("POST", path, payload);
+async function postJson<T, K extends keyof Schemas>(
+  path: string,
+  payload: Schemas[K],
+  signal?: AbortSignal
+): Promise<T> {
+  return sendJson<T>("POST", path, payload, signal);
 }
 
-export async function generateNextQuestion(params: {
+type NextQuestionParams = {
   company: Company;
   stage: InterviewStage;
   difficulty: string;
   user_id?: string;
   resume_grounded?: boolean;
   session_id?: string;
-}): Promise<StructuredQuestion> {
-  // previous_answer is deliberately not sent. The backend used to send it as
-  // `previousAnswer`, which FastAPI dropped, so the ai-service has never seen it; turning it
-  // on changes every later stage's retrieval query and needs the eval harness (D-062).
-  return postJson<StructuredQuestion, "NextQuestionRequest">("/api/interview/next-question", {
-    company: params.company,
-    stage: params.stage,
-    difficulty: params.difficulty,
-    user_id: params.user_id,
-    resume_grounded: params.resume_grounded,
-    session_id: params.session_id,
-  });
+};
+
+// previous_answer is deliberately not sent. The backend used to send it as
+// `previousAnswer`, which FastAPI dropped, so the ai-service has never seen it; turning it
+// on changes every later stage's retrieval query and needs the eval harness (D-062).
+const nextQuestionBody = (params: NextQuestionParams): Schemas["NextQuestionRequest"] => ({
+  company: params.company,
+  stage: params.stage,
+  difficulty: params.difficulty,
+  user_id: params.user_id,
+  resume_grounded: params.resume_grounded,
+  session_id: params.session_id,
+});
+
+export async function generateNextQuestion(params: NextQuestionParams): Promise<StructuredQuestion> {
+  return postJson<StructuredQuestion, "NextQuestionRequest">("/api/interview/next-question", nextQuestionBody(params));
+}
+
+/** `generateNextQuestion`, with the question's text passed to `onDelta` as it's generated. */
+export async function streamNextQuestion(
+  params: NextQuestionParams,
+  options: QuestionStreamOptions
+): Promise<StructuredQuestion> {
+  return streamQuestion<StructuredQuestion>("/api/interview/next-question/stream", nextQuestionBody(params), options);
 }
 
 export async function ingestResume(params: {
@@ -171,30 +264,43 @@ export async function evaluateAnswer(params: {
   question: string;
   answer: string;
   context?: string;
-}): Promise<StructuredEvaluation> {
-  return postJson<StructuredEvaluation, "EvaluateAnswerRequest">("/api/interview/evaluate-answer", {
-    company: params.company,
-    stage: params.stage,
-    question: params.question,
-    answer: params.answer,
-    context: params.context,
-  });
+}, signal?: AbortSignal): Promise<StructuredEvaluation> {
+  return postJson<StructuredEvaluation, "EvaluateAnswerRequest">(
+    "/api/interview/evaluate-answer",
+    {
+      company: params.company,
+      stage: params.stage,
+      question: params.question,
+      answer: params.answer,
+      context: params.context,
+    },
+    signal
+  );
 }
 
-export async function generateFollowup(params: {
+type FollowupParams = {
   company: Company;
   stage: InterviewStage;
   question: string;
   answer: string;
   evaluation: StructuredEvaluation;
-}): Promise<StructuredFollowup> {
-  return postJson<StructuredFollowup, "GenerateFollowupRequest">("/api/interview/generate-followup", {
-    company: params.company,
-    stage: params.stage,
-    question: params.question,
-    answer: params.answer,
-    evaluation: params.evaluation,
-  });
+};
+
+const followupBody = (params: FollowupParams): Schemas["GenerateFollowupRequest"] => ({
+  company: params.company,
+  stage: params.stage,
+  question: params.question,
+  answer: params.answer,
+  evaluation: params.evaluation,
+});
+
+export async function generateFollowup(params: FollowupParams): Promise<StructuredFollowup> {
+  return postJson<StructuredFollowup, "GenerateFollowupRequest">("/api/interview/generate-followup", followupBody(params));
+}
+
+/** `generateFollowup`, with the question's text passed to `onDelta` as it's generated. */
+export async function streamFollowup(params: FollowupParams, options: QuestionStreamOptions): Promise<StructuredFollowup> {
+  return streamQuestion<StructuredFollowup>("/api/interview/generate-followup/stream", followupBody(params), options);
 }
 
 export async function transcribeSpeech(params: {

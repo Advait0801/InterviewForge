@@ -14,6 +14,29 @@ load_dotenv()
 app = FastAPI(title="InterviewForge AI Service", version="1.0.0")
 
 
+def _openapi():
+    """FastAPI's spec, minus the `"type": "string"` it puts beside the `$ref` of a
+    non-JSON response. For the event streams that claims the body is a string *and* an
+    event object; the `$ref` (the shape of each event's data) is the true part."""
+    if app.openapi_schema is None:
+        from fastapi.openapi.utils import get_openapi
+
+        schema = get_openapi(
+            title=app.title, version=app.version, openapi_version=app.openapi_version, routes=app.routes
+        )
+        for item in schema.get("paths", {}).values():
+            for operation in item.values():
+                for response in operation.get("responses", {}).values():
+                    stream = response.get("content", {}).get("text/event-stream", {}).get("schema", {})
+                    if "$ref" in stream:
+                        stream.pop("type", None)
+        app.openapi_schema = schema
+    return app.openapi_schema
+
+
+app.openapi = _openapi
+
+
 @app.middleware("http")
 async def correlation_middleware(request: Request, call_next):
     """Adopt the backend's request id so logs from both services can be joined."""

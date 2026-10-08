@@ -10,22 +10,10 @@ import {
 } from "../services/ai.service";
 import { DomainError } from "../services/errors";
 import * as interviews from "../services/interviews.service";
-import { getSingleParam, sendDomainError, sendInternalError } from "./http";
+import { getAIServiceMessage, getSingleParam, sendDomainError, sendInternalError } from "./http";
+import { openEventStream } from "./sse";
 
 const router = Router();
-
-function getAIServiceMessage(err: AIServiceError): string {
-  if (
-    typeof err.details === "object" &&
-    err.details !== null &&
-    "detail" in err.details &&
-    typeof (err.details as { detail?: unknown }).detail === "string"
-  ) {
-    return (err.details as { detail: string }).detail;
-  }
-
-  return err.message;
-}
 
 function sendAIServiceError(res: Response, err: AIServiceError) {
   const statusCode = err.statusCode === 429 ? 429 : 503;
@@ -93,6 +81,41 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   }
 });
 
+/**
+ * `POST /` with the opening question streamed (D-065). Input errors are JSON, as on
+ * `POST /`; once the stream opens, the outcome is a `done` event carrying the same body
+ * `POST /` returns, or an `error` event with the status it would have used.
+ */
+router.post("/stream", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
+  const { company, difficulty, useResume } = req.body as {
+    company?: string;
+    difficulty?: string;
+    useResume?: boolean;
+  };
+
+  if (!company) {
+    return res.status(400).json({ error: "company is required" });
+  }
+
+  const normalizedCompany = normalizeCompany(company);
+  if (!normalizedCompany) {
+    return res.status(400).json({ error: `company must be one of: ${COMPANIES.join(", ")}` });
+  }
+
+  const stream = openEventStream(req, res);
+  try {
+    const started = await interviews.startInterview(
+      { userId: req.user!.id, company: normalizedCompany, difficulty, useResume },
+      stream.turn
+    );
+    await stream.send({ type: "done", result: started });
+  } catch (err) {
+    await stream.fail("Create interview session stream error", err);
+  } finally {
+    stream.end();
+  }
+});
+
 router.get("/:id", requireAuth, async (req: AuthRequest, res) => {
   const id = getSingleParam(req.params.id);
 
@@ -137,6 +160,37 @@ router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res
     return res.json(await interviews.submitAnswer(id, req.user!.id, answer));
   } catch (err) {
     return sendInterviewError(res, "Submit interview answer error", err);
+  }
+});
+
+/** `POST /:id/answer` with the next question streamed; same split as `POST /stream`. */
+router.post("/:id/answer/stream", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
+  const id = getSingleParam(req.params.id);
+  const { answer } = req.body as { answer?: string };
+
+  if (!id || !UUID_REGEX.test(id)) {
+    return res.status(400).json({ error: "Invalid session id" });
+  }
+
+  if (!answer?.trim()) {
+    return res.status(400).json({ error: "answer is required" });
+  }
+
+  let turn: interviews.Turn;
+  try {
+    turn = await interviews.loadTurn(id, req.user!.id);
+  } catch (err) {
+    return sendInterviewError(res, "Submit interview answer error", err);
+  }
+
+  const stream = openEventStream(req, res);
+  try {
+    const outcome = await interviews.answerTurn(turn, req.user!.id, answer, stream.turn);
+    await stream.send({ type: "done", result: outcome });
+  } catch (err) {
+    await stream.fail("Submit interview answer stream error", err);
+  } finally {
+    stream.end();
   }
 });
 

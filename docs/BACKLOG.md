@@ -20,8 +20,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
   retrieval that already exists.
 - **Hint-ladder policy** *(M, Loud)* — track time-stuck and answer quality, decide whether to
   nudge, apply a scoring penalty per hint.
-- **SSE streaming** *(M, Loud)* — token-by-token through FastAPI → Express → browser. Real UX
-  win and a genuine backpressure conversation across two hops.
 - **Interviewer personas** *(S)* — friendly / terse / adversarial as a prompt dimension.
 - **Previous-answer conditioning** *(S)* — the ai-service can append the candidate's last
   answer to the next stage's retrieval query, but it never received it (D-062). Measure with

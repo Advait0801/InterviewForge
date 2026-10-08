@@ -1,7 +1,9 @@
 import json
-from typing import Any, Dict, Optional
+import logging
+from typing import Any, Callable, Dict, Optional
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.core import config
@@ -15,6 +17,10 @@ from app.interview.orchestrator import (
     retrieve_with_live_fallback,
 )
 from app.llm.chains import (
+    ResumeGroundedQuestionOutput,
+    StructuredFollowupOutput,
+    StructuredQuestionOutput,
+    astream_with_fallback,
     evaluation_chain,
     followup_chain,
     interview_report_chain,
@@ -27,7 +33,30 @@ from app.llm.chains import (
 )
 from app.rag.service import RAGService
 from app.resume.store import ResumeStore
-from app.api.schemas import InterviewReportResponse, NextQuestionResponse, StructuredEvaluationOutput, StructuredFollowupOutput, documented
+from app.api.schemas import (
+    FollowupStreamEvent,
+    InterviewReportResponse,
+    NextQuestionResponse,
+    NextQuestionStreamEvent,
+    StructuredEvaluationOutput,
+    documented,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class EventStreamResponse(StreamingResponse):
+    """A server-sent-event stream. As a `response_class` it also makes the OpenAPI spec
+    document the route's 200 under `text/event-stream`."""
+
+    media_type = "text/event-stream"
+
+    # FastAPI reads the documented status from this signature's default.
+    def __init__(self, content, status_code: int = 200, **kwargs):
+        super().__init__(content, status_code=status_code, **kwargs)
+        # No proxy buffering or caching: each event must reach the client when sent.
+        self.headers["Cache-Control"] = "no-cache"
+        self.headers["X-Accel-Buffering"] = "no"
 
 router = APIRouter(prefix="/api/interview", tags=["interview"])
 
@@ -124,14 +153,91 @@ def _safe_company_style(company: str) -> str:
     return get_company_style(company)
 
 
-def _raise_llm_http_error(exc: Exception) -> None:
+def _llm_error(exc: Exception) -> HTTPException:
     text = str(exc)
     lowered = text.lower()
 
     if "429" in lowered or "quota" in lowered or "rate limit" in lowered or "resourceexhausted" in lowered:
-        raise HTTPException(status_code=429, detail=f"LLM rate limited: {text}")
+        return HTTPException(status_code=429, detail=f"LLM rate limited: {text}")
 
-    raise HTTPException(status_code=503, detail=f"LLM unavailable: {text}")
+    return HTTPException(status_code=503, detail=f"LLM unavailable: {text}")
+
+
+def _raise_llm_http_error(exc: Exception) -> None:
+    raise _llm_error(exc)
+
+
+def _sse(event: dict) -> bytes:
+    """One server-sent event. The `event:` field repeats `type`, so a client can use
+    either an EventSource-style listener or the JSON discriminator."""
+    return f"event: {event['type']}\ndata: {json.dumps(event)}\n\n".encode()
+
+
+async def _stream_question(chain, payload: dict, output_model, finalize: Callable[[dict], dict]):
+    """Run a question chain as a stream of `delta` events closed by `done` or `error`.
+
+    The first partial output is awaited *before* the response starts, so a provider that
+    fails up front (and the fallback to the next one) behaves exactly as on the JSON
+    endpoint: a real 429/503, not a 200 carrying an error event.
+
+    Only the `question` field streams. The model writes JSON, and LangChain's parser
+    yields a growing partial object; each delta is what the question gained since the
+    last one. A partial that isn't an extension of what was already sent (possible
+    mid-escape) is skipped -- text can't be taken back -- and the `done` copy is
+    authoritative.
+
+    Backpressure is end to end: uvicorn's `send` waits while the socket is full, so the
+    next partial isn't pulled from the provider until the client reads. On disconnect
+    Starlette cancels this generator; the cancellation reaches the provider's stream and
+    generation stops (`llm_stream_cancelled` is logged).
+    """
+    stream = astream_with_fallback(chain, payload).__aiter__()
+    try:
+        first = await stream.__anext__()
+    except StopAsyncIteration:
+        raise HTTPException(status_code=503, detail="LLM unavailable: empty response")
+    except Exception as exc:
+        await stream.aclose()
+        _raise_llm_http_error(exc)
+
+    async def events():
+        sent = ""
+        last = first
+        outcome = "cancelled"  # stays so only if the client left mid-stream
+        try:
+            partial = first
+            while True:
+                last = partial
+                text = partial.get("question") if isinstance(partial, dict) else None
+                if isinstance(text, str) and len(text) > len(sent) and text.startswith(sent):
+                    yield _sse({"type": "delta", "text": text[len(sent):]})
+                    sent = text
+                try:
+                    partial = await stream.__anext__()
+                except StopAsyncIteration:
+                    break
+            outcome = "finished"
+        except Exception as exc:
+            outcome = "failed"
+            error = _llm_error(exc)
+            yield _sse({"type": "error", "status": error.status_code, "detail": error.detail})
+            return
+        finally:
+            if outcome == "cancelled":
+                logger.info(json.dumps({"event": "llm_stream_cancelled", "sent_chars": len(sent)}))
+            await stream.aclose()
+
+        # Truncated or malformed model output: the JSON endpoint fails to parse it too.
+        # Not passed on, because the backend records the question as given.
+        try:
+            output_model.model_validate(last)
+        except Exception as exc:
+            detail = f"LLM unavailable: incomplete output ({exc.__class__.__name__})"
+            yield _sse({"type": "error", "status": 503, "detail": detail})
+            return
+        yield _sse({"type": "done", "result": finalize(last)})
+
+    return EventStreamResponse(events())
 
 
 @router.post("/generate-question")
@@ -197,8 +303,12 @@ async def followup(req: FollowUpRequest):
     }
 
 
-@router.post("/next-question", responses=documented(NextQuestionResponse))
-async def next_question(req: NextQuestionRequest):
+def _prepare_next_question(req: NextQuestionRequest):
+    """Everything before the model call: retrieval, resume grounding, the prompt payload.
+
+    Shared by the JSON and streaming endpoints so the two can't drift. Returns the chain,
+    its payload, and the response fields that come from retrieval rather than the model.
+    """
     try:
         get_company_profile(req.company)
     except ValueError as e:
@@ -255,15 +365,12 @@ async def next_question(req: NextQuestionRequest):
     if resume_hits:
         payload["resume_context"] = build_resume_context(resume_hits)
         chain = resume_grounded_question_chain
+        output_model = ResumeGroundedQuestionOutput
     else:
         chain = structured_question_chain
+        output_model = StructuredQuestionOutput
 
-    try:
-        result = await invoke_with_fallback(chain, payload)
-    except Exception as exc:
-        _raise_llm_http_error(exc)
-    return {
-        **result,
+    extras = {
         "retrievalHits": len(retrieved["hits"]),
         "context": context,
         # Surfaced so the caller can see which path served the question -- a
@@ -274,6 +381,34 @@ async def next_question(req: NextQuestionRequest):
         "resumeHits": len(resume_hits),
         "resumeEvidence": resume_evidence(resume_hits),
     }
+    return chain, payload, output_model, extras
+
+
+@router.post("/next-question", responses=documented(NextQuestionResponse))
+async def next_question(req: NextQuestionRequest):
+    chain, payload, _, extras = _prepare_next_question(req)
+    try:
+        result = await invoke_with_fallback(chain, payload)
+    except Exception as exc:
+        _raise_llm_http_error(exc)
+    return {**result, **extras}
+
+
+@router.post(
+    "/next-question/stream",
+    response_class=EventStreamResponse,
+    responses=documented(NextQuestionStreamEvent),
+)
+async def next_question_stream(req: NextQuestionRequest):
+    """`/next-question`, with the question's text streamed as it is generated (D-065).
+
+    Bad input, a retrieval outage, or a provider failing before its first token are
+    ordinary HTTP errors, exactly as on the JSON endpoint. After that the response is a
+    `text/event-stream` of `delta` events and one `done` (the JSON endpoint's body) or
+    `error`.
+    """
+    chain, payload, output_model, extras = _prepare_next_question(req)
+    return await _stream_question(chain, payload, output_model, lambda result: {**result, **extras})
 
 
 @router.post("/evaluate-answer", responses=documented(StructuredEvaluationOutput))
@@ -297,25 +432,42 @@ async def evaluate_answer(req: EvaluateAnswerRequest):
     return result
 
 
-@router.post("/generate-followup", responses=documented(StructuredFollowupOutput))
-async def generate_followup(req: GenerateFollowupRequest):
+def _followup_payload(req: GenerateFollowupRequest) -> dict:
     try:
         get_company_profile(req.company)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    return {
+        "company": req.company,
+        "company_style": _safe_company_style(req.company),
+        "stage": req.stage,
+        "question": req.question,
+        "answer": req.answer,
+        "evaluation": json.dumps(req.evaluation),
+    }
 
+
+@router.post("/generate-followup", responses=documented(StructuredFollowupOutput))
+async def generate_followup(req: GenerateFollowupRequest):
+    payload = _followup_payload(req)
     try:
-        result = await invoke_with_fallback(structured_followup_chain, {
-            "company": req.company,
-            "company_style": _safe_company_style(req.company),
-            "stage": req.stage,
-            "question": req.question,
-            "answer": req.answer,
-            "evaluation": json.dumps(req.evaluation),
-        })
+        result = await invoke_with_fallback(structured_followup_chain, payload)
     except Exception as exc:
         _raise_llm_http_error(exc)
     return result
+
+
+@router.post(
+    "/generate-followup/stream",
+    response_class=EventStreamResponse,
+    responses=documented(FollowupStreamEvent),
+)
+async def generate_followup_stream(req: GenerateFollowupRequest):
+    """`/generate-followup`, streamed; same event contract as `/next-question/stream`."""
+    payload = _followup_payload(req)
+    return await _stream_question(
+        structured_followup_chain, payload, StructuredFollowupOutput, lambda result: result
+    )
 
 
 @router.post("/generate-report", responses=documented(InterviewReportResponse))

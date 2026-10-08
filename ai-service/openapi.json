@@ -313,6 +313,50 @@
         "title": "FollowUpRequest",
         "type": "object"
       },
+      "FollowupStreamDone": {
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/StructuredFollowupOutput"
+          },
+          "type": {
+            "const": "done",
+            "enum": [
+              "done"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "result"
+        ],
+        "title": "FollowupStreamDone",
+        "type": "object"
+      },
+      "FollowupStreamEvent": {
+        "description": "The `data` of one `text/event-stream` event; the SSE `event:` field repeats `type`.",
+        "discriminator": {
+          "mapping": {
+            "delta": "#/components/schemas/StreamDelta",
+            "done": "#/components/schemas/FollowupStreamDone",
+            "error": "#/components/schemas/StreamError"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/StreamDelta"
+          },
+          {
+            "$ref": "#/components/schemas/FollowupStreamDone"
+          },
+          {
+            "$ref": "#/components/schemas/StreamError"
+          }
+        ],
+        "title": "FollowupStreamEvent"
+      },
       "GenerateFollowupRequest": {
         "properties": {
           "answer": {
@@ -811,6 +855,50 @@
         "title": "NextQuestionResponse",
         "type": "object"
       },
+      "NextQuestionStreamDone": {
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/NextQuestionResponse"
+          },
+          "type": {
+            "const": "done",
+            "enum": [
+              "done"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "result"
+        ],
+        "title": "NextQuestionStreamDone",
+        "type": "object"
+      },
+      "NextQuestionStreamEvent": {
+        "description": "The `data` of one `text/event-stream` event; the SSE `event:` field repeats `type`.",
+        "discriminator": {
+          "mapping": {
+            "delta": "#/components/schemas/StreamDelta",
+            "done": "#/components/schemas/NextQuestionStreamDone",
+            "error": "#/components/schemas/StreamError"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/StreamDelta"
+          },
+          {
+            "$ref": "#/components/schemas/NextQuestionStreamDone"
+          },
+          {
+            "$ref": "#/components/schemas/StreamError"
+          }
+        ],
+        "title": "NextQuestionStreamEvent"
+      },
       "QueryRequest": {
         "properties": {
           "answer": {
@@ -1171,6 +1259,57 @@
           "notes"
         ],
         "title": "RubricSectionScore",
+        "type": "object"
+      },
+      "StreamDelta": {
+        "description": "More of the question's text, in order. Concatenated, the deltas are a prefix of\nthe final `question`; the `done` event's copy is authoritative.",
+        "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "const": "delta",
+            "enum": [
+              "delta"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "text"
+        ],
+        "title": "StreamDelta",
+        "type": "object"
+      },
+      "StreamError": {
+        "description": "Generation failed after the stream opened. `status` is what the JSON endpoint\nwould have returned (429 rate limited, 503 otherwise).",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "integer"
+          },
+          "type": {
+            "const": "error",
+            "enum": [
+              "error"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "status",
+          "detail"
+        ],
+        "title": "StreamError",
         "type": "object"
       },
       "StructuredEvaluationOutput": {
@@ -1720,6 +1859,48 @@
         ]
       }
     },
+    "/api/interview/generate-followup/stream": {
+      "post": {
+        "description": "`/generate-followup`, streamed; same event contract as `/next-question/stream`.",
+        "operationId": "generate_followup_stream_api_interview_generate_followup_stream_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateFollowupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowupStreamEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Followup Stream",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
     "/api/interview/generate-question": {
       "post": {
         "operationId": "generate_question_api_interview_generate_question_post",
@@ -1836,6 +2017,48 @@
           }
         },
         "summary": "Next Question",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
+    "/api/interview/next-question/stream": {
+      "post": {
+        "description": "`/next-question`, with the question's text streamed as it is generated (D-065).\n\nBad input, a retrieval outage, or a provider failing before its first token are\nordinary HTTP errors, exactly as on the JSON endpoint. After that the response is a\n`text/event-stream` of `delta` events and one `done` (the JSON endpoint's body) or\n`error`.",
+        "operationId": "next_question_stream_api_interview_next_question_stream_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NextQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextQuestionStreamEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Next Question Stream",
         "tags": [
           "interview"
         ]

@@ -7,9 +7,10 @@ handler returns: chain output passes through exactly as before. The backend gene
 TypeScript types from the committed spec (`ai-service/openapi.json`), so a change here that
 breaks Express fails the backend's typecheck (D-062).
 """
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, RootModel
+from typing_extensions import Annotated
 
 from app.llm.chains import (
     CodeReviewOutput,
@@ -108,6 +109,45 @@ class ResumePurgeResponse(BaseModel):
     verified: bool
 
 
+class StreamDelta(BaseModel):
+    """More of the question's text, in order. Concatenated, the deltas are a prefix of
+    the final `question`; the `done` event's copy is authoritative."""
+
+    type: Literal["delta"]
+    text: str
+
+
+class StreamError(BaseModel):
+    """Generation failed after the stream opened. `status` is what the JSON endpoint
+    would have returned (429 rate limited, 503 otherwise)."""
+
+    type: Literal["error"]
+    status: int
+    detail: str
+
+
+class NextQuestionStreamDone(BaseModel):
+    type: Literal["done"]
+    result: NextQuestionResponse
+
+
+class FollowupStreamDone(BaseModel):
+    type: Literal["done"]
+    result: StructuredFollowupOutput
+
+
+class NextQuestionStreamEvent(RootModel):
+    """The `data` of one `text/event-stream` event; the SSE `event:` field repeats `type`."""
+
+    root: Annotated[Union[StreamDelta, NextQuestionStreamDone, StreamError], Field(discriminator="type")]
+
+
+class FollowupStreamEvent(RootModel):
+    """The `data` of one `text/event-stream` event; the SSE `event:` field repeats `type`."""
+
+    root: Annotated[Union[StreamDelta, FollowupStreamDone, StreamError], Field(discriminator="type")]
+
+
 def documented(model: type[BaseModel]) -> Dict[int, Dict[str, type[BaseModel]]]:
     """`responses=` value documenting a 200 body without enforcing it."""
     return {200: {"model": model}}
@@ -115,13 +155,19 @@ def documented(model: type[BaseModel]) -> Dict[int, Dict[str, type[BaseModel]]]:
 
 __all__ = [
     "CodeReviewOutput",
+    "FollowupStreamDone",
+    "FollowupStreamEvent",
     "InterviewReportResponse",
     "LiveIngestion",
     "NextQuestionResponse",
+    "NextQuestionStreamDone",
+    "NextQuestionStreamEvent",
     "RecommendationOutput",
     "ResumeIngestResponse",
     "ResumePurgeResponse",
     "RetrievalConfidence",
+    "StreamDelta",
+    "StreamError",
     "StructuredEvaluationOutput",
     "StructuredFollowupOutput",
     "SystemDesignAnalysisOutput",

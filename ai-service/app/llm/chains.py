@@ -1,6 +1,6 @@
 import re
 import time
-from typing import Callable, Dict, List, Optional, TypeVar
+from typing import AsyncIterator, Callable, Dict, List, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
@@ -119,6 +119,49 @@ async def invoke_with_fallback(
     if last_error:
         raise last_error
     raise RuntimeError("No LLM provider configured. Set GEMINI_API_KEY or OPENAI_API_KEY.")
+
+
+async def astream_with_fallback(
+    chain_factory: Callable[[Optional[str]], object],
+    payload: dict,
+    *,
+    chain_name: Optional[str] = None,
+) -> AsyncIterator[object]:
+    """`invoke_with_fallback`, streamed: yields the chain's growing partial output.
+
+    A provider can only be swapped before anything has been yielded; once the caller has
+    shown text from one model, switching to another would splice two different answers
+    together, so a later failure is raised as-is. Closing the generator early (a client
+    disconnect) propagates into the provider's stream and stops generation; the call is
+    recorded with what was produced so far, so cancelled streams still show up in cost.
+    """
+    from app.core.observability import timed
+
+    label = chain_name or getattr(chain_factory, "__name__", "unknown")
+    providers = _available_providers()
+    if not providers:
+        raise RuntimeError("No LLM provider configured. Set GEMINI_API_KEY or OPENAI_API_KEY.")
+    for idx, provider in enumerate(providers):
+        yielded = False
+        try:
+            chain = chain_factory(provider)
+            with timed(label, provider, _model_for(provider)) as call:
+                last: object = None
+                try:
+                    async for partial in chain.astream(payload):
+                        last = partial
+                        yielded = True
+                        yield partial
+                finally:
+                    call.input_tokens, call.output_tokens = _estimate_tokens(payload, last or "")
+            return
+        except Exception as exc:
+            if yielded:
+                raise
+            if provider == "gemini" and _should_fallback(exc):
+                _provider_cooldowns["gemini"] = time.time() + _extract_retry_seconds(exc)
+            if not _should_fallback(exc) or idx == len(providers) - 1:
+                raise
 
 
 def question_generation_chain(provider: Optional[str] = None):

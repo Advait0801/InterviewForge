@@ -106,6 +106,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/interview/generate-followup/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate Followup Stream
+         * @description `/generate-followup`, streamed; same event contract as `/next-question/stream`.
+         */
+        post: operations["generate_followup_stream_api_interview_generate_followup_stream_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/interview/generate-question": {
         parameters: {
             query?: never;
@@ -151,6 +171,31 @@ export interface paths {
         put?: never;
         /** Next Question */
         post: operations["next_question_api_interview_next_question_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/interview/next-question/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Next Question Stream
+         * @description `/next-question`, with the question's text streamed as it is generated (D-065).
+         *
+         *     Bad input, a retrieval outage, or a provider failing before its first token are
+         *     ordinary HTTP errors, exactly as on the JSON endpoint. After that the response is a
+         *     `text/event-stream` of `delta` events and one `done` (the JSON endpoint's body) or
+         *     `error`.
+         */
+        post: operations["next_question_stream_api_interview_next_question_stream_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -552,6 +597,20 @@ export interface components {
             /** Question */
             question: string;
         };
+        /** FollowupStreamDone */
+        FollowupStreamDone: {
+            result: components["schemas"]["StructuredFollowupOutput"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "done";
+        };
+        /**
+         * FollowupStreamEvent
+         * @description The `data` of one `text/event-stream` event; the SSE `event:` field repeats `type`.
+         */
+        FollowupStreamEvent: components["schemas"]["StreamDelta"] | components["schemas"]["FollowupStreamDone"] | components["schemas"]["StreamError"];
         /** GenerateFollowupRequest */
         GenerateFollowupRequest: {
             /** Answer */
@@ -729,6 +788,20 @@ export interface components {
             /** Retrievalhits */
             retrievalHits: number;
         };
+        /** NextQuestionStreamDone */
+        NextQuestionStreamDone: {
+            result: components["schemas"]["NextQuestionResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "done";
+        };
+        /**
+         * NextQuestionStreamEvent
+         * @description The `data` of one `text/event-stream` event; the SSE `event:` field repeats `type`.
+         */
+        NextQuestionStreamEvent: components["schemas"]["StreamDelta"] | components["schemas"]["NextQuestionStreamDone"] | components["schemas"]["StreamError"];
         /** QueryRequest */
         QueryRequest: {
             /**
@@ -885,6 +958,36 @@ export interface components {
              * @description Section score from 1 to 10.
              */
             score: number;
+        };
+        /**
+         * StreamDelta
+         * @description More of the question's text, in order. Concatenated, the deltas are a prefix of
+         *     the final `question`; the `done` event's copy is authoritative.
+         */
+        StreamDelta: {
+            /** Text */
+            text: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "delta";
+        };
+        /**
+         * StreamError
+         * @description Generation failed after the stream opened. `status` is what the JSON endpoint
+         *     would have returned (429 rate limited, 503 otherwise).
+         */
+        StreamError: {
+            /** Detail */
+            detail: string;
+            /** Status */
+            status: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "error";
         };
         /** StructuredEvaluationOutput */
         StructuredEvaluationOutput: {
@@ -1220,6 +1323,39 @@ export interface operations {
             };
         };
     };
+    generate_followup_stream_api_interview_generate_followup_stream_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateFollowupRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["FollowupStreamEvent"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     generate_question_api_interview_generate_question_post: {
         parameters: {
             query?: never;
@@ -1306,6 +1442,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NextQuestionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    next_question_stream_api_interview_next_question_stream_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NextQuestionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["NextQuestionStreamEvent"];
                 };
             };
             /** @description Validation Error */
