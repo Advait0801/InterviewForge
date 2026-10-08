@@ -40,8 +40,10 @@ independently before merge.
 - `InterviewMessage.metadata_json` and `InterviewSession.report_json` are bare `type: object`
   in the spec, so they generate as `Record<string, never>` and the UI reads `kind` through a
   `never` type. Works at runtime; to be typed in Phase 4, which reworks interview messages.
-- A manual screen-reader pass and a real-device microphone check are Advait's; until done,
-  the BACKLOG item stays.
+- Real microphone, checked by Advait in Chrome (2026-10-07): live speech transcribed word for
+  word into the answer, a blocked microphone showed the plain message, and a near-silent clip
+  triggered the confirmation instead of appending "You". The VoiceOver pass and Safari are
+  still open (BACKLOG).
 - Codex's evidence lives in `web/docs/ui-group-a/` (1.2 MB; not in the prod image).
 
 ### D-063 — Redis: shared rate limits, a bounded code-run queue, a cached leaderboard (closes F-19)

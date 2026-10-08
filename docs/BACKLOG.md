@@ -57,5 +57,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Carried over from the UI workstream
 
-- **Screen-reader and real-device microphone testing** were outside the automated pass;
-  narrow-width checks cover the responsive site, not a native client.
+- **Screen-reader pass** *(S)* — axe is clean (D-064), but no one has walked the site with
+  VoiceOver. The real-microphone check was done in Chrome on 2026-10-07; Safari (`audio/mp4`)
+  is still untried on real hardware.
