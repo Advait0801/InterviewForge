@@ -42,8 +42,8 @@ independently before merge.
   `never` type. Works at runtime; to be typed in Phase 4, which reworks interview messages.
 - Real microphone, checked by Advait in Chrome (2026-10-07): live speech transcribed word for
   word into the answer, a blocked microphone showed the plain message, and a near-silent clip
-  triggered the confirmation instead of appending "You". The VoiceOver pass and Safari are
-  still open (BACKLOG).
+  triggered the confirmation instead of appending "You". Advait also walked the site with
+  VoiceOver: no problems found. Only Safari recording is still open (BACKLOG).
 - Codex's evidence lives in `web/docs/ui-group-a/` (1.2 MB; not in the prod image).
 
 ### D-063 — Redis: shared rate limits, a bounded code-run queue, a cached leaderboard (closes F-19)

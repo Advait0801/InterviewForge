@@ -57,6 +57,5 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Carried over from the UI workstream
 
-- **Screen-reader pass** *(S)* — axe is clean (D-064), but no one has walked the site with
-  VoiceOver. The real-microphone check was done in Chrome on 2026-10-07; Safari (`audio/mp4`)
-  is still untried on real hardware.
+- **Safari recording** *(S)* — the real-microphone and VoiceOver checks passed in Chrome
+  (D-064); Safari records `audio/mp4` and is still untried on real hardware.
