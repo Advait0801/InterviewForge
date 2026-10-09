@@ -44,6 +44,23 @@ function sendInterviewError(res: Response, label: string, err: unknown) {
   return sendInternalError(res, label, err);
 }
 
+/** The body of both start endpoints. */
+function parseStart(body: unknown) {
+  const { company, difficulty, useResume, persona } = (body ?? {}) as {
+    company?: string;
+    difficulty?: string;
+    useResume?: boolean;
+    persona?: unknown;
+  };
+  if (!company) return { error: "company is required" };
+  const normalized = normalizeCompany(company);
+  if (!normalized) return { error: `company must be one of: ${COMPANIES.join(", ")}` };
+  if (persona !== undefined && !interviews.isPersona(persona)) {
+    return { error: `persona must be one of: ${interviews.PERSONAS.join(", ")}` };
+  }
+  return { company: normalized, difficulty, useResume, persona };
+}
+
 router.get("/", requireAuth, async (req: AuthRequest, res) => {
   try {
     return res.json({ sessions: await interviews.listSessions(req.user!.id) });
@@ -53,20 +70,9 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
 });
 
 router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
-  const { company, difficulty, useResume } = req.body as {
-    company?: string;
-    difficulty?: string;
-    useResume?: boolean;
-  };
-
-  if (!company) {
-    return res.status(400).json({ error: "company is required" });
-  }
-
-  const normalizedCompany = normalizeCompany(company);
-  if (!normalizedCompany) {
-    return res.status(400).json({ error: `company must be one of: ${COMPANIES.join(", ")}` });
-  }
+  const parsed = parseStart(req.body);
+  if ("error" in parsed) return res.status(400).json({ error: parsed.error });
+  const { company: normalizedCompany, difficulty, useResume, persona } = parsed;
 
   try {
     const started = await interviews.startInterview({
@@ -74,6 +80,7 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
       company: normalizedCompany,
       difficulty,
       useResume,
+      persona,
     });
     return res.status(201).json(started);
   } catch (err) {
@@ -87,25 +94,14 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
  * `POST /` returns, or an `error` event with the status it would have used.
  */
 router.post("/stream", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
-  const { company, difficulty, useResume } = req.body as {
-    company?: string;
-    difficulty?: string;
-    useResume?: boolean;
-  };
-
-  if (!company) {
-    return res.status(400).json({ error: "company is required" });
-  }
-
-  const normalizedCompany = normalizeCompany(company);
-  if (!normalizedCompany) {
-    return res.status(400).json({ error: `company must be one of: ${COMPANIES.join(", ")}` });
-  }
+  const parsed = parseStart(req.body);
+  if ("error" in parsed) return res.status(400).json({ error: parsed.error });
+  const { company: normalizedCompany, difficulty, useResume, persona } = parsed;
 
   const stream = openEventStream(req, res);
   try {
     const started = await interviews.startInterview(
-      { userId: req.user!.id, company: normalizedCompany, difficulty, useResume },
+      { userId: req.user!.id, company: normalizedCompany, difficulty, useResume, persona },
       stream.turn
     );
     await stream.send({ type: "done", result: started });
@@ -191,6 +187,28 @@ router.post("/:id/answer/stream", requireAuth, llmLimiter, async (req: AuthReque
     await stream.fail("Submit interview answer stream error", err);
   } finally {
     stream.end();
+  }
+});
+
+/**
+ * The next hint for the question being answered (D-066). Each one costs a point off that
+ * answer's score; 409 with `code` when none are left or the next isn't unlocked yet.
+ */
+router.post("/:id/hint", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
+  const id = getSingleParam(req.params.id);
+  const { draft } = (req.body ?? {}) as { draft?: unknown };
+
+  if (!id || !UUID_REGEX.test(id)) {
+    return res.status(400).json({ error: "Invalid session id" });
+  }
+  if (draft !== undefined && typeof draft !== "string") {
+    return res.status(400).json({ error: "draft must be a string" });
+  }
+
+  try {
+    return res.json(await interviews.requestHint(id, req.user!.id, draft));
+  } catch (err) {
+    return sendInterviewError(res, "Interview hint error", err);
   }
 });
 

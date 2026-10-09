@@ -46,6 +46,7 @@ PRICING: Dict[str, Dict[str, float]] = {
     "gemini-3.7-flash": {"input": 0.30, "output": 2.50},
     "gemini-3.8-flash": {"input": 0.30, "output": 2.50},
     "gpt-4o-mini": {"input": 0.15, "output": 0.60},
+    "gpt-4o": {"input": 2.50, "output": 10.00},
     "text-embedding-3-small": {"input": 0.02, "output": 0.0},
 }
 DEFAULT_PRICE = {"input": 0.30, "output": 2.50}

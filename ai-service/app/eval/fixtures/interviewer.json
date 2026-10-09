@@ -1,0 +1,1401 @@
+{
+  "challenge": {
+    "audio-right": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "The candidate's approach aligns with the reference context's mention of bounded queues and drop policies, and does not contradict any stated facts."
+    },
+    "audio-wrong": {
+      "challenged": true,
+      "claim": "Use unbounded queues between the decoder and the audio thread so nothing is ever dropped, and let the queue grow until the load passes.",
+      "evidence": "Real-time audio/video: bounded queues, backpressure, drop policies.",
+      "question": "You suggested using unbounded queues to prevent drops, but standard real-time audio practices emphasize the use of bounded queues and specific drop policies. How would using an unbounded queue impact the system's memory stability or latency under high load, and why might bounded queues be preferred in this context?",
+      "reason": "The candidate's suggestion of using unbounded queues directly contradicts the reference context's requirement for bounded queues in real-time audio systems."
+    },
+    "clocks-different": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "The candidate's preference for vector clocks is not contradicted by the reference material, which simply lists logical and vector clocks as relevant topics."
+    },
+    "consensus-right": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "The candidate's answer aligns with the reference context's mention that Raft is easier to reason about than Paxos."
+    },
+    "consensus-wrong": {
+      "challenged": true,
+      "claim": "Paxos is much easier to reason about than Raft in practice",
+      "evidence": "why Raft is easier to reason about than Paxos in practice for many systems.",
+      "question": "You mentioned that Paxos is easier to reason about than Raft, but the standard consensus on this topic suggests that Raft is actually designed to be more understandable and easier to reason about than Paxos. Given this, how would you reconcile your view with the industry consensus that Raft is the more approachable protocol?",
+      "reason": "The candidate's claim directly contradicts the provided reference material which explicitly states that Raft is easier to reason about than Paxos."
+    },
+    "exactly-once-right": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "The candidate's answer aligns with the concept of idempotency mentioned in the provided reference context."
+    },
+    "exactly-once-wrong": {
+      "challenged": true,
+      "claim": "At-least-once delivery can never give you exactly-once behaviour, even if every handler is idempotent",
+      "evidence": "Idempotency: why at-least-once delivery plus idempotent handlers gives effective exactly-once behavior.",
+      "question": "The reference material suggests that at-least-once delivery combined with idempotent handlers results in effective exactly-once behavior; could you explain why you believe this combination is insufficient?",
+      "reason": "The candidate explicitly denies that at-least-once delivery with idempotent handlers can achieve exactly-once behavior, which directly contradicts the provided reference text."
+    },
+    "locks-different": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "The candidate's suggestion of using locks with priority inheritance is a common strategy for handling priority inversion, and the reference context does not explicitly forbid or contradict this approach, though it does emphasize real-time constraints."
+    },
+    "not-covered": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "The candidate's answer discusses API design (gRPC/deadlines), which is not addressed or contradicted by the provided reference context covering consensus, clocks, idempotency, backpressure, and networking protocols."
+    },
+    "presence-weak": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "not confirmed: The passage suggests alternative methods for handling state, but it does not explicitly state that using a database is incorrect or false."
+    },
+    "presence-wrong": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "not confirmed: The passage lists WebSockets and long polling as approaches for client updates but does not comment on their viability or scalability at Meta."
+    },
+    "prewarm-right": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "The candidate's suggestions are aligned with the reference context, which explicitly mentions pre-warming capacity, autoscaling, and feature flags."
+    },
+    "prewarm-wrong": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "not confirmed: The provided passage lists these topics as areas of focus but does not provide specific details or claims about their effectiveness, making it impossible to determine if the claim is false based on the text."
+    },
+    "quic-wrong": {
+      "challenged": true,
+      "claim": "QUIC runs on top of TCP, so it inherits TCP's head-of-line blocking",
+      "evidence": "QUIC over UDP: connection migration, reduced head-of-line blocking.",
+      "question": "You mentioned that QUIC runs on top of TCP and inherits its head-of-line blocking, but my reference notes indicate that QUIC operates over UDP and is specifically designed to reduce head-of-line blocking. Could you clarify how the transport layer choice affects this behavior?",
+      "reason": "The candidate incorrectly identifies QUIC as running on TCP, whereas the reference material explicitly states it runs on UDP and provides the benefit of reduced head-of-line blocking."
+    },
+    "shedding-different": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "The candidate's preference for load shedding at the load balancer is a design choice that complements, rather than contradicts, the reference material's suggestion to use feature flags."
+    },
+    "zippydb-right": {
+      "challenged": false,
+      "claim": "",
+      "evidence": "",
+      "question": "",
+      "reason": "The candidate's approach aligns with the reference material, which explicitly identifies ZippyDB and ZGateway (proxy) as components used for these types of systems."
+    },
+    "zippydb-wrong": {
+      "challenged": true,
+      "claim": "ZippyDB is a niche store at Meta that hardly anything uses",
+      "evidence": "ZippyDB, Meta's most widely-used key value store.",
+      "question": "You mentioned that ZippyDB is a niche store with very little usage, but our documentation identifies it as Meta's most widely-used key-value store. How does this impact your decision to favor MySQL over ZippyDB for per-user counters?",
+      "reason": "The candidate's characterization of ZippyDB as a 'niche store that hardly anything uses' directly contradicts the reference material stating it is Meta's most widely-used key-value store."
+    }
+  },
+  "hints": {
+    "cycle": {
+      "generator": "gemini",
+      "hints": [
+        "If you were to traverse the list normally, how would you determine if you have reached a node you have already visited without using an auxiliary data structure like a hash set to store node references?",
+        "Imagine two individuals walking through the list at different constant speeds. If there is a loop, the person moving faster will eventually catch up to the person moving slower, rather than reaching the end of the list.",
+        "This approach is known as Floyd's Cycle-Finding Algorithm, or the 'Tortoise and the Hare' technique. Initialize two pointers at the head, move the slow pointer one step at a time and the fast pointer two steps at a time, and check if they ever point to the same node."
+      ],
+      "leaks": [
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests thinking about traversal without extra space but does not specify the two-pointer technique needed to detect cycles."
+        },
+        {
+          "gives_answer": false,
+          "reason": "The hint describes the two-pointer technique but does not detail how to implement it."
+        }
+      ],
+      "pairs": [
+        {
+          "high": 2,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 2,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        }
+      ],
+      "rank": {
+        "order": [
+          "A",
+          "C",
+          "B"
+        ],
+        "reason": "Hint A is more abstract and doesn't reference a specific algorithm, while Hint C gives a conceptual overview of the cycle detection, and Hint B directly names and describes the 'Tortoise and the Hare' algorithm."
+      },
+      "shuffled": [
+        0,
+        2,
+        1
+      ]
+    },
+    "exactly-once": {
+      "generator": "gemini",
+      "hints": [
+        "Since the delivery mechanism guarantees at-least-once delivery, what specific property must the processing logic possess to ensure that repeating the same operation does not change the system state beyond the intended initial outcome?",
+        "Assign a unique identifier to every incoming payment request and store a record of these identifiers once they have been successfully processed. Before executing any new charge, check this record to confirm whether the identifier associated with the current request has already been recorded.",
+        "You should implement the idempotency pattern using an atomic 'check-and-set' operation within your database. Specifically, ensure the transaction that records the unique request ID and updates the customer's balance is performed as a single atomic unit to prevent race conditions."
+      ],
+      "leaks": [
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests implementing idempotency in the processing logic but does not explain how to achieve it."
+        },
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests a solution strategy but doesn't provide implementation details, such as handling race conditions or database transactions."
+        }
+      ],
+      "pairs": [
+        {
+          "high": 2,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 2,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": false,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        }
+      ],
+      "rank": {
+        "order": [
+          "B",
+          "C",
+          "A"
+        ],
+        "reason": "Hint B introduces the concept of idempotency without detailing its implementation, Hint C describes a basic implementation strategy, and Hint A gives a detailed technical solution involving atomic operations."
+      },
+      "shuffled": [
+        2,
+        0,
+        1
+      ]
+    },
+    "lru": {
+      "generator": "gemini",
+      "hints": [
+        "If you use a simple array or list to store your cache elements, what is the bottleneck you encounter when trying to access or update an item in O(1) time while simultaneously keeping track of the order of usage?",
+        "To achieve constant time performance, you need a way to instantly locate any item in your collection while simultaneously maintaining a strict order of access. Consider using two separate mechanisms: one that maps keys to their exact positions for quick lookups, and another that keeps all items physically linked in a sequence to track their relative age.",
+        "Combine a hash map for O(1) key-to-node lookups with a doubly linked list to maintain the order of usage. When an item is accessed or updated, move its corresponding node to the head of the list to mark it as most recently used, and use the map to keep track of these nodes for immediate access."
+      ],
+      "leaks": [
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests thinking about the limitations of arrays or lists, but it does not provide the specific data structures needed to achieve O(1) operations."
+        },
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests using a hashmap and doubly linked list but does not provide the exact implementation details."
+        }
+      ],
+      "pairs": [
+        {
+          "high": 2,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 2,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        }
+      ],
+      "rank": {
+        "order": [
+          "B",
+          "C",
+          "A"
+        ],
+        "reason": "B addresses a potential issue with arrays without providing a solution, C suggests using two mechanisms without specifics, and A outlines the exact data structures needed."
+      },
+      "shuffled": [
+        2,
+        0,
+        1
+      ]
+    },
+    "presence": {
+      "generator": "gemini",
+      "hints": [
+        "With 1 billion users constantly toggling their status, how would you handle the massive volume of state change events without overwhelming your databases or flooding your network with redundant updates?",
+        "Instead of writing every status change to a persistent database immediately, consider maintaining a highly available, distributed in-memory cache that tracks the current state of active connections. You should organize these connections into logical groupings based on user activity or geography to ensure that status updates are only broadcast to the relevant interested parties rather than the entire user base.",
+        "Implement a Pub/Sub model combined with a heartbeat mechanism to track connection liveness. Use a distributed cache to store the presence state and a fan-out service to push status updates only to the specific set of 'friends' currently active, rather than broadcasting to all users."
+      ],
+      "leaks": [
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests considering efficient handling of state changes, but does not provide a specific solution."
+        },
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests using a distributed in-memory cache and logical groupings but does not provide a complete design solution."
+        }
+      ],
+      "pairs": [
+        {
+          "high": 2,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 2,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        }
+      ],
+      "rank": {
+        "order": [
+          "B",
+          "A",
+          "C"
+        ],
+        "reason": "Hint B raises the problem of handling many state change events, Hint A suggests using a distributed cache for managing state changes, while Hint C provides a complete solution with a Pub/Sub model and details on implementation."
+      },
+      "shuffled": [
+        1,
+        0,
+        2
+      ]
+    },
+    "priority-inversion": {
+      "generator": "gemini",
+      "hints": [
+        "Have you considered how the priority of the thread currently holding that lock might affect the progress of your high-priority audio thread, and what specific scheduling phenomenon occurs when a lower-priority task blocks a higher-priority one?",
+        "To resolve this, you need a mechanism that dynamically elevates the priority of the thread holding the resource to match the priority of the thread waiting for it. By ensuring the holder runs at the highest priority of any task currently blocked on that resource, you can ensure it completes its critical section as quickly as possible to release the lock.",
+        "The technique you need to implement is priority inheritance. To achieve this, you must track which thread owns the lock and, upon a high-priority request, dynamically elevate the owner's priority to match the waiter's until the lock is released."
+      ],
+      "leaks": [
+        {
+          "gives_answer": false,
+          "reason": "The hint points towards priority inversion but does not provide the solution."
+        },
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests using priority inheritance but does not explain how to implement it."
+        }
+      ],
+      "pairs": [
+        {
+          "high": 2,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 2,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        }
+      ],
+      "rank": {
+        "order": [
+          "C",
+          "A",
+          "B"
+        ],
+        "reason": "Hint C introduces the concept without naming it, A describes a mechanism, and B explicitly names 'priority inheritance'."
+      },
+      "shuffled": [
+        1,
+        2,
+        0
+      ]
+    },
+    "rate-limiter": {
+      "generator": "gemini",
+      "hints": [
+        "How would you ensure that your rate-limiting logic remains performant and consistent across a distributed system without creating a single point of failure or an unacceptable latency bottleneck during extreme traffic spikes?",
+        "Instead of tracking every individual request, consider maintaining a per-user counter associated with a specific time window. You should store these counters in a fast, shared memory store so that multiple server nodes can check and update the remaining allowance for a user without needing to communicate with each other for every single hit.",
+        "Consider implementing the Token Bucket algorithm, where each user is assigned a bucket that refills with tokens at a fixed rate up to a maximum capacity. You can use an atomic operation in a distributed store like Redis to decrement the token count for each request, allowing you to naturally accommodate bursts while strictly enforcing the sustained rate limit."
+      ],
+      "leaks": [
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests considerations for designing a distributed rate limiter but does not specify the exact design or implementation details."
+        },
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests using a counter associated with a time window and a shared memory store, but it doesn't specify the complete implementation details of a rate limiter."
+        }
+      ],
+      "pairs": [
+        {
+          "high": 2,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 2,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        }
+      ],
+      "rank": {
+        "order": [
+          "C",
+          "A",
+          "B"
+        ],
+        "reason": "Hint C discusses performance and consistency in a distributed system without revealing specific algorithms or data structures, Hint A introduces the concept of using counters and shared memory, and Hint B directly suggests using the Token Bucket algorithm with implementation details."
+      },
+      "shuffled": [
+        1,
+        2,
+        0
+      ]
+    },
+    "resharding": {
+      "generator": "gemini",
+      "hints": [
+        "If you use a simple modulo operation to map keys to nodes, what happens to the mapping of existing keys when the total number of nodes changes, and why does this create a bottleneck for system performance?",
+        "Instead of mapping keys directly to the current number of nodes, place both your keys and your nodes onto a common, circular abstract space. By positioning them based on their numerical identifiers, you can ensure that a key is always assigned to the first node encountered when moving in a single direction along this circle.",
+        "The technique is called Consistent Hashing. You should map both your server nodes and data keys to a hash ring, and for each key, move clockwise until you hit the first server node; to prevent uneven distribution, consider using 'virtual nodes' to represent each physical server multiple times on the ring."
+      ],
+      "leaks": [
+        {
+          "gives_answer": false,
+          "reason": "The hint explains the problem with using a modulo operation but does not provide the solution, which involves consistent hashing."
+        },
+        {
+          "gives_answer": false,
+          "reason": "The hint describes consistent hashing, but doesn't explicitly explain how it minimizes remapping."
+        }
+      ],
+      "pairs": [
+        {
+          "high": 2,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 2,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        }
+      ],
+      "rank": {
+        "order": [
+          "C",
+          "A",
+          "B"
+        ],
+        "reason": "Hint C discusses the problem without mentioning the solution, Hint A introduces the concept of a circular space without naming the technique, and Hint B explicitly names 'Consistent Hashing' and describes its implementation in detail."
+      },
+      "shuffled": [
+        1,
+        2,
+        0
+      ]
+    },
+    "two-sum": {
+      "generator": "gemini",
+      "hints": [
+        "What is the primary factor causing the O(n^2) time complexity in your current approach, and could you potentially trade some memory to avoid re-scanning the array?",
+        "Instead of scanning the array repeatedly, try keeping a record of the values you have already visited and their respective positions. As you iterate through the array once, check if the complement needed to reach your target exists within that record.",
+        "Use a hash map to store the values you have encountered as keys and their indices as values. As you iterate through the array, calculate the complement (target - current_value) and check if that complement is already a key in your hash map to determine the indices in a single pass."
+      ],
+      "leaks": [
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests using extra memory to improve time complexity but does not specify the exact method."
+        },
+        {
+          "gives_answer": false,
+          "reason": "The hint suggests using a hash map to track visited elements, which helps optimize the solution, but it doesn't provide the complete implementation details."
+        }
+      ],
+      "pairs": [
+        {
+          "high": 2,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 2,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 2
+        },
+        {
+          "high": 3,
+          "high_first": false,
+          "higher_judged_more": true,
+          "low": 1
+        },
+        {
+          "high": 3,
+          "high_first": true,
+          "higher_judged_more": true,
+          "low": 1
+        }
+      ],
+      "rank": {
+        "order": [
+          "B",
+          "C",
+          "A"
+        ],
+        "reason": "Hint B prompts considering a trade-off between time and space complexity without giving away the solution, Hint C explains the idea of maintaining a record of visited values, and Hint A directly provides the solution using a hash map."
+      },
+      "shuffled": [
+        2,
+        0,
+        1
+      ]
+    }
+  },
+  "persona_pairwise": {
+    "adobe/behavioral/adversarial": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A is more adversarial as it challenges the candidate to defend their decision and consider potential future impacts."
+      }
+    },
+    "adobe/behavioral/friendly": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B starts with a friendly greeting and expresses interest in the candidate's experience, creating a more warm and collaborative atmosphere."
+      }
+    },
+    "adobe/behavioral/terse": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B is shorter and more direct, with fewer details and context."
+      }
+    },
+    "airbnb/core_cs/adversarial": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A challenges the candidate's assumptions on using JWT and presses them to identify failure points and justify their design under stress."
+      }
+    },
+    "airbnb/core_cs/friendly": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B starts with a friendly greeting and expresses curiosity, making it more warm and encouraging."
+      }
+    },
+    "airbnb/core_cs/terse": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B is shorter and more direct, lacking the detailed setup and scenario provided in question A."
+      }
+    },
+    "amazon/behavioral/adversarial": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A is more adversarial as it questions the candidate's judgment and demands justification for their decision-making process."
+      }
+    },
+    "amazon/behavioral/friendly": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "It starts with a warm greeting and expresses enthusiasm to hear about the candidate's experiences."
+      }
+    },
+    "amazon/behavioral/terse": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B is shorter and more direct than question A."
+      }
+    },
+    "apple/core_cs/adversarial": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B is more adversarial as it challenges the candidate to justify their approach and critiques common solutions."
+      }
+    },
+    "apple/core_cs/friendly": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A uses friendly language and expresses enthusiasm about hearing the candidate's approach."
+      }
+    },
+    "apple/core_cs/terse": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A is shorter and more direct, with fewer words and no elaborate setup."
+      }
+    },
+    "bloomberg/coding/adversarial": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A challenges assumptions and presses the candidate to justify and defend their approach in a demanding scenario."
+      }
+    },
+    "bloomberg/coding/friendly": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B starts with a warm greeting and expresses enthusiasm about working together, making it more friendly."
+      }
+    },
+    "bloomberg/coding/terse": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B is shorter and more direct without additional context or setup."
+      }
+    },
+    "bloomberg/core_cs/adversarial": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A is more adversarial as it challenges the candidate to defend their assumptions and redesign a solution under specific constraints."
+      }
+    },
+    "bloomberg/core_cs/friendly": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B starts with a warm greeting and expresses interest in the candidate's thoughts, creating a more friendly and encouraging atmosphere."
+      }
+    },
+    "bloomberg/core_cs/terse": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B is more terse with fewer words and less context."
+      }
+    },
+    "google/coding/adversarial": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B challenges assumptions about standard approaches and adds complexity by introducing unreliable conditions."
+      }
+    },
+    "google/coding/friendly": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "It starts with a friendly greeting and expresses enthusiasm about the candidate's approach."
+      }
+    },
+    "google/coding/terse": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "A is more concise and direct without additional context or requirements."
+      }
+    },
+    "linkedin/system_design/adversarial": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "It challenges the candidate by questioning assumptions and demanding a defense of trade-offs."
+      }
+    },
+    "linkedin/system_design/friendly": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "It starts with a warm greeting and expresses enthusiasm for the candidate's input."
+      }
+    },
+    "linkedin/system_design/terse": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A is shorter and more direct."
+      }
+    },
+    "meta/system_design/adversarial": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A challenges assumptions about using a proxy-based load balancing pattern and presses the candidate on specific failure scenarios."
+      }
+    },
+    "meta/system_design/friendly": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A is more friendly as it starts with a warm greeting and expresses enthusiasm for the discussion."
+      }
+    },
+    "meta/system_design/terse": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A is more terse as it is shorter and lacks detailed requirements and context."
+      }
+    },
+    "microsoft/behavioral/adversarial": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A challenges the candidate's assumptions and decisions regarding prioritizing speed over caution in complex environments."
+      }
+    },
+    "microsoft/behavioral/friendly": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A starts with a warm greeting and expresses eagerness to hear the candidate's experiences, creating a more welcoming and friendly atmosphere."
+      }
+    },
+    "microsoft/behavioral/terse": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B is shorter and more direct with fewer words and no additional context."
+      }
+    },
+    "uber/coding/adversarial": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "Question B is more adversarial as it challenges the candidate's assumptions and approaches, pressing them on potential failures and trade-offs."
+      }
+    },
+    "uber/coding/friendly": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "It starts with a friendly greeting and expresses curiosity, creating a more collaborative atmosphere."
+      }
+    },
+    "uber/coding/terse": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A is shorter and more direct without additional setup or details."
+      }
+    },
+    "uber/system_design/adversarial": {
+      "persona_shown_as": "B",
+      "persona_won": true,
+      "verdict": {
+        "answer": "B",
+        "reason": "B is more adversarial as it challenges assumptions, questions standard approaches, and demands specific defenses and trade-offs."
+      }
+    },
+    "uber/system_design/friendly": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Interview A starts with a warm welcome and encouraging language."
+      }
+    },
+    "uber/system_design/terse": {
+      "persona_shown_as": "A",
+      "persona_won": true,
+      "verdict": {
+        "answer": "A",
+        "reason": "Question A uses fewer words and lacks specific details compared to Question B."
+      }
+    }
+  },
+  "personas": {
+    "adobe/behavioral/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is challenging and pressing, requiring the candidate to defend their decision with specific examples.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most engineers treat 'shipping on time' and 'maintaining high-fidelity performance' as a zero-sum game, often opting to ship a feature with technical debt or reduced performance targets to meet a deadline. Tell me about a specific time you were pressured to ship a media-heavy feature where the performance benchmarks were slipping. Why did you choose to push back or compromise on scope rather than just 'optimizing later'? Defend your decision\u2014if you had chosen to ship the debt, what specifically would have broken in the production environment three months down the line, and how would that have impacted the end-user's creative workflow?"
+    },
+    "adobe/behavioral/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is warm and appropriately asks about a relevant behavioral topic.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's a pleasure to meet you and hear about your experience; could you tell me about a time you had to balance a tight release deadline with the need to maintain high performance for a large-scale media asset, and how you decided what to prioritize or cut to ensure the user experience didn't suffer?"
+    },
+    "adobe/behavioral/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, coherent, and relevant to a behavioral interview.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Tell me about a time you identified a significant performance bottleneck or quality issue in a feature that was already near the release deadline. How did you balance the pressure to ship on time with the need to ensure the product met our craft standards, and what specific trade-offs did you make to resolve it?"
+    },
+    "adobe/behavioral/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is coherent and relevant for a behavioral interview stage.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Describe a time you delayed a release to improve performance or quality for creative users. How did you justify this to stakeholders?"
+    },
+    "airbnb/core_cs/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question challenges the candidate to critically analyze a common solution and provide a detailed alternative strategy.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates suggest using a standard JWT-based stateless authentication approach to handle Airbnb's distributed login sessions, arguing that it removes the need for database lookups and scales horizontally. Why would this approach fail for a high-stakes marketplace where we need to support immediate session revocation\u2014for instance, when a host reports their account as compromised or a device is lost? Define your strategy for session state management, justify the trade-offs between latency and consistency, and explain exactly where your design breaks under a sudden surge of 'force-logout' events."
+    },
+    "airbnb/core_cs/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant to core CS, and encourages a detailed response.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to meet you; I'm curious to hear how you'd approach designing a 'remember me' session persistence service that balances user convenience for infrequent Airbnb travelers with the strict security requirements of a global marketplace. If we need to support a user who hasn't logged in for six months but needs to immediately access their reservation details upon opening the app, how would you architect the session storage and consistency model to ensure they aren't forced to re-authenticate, while still allowing us to revoke access instantly if a device is reported lost?"
+    },
+    "airbnb/core_cs/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is coherent, on-topic, and appropriate for a core computer science interview stage.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Airbnb users often experience long gaps between sessions, leading to 'forgotten' login methods. Design a system for 'Flexible Authentication' that allows a user to identify themselves (e.g., via email or phone) and then dynamically presents the most appropriate challenge (OTP, Social, or Magic Link). How would you handle the trade-offs between consistency and availability if a user attempts to log in from a new device while their primary account data is being migrated across database shards?"
+    },
+    "airbnb/core_cs/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant to core computer science, and focuses on authentication design.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design an authentication flow that balances low-latency logins with high security for users returning after long absences. How do you handle session consistency across devices?"
+    },
+    "amazon/behavioral/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is challenging and asks for specific examples, fitting the behavioral stage.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates instinctively prioritize 'speed' when faced with a critical production issue, often choosing a quick patch to restore service. Tell me about a time you chose to prioritize long-term system integrity over a fast, temporary fix, even when it meant delaying recovery. Why was your judgment superior to the quick-fix approach, what specific metrics did you use to justify the trade-off, and where did this decision almost break or backfire?"
+    },
+    "amazon/behavioral/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is warm and inviting, and it appropriately asks about decision-making in a behavioral context.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to meet you, and I'm really looking forward to hearing about your experience working through complex technical trade-offs. Can you tell me about a time when you had to make a difficult decision with incomplete information, and how you ensured that decision aligned with the long-term best interests of the customer?"
+    },
+    "amazon/behavioral/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is coherent and relevant for a behavioral interview, asking about problem-solving and impact.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Tell me about a time when you identified a significant technical or operational inefficiency in a system you were working on. What was the impact of this inefficiency on the end customer, what steps did you take to address it despite potential pushback or resource constraints, and what were the measurable results of your intervention?"
+    },
+    "amazon/behavioral/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, on-topic for a behavioral interview, and focuses on problem-solving and customer prioritization.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Describe a time you challenged a technical direction despite opposition. How did you ensure the final outcome prioritized the customer?"
+    },
+    "apple/core_cs/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question challenges the candidate to critically evaluate and defend their approach to synchronization in real-time systems.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates jump straight to using a standard Mutex or a Serial Dispatch Queue to protect a shared resource like a high-frequency audio buffer. Why would that approach likely cause audio glitches or 'jank' in a real-time system? Defend how you would handle that synchronization differently, and explain exactly what breaks if you choose a lock-free structure versus a fine-grained locking strategy when the producer and consumer threads operate at different QoS levels."
+    },
+    "apple/core_cs/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is well-phrased for the core CS interview stage and maintains a warm tone.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to meet you, and I'm really looking forward to hearing how you approach building highly responsive systems. Imagine we are building a real-time audio processing pipeline for a mobile app where we need to ingest incoming audio buffers and perform light effects processing before playback. If you were designing the buffer management system, how would you handle the memory and concurrency trade-offs to ensure we avoid audio glitches (like pops or clicks) while keeping the main thread free from jank?"
+    },
+    "apple/core_cs/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is coherent, on-topic, and appropriate for a core CS interview stage.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Imagine you are building a real-time audio processing pipeline for a high-performance iOS application. You need to implement a thread-safe circular buffer to pass audio frames between a high-priority hardware callback thread and a background processing thread. How would you design this buffer to avoid priority inversion and minimize the risk of audio glitches (dropouts)? Specifically, discuss your choice of synchronization primitives versus lock-free structures, and explain how you would handle backpressure if the processing thread falls behind."
+    },
+    "apple/core_cs/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is coherent, relevant to core computer science, and appropriately challenging for the candidate's stage.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Implement a thread-safe LRU cache. How do you minimize lock contention to prevent UI jank in a high-concurrency environment?"
+    },
+    "bloomberg/coding/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is challenging and requires the candidate to justify their approach and consider trade-offs, which is appropriate for a coding interview.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates jump straight to using a standard LRU cache with a doubly linked list and hash map when asked to build a time-series data buffer. Why would that approach fail in a high-throughput financial ticker system where we must guarantee O(1) ingestion while periodically purging data older than a specific timestamp? Implement a data structure that supports 'put(timestamp, value)' and 'get_range(start_time, end_time)', justifying your choice of underlying storage. Defend your trade-offs regarding memory fragmentation and the impact of stale data on your latency profile."
+    },
+    "bloomberg/coding/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is coherent, on-topic, and suitable for a coding interview stage.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to meet you, and I'm looking forward to diving into some technical problem-solving with you today. Imagine we are building a high-frequency trading order book; given a stream of incoming limit orders\u2014each containing a price, quantity, and side (buy or sell)\u2014how would you efficiently maintain the 'best bid' and 'best ask' prices, and what data structure would you use to ensure that inserting a new order and retrieving the current top-of-book remains performant as the volume of orders grows?"
+    },
+    "bloomberg/coding/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant to the coding stage, and includes specific requirements and considerations.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design a 'Moving Average' stream processor that tracks the average of the last 'k' price ticks for a financial instrument. Implement a class with a method 'add_tick(price)' that returns the current moving average. Your implementation must be thread-safe, handle high-frequency updates with O(1) time complexity, and be memory-efficient. Discuss how you would handle potential floating-point precision issues when processing millions of ticks over a long duration."
+    },
+    "bloomberg/coding/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant to the coding stage, and asks for a solution and explanation regarding concurrency.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Implement a thread-safe LRU cache with O(1) operations. Explain how you would handle data consistency during high-concurrency access."
+    },
+    "bloomberg/core_cs/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question challenges the candidate to defend and redesign a solution, which is appropriate for the core_cs stage.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates suggest using a standard mutex-protected circular buffer to pass high-frequency telemetry data between a producer thread and a consumer thread in a low-latency trading system. Why would this approach likely fail to meet your p99 latency requirements under high contention, and how would you redesign this communication channel to ensure deterministic performance? Specifically, defend your choice of concurrency primitive and explain how you would handle cache line contention and memory ordering without sacrificing correctness."
+    },
+    "bloomberg/core_cs/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is warm and relevant to core computer science concepts, focusing on system performance and data integrity.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to meet you, and I'm really interested to hear how you think about balancing system performance with data integrity. Suppose you are designing a high-throughput ticker plant that ingests market data feeds; if you need to ensure that the order of updates is strictly preserved across multiple downstream consumers while maintaining low p99 latency, how would you architect the data flow, and what specific concurrency or synchronization challenges would you anticipate when dealing with cache line contention or lock contention in a multi-threaded environment?"
+    },
+    "bloomberg/core_cs/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is coherent, relevant to core computer science, and appropriately complex for the interview stage.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "In a high-frequency financial data feed system, you are tasked with distributing market updates to multiple downstream consumers. If a consumer falls behind, the system experiences 'head-of-line blocking' and memory pressure. Propose a mechanism to handle this backpressure while ensuring that the most recent price updates are prioritized over stale data. How would you design the buffer management to avoid GC pauses or excessive heap allocation, and how do you handle the trade-off between consistency and latency when a consumer is disconnected?"
+    },
+    "bloomberg/core_cs/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is technical, relevant to core computer science, and focuses on important aspects of data structure design.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design a thread-safe, fixed-size circular buffer for low-latency streaming data. How do you prevent false sharing and ensure memory alignment for cache efficiency?"
+    },
+    "google/coding/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is complex and not directly related to coding skills assessment for a standard coding interview.",
+        "tone": "adversarial",
+        "valid": false
+      },
+      "question": "Most candidates jump straight to a standard BFS to find the shortest path in an unweighted graph. Why would that approach fail if the graph edges represented unreliable, asynchronous message-passing links where latencies are non-deterministic and messages can be reordered or lost? Design an algorithm to determine the 'reliable reachability' of a target node given that you can only perform a bounded number of retries per edge, and justify the trade-offs between latency and the probability of reaching the target."
+    },
+    "google/coding/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is warm and inviting, and it is a coherent, relevant question for a coding interview.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to meet you, and I'm really looking forward to hearing how you approach this problem: Given a non-empty 2D grid of characters representing a maze, where 'S' is the start, 'E' is the exit, '.' is an open path, and '#' is a wall, design an algorithm to find the length of the shortest path from 'S' to 'E'. If there are multiple possible paths, we only care about the shortest one; if no path exists, return -1. How would you structure your search, and what would the time and space complexity look like for your chosen approach?"
+    },
+    "google/coding/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant to a coding interview, and asks for a solution with complexity analysis and adaptability considerations.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Given a grid of size M x N representing a network of nodes, where each cell (i, j) contains a non-negative integer representing the latency to traverse that node, design an algorithm to find the path from (0, 0) to (M-1, N-1) that minimizes the maximum latency encountered on any single node along the path. Discuss the time and space complexity of your approach, and explain how you would adapt this if the network were dynamic (i.e., node latencies can change)."
+    },
+    "google/coding/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant to a coding interview, and focuses on algorithmic problem-solving.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Given a grid of nodes with intermittent message loss, find the shortest path between two nodes using a robust traversal algorithm."
+    },
+    "linkedin/system_design/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question challenges the candidate to think critically about scalability issues and propose a solution.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates immediately reach for a fan-out-on-write model using a distributed message queue to push updates to follower timelines. Why would this approach fail for a 'celebrity' user with 50 million followers, and how would you architect a hybrid system to handle that specific hotspot without sacrificing the freshness of the feed for ordinary users? Defend the trade-offs regarding consistency and write amplification."
+    },
+    "linkedin/system_design/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is warm, detailed, and relevant to system design.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to see you today, and I'd love to hear how you would design a 'Suggested Connections' service that recommends new professional contacts; specifically, how would you handle the trade-offs between a 'pull' model for real-time graph traversal versus a 'push' model for pre-computed recommendations, especially for high-profile users with millions of connections?"
+    },
+    "linkedin/system_design/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant to system design, and appropriately challenges the candidate to consider performance and scalability.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design a 'Mutual Friends' service that can handle a social graph with billions of nodes and hundreds of billions of edges. How would you architect the storage and retrieval to ensure that querying mutual friends between two users remains performant (sub-100ms p99 latency), and how do you handle the 'celebrity problem' where a user has millions of connections?"
+    },
+    "linkedin/system_design/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, on-topic for system design, and asks about handling a specific challenge.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design a feed system for a celebrity with millions of followers. How do you handle fan-out trade-offs to minimize latency?"
+    },
+    "meta/system_design/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is challenging and relevant to system design, probing the candidate's understanding of complex traffic patterns and architectural implications.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates jump straight to a standard proxy-based load balancing pattern when discussing ZippyDB's connection sprawl, assuming a simple L7 proxy will solve the many-to-many connection mesh. If you interpose a proxy layer like ZGateway, you're introducing a new point of contention and an extra network hop. Why would this architecture fail under the specific 'incast' traffic patterns common in Meta's distributed storage or AI infrastructure, and how would you redesign the control plane to handle these bursts without cascading failures at the proxy tier?"
+    },
+    "meta/system_design/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is on-topic for system design and is phrased in a warm and encouraging manner.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to meet you, and I'm looking forward to diving into some system design with you today. Given Meta's scale, how would you design a global 'Presence Service'\u2014which tracks whether a user is online or offline\u2014that integrates with a proxy layer similar to ZGateway to manage high-throughput connections, while ensuring that presence updates don't overwhelm our core storage systems during traffic spikes?"
+    },
+    "meta/system_design/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant, and appropriate for a system design stage.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design a distributed 'Presence Service' for a social platform with 2 billion daily active users. The service must track the online/offline status of users and support real-time status updates (e.g., 'active 5m ago'). Given the scale, how would you handle the 'thundering herd' problem when a high-profile user comes online, and how would you utilize a proxy layer (similar to ZGateway) to optimize connection management between mobile clients and the backend storage?"
+    },
+    "meta/system_design/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant, and appropriate for a system design interview stage.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design a real-time 'active status' indicator system for a messaging app with 500 million daily active users."
+    },
+    "microsoft/behavioral/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question challenges assumptions and asks for specific past behavior, appropriate for a behavioral interview.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates instinctively prioritize 'shipping fast' when faced with conflicting requirements from cross-functional stakeholders. Why would that strategy be a liability in a large-scale, multi-service environment like Azure, and can you describe a time you intentionally slowed down a delivery to address a systemic risk, even at the cost of your team's immediate velocity?"
+    },
+    "microsoft/behavioral/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is warm, relevant for a behavioral interview, and asks for a specific example related to influencing a team.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It\u2019s great to meet you, and I\u2019d love to hear about a time you had to influence a cross-functional team or a partner group to change their technical direction to better serve the end customer\u2014how did you approach that conversation and what was the outcome?"
+    },
+    "microsoft/behavioral/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, pertinent to the behavioral stage, and asks for a specific experience related to problem-solving and cross-team communication.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Tell me about a time when you identified a significant technical or process bottleneck that was negatively impacting your customers. How did you advocate for the necessary changes across teams, and how did you balance the urgency of the fix with the long-term architectural health of the system?"
+    },
+    "microsoft/behavioral/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is professional and relevant for a behavioral interview, asking about past experiences with teamwork and decision-making.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Describe a time you navigated a technical disagreement with a cross-team partner to ensure a customer-centric outcome. How did you balance trade-offs while maintaining the partnership?"
+    },
+    "uber/coding/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question challenges the candidate with a complex scenario and expects a detailed response, suitable for a coding interview on system design.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates jump straight to a quadtree or geohash-based grid to solve the 'nearby driver' problem. Why would that approach fail under high-contention scenarios, specifically when a surge of riders hits a localized area? Design a function `find_nearby_drivers(rider_lat, rider_lon, radius_km)` that handles the 'hot partition' problem. How do you implement backpressure when the driver-to-rider ratio drops below a critical threshold, and what trade-offs are you making between consistency and latency when the system is under heavy load?"
+    },
+    "uber/coding/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is well-phrased for a coding stage, focusing on a technical challenge related to concurrency and service design.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to meet you; I'm curious to hear how you'd approach building a simple 'driver-to-rider' matching service that needs to handle high-concurrency requests in a localized area. Given a stream of incoming driver location updates and a set of pending ride requests, how would you implement a function to efficiently match a rider with the nearest available driver within a 5km radius, and how would you handle the case where multiple riders are competing for the same driver simultaneously?"
+    },
+    "uber/coding/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question combines a coding task with a system design component, which is not suitable for a coding interview stage.",
+        "tone": "neutral",
+        "valid": false
+      },
+      "question": "You are building a dispatch service that matches incoming ride requests to nearby available drivers. Given a list of driver locations (lat, lon) and a specific ride request location, write a function to return the top K nearest drivers. If two drivers are at the same distance, prefer the one with the higher rating. How would you handle a scenario where the driver location updates are arriving at a rate of 100k events/second, and what mechanisms would you implement to ensure the dispatch system doesn't crash under a sudden spike in requests?"
+    },
+    "uber/coding/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant, and appropriate for a coding interview stage.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design a service to match riders with drivers in real-time. How do you handle high-concurrency requests and partial driver availability during peak demand?"
+    },
+    "uber/system_design/adversarial": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is challenging and on-topic for a system design interview, focusing on scalability and trade-offs.",
+        "tone": "adversarial",
+        "valid": true
+      },
+      "question": "Most candidates immediately reach for a standard geohashing approach combined with a Redis-based spatial index to handle driver-rider matching at scale. Why would this approach fail during a massive, localized surge\u2014like a sudden rainstorm in downtown Manhattan\u2014and how would you re-engineer the dispatch architecture to maintain latency targets when the number of concurrent match requests exceeds the throughput of your primary index? Defend your trade-offs regarding consistency versus availability during these spikes, and explain exactly where the system breaks if you choose the wrong partition key."
+    },
+    "uber/system_design/friendly": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is warm and encouraging, and it is relevant to system design.",
+        "tone": "friendly",
+        "valid": true
+      },
+      "question": "It's great to have you here; let's talk about how we might design a ride-matching service that needs to pair riders with drivers in real-time, and specifically, how you would handle the system's behavior when a regional data center experiences a sudden spike in latency or a partial network partition."
+    },
+    "uber/system_design/neutral": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is clear, relevant to system design, and addresses specific challenges in a ride-sharing platform.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design a real-time 'dispatch service' for a ride-sharing platform that matches riders to nearby drivers. How do you handle the system's behavior when a specific geographic region (e.g., a city center during a major event) experiences a 10x spike in requests, and how do you prevent cascading failures when the matching algorithm latency exceeds the p99 threshold?"
+    },
+    "uber/system_design/terse": {
+      "generator": "gemini",
+      "judge": {
+        "reason": "The question is relevant and specific to system design, addressing key challenges in ride-matching services.",
+        "tone": "neutral",
+        "valid": true
+      },
+      "question": "Design a real-time ride-matching service. How do you handle dispatch latency and system backpressure during high-demand surges?"
+    }
+  }
+}

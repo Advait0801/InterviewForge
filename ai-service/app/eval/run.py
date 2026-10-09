@@ -52,12 +52,34 @@ def retrieved_sources(hits: List[Dict[str, Any]]) -> List[str]:
     return seen
 
 
-def run_eval(*, k: int, use_filter: bool = True) -> Dict[str, Any]:
+# The stage before each stage in the interview loop, for --previous-answer.
+PREVIOUS_STAGE = {"coding": "behavioral", "system_design": "coding", "core_cs": "system_design"}
+
+
+def previous_answer_for(stage: Optional[str], tier: str) -> Optional[str]:
+    """A realistic answer from the stage before `stage` (D-066), or None for the first stage.
+
+    Taken from the judge-calibration answers, so it is a real-length candidate answer about a
+    different topic than the query, which is exactly what production would append."""
+    from app.eval.graded_answers import GRADED_CASES
+
+    prior = PREVIOUS_STAGE.get(stage or "")
+    case = next((c for c in GRADED_CASES if c.stage == prior), None)
+    return case.answers[tier] if case else None
+
+
+def run_eval(*, k: int, use_filter: bool = True, previous_answer_tier: Optional[str] = None) -> Dict[str, Any]:
     rag = RAGService()
     per_query: List[Dict[str, Any]] = []
 
     for q in GOLDEN_SET:
         where = build_where(q) if use_filter else None
+        query = q.query
+        if previous_answer_tier:
+            # Exactly what build_retrieval_query() appends in production.
+            previous = previous_answer_for(q.stage, previous_answer_tier)
+            if previous:
+                query += f" Candidate previously said: {previous}"
 
         if config.ROUTING_ENABLED:
             # Apply the per-stage policy for this query, then restore, so one
@@ -68,11 +90,11 @@ def run_eval(*, k: int, use_filter: bool = True) -> Dict[str, Any]:
             saved = (config.RERANK_ENABLED, config.HYBRID_ENABLED)
             config.RERANK_ENABLED, config.HYBRID_ENABLED = route.rerank, route.hybrid
             try:
-                result = rag.retrieve(q.query, top_k=k, where=where)
+                result = rag.retrieve(query, top_k=k, where=where)
             finally:
                 config.RERANK_ENABLED, config.HYBRID_ENABLED = saved
         else:
-            result = rag.retrieve(q.query, top_k=k, where=where)
+            result = rag.retrieve(query, top_k=k, where=where)
         sources = retrieved_sources(result["hits"])
         scores = evaluate_one(sources, q.relevant_sources, k)
         per_query.append(
@@ -97,6 +119,7 @@ def run_eval(*, k: int, use_filter: bool = True) -> Dict[str, Any]:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "k": k,
         "filtered": use_filter,
+        "previous_answer": previous_answer_tier,
         "config": {
             "chunk_size": config.CHUNK_SIZE_CHARS,
             "chunk_overlap": config.CHUNK_OVERLAP_CHARS,
@@ -160,11 +183,21 @@ def main() -> None:
     parser.add_argument("--out", type=str, default=None, help="directory to write report files into")
     parser.add_argument("--name", type=str, default=None, help="base filename (default: timestamp)")
     parser.add_argument("--no-filter", action="store_true", help="disable the company/stage filter")
+    parser.add_argument(
+        "--previous-answer",
+        choices=["weak", "mediocre", "strong"],
+        default=None,
+        help="append a previous-stage answer of this quality to each query, as production would",
+    )
     args = parser.parse_args()
 
-    report = run_eval(k=args.k, use_filter=not args.no_filter)
+    report = run_eval(k=args.k, use_filter=not args.no_filter, previous_answer_tier=args.previous_answer)
     markdown = to_markdown(report)
     print(markdown)
+    from app.core.observability import snapshot
+
+    spend = snapshot()
+    print(f"\nModel spend this run: {spend['calls']} calls, ~${spend['estimatedCostUsd']:.4f} (rerank; embeddings not counted)")
 
     if args.out:
         os.makedirs(args.out, exist_ok=True)

@@ -1,6 +1,7 @@
 import json
 import logging
-from typing import Any, Callable, Dict, Optional
+import re
+from typing import Any, Callable, Dict, List, Literal, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
@@ -17,10 +18,15 @@ from app.interview.orchestrator import (
     retrieve_with_live_fallback,
 )
 from app.llm.chains import (
+    HINT_LEVELS,
     ResumeGroundedQuestionOutput,
     StructuredFollowupOutput,
     StructuredQuestionOutput,
     astream_with_fallback,
+    challenge_chain,
+    challenge_verify_chain,
+    hint_chain,
+    persona_instructions,
     evaluation_chain,
     followup_chain,
     interview_report_chain,
@@ -34,7 +40,9 @@ from app.llm.chains import (
 from app.rag.service import RAGService
 from app.resume.store import ResumeStore
 from app.api.schemas import (
+    ChallengeResponse,
     FollowupStreamEvent,
+    HintResponse,
     InterviewReportResponse,
     NextQuestionResponse,
     NextQuestionStreamEvent,
@@ -112,6 +120,9 @@ class FollowUpRequest(BaseModel):
     evaluation: str
 
 
+Persona = Literal["neutral", "friendly", "terse", "adversarial"]
+
+
 class NextQuestionRequest(BaseModel):
     company: str = Field(..., examples=["amazon"])
     stage: str = Field(..., examples=["behavioral"])
@@ -126,6 +137,8 @@ class NextQuestionRequest(BaseModel):
     # Scopes the live-fetch limiter's per-session budget. Without it one
     # interview can spend the whole global daily allowance on its own.
     session_id: Optional[str] = None
+    # Tone only (D-066); never reaches retrieval.
+    persona: Optional[Persona] = None
 
 
 class EvaluateAnswerRequest(BaseModel):
@@ -142,6 +155,27 @@ class GenerateFollowupRequest(BaseModel):
     question: str
     answer: str
     evaluation: Dict[str, Any]
+    persona: Optional[Persona] = None
+
+
+class HintRequest(BaseModel):
+    company: str = Field(..., examples=["google"])
+    stage: str = Field(..., examples=["coding"])
+    question: str
+    context: Optional[str] = ""
+    level: int = Field(..., ge=1, le=3)
+    previous_hints: List[str] = []
+    draft: Optional[str] = None
+    persona: Optional[Persona] = None
+
+
+class ChallengeRequest(BaseModel):
+    company: str = Field(..., examples=["amazon"])
+    stage: str = Field(..., examples=["system_design"])
+    question: str
+    answer: str
+    context: str
+    persona: Optional[Persona] = None
 
 
 class GenerateReportRequest(BaseModel):
@@ -357,6 +391,7 @@ def _prepare_next_question(req: NextQuestionRequest):
         "difficulty": req.difficulty,
         "difficulty_calibration": calibration_text or "Use default expectations for this difficulty.",
         "context": context,
+        "persona_instructions": persona_instructions(req.persona),
     }
 
     # Grounding is decided by whether resume chunks were actually retrieved, not
@@ -444,6 +479,7 @@ def _followup_payload(req: GenerateFollowupRequest) -> dict:
         "question": req.question,
         "answer": req.answer,
         "evaluation": json.dumps(req.evaluation),
+        "persona_instructions": persona_instructions(req.persona),
     }
 
 
@@ -468,6 +504,105 @@ async def generate_followup_stream(req: GenerateFollowupRequest):
     return await _stream_question(
         structured_followup_chain, payload, StructuredFollowupOutput, lambda result: result
     )
+
+
+@router.post("/hint", responses=documented(HintResponse))
+async def hint(req: HintRequest):
+    """One rung of the hint ladder (D-066). The backend decides whether a hint is allowed
+    (time stuck, rungs left) and applies the score penalty; this only writes it."""
+    try:
+        get_company_profile(req.company)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    earlier = "\n".join(f"{i}. {h}" for i, h in enumerate(req.previous_hints, start=1))
+    try:
+        result = await invoke_with_fallback(hint_chain, {
+            "company": req.company,
+            "stage": req.stage,
+            "question": req.question,
+            "level": req.level,
+            "level_description": HINT_LEVELS[req.level],
+            "previous_hints": earlier or "None.",
+            "draft": (req.draft or "").strip() or "Nothing written yet.",
+            "context": req.context or "No additional context provided.",
+            "persona_instructions": persona_instructions(req.persona),
+        })
+    except Exception as exc:
+        _raise_llm_http_error(exc)
+    text = result.get("hint") if isinstance(result, dict) else None
+    if not isinstance(text, str) or not text.strip():
+        raise HTTPException(status_code=503, detail="LLM unavailable: empty hint")
+    return {"hint": text.strip(), "level": req.level}
+
+
+_QUOTES = str.maketrans({"\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"', "\u2013": "-", "\u2014": "-"})
+
+
+def _normalise(text: str) -> str:
+    return re.sub(r"\s+", " ", text.translate(_QUOTES)).strip().strip(" .,;:!?\"'").lower()
+
+
+def appears_verbatim(quote: str, source: str) -> bool:
+    """`quote` occurs in `source`, ignoring case, whitespace, curly quotes and the
+    punctuation a model trims or adds at the ends. Short fragments never count: a
+    two-word "quote" matches almost anything."""
+    needle = _normalise(quote)
+    return len(needle) >= 12 and needle in _normalise(source)
+
+
+@router.post("/challenge", responses=documented(ChallengeResponse))
+async def challenge(req: ChallengeRequest):
+    """Grounded challenge (D-066): push back only on a contradiction both sides of which
+    can be quoted. The model proposes; this checks the quotes before anything is acted on."""
+    try:
+        get_company_profile(req.company)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    if not req.context.strip():
+        return {"challenged": False, "claim": "", "evidence": "", "question": "", "reason": "no reference context"}
+
+    try:
+        result = await invoke_with_fallback(challenge_chain, {
+            "company": req.company,
+            "stage": req.stage,
+            "question": req.question,
+            "answer": req.answer,
+            "context": req.context,
+            "persona_instructions": persona_instructions(req.persona),
+        })
+    except Exception as exc:
+        _raise_llm_http_error(exc)
+
+    if not isinstance(result, dict) or result.get("contradicts") is not True:
+        reason = str(result.get("reason", "")) if isinstance(result, dict) else "unparseable output"
+        return {"challenged": False, "claim": "", "evidence": "", "question": "", "reason": reason or "no contradiction"}
+
+    claim, evidence = str(result.get("claim", "")), str(result.get("evidence", ""))
+    question = str(result.get("challenge", "")).strip()
+    if not appears_verbatim(claim, req.answer):
+        return {"challenged": False, "claim": "", "evidence": "", "question": "", "reason": "claim not found in the answer"}
+    if not appears_verbatim(evidence, req.context):
+        return {"challenged": False, "claim": "", "evidence": "", "question": "", "reason": "evidence not found in the context"}
+    if not question:
+        return {"challenged": False, "claim": "", "evidence": "", "question": "", "reason": "no challenge question"}
+
+    # Quotes that exist can still be a "different approach", not a contradiction. A second,
+    # narrower look at just the two quotes decides; any doubt (or failure) means no pushback.
+    try:
+        verdict = await invoke_with_fallback(challenge_verify_chain, {"claim": claim, "evidence": evidence})
+    except Exception as exc:
+        _raise_llm_http_error(exc)
+    if not isinstance(verdict, dict) or verdict.get("false_by_evidence") is not True:
+        reason = str(verdict.get("reason", "")) if isinstance(verdict, dict) else "unparseable verdict"
+        return {"challenged": False, "claim": "", "evidence": "", "question": "", "reason": f"not confirmed: {reason}"}
+    return {
+        "challenged": True,
+        "claim": claim.strip(),
+        "evidence": evidence.strip(),
+        "question": question,
+        "reason": str(result.get("reason", "")),
+    }
 
 
 @router.post("/generate-report", responses=documented(InterviewReportResponse))

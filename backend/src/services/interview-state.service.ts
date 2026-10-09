@@ -54,6 +54,9 @@ export function shouldAskFollowup(stageTurnCount: number): boolean {
 
 export function buildEvaluationSummary(evaluation: {
   score: number;
+  rawScore?: number;
+  hintsUsed?: number;
+  hintPenalty?: number;
   strengths: string[];
   weaknesses: string[];
   suggestions: string[];
@@ -62,6 +65,10 @@ export function buildEvaluationSummary(evaluation: {
 }): string {
   return [
     `Score: ${evaluation.score}/10`,
+    // Shown so the report (which reads these summaries) knows the score includes a penalty.
+    ...(evaluation.hintsUsed
+      ? [`Hints used: ${evaluation.hintsUsed} (score ${evaluation.rawScore} before a ${evaluation.hintPenalty}-point penalty)`]
+      : []),
     `Strengths: ${evaluation.strengths.join("; ") || "None"}`,
     `Weaknesses: ${evaluation.weaknesses.join("; ") || "None"}`,
     `Suggestions: ${evaluation.suggestions.join("; ") || "None"}`,

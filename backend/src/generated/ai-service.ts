@@ -38,6 +38,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/interview/challenge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Challenge
+         * @description Grounded challenge (D-066): push back only on a contradiction both sides of which
+         *     can be quoted. The model proposes; this checks the quotes before anything is acted on.
+         */
+        post: operations["challenge_api_interview_challenge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/interview/evaluate": {
         parameters: {
             query?: never;
@@ -154,6 +175,27 @@ export interface paths {
         put?: never;
         /** Generate Report */
         post: operations["generate_report_api_interview_generate_report_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/interview/hint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hint
+         * @description One rung of the hint ladder (D-066). The backend decides whether a hint is allowed
+         *     (time stuck, rungs left) and applies the score penalty; this only writes it.
+         */
+        post: operations["hint_api_interview_hint_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -453,6 +495,43 @@ export interface components {
              */
             type: string;
         };
+        /** ChallengeRequest */
+        ChallengeRequest: {
+            /** Answer */
+            answer: string;
+            /**
+             * Company
+             * @example amazon
+             */
+            company: string;
+            /** Context */
+            context: string;
+            /** Persona */
+            persona?: ("neutral" | "friendly" | "terse" | "adversarial") | null;
+            /** Question */
+            question: string;
+            /**
+             * Stage
+             * @example system_design
+             */
+            stage: string;
+        };
+        /**
+         * ChallengeResponse
+         * @description `challenged` is true only when both quotes were found verbatim (D-066).
+         */
+        ChallengeResponse: {
+            /** Challenged */
+            challenged: boolean;
+            /** Claim */
+            claim: string;
+            /** Evidence */
+            evidence: string;
+            /** Question */
+            question: string;
+            /** Reason */
+            reason: string;
+        };
         /** CodeReviewOutput */
         CodeReviewOutput: {
             /**
@@ -622,6 +701,8 @@ export interface components {
             company: string;
             /** Evaluation */
             evaluation: Record<string, unknown>;
+            /** Persona */
+            persona?: ("neutral" | "friendly" | "terse" | "adversarial") | null;
             /** Question */
             question: string;
             /**
@@ -662,6 +743,44 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HintRequest */
+        HintRequest: {
+            /**
+             * Company
+             * @example google
+             */
+            company: string;
+            /**
+             * Context
+             * @default
+             */
+            context?: string | null;
+            /** Draft */
+            draft?: string | null;
+            /** Level */
+            level: number;
+            /** Persona */
+            persona?: ("neutral" | "friendly" | "terse" | "adversarial") | null;
+            /**
+             * Previous Hints
+             * @default []
+             */
+            previous_hints?: string[];
+            /** Question */
+            question: string;
+            /**
+             * Stage
+             * @example coding
+             */
+            stage: string;
+        };
+        /** HintResponse */
+        HintResponse: {
+            /** Hint */
+            hint: string;
+            /** Level */
+            level: number;
         };
         /** IngestDoc */
         IngestDoc: {
@@ -746,6 +865,8 @@ export interface components {
              * @example medium
              */
             difficulty?: string;
+            /** Persona */
+            persona?: ("neutral" | "friendly" | "terse" | "adversarial") | null;
             /** Previous Answer */
             previous_answer?: string | null;
             /**
@@ -1191,6 +1312,39 @@ export interface operations {
             };
         };
     };
+    challenge_api_interview_challenge_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChallengeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChallengeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     evaluate_api_interview_evaluate_post: {
         parameters: {
             query?: never;
@@ -1409,6 +1563,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InterviewReportResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hint_api_interview_hint_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HintRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HintResponse"];
                 };
             };
             /** @description Validation Error */

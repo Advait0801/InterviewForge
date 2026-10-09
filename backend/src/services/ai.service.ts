@@ -51,6 +51,9 @@ export type ResumePurgeResult = Schemas["ResumePurgeResponse"];
 export type InterviewReport = Schemas["InterviewReportResponse"];
 export type CodeReviewResult = Schemas["CodeReviewOutput"];
 export type RecommendationAIResult = Schemas["RecommendationOutput"];
+export type HintResult = Schemas["HintResponse"];
+export type ChallengeResult = Schemas["ChallengeResponse"];
+export type Persona = NonNullable<Schemas["NextQuestionRequest"]["persona"]>;
 
 /**
  * Send a request and return the response once its status is OK; a non-OK status becomes an
@@ -214,6 +217,7 @@ type NextQuestionParams = {
   user_id?: string;
   resume_grounded?: boolean;
   session_id?: string;
+  persona?: Persona;
 };
 
 // previous_answer is deliberately not sent. The backend used to send it as
@@ -226,6 +230,7 @@ const nextQuestionBody = (params: NextQuestionParams): Schemas["NextQuestionRequ
   user_id: params.user_id,
   resume_grounded: params.resume_grounded,
   session_id: params.session_id,
+  persona: params.persona,
 });
 
 export async function generateNextQuestion(params: NextQuestionParams): Promise<StructuredQuestion> {
@@ -284,6 +289,7 @@ type FollowupParams = {
   question: string;
   answer: string;
   evaluation: StructuredEvaluation;
+  persona?: Persona;
 };
 
 const followupBody = (params: FollowupParams): Schemas["GenerateFollowupRequest"] => ({
@@ -292,6 +298,7 @@ const followupBody = (params: FollowupParams): Schemas["GenerateFollowupRequest"
   question: params.question,
   answer: params.answer,
   evaluation: params.evaluation,
+  persona: params.persona,
 });
 
 export async function generateFollowup(params: FollowupParams): Promise<StructuredFollowup> {
@@ -301,6 +308,58 @@ export async function generateFollowup(params: FollowupParams): Promise<Structur
 /** `generateFollowup`, with the question's text passed to `onDelta` as it's generated. */
 export async function streamFollowup(params: FollowupParams, options: QuestionStreamOptions): Promise<StructuredFollowup> {
   return streamQuestion<StructuredFollowup>("/api/interview/generate-followup/stream", followupBody(params), options);
+}
+
+/** One rung of the hint ladder (D-066). Whether a hint is allowed is the caller's call. */
+export async function generateHint(params: {
+  company: Company;
+  stage: InterviewStage;
+  question: string;
+  context: string;
+  level: number;
+  previous_hints: string[];
+  draft?: string;
+  persona?: Persona;
+}): Promise<HintResult> {
+  return postJson<HintResult, "HintRequest">("/api/interview/hint", {
+    company: params.company,
+    stage: params.stage,
+    question: params.question,
+    context: params.context,
+    level: params.level,
+    previous_hints: params.previous_hints,
+    draft: params.draft,
+    persona: params.persona,
+  });
+}
+
+/**
+ * Grounded challenge (D-066): `challenged` only when the answer contradicts the context and
+ * the ai-service found both quotes verbatim.
+ */
+export async function checkChallenge(
+  params: {
+    company: Company;
+    stage: InterviewStage;
+    question: string;
+    answer: string;
+    context: string;
+    persona?: Persona;
+  },
+  signal?: AbortSignal
+): Promise<ChallengeResult> {
+  return postJson<ChallengeResult, "ChallengeRequest">(
+    "/api/interview/challenge",
+    {
+      company: params.company,
+      stage: params.stage,
+      question: params.question,
+      answer: params.answer,
+      context: params.context,
+      persona: params.persona,
+    },
+    signal
+  );
 }
 
 export async function transcribeSpeech(params: {

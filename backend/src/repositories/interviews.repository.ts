@@ -8,6 +8,7 @@ export type SessionRow = {
   status: string;
   stage_turn_count: number;
   resume_grounded: boolean;
+  persona: string;
   report_json: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
@@ -37,7 +38,7 @@ export type TurnUpdate = { set: string; params: unknown[] };
 export async function listSessions(userId: string): Promise<Omit<SessionRow, "report_json">[]> {
   const result = await query<SessionRow>(
     `SELECT id, user_id, company, current_stage, status, stage_turn_count, resume_grounded,
-              created_at, updated_at
+              persona, created_at, updated_at
        FROM interview_sessions
        WHERE user_id = $1
        ORDER BY created_at DESC
@@ -50,7 +51,7 @@ export async function listSessions(userId: string): Promise<Omit<SessionRow, "re
 export async function findSession(sessionId: string, userId: string): Promise<SessionRow | null> {
   const result = await query<SessionRow>(
     `SELECT id, user_id, company, current_stage, status, stage_turn_count, resume_grounded,
-            report_json, created_at, updated_at
+            persona, report_json, created_at, updated_at
      FROM interview_sessions
      WHERE id = $1 AND user_id = $2`,
     [sessionId, userId]
@@ -85,13 +86,49 @@ export async function findLatestQuestion(sessionId: string, stage: string): Prom
 
 export async function insertSession(
   db: Queryable,
-  row: { id: string; userId: string; company: string; stage: string; resumeGrounded: boolean }
+  row: { id: string; userId: string; company: string; stage: string; resumeGrounded: boolean; persona: string }
 ): Promise<void> {
   await db.query(
-    `INSERT INTO interview_sessions (id, user_id, company, current_stage, status, stage_turn_count, resume_grounded)
-         VALUES ($1, $2, $3, $4, 'active', 0, $5)`,
-    [row.id, row.userId, row.company, row.stage, row.resumeGrounded]
+    `INSERT INTO interview_sessions (id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, persona)
+         VALUES ($1, $2, $3, $4, 'active', 0, $5, $6)`,
+    [row.id, row.userId, row.company, row.stage, row.resumeGrounded, row.persona]
   );
+}
+
+/**
+ * Hints given in `stage` since `since` (the question being answered was asked), oldest
+ * first (D-066). Pass `db` to count inside a transaction.
+ */
+export async function listHintsSince(
+  sessionId: string,
+  stage: string,
+  since: string,
+  db: Queryable = { query }
+): Promise<MessageRow[]> {
+  const result = await db.query<MessageRow>(
+    `SELECT id, session_id, role, stage, content, metadata_json, created_at
+       FROM interview_messages
+       WHERE session_id = $1 AND stage = $2 AND metadata_json->>'kind' = 'hint' AND created_at > $3
+       ORDER BY created_at ASC`,
+    [sessionId, stage, since]
+  );
+  return result.rows;
+}
+
+/**
+ * Lock the session row for the rest of the transaction and return where it stands. A hint
+ * and an answer to the same turn serialise on this lock (the answer's claim is an UPDATE of
+ * the same row), so a hint is never recorded against a turn that has moved on.
+ */
+export async function lockSessionTurn(
+  db: Queryable,
+  sessionId: string
+): Promise<{ status: string; current_stage: string; stage_turn_count: number } | null> {
+  const result = await db.query<{ status: string; current_stage: string; stage_turn_count: number }>(
+    `SELECT status, current_stage, stage_turn_count FROM interview_sessions WHERE id = $1 FOR UPDATE`,
+    [sessionId]
+  );
+  return result.rows[0] ?? null;
 }
 
 export async function insertMessage(db: Queryable, params: NewMessage): Promise<void> {

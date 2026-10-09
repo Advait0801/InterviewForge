@@ -205,16 +205,23 @@ def main():
     check("answer stream: the turn is stored (answer, evaluation, question)", len(msgs) == 4, f"{len(msgs)} messages")
 
     print("\n3. Disconnect mid-question")
-    # (a) At the ai-service: leaving after the first chunk must stop the model stream.
-    before_cancelled = cancelled_streams()
-    direct = Stream(AI, "/api/interview/next-question/stream", {"company": "uber", "stage": "system_design", "difficulty": "hard"})
-    for event in direct:
-        if event["type"] == "delta":
-            direct.drop()
+    # (a) At the ai-service: leaving after the first chunk must stop the model stream. Up to
+    # three tries: when a model sends the rest of the question within milliseconds of its
+    # first chunk (gpt-4o-mini often does), it can finish before the disconnect lands, and
+    # then there is nothing left to cancel.
+    tries = []
+    for _ in range(3):
+        before_cancelled = cancelled_streams()
+        direct = Stream(AI, "/api/interview/next-question/stream", {"company": "uber", "stage": "system_design", "difficulty": "hard"})
+        for event in direct:
+            if event["type"] == "delta":
+                direct.drop()
+                break
+        time.sleep(2)
+        tries.append(cancelled_streams() > before_cancelled)
+        if tries[-1]:
             break
-    time.sleep(2)
-    check("disconnect at the ai-service: the model stream is cancelled",
-          cancelled_streams() > before_cancelled, f"cancelled {before_cancelled} -> {cancelled_streams()}")
+    check("disconnect at the ai-service: the model stream is cancelled", any(tries), f"attempts {tries}")
 
     # (b) Through Express: it aborts its upstream call and records nothing. Gemini sends a
     # question in a few large chunks, so the model may already be done by then; whether it
