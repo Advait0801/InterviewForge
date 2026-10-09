@@ -81,6 +81,7 @@ function session(overrides: Record<string, unknown> = {}) {
     status: "active",
     stage_turn_count: 0,
     resume_grounded: false,
+    persona: "neutral",
     report_json: null,
     created_at: "2026-09-22T00:00:00Z",
     updated_at: "2026-09-22T00:00:00Z",
@@ -169,6 +170,9 @@ describe("POST /api/interviews/stream", () => {
 });
 
 describe("POST /api/interviews/:id/answer/stream", () => {
+  beforeEach(() => {
+    db.handlers.push({ match: "metadata_json->>'kind' = 'hint'", reply: [] });
+  });
   const answer = (body: unknown = { answer: "An answer" }) =>
     api.request("POST", `/api/interviews/${SESSION}/answer/stream`, { body });
 
@@ -298,6 +302,9 @@ const until = async (cond: () => boolean, ms = 3000) => {
 };
 
 describe("disconnect and backpressure", () => {
+  beforeEach(() => {
+    db.handlers.push({ match: "metadata_json->>'kind' = 'hint'", reply: [] });
+  });
   it("a client leaving mid-question aborts generation and records nothing", async () => {
     sessionLookup(session({ stage_turn_count: 1 }));
     db.handlers.push(latestQuestion);

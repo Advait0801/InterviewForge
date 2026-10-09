@@ -63,6 +63,7 @@ function session(overrides: Record<string, unknown> = {}) {
     status: "active",
     stage_turn_count: 0,
     resume_grounded: false,
+    persona: "neutral",
     report_json: null,
     created_at: "2026-09-22T00:00:00Z",
     updated_at: "2026-09-22T00:00:00Z",
@@ -214,6 +215,10 @@ describe("GET /api/interviews/:id", () => {
 });
 
 describe("POST /api/interviews/:id/answer", () => {
+  // No hints used on these turns (D-066); counted before grading and again in the commit.
+  beforeEach(() => {
+    db.handlers.push({ match: "metadata_json->>'kind' = 'hint'", reply: [] });
+  });
   const latestQuestion = {
     match: "metadata_json->>'kind' = 'question'",
     reply: [{ id: "q1", content: QUESTION.question, metadata_json: { context: "ctx" } }],

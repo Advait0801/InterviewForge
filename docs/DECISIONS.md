@@ -7,6 +7,115 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-10-08
+
+### D-066 — Interviewer upgrades: personas, a hint ladder with a score penalty, grounded challenge; previous_answer stays off
+
+**Why:** Phase 5 (Group B). Each upgrade had to be measured, not just built, with no retrieval
+regression. Advait's spend cap was $1; the phase spent about **$0.21**.
+
+**Decided:**
+- **Personas** (`neutral` default, `friendly`, `terse`, `adversarial`). Chosen at the start of an
+  interview (`persona` on both start endpoints) and stored on the session (migration 015). Used
+  for questions, follow-ups, hints and challenges; **never** for retrieval, grading or the report.
+  The persona is a variable at the *start* of the one system message.
+  - Neutral renders the old prompts byte for byte, pinned by hash, so every earlier measurement
+    still holds.
+  - At the end of the message, the model ignored it.
+  - A second system message is rejected by Gemini's client but accepted by OpenAI and by the
+    fake test model. The first live run caught this; no unit test could.
+- **Hint ladder:** `POST /interviews/{id}/hint`, at most 3 hints per question.
+  - The rungs are: what to notice; the mechanism, unnamed; then named, with steps.
+  - Each rung unlocks after `HINT_UNLOCK_SECONDS` (30) stuck on the question or since the
+    previous hint, and costs 1 point off that answer's score (never below 1). The answer's
+    evaluation keeps `rawScore`, `hintsUsed` and `hintPenalty`.
+  - A hint is generated outside the transaction (D-057) and recorded under a row lock only if
+    the turn and the hint count are unchanged.
+  - The answer's commit recounts hints under the same lock, so a hint given while an answer is
+    graded is never missed: one of the two gets a 409.
+- **Grounded challenge:** when the stage's follow-up is unused, a check runs alongside the
+  evaluation, adding no latency. It decides whether the answer states something the retrieved
+  context directly contradicts. Pushback needs **three** things:
+  1. the model says so;
+  2. both quotes are found verbatim (ignoring case, whitespace and curly quotes, at least 12
+     characters);
+  3. a second, narrow look at just the two quotes confirms the context says the claim is false.
+
+  A verified contradiction becomes the stage's follow-up, carrying `challenge: {claim, evidence}`.
+  Any failure falls back to the normal flow. It sits behind `INTERVIEW_CHALLENGE_ENABLED`
+  (default off) until UI B shows it.
+- **`previous_answer` stays off, measured** (`app.eval.run --previous-answer`):
+
+  | Variant | nDCG@5 | MRR | hit rate |
+  |---|---|---|---|
+  | baseline (not sent) | **0.909** | 0.917 | 0.952 |
+  | + a strong previous-stage answer | 0.411 | 0.407 | 0.452 |
+  | + a mediocre previous-stage answer | 0.627 | 0.607 | 0.714 |
+
+  The previous answer is about another stage's topic and drowns the query. That's far outside
+  the ±0.024 noise band. The baseline still matches the shipped 0.9009, so nothing in this phase
+  touched retrieval.
+
+**Measured** (`python -m app.eval.interviewer`; generations on Gemini flash-lite only, judged by
+gpt-4o; recorded in `app/eval/fixtures/interviewer.json` and replayed by pytest):
+
+| Part | Result | Bar |
+|---|---|---|
+| Personas: blind judge names the style | **75%**, held-out pairs 75% | ≥ 75% |
+| Personas: question quality vs neutral | no drop (all ≥ neutral's 92%) | drop ≤ 12.5% |
+| Hints: rungs in order (pairwise, both orders) | **88%** (3-way ranking 100%), held-out 2/2 | ≥ 80% |
+| Hints: rung 1–2 gives the answer away | **0 of 16** | 0 |
+| Challenge: pushback on correct answers | **0 of 10** (stable over 3 runs) | 0 |
+| Challenge: contradictions caught | **5 of 7** (71%) | ≥ 50% |
+
+- **Terse** is never named by a blind judge (0/12, with both judges). It is a third the length of
+  neutral (21 vs 68 words) and is judged terser than neutral **12/12 side by side**: a short,
+  plain question reads as "neutral" on its own. Friendly and adversarial are 12/12 blind.
+- The two missed contradictions ("you can't use WebSockets", "no need to pre-warm") contradict
+  contexts that list options rather than state requirements. The cautious verifier is the right
+  side to err on. Without it, the first run pushed back on 1 of 7 correct answers (a different
+  approach read as a contradiction).
+- Hint rungs took three definitions:
+  1. Naming the technique at rung 2 gave the answer away 3 of 6 times. For many questions the
+     name *is* the answer.
+  2. Not naming it made rung 2 vaguer than rung 1.
+  3. "More specific than rung 1, describe the mechanism unnamed, and stop short of the step
+     that completes the answer" passed.
+
+**How the measurement had to change, and why:**
+- **Gemini's free tier is 15 requests/minute *and* 500/day per model** (from Gemini's own 429s).
+  The daily cap was hit mid-run and calls silently fell back to gpt-4o-mini. Two models were
+  measured as one, so that run was discarded.
+  - The eval now pins providers and paces itself.
+  - Calls have a 60 s timeout and 3 attempts: one run stalled 15 minutes on a hung call, and
+    another died on a DNS blip.
+- **gpt-4o-mini was not a reliable judge for hint order.** Its reasons described hints it then
+  ranked the other way, and its pairwise answers flipped with presentation order. Advait approved
+  **gpt-4o as the judge only**. Pairwise comparison in both orders replaced the single 3-way
+  ranking, which is still reported. For personas, gpt-4o and gpt-4o-mini agreed exactly.
+- Held-out cases (4 company/stage pairs, 2 hint questions) were added before the final runs and
+  never used for tuning. They score the same as the rest.
+
+**Found:** retrieval for thin companies (Uber, Microsoft) returns other companies' documents, and
+contexts often hold the same chunk twice. That's not this phase's concern; noted for later.
+
+**Verified:**
+- ai-service 508 (+59), backend 286 (+22, with `REDIS_TEST_URL`); web 96, lint and tsc on the
+  regenerated types; code-runner 48. Contract drift check clean.
+- The race guards each fail their test when removed. Neutral prompts match their pre-phase hashes.
+  Every interviewer prompt has exactly one, leading, system message for every persona.
+- Live, `scripts/verify_interviewer.py` 14/14:
+  - persona stored and returned on the JSON, stream, GET and list paths;
+  - hint locked → unlocked after 30 s → locked → rung 2;
+  - both hints in the transcript;
+  - the next answer's score carries the 2-point penalty, stored with the raw score;
+  - a fresh ladder on the next question.
+
+  With the flag on (`--challenge`, 16/16), a wrong answer about Amazon's Leadership Principles got
+  pushback quoting the answer and the retrieved guide verbatim. `backend/.env` was restored after.
+- `verify_phase7.py` 46/46, `verify_resume_isolation.py` 42/42, `verify_streaming.py` 22/22, 0
+  `openapi_violation`.
+
 ## 2026-10-07
 
 ### D-065 — Interview questions stream over SSE, ai-service → Express → client; message metadata and the report get real schemas

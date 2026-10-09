@@ -3,12 +3,16 @@ import { withTransaction } from "../db";
 import * as interviews from "../repositories/interviews.repository";
 import type { NewMessage, TurnUpdate } from "../repositories/interviews.repository";
 import {
+  checkChallenge,
   evaluateAnswer,
   generateFollowup,
+  generateHint,
   generateNextQuestion,
   generateReport,
   streamFollowup,
   streamNextQuestion,
+  type ChallengeResult,
+  type Persona,
   type StructuredEvaluation,
   type StructuredFollowup,
   type StructuredQuestion,
@@ -73,6 +77,35 @@ async function askFollowup(input: FollowupInput, stream?: TurnStream): Promise<S
 
 const sessionNotFound = () => notFound("Interview session not found");
 
+export const PERSONAS = ["neutral", "friendly", "terse", "adversarial"] as const;
+
+export function isPersona(value: unknown): value is Persona {
+  return typeof value === "string" && (PERSONAS as readonly string[]).includes(value);
+}
+
+/** Stored values predate the CHECK constraint only in tests; anything else reads as neutral. */
+const sessionPersona = (session: { persona?: string }): Persona =>
+  isPersona(session.persona) ? session.persona : "neutral";
+
+/**
+ * The hint ladder (D-066): up to MAX_HINTS per question, each unlocked by time stuck on the
+ * question (since it was asked, or since the previous hint), each costing HINT_PENALTY off
+ * that answer's score, never below 1.
+ */
+export const MAX_HINTS = 3;
+export const HINT_PENALTY = 1;
+const hintUnlockMs = () => Number(process.env.HINT_UNLOCK_SECONDS ?? 30) * 1000;
+
+/** The evaluation as recorded: the model's score less the hint penalty, with both kept. */
+export function applyHintPenalty(evaluation: StructuredEvaluation, hintsUsed: number) {
+  if (hintsUsed <= 0) return evaluation;
+  const hintPenalty = Math.min(hintsUsed * HINT_PENALTY, evaluation.score - 1);
+  return { ...evaluation, score: evaluation.score - hintPenalty, rawScore: evaluation.score, hintsUsed, hintPenalty };
+}
+
+/** Grounded challenge (D-066) runs only when enabled: it changes the follow-up UI B shows. */
+const challengeEnabled = () => process.env.INTERVIEW_CHALLENGE_ENABLED === "true";
+
 function questionMetadata(company: string, stage: string, question: StructuredQuestion) {
   return {
     kind: "question",
@@ -99,9 +132,11 @@ export async function startInterview(
     company: Company;
     difficulty?: string;
     useResume?: boolean;
+    persona?: Persona;
   },
   stream?: TurnStream
 ) {
+  const persona = input.persona ?? "neutral";
   const startingStage: InterviewStage = "behavioral";
   const stageDifficulty = input.difficulty ?? getDefaultDifficulty(startingStage);
 
@@ -124,6 +159,7 @@ export async function startInterview(
       user_id: input.userId,
       resume_grounded: resumeGrounded,
       session_id: sessionId,
+      persona,
     },
     stream
   );
@@ -137,6 +173,7 @@ export async function startInterview(
       company: input.company,
       stage: startingStage,
       resumeGrounded,
+      persona,
     });
     await interviews.insertMessage(tx, {
       sessionId,
@@ -154,6 +191,7 @@ export async function startInterview(
       currentStage: startingStage,
       status: "active",
       resumeGrounded: nextQuestion.resumeGrounded ?? false,
+      persona,
     },
     openingQuestion: nextQuestion,
   };
@@ -248,16 +286,31 @@ export async function submitAnswer(sessionId: string, userId: string, answer: st
 export async function answerTurn(turn: Turn, userId: string, answer: string, stream?: TurnStream) {
   const { session, stage, latestQuestion, company: normalizedCompany } = turn;
   const sessionId = session.id;
-  const evaluation = await evaluateAnswer(
-    {
-      company: normalizedCompany,
-      stage,
-      question: latestQuestion.content,
-      answer,
-      context: String(latestQuestion.metadata_json.context ?? ""),
-    },
-    stream?.signal
-  );
+  const persona = sessionPersona(session);
+  const context = String(latestQuestion.metadata_json.context ?? "");
+  const hintsBefore = (await interviews.listHintsSince(sessionId, stage, latestQuestion.created_at)).length;
+
+  // The challenge check needs only the question, answer and context, so it runs alongside
+  // the evaluation and adds no latency. It's only worth running when the stage's one
+  // follow-up is still unused. A failed check falls back to the normal flow.
+  const wantsChallenge = challengeEnabled() && shouldAskFollowup(session.stage_turn_count) && context.trim() !== "";
+  const [rawEvaluation, challenge] = await Promise.all([
+    evaluateAnswer(
+      { company: normalizedCompany, stage, question: latestQuestion.content, answer, context },
+      stream?.signal
+    ),
+    wantsChallenge
+      ? checkChallenge(
+          { company: normalizedCompany, stage, question: latestQuestion.content, answer, context, persona },
+          stream?.signal
+        ).catch((err): ChallengeResult | null => {
+          if (stream?.signal.aborted) throw err;
+          console.warn(JSON.stringify({ level: "warn", event: "challenge_check_failed", message: String(err) }));
+          return null;
+        })
+      : Promise.resolve(null),
+  ]);
+  const evaluation = applyHintPenalty(rawEvaluation, hintsBefore);
   await stream?.emit({ type: "evaluation", evaluation });
 
   const answerMessage: NewMessage = {
@@ -290,20 +343,41 @@ export async function answerTurn(turn: Turn, userId: string, answer: string, str
         update
       );
       if (!claimed) throw new DomainError(409, "This question was already answered. Refresh to continue.");
+      // The claim holds the session row, which a hint also locks: a hint given while this
+      // answer was graded is either counted above or rejected here, never missed.
+      const hintsNow = (await interviews.listHintsSince(sessionId, stage, latestQuestion.created_at, tx)).length;
+      if (hintsNow !== hintsBefore) {
+        throw new DomainError(409, "A hint was given while this answer was being graded. Send the answer again.");
+      }
       for (const message of messages) await interviews.insertMessage(tx, message);
     });
 
-  if (shouldAskFollowup(session.stage_turn_count) && evaluation.shouldAskFollowup) {
-    const followup = await askFollowup(
-      {
-        company: normalizedCompany,
-        stage,
-        question: latestQuestion.content,
-        answer,
-        evaluation,
-      },
-      stream
-    );
+  if (challenge?.challenged || (shouldAskFollowup(session.stage_turn_count) && evaluation.shouldAskFollowup)) {
+    // A verified contradiction takes the stage's follow-up: pushing back on it is the most
+    // useful question to ask next. It arrives whole from the check, so it's sent as one delta.
+    const followup: StructuredFollowup & { challenge?: { claim: string; evidence: string } } =
+      challenge?.challenged
+        ? await (async () => {
+            await stream?.emit({ type: "question", kind: "followup", stage });
+            await stream?.emit({ type: "delta", text: challenge.question });
+            return {
+              question: challenge.question,
+              focus: "contradiction with the reference material",
+              reason: challenge.reason,
+              challenge: { claim: challenge.claim, evidence: challenge.evidence },
+            };
+          })()
+        : await askFollowup(
+            {
+              company: normalizedCompany,
+              stage,
+              question: latestQuestion.content,
+              answer,
+              evaluation,
+              persona,
+            },
+            stream
+          );
 
     await commitTurn({ set: "stage_turn_count = stage_turn_count + 1", params: [] }, [
       answerMessage,
@@ -313,7 +387,12 @@ export async function answerTurn(turn: Turn, userId: string, answer: string, str
         role: "assistant",
         stage,
         content: followup.question,
-        metadata: { kind: "followup", focus: followup.focus, reason: followup.reason },
+        metadata: {
+          kind: "followup",
+          focus: followup.focus,
+          reason: followup.reason,
+          ...(followup.challenge ? { challenge: followup.challenge } : {}),
+        },
       },
     ]);
 
@@ -340,6 +419,7 @@ export async function answerTurn(turn: Turn, userId: string, answer: string, str
       // degrades to an ordinary question on the AI service side.
       resume_grounded: session.resume_grounded === true,
       session_id: sessionId,
+      persona,
     },
     stream
   );
@@ -363,5 +443,72 @@ export async function answerTurn(turn: Turn, userId: string, answer: string, str
     currentStage: nextStage,
     evaluation,
     nextQuestion,
+  };
+}
+
+/**
+ * The next rung of the hint ladder for the question being answered (D-066). Refused with
+ * 409 when the ladder is used up or the next rung hasn't unlocked yet (`availableAt`).
+ * The hint is generated outside the transaction (D-057), then recorded only if the turn
+ * and the hint count are still what they were: a concurrent hint or answer gets a 409.
+ */
+export async function requestHint(sessionId: string, userId: string, draft?: string) {
+  const { session, stage, latestQuestion, company } = await loadTurn(sessionId, userId);
+  const hints = await interviews.listHintsSince(sessionId, stage, latestQuestion.created_at);
+  if (hints.length >= MAX_HINTS) {
+    throw new DomainError(409, "No hints left for this question.", { code: "hints_exhausted" });
+  }
+
+  const since = new Date((hints[hints.length - 1] ?? latestQuestion).created_at).getTime();
+  const availableAt = since + hintUnlockMs();
+  if (Date.now() < availableAt) {
+    throw new DomainError(409, "Give it a little longer before the next hint.", {
+      code: "hint_locked",
+      availableAt: new Date(availableAt).toISOString(),
+    });
+  }
+
+  const level = hints.length + 1;
+  const { hint } = await generateHint({
+    company,
+    stage,
+    question: latestQuestion.content,
+    context: String(latestQuestion.metadata_json.context ?? ""),
+    level,
+    previous_hints: hints.map((h) => h.content),
+    draft: draft?.trim() || undefined,
+    persona: sessionPersona(session),
+  });
+
+  await withTransaction(async (tx) => {
+    const now = await interviews.lockSessionTurn(tx, sessionId);
+    if (
+      !now ||
+      now.status !== "active" ||
+      now.current_stage !== stage ||
+      now.stage_turn_count !== session.stage_turn_count
+    ) {
+      throw new DomainError(409, "This question was already answered. Refresh to continue.");
+    }
+    const count = (await interviews.listHintsSince(sessionId, stage, latestQuestion.created_at, tx)).length;
+    if (count !== hints.length) throw new DomainError(409, "A hint was just given. Refresh to see it.");
+    await interviews.insertMessage(tx, {
+      sessionId,
+      role: "assistant",
+      stage,
+      content: hint,
+      metadata: { kind: "hint", level, penalty: HINT_PENALTY },
+    });
+  });
+
+  return {
+    sessionId,
+    stage,
+    level,
+    hint,
+    hintsUsed: level,
+    hintsRemaining: MAX_HINTS - level,
+    penalty: level * HINT_PENALTY,
+    nextAvailableAt: level < MAX_HINTS ? new Date(Date.now() + hintUnlockMs()).toISOString() : null,
   };
 }

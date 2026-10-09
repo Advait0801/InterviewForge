@@ -463,6 +463,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/interviews/{id}/hint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The next rung of the hint ladder for the question being answered (D-066): up to 3 per
+         *     question, from a nudge to the approach to a near-solution. Each unlocks after
+         *     `HINT_UNLOCK_SECONDS` (default 30) stuck on the question or since the previous hint,
+         *     and costs 1 point off that answer's score (never below 1; the answer's evaluation
+         *     then carries `rawScore`, `hintsUsed` and `hintPenalty`). 409 with `code`
+         *     `hints_exhausted`, or `hint_locked` plus `availableAt`; also 409 if the question was
+         *     answered meanwhile.
+         */
+        post: operations["interviewHint"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/interviews/speech/transcribe": {
         parameters: {
             query?: never;
@@ -721,9 +746,14 @@ export interface components {
     schemas: {
         Error: {
             error: string;
-            /** @description `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes. */
+            /**
+             * @description `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes.
+             *     Hints (D-066): `hints_exhausted` and `hint_locked` (409).
+             */
             code?: string;
             retryable?: boolean;
+            /** @description With `hint_locked`, when the next hint unlocks. */
+            availableAt?: components["schemas"]["Timestamp"];
             details?: unknown;
         };
         Uuid: string;
@@ -740,6 +770,12 @@ export interface components {
         Company: "amazon" | "google" | "meta" | "apple" | "microsoft" | "uber" | "bloomberg" | "adobe" | "linkedin" | "airbnb";
         /** @enum {string} */
         InterviewStage: "behavioral" | "coding" | "system_design" | "core_cs" | "report";
+        /**
+         * @description The interviewer's tone for the whole session (D-066). Retrieval and grading ignore it.
+         * @default neutral
+         * @enum {string}
+         */
+        Persona: "neutral" | "friendly" | "terse" | "adversarial";
         /** @description Activity count per day (YYYY-MM-DD). */
         ActivityMap: {
             [key: string]: number;
@@ -898,6 +934,7 @@ export interface components {
             status: "active" | "completed";
             stage_turn_count: number;
             resume_grounded: boolean;
+            persona: components["schemas"]["Persona"];
             created_at: components["schemas"]["Timestamp"];
             updated_at: components["schemas"]["Timestamp"];
         };
@@ -910,6 +947,7 @@ export interface components {
             status: "active" | "completed";
             stage_turn_count: number;
             resume_grounded: boolean;
+            persona: components["schemas"]["Persona"];
             /** @description The stored report once generated. */
             report_json: components["schemas"]["StoredInterviewReport"] | null;
             created_at: components["schemas"]["Timestamp"];
@@ -973,12 +1011,38 @@ export interface components {
             suggestions: string[];
             shouldAskFollowup: boolean;
             followupFocus: string;
+            /** @description Present when hints were used; the score before the penalty (D-066). */
+            rawScore?: number;
+            /** @description Present when hints were used on this question. */
+            hintsUsed?: number;
+            /** @description Points taken off; `score` is already reduced. */
+            hintPenalty?: number;
         };
         /** @description LLM output; may carry extra keys. */
         Followup: {
             question: string;
             focus: string;
             reason: string;
+            challenge?: components["schemas"]["Challenge"];
+        };
+        /**
+         * @description Present when the follow-up pushes back on a contradiction (D-066): `claim` is quoted
+         *     from the answer and `evidence` from the retrieved context, both checked verbatim.
+         */
+        Challenge: {
+            claim: string;
+            evidence: string;
+        };
+        InterviewHint: {
+            sessionId: components["schemas"]["Uuid"];
+            stage: components["schemas"]["InterviewStage"];
+            level: number;
+            hint: string;
+            hintsUsed: number;
+            hintsRemaining: number;
+            /** @description Points this question's score will lose so far. */
+            penalty: number;
+            nextAvailableAt: components["schemas"]["Timestamp"] | null;
         };
         AnswerOutcome: {
             /** @constant */
@@ -1021,7 +1085,7 @@ export interface components {
             company: string;
         };
         /** @description `metadata_json` of an interview message; `kind` says which. */
-        InterviewMessageMetadata: components["schemas"]["QuestionMetadata"] | components["schemas"]["FollowupMetadata"] | components["schemas"]["AnswerMetadata"] | components["schemas"]["EvaluationMetadata"];
+        InterviewMessageMetadata: components["schemas"]["QuestionMetadata"] | components["schemas"]["FollowupMetadata"] | components["schemas"]["AnswerMetadata"] | components["schemas"]["EvaluationMetadata"] | components["schemas"]["HintMetadata"];
         /** @description A stage's opening question (role `assistant`), with how it was grounded. */
         QuestionMetadata: {
             /**
@@ -1050,6 +1114,18 @@ export interface components {
             kind: "followup";
             focus: string;
             reason: string;
+            challenge?: components["schemas"]["Challenge"];
+        };
+        /** @description A hint the candidate asked for (role `assistant`, D-066). */
+        HintMetadata: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "hint";
+            level: number;
+            /** @description Points it costs the answer to this question. */
+            penalty: number;
         };
         /** @description The candidate's answer (role `candidate`). */
         AnswerMetadata: {
@@ -1078,6 +1154,7 @@ export interface components {
                 /** @constant */
                 status: "active";
                 resumeGrounded: boolean;
+                persona: components["schemas"]["Persona"];
             };
             openingQuestion: components["schemas"]["InterviewQuestion"];
         };
@@ -1972,6 +2049,7 @@ export interface operations {
                      * @default true
                      */
                     useResume?: boolean;
+                    persona?: components["schemas"]["Persona"];
                 };
             };
         };
@@ -2009,6 +2087,7 @@ export interface operations {
                      * @default true
                      */
                     useResume?: boolean;
+                    persona?: components["schemas"]["Persona"];
                 };
             };
         };
@@ -2152,6 +2231,42 @@ export interface operations {
             404: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
+        };
+    };
+    interviewHint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description The answer so far; lets the hint build on it. */
+                    draft?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The hint, now part of the transcript. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewHint"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     transcribeSpeech: {

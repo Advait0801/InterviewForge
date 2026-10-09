@@ -303,11 +303,48 @@ class SystemDesignAnalysisOutput(BaseModel):
     rubric: Dict[str, RubricSectionScore]
 
 
+# Interviewer personas (D-066). Tone only: the technical bar, retrieval and grading are the
+# same for every persona, so evaluation and report chains never receive one.
+PERSONAS: Dict[str, str] = {
+    "friendly": (
+        "Persona: friendly. Open with one short, warm sentence before the question (for example, "
+        "acknowledging the candidate or saying what you're curious about), use plain conversational "
+        "phrasing, and frame it as a discussion. Keep the technical bar exactly the same."
+    ),
+    "terse": (
+        "Persona: terse. Write at most two sentences and under 30 words in total. No greeting, no "
+        "scenario set-up (no \"Imagine\" or \"Suppose\"), no preamble: state the task directly. Keep the "
+        "technical bar exactly the same."
+    ),
+    "adversarial": (
+        "Persona: adversarial, a skeptical bar-raiser. Open by challenging an assumption or a common "
+        "answer (for example, \"Most candidates reach for X here. Why would that fail?\"), then demand "
+        "justification: ask the candidate to defend trade-offs and say what breaks. Sound skeptical, "
+        "never encouraging; stay professional, never rude or personal. Keep the technical bar exactly "
+        "the same."
+    ),
+}
+PERSONA_NAMES = ("neutral", *PERSONAS)
+
+
+def persona_instructions(persona: Optional[str]) -> str:
+    """The `persona_instructions` value for a prompt: placed at the start of its system
+    message. Empty for neutral (or none), which renders the prompt exactly as it was before
+    personas existed, so the measured baseline holds.
+
+    At the start, not the end: after the long JSON format block the model all but ignored it
+    (D-066). And not a second system message: Gemini's client rejects any system message
+    that isn't the first (found by the live eval; the fake model accepts it)."""
+    if not persona or persona == "neutral":
+        return ""
+    return PERSONAS[persona] + "\n\n"
+
+
 def structured_question_chain(provider: Optional[str] = None):
     parser = JsonOutputParser(pydantic_object=StructuredQuestionOutput)
     prompt = ChatPromptTemplate.from_messages([
         ("system", (
-            "You are InterviewForge, an expert technical interviewer. "
+            "{persona_instructions}You are InterviewForge, an expert technical interviewer. "
             "Generate one interview question tailored to the company style, stage, difficulty, and retrieved context. "
             "Return valid JSON only.\n{format_instructions}"
         )),
@@ -319,7 +356,7 @@ def structured_question_chain(provider: Optional[str] = None):
             "## Difficulty calibration (bar for this level)\n{difficulty_calibration}\n\n"
             "## Retrieved context\n{context}"
         )),
-    ]).partial(format_instructions=parser.get_format_instructions())
+    ]).partial(format_instructions=parser.get_format_instructions(), persona_instructions="")
     return prompt | _get_llm(provider) | parser
 
 
@@ -339,7 +376,7 @@ def resume_grounded_question_chain(provider: Optional[str] = None):
     parser = JsonOutputParser(pydantic_object=ResumeGroundedQuestionOutput)
     prompt = ChatPromptTemplate.from_messages([
         ("system", (
-            "You are InterviewForge, an expert technical interviewer. "
+            "{persona_instructions}You are InterviewForge, an expert technical interviewer. "
             "Generate one interview question that is specific to THIS candidate, "
             "asked in the style of the target company.\n"
             "Rules:\n"
@@ -361,7 +398,7 @@ def resume_grounded_question_chain(provider: Optional[str] = None):
             "## Company context (what this company probes for -- NOT the candidate)\n{context}\n\n"
             "## Candidate resume context (the candidate's own experience)\n{resume_context}"
         )),
-    ]).partial(format_instructions=parser.get_format_instructions())
+    ]).partial(format_instructions=parser.get_format_instructions(), persona_instructions="")
     return prompt | _get_llm(provider) | parser
 
 
@@ -389,7 +426,7 @@ def structured_followup_chain(provider: Optional[str] = None):
     parser = JsonOutputParser(pydantic_object=StructuredFollowupOutput)
     prompt = ChatPromptTemplate.from_messages([
         ("system", (
-            "You are InterviewForge, an expert technical interviewer. "
+            "{persona_instructions}You are InterviewForge, an expert technical interviewer. "
             "Generate a natural follow-up question based on the answer and evaluation. "
             "Return valid JSON only.\n{format_instructions}"
         )),
@@ -401,7 +438,7 @@ def structured_followup_chain(provider: Optional[str] = None):
             "## Candidate answer\n{answer}\n\n"
             "## Evaluation summary\n{evaluation}"
         )),
-    ]).partial(format_instructions=parser.get_format_instructions())
+    ]).partial(format_instructions=parser.get_format_instructions(), persona_instructions="")
     return prompt | _get_llm(provider) | parser
 
 
@@ -418,6 +455,126 @@ def voice_explanation_rubric_chain(provider: Optional[str] = None):
             "## Candidate Transcript\n{transcript}\n\n"
             "## Optional Context\n{context}"
         )),
+    ]).partial(format_instructions=parser.get_format_instructions())
+    return prompt | _get_llm(provider) | parser
+
+
+class HintOutput(BaseModel):
+    hint: str = Field(description="The hint, addressed to the candidate, in one to three sentences.")
+
+
+# What each rung of the hint ladder may reveal (D-066). The judge in app.eval.interviewer
+# checks that the rungs reveal progressively more and that the first two never give the
+# answer away.
+HINT_LEVELS: Dict[int, str] = {
+    1: (
+        "a nudge: name the difficulty or bottleneck the question hinges on (what makes the obvious "
+        "approach too slow, fragile or wrong), ideally as a question back to the candidate. Do NOT "
+        "suggest any solution or direction."
+    ),
+    2: (
+        "a direction: build on the first hint and be clearly more specific than it. Describe the "
+        "mechanism a good solution uses in concrete terms (what to store or track, and how it is "
+        "used), WITHOUT naming the specific technique, algorithm, data structure, protocol or "
+        "pattern. For many questions the name is the answer. Stop short of the step that completes "
+        "the answer: if spelling out the mechanism would solve the question outright, describe only "
+        "the property it must guarantee and leave the mechanism to the next hint."
+    ),
+    3: (
+        "a near-solution: name the technique and outline its key steps, but leave the details, "
+        "edge cases and final assembly to the candidate."
+    ),
+}
+
+
+def hint_chain(provider: Optional[str] = None):
+    parser = JsonOutputParser(pydantic_object=HintOutput)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "{persona_instructions}You are InterviewForge, an expert technical interviewer. The candidate is stuck and "
+            "asked for a hint. Give exactly one hint at the requested level.\n"
+            "Rules:\n"
+            "- Never state the complete answer.\n"
+            "- Never repeat an earlier hint; build on it.\n"
+            "- Use the reference context when it is relevant, but do not quote it at length.\n"
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", (
+            "## Company\n{company}\n\n"
+            "## Stage\n{stage}\n\n"
+            "## Question\n{question}\n\n"
+            "## Hint level {level} of 3: {level_description}\n\n"
+            "## Earlier hints\n{previous_hints}\n\n"
+            "## Candidate's draft so far\n{draft}\n\n"
+            "## Reference context\n{context}"
+        )),
+    ]).partial(format_instructions=parser.get_format_instructions(), persona_instructions="")
+    return prompt | _get_llm(provider) | parser
+
+
+class ChallengeOutput(BaseModel):
+    contradicts: bool = Field(description="True only if the answer states a fact the context directly contradicts.")
+    claim: str = Field(description="The contradicted statement, copied verbatim from the answer. Empty if none.")
+    evidence: str = Field(description="The contradicting passage, copied verbatim from the context. Empty if none.")
+    challenge: str = Field(description="One follow-up question that pushes back, citing the evidence. Empty if none.")
+    reason: str = Field(description="One short sentence explaining the decision.")
+
+
+def challenge_chain(provider: Optional[str] = None):
+    """Grounded challenge (D-066): does the answer contradict the retrieved context?
+
+    Pushing back on a correct answer is far worse than missing a wrong one, so the prompt
+    asks for direct contradictions only, and the caller verifies both quotes verbatim
+    before acting on a `contradicts: true`."""
+    parser = JsonOutputParser(pydantic_object=ChallengeOutput)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "{persona_instructions}You are InterviewForge, an expert technical interviewer checking a candidate's answer "
+            "against reference material.\n"
+            "Decide whether the answer states a specific fact that the reference context DIRECTLY "
+            "contradicts.\n"
+            "Not a contradiction: something the context does not mention; an omission; a "
+            "different but valid approach; opinions, preferences or trade-off judgements; vague "
+            "or weak answers.\n"
+            "If there is a direct contradiction: copy the contradicted statement from the answer "
+            "word for word into claim, copy the contradicting passage from the context word for "
+            "word into evidence, and write one follow-up question that politely pushes back, "
+            "cites the evidence, and asks the candidate to reconcile the two.\n"
+            "If not: contradicts is false and claim, evidence and challenge are empty strings.\n"
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", (
+            "## Company\n{company}\n\n"
+            "## Stage\n{stage}\n\n"
+            "## Question\n{question}\n\n"
+            "## Candidate answer\n{answer}\n\n"
+            "## Reference context\n{context}"
+        )),
+    ]).partial(format_instructions=parser.get_format_instructions(), persona_instructions="")
+    return prompt | _get_llm(provider) | parser
+
+
+class ChallengeVerdict(BaseModel):
+    false_by_evidence: bool = Field(description="True only if the evidence states or directly implies the claim is false.")
+    reason: str = Field(description="One short sentence.")
+
+
+def challenge_verify_chain(provider: Optional[str] = None):
+    """Second look at a suspected contradiction, from the two quotes alone (D-066).
+
+    The first pass sees the whole answer and context and tends to read "a different choice
+    from the one the context lists" as a contradiction. This asks a narrower question with
+    nothing else to go on: does this passage say this sentence is false?"""
+    parser = JsonOutputParser(pydantic_object=ChallengeVerdict)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "You check one claim against one passage of reference material.\n"
+            "false_by_evidence is true ONLY if the passage states, or directly implies, that the claim is false.\n"
+            "It is false when the claim simply picks a different option, tool or approach than one the passage "
+            "mentions, adds detail the passage doesn't cover, or is vague.\n"
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", "## Claim\n{claim}\n\n## Passage\n{evidence}"),
     ]).partial(format_instructions=parser.get_format_instructions())
     return prompt | _get_llm(provider) | parser
 

@@ -109,6 +109,21 @@ class ResumePurgeResponse(BaseModel):
     verified: bool
 
 
+class HintResponse(BaseModel):
+    hint: str
+    level: int
+
+
+class ChallengeResponse(BaseModel):
+    """`challenged` is true only when both quotes were found verbatim (D-066)."""
+
+    challenged: bool
+    claim: str
+    evidence: str
+    question: str
+    reason: str
+
+
 class StreamDelta(BaseModel):
     """More of the question's text, in order. Concatenated, the deltas are a prefix of
     the final `question`; the `done` event's copy is authoritative."""
@@ -154,9 +169,11 @@ def documented(model: type[BaseModel]) -> Dict[int, Dict[str, type[BaseModel]]]:
 
 
 __all__ = [
+    "ChallengeResponse",
     "CodeReviewOutput",
     "FollowupStreamDone",
     "FollowupStreamEvent",
+    "HintResponse",
     "InterviewReportResponse",
     "LiveIngestion",
     "NextQuestionResponse",

@@ -44,7 +44,7 @@ backend/src/repositories/    # all SQL, one file per table group; take a Queryab
 backend/src/db.ts            # query() over a pg Pool, plus withTransaction()
 backend/openapi/openapi.yaml # the Express API contract (D-062); served at /api/openapi.json
 backend/src/generated/       # ai-service types generated from ai-service/openapi.json — never hand-edit
-backend/sql_migrations/      # 001_init.sql … 014_interview_report.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 015_interviewer_persona.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
 scripts/problemgen/          # problem specs + independent oracles that generate the data files
@@ -168,6 +168,15 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   injected into the prompt, so output is typed JSON, never prose.
 - All calls go through `invoke_with_fallback` (Gemini → OpenAI, with per-provider
   rate-limit cooldowns). Don't call a provider SDK directly from a router.
+- A prompt has exactly **one system message, and it comes first**: Gemini's client raises on
+  any other, while OpenAI and the fake test model accept it (D-066). Add per-request
+  instructions as a template variable inside that message.
+- Gemini's free tier caps each model at **15 requests/minute and 500/day**. Past either,
+  calls fall back to OpenAI silently. An eval that must measure one model pins the provider
+  (`app/eval/interviewer.py` does) and paces itself.
+- Interviewer prompts take `persona_instructions` (D-066); neutral is an empty string, and
+  the neutral prompts are pinned by hash in `tests/test_interviewer_upgrades.py`. Grading and
+  report chains never take a persona.
 
 **Personal data in the vector store (Phase 5)**
 - Resume chunks live in a **per-user Chroma collection**, never the shared corpus.
@@ -205,6 +214,9 @@ python scripts/verify_problems.py           # Phase 7: every problem x 4 languag
 python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
 python scripts/verify_streaming.py          # SSE interview streams, disconnect, 409, timings (D-065); live stack
 python scripts/verify_streaming.py --measure 6  # JSON vs stream latency medians at the ai-service
+python scripts/verify_interviewer.py        # personas, hint ladder + penalty, challenge wiring (D-066); live stack
+docker compose exec ai-service python -m app.eval.interviewer  # persona/hint/challenge quality, ~120 Gemini calls
+docker compose exec ai-service python -m app.eval.run --k 5 --no-filter --previous-answer strong  # why it stays off
 python scripts/problemgen/batch1_easy.py    # regenerate a batch's data (idempotent; see D-042)
 python scripts/problemgen/apply_curation.py # write curated company tags into leetcode_problems.json
 docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tune the live-fetch gate

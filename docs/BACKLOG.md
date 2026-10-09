@@ -15,15 +15,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
   with a tool-using agent that probes, pivots or moves on. The RAG half of this project is
   sophisticated; the orchestration half is an if/else chain in `interviews.routes.ts`, and
   that gap is what a thorough interviewer will find.
-- **Grounded challenge** *(M, Loud)* — push back when a candidate asserts something the
-  retrieved context contradicts. The most "that felt real" moment available, and it reuses
-  retrieval that already exists.
-- **Hint-ladder policy** *(M, Loud)* — track time-stuck and answer quality, decide whether to
-  nudge, apply a scoring penalty per hint.
-- **Interviewer personas** *(S)* — friendly / terse / adversarial as a prompt dimension.
-- **Previous-answer conditioning** *(S)* — the ai-service can append the candidate's last
-  answer to the next stage's retrieval query, but it never received it (D-062). Measure with
-  the eval harness before turning it on; it may help or add noise across stages.
 
 ## Alternative showpieces (considered and not chosen)
 

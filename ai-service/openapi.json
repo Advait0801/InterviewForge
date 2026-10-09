@@ -53,6 +53,96 @@
         "title": "ArchitectureNode",
         "type": "object"
       },
+      "ChallengeRequest": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "company": {
+            "examples": [
+              "amazon"
+            ],
+            "title": "Company",
+            "type": "string"
+          },
+          "context": {
+            "title": "Context",
+            "type": "string"
+          },
+          "persona": {
+            "anyOf": [
+              {
+                "enum": [
+                  "neutral",
+                  "friendly",
+                  "terse",
+                  "adversarial"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persona"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "stage": {
+            "examples": [
+              "system_design"
+            ],
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "company",
+          "stage",
+          "question",
+          "answer",
+          "context"
+        ],
+        "title": "ChallengeRequest",
+        "type": "object"
+      },
+      "ChallengeResponse": {
+        "description": "`challenged` is true only when both quotes were found verbatim (D-066).",
+        "properties": {
+          "challenged": {
+            "title": "Challenged",
+            "type": "boolean"
+          },
+          "claim": {
+            "title": "Claim",
+            "type": "string"
+          },
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenged",
+          "claim",
+          "evidence",
+          "question",
+          "reason"
+        ],
+        "title": "ChallengeResponse",
+        "type": "object"
+      },
       "CodeReviewOutput": {
         "properties": {
           "issues": {
@@ -374,6 +464,23 @@
             "title": "Evaluation",
             "type": "object"
           },
+          "persona": {
+            "anyOf": [
+              {
+                "enum": [
+                  "neutral",
+                  "friendly",
+                  "terse",
+                  "adversarial"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persona"
+          },
           "question": {
             "title": "Question",
             "type": "string"
@@ -464,6 +571,108 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HintRequest": {
+        "properties": {
+          "company": {
+            "examples": [
+              "google"
+            ],
+            "title": "Company",
+            "type": "string"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "",
+            "title": "Context"
+          },
+          "draft": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft"
+          },
+          "level": {
+            "maximum": 3.0,
+            "minimum": 1.0,
+            "title": "Level",
+            "type": "integer"
+          },
+          "persona": {
+            "anyOf": [
+              {
+                "enum": [
+                  "neutral",
+                  "friendly",
+                  "terse",
+                  "adversarial"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persona"
+          },
+          "previous_hints": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Previous Hints",
+            "type": "array"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "stage": {
+            "examples": [
+              "coding"
+            ],
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "company",
+          "stage",
+          "question",
+          "level"
+        ],
+        "title": "HintRequest",
+        "type": "object"
+      },
+      "HintResponse": {
+        "properties": {
+          "hint": {
+            "title": "Hint",
+            "type": "string"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hint",
+          "level"
+        ],
+        "title": "HintResponse",
         "type": "object"
       },
       "IngestDoc": {
@@ -703,6 +912,23 @@
             ],
             "title": "Difficulty",
             "type": "string"
+          },
+          "persona": {
+            "anyOf": [
+              {
+                "enum": [
+                  "neutral",
+                  "friendly",
+                  "terse",
+                  "adversarial"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persona"
           },
           "previous_answer": {
             "anyOf": [
@@ -1699,6 +1925,48 @@
         ]
       }
     },
+    "/api/interview/challenge": {
+      "post": {
+        "description": "Grounded challenge (D-066): push back only on a contradiction both sides of which\ncan be quoted. The model proposes; this checks the quotes before anything is acted on.",
+        "operationId": "challenge_api_interview_challenge_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChallengeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Challenge",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
     "/api/interview/evaluate": {
       "post": {
         "operationId": "evaluate_api_interview_evaluate_post",
@@ -1976,6 +2244,48 @@
           }
         },
         "summary": "Generate Report",
+        "tags": [
+          "interview"
+        ]
+      }
+    },
+    "/api/interview/hint": {
+      "post": {
+        "description": "One rung of the hint ladder (D-066). The backend decides whether a hint is allowed\n(time stuck, rungs left) and applies the score penalty; this only writes it.",
+        "operationId": "hint_api_interview_hint_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HintRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HintResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Hint",
         "tags": [
           "interview"
         ]

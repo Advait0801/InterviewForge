@@ -602,6 +602,7 @@ paths:
                   type: boolean
                   default: true
                   description: Ground questions in the caller's resume when one is indexed.
+                persona: { $ref: "#/components/schemas/Persona" }
       responses:
         "201":
           description: The new session and its opening question.
@@ -640,6 +641,7 @@ paths:
                   type: boolean
                   default: true
                   description: Ground questions in the caller's resume when one is indexed.
+                persona: { $ref: "#/components/schemas/Persona" }
       responses:
         "200":
           description: An event stream; the schema describes one event's `data`.
@@ -764,6 +766,42 @@ paths:
         "404": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+
+  /interviews/{id}/hint:
+    post:
+      tags: [interviews]
+      operationId: interviewHint
+      description: |
+        The next rung of the hint ladder for the question being answered (D-066): up to 3 per
+        question, from a nudge to the approach to a near-solution. Each unlocks after
+        `HINT_UNLOCK_SECONDS` (default 30) stuck on the question or since the previous hint,
+        and costs 1 point off that answer's score (never below 1; the answer's evaluation
+        then carries `rawScore`, `hintsUsed` and `hintPenalty`). 409 with `code`
+        `hints_exhausted`, or `hint_locked` plus `availableAt`; also 409 if the question was
+        answered meanwhile.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                draft: { type: string, description: The answer so far; lets the hint build on it. }
+      responses:
+        "200":
+          description: The hint, now part of the transcript.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InterviewHint" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /interviews/speech/transcribe:
     post:
@@ -1234,8 +1272,13 @@ components:
         error: { type: string }
         code:
           type: string
-          description: "`session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes."
+          description: |
+            `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes.
+            Hints (D-066): `hints_exhausted` and `hint_locked` (409).
         retryable: { type: boolean }
+        availableAt:
+          $ref: "#/components/schemas/Timestamp"
+          description: With `hint_locked`, when the next hint unlocks.
         details: {}
 
     Uuid:
@@ -1257,6 +1300,11 @@ components:
     InterviewStage:
       type: string
       enum: [behavioral, coding, system_design, core_cs, report]
+    Persona:
+      type: string
+      enum: [neutral, friendly, terse, adversarial]
+      default: neutral
+      description: The interviewer's tone for the whole session (D-066). Retrieval and grading ignore it.
     ActivityMap:
       type: object
       description: Activity count per day (YYYY-MM-DD).
@@ -1492,7 +1540,7 @@ components:
     InterviewSessionSummary:
       type: object
       additionalProperties: false
-      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, created_at, updated_at]
+      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, created_at, updated_at, persona]
       properties:
         id: { $ref: "#/components/schemas/Uuid" }
         user_id: { $ref: "#/components/schemas/Uuid" }
@@ -1501,13 +1549,14 @@ components:
         status: { type: string, enum: [active, completed] }
         stage_turn_count: { type: integer }
         resume_grounded: { type: boolean }
+        persona: { $ref: "#/components/schemas/Persona" }
         created_at: { $ref: "#/components/schemas/Timestamp" }
         updated_at: { $ref: "#/components/schemas/Timestamp" }
 
     InterviewSession:
       type: object
       additionalProperties: false
-      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, report_json, created_at, updated_at]
+      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, report_json, created_at, updated_at, persona]
       properties:
         id: { $ref: "#/components/schemas/Uuid" }
         user_id: { $ref: "#/components/schemas/Uuid" }
@@ -1516,6 +1565,7 @@ components:
         status: { type: string, enum: [active, completed] }
         stage_turn_count: { type: integer }
         resume_grounded: { type: boolean }
+        persona: { $ref: "#/components/schemas/Persona" }
         report_json:
           description: The stored report once generated.
           oneOf:
@@ -1620,6 +1670,9 @@ components:
         suggestions: { type: array, items: { type: string } }
         shouldAskFollowup: { type: boolean }
         followupFocus: { type: string }
+        rawScore: { type: integer, description: Present when hints were used; the score before the penalty (D-066). }
+        hintsUsed: { type: integer, minimum: 1, description: Present when hints were used on this question. }
+        hintPenalty: { type: integer, minimum: 0, description: Points taken off; `score` is already reduced. }
 
     Followup:
       type: object
@@ -1629,6 +1682,35 @@ components:
         question: { type: string }
         focus: { type: string }
         reason: { type: string }
+        challenge: { $ref: "#/components/schemas/Challenge" }
+
+    Challenge:
+      type: object
+      description: |
+        Present when the follow-up pushes back on a contradiction (D-066): `claim` is quoted
+        from the answer and `evidence` from the retrieved context, both checked verbatim.
+      additionalProperties: false
+      required: [claim, evidence]
+      properties:
+        claim: { type: string }
+        evidence: { type: string }
+
+    InterviewHint:
+      type: object
+      additionalProperties: false
+      required: [sessionId, stage, level, hint, hintsUsed, hintsRemaining, penalty, nextAvailableAt]
+      properties:
+        sessionId: { $ref: "#/components/schemas/Uuid" }
+        stage: { $ref: "#/components/schemas/InterviewStage" }
+        level: { type: integer, minimum: 1, maximum: 3 }
+        hint: { type: string }
+        hintsUsed: { type: integer, minimum: 1, maximum: 3 }
+        hintsRemaining: { type: integer, minimum: 0, maximum: 2 }
+        penalty: { type: integer, description: Points this question's score will lose so far. }
+        nextAvailableAt:
+          oneOf:
+            - { $ref: "#/components/schemas/Timestamp" }
+            - { type: "null" }
 
     AnswerOutcome:
       oneOf:
@@ -1694,6 +1776,7 @@ components:
         - { $ref: "#/components/schemas/FollowupMetadata" }
         - { $ref: "#/components/schemas/AnswerMetadata" }
         - { $ref: "#/components/schemas/EvaluationMetadata" }
+        - { $ref: "#/components/schemas/HintMetadata" }
       discriminator:
         propertyName: kind
         mapping:
@@ -1701,6 +1784,7 @@ components:
           followup: "#/components/schemas/FollowupMetadata"
           answer: "#/components/schemas/AnswerMetadata"
           evaluation: "#/components/schemas/EvaluationMetadata"
+          hint: "#/components/schemas/HintMetadata"
 
     QuestionMetadata:
       type: object
@@ -1744,6 +1828,17 @@ components:
         kind: { type: string, const: followup }
         focus: { type: string }
         reason: { type: string }
+        challenge: { $ref: "#/components/schemas/Challenge" }
+
+    HintMetadata:
+      type: object
+      description: A hint the candidate asked for (role `assistant`, D-066).
+      additionalProperties: false
+      required: [kind, level, penalty]
+      properties:
+        kind: { type: string, const: hint }
+        level: { type: integer, minimum: 1, maximum: 3 }
+        penalty: { type: integer, description: Points it costs the answer to this question. }
 
     AnswerMetadata:
       type: object
@@ -1770,13 +1865,14 @@ components:
         session:
           type: object
           additionalProperties: false
-          required: [id, company, currentStage, status, resumeGrounded]
+          required: [id, company, currentStage, status, resumeGrounded, persona]
           properties:
             id: { $ref: "#/components/schemas/Uuid" }
             company: { $ref: "#/components/schemas/Company" }
             currentStage: { $ref: "#/components/schemas/InterviewStage" }
             status: { type: string, const: active }
             resumeGrounded: { type: boolean }
+            persona: { $ref: "#/components/schemas/Persona" }
         openingQuestion: { $ref: "#/components/schemas/InterviewQuestion" }
 
     StreamQuestionStart:
