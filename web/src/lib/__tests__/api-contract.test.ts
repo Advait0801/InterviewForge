@@ -1,3 +1,4 @@
+import { transferableAbortController } from "node:util";
 import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import { api, ApiError, emailVerificationUrl, type Assessment, type InterviewReport } from "@/lib/api";
 import { getToken, setToken } from "@/lib/auth";
@@ -106,5 +107,48 @@ describe("generated API client compatibility", () => {
     expectTypeOf<Awaited<ReturnType<typeof api.answerInterview>>>().toEqualTypeOf<components["schemas"]["AnswerOutcome"]>();
     const live: components["schemas"]["LiveIngestion"] = { triggered: false, reason: "local context sufficient" };
     expect(live.triggered).toBe(false);
+  });
+});
+
+describe("interview streams and hints", () => {
+  function events(body: unknown[]) {
+    fetchMock.mockResolvedValueOnce(new Response(body.map((event) => {
+      const value = event as { type: string };
+      return `event: ${value.type}\r\ndata: ${JSON.stringify(value)}\r\n\r\n`;
+    }).join(""), { headers: { "Content-Type": "text/event-stream" } }));
+  }
+  it("streams through the typed client, sends preferences, and returns the authoritative result", async () => {
+    const result = { session: { id: "s" }, openingQuestion: { question: "Final" } };
+    events([{ type: "question", kind: "question", stage: "behavioral" }, { type: "delta", text: "Draft" }, { type: "done", result }]);
+    const onEvent = vi.fn(); const controller = transferableAbortController();
+    expect(await api.startInterviewStream({ company: "google", persona: "terse", mode: "agent" }, onEvent, controller.signal)).toEqual(result);
+    expect(onEvent).toHaveBeenCalledTimes(3);
+    expect(new URL(request().url).pathname).toBe("/api/interviews/stream");
+    expect(await request().json()).toEqual({ company: "google", persona: "terse", mode: "agent" });
+  });
+  it("handles JSON rejection before a stream and preserves normal 401 authentication", async () => {
+    setToken("keep-session"); respond({ error: "Service credentials unavailable" }, 401);
+    await expect(api.startInterviewStream({ company: "google" }, vi.fn())).rejects.toMatchObject({ status: 401, message: "Service credentials unavailable" });
+    expect(getToken()).toBe("keep-session");
+  });
+  it.each([true, false])("preserves mid-stream error retryability %s", async (retryable) => {
+    events([{ type: "evaluation", evaluation: {} }, { type: "error", status: retryable ? 503 : 409, error: "Stream failed", retryable }]);
+    await expect(api.answerInterviewStream("session", "Same answer", vi.fn())).rejects.toMatchObject({ name: "ApiError", retryable, message: "Stream failed" });
+    expect(await request().json()).toEqual({ answer: "Same answer" });
+  });
+  it("treats EOF without a terminal event as unconfirmed", async () => {
+    events([{ type: "delta", text: "partial" }]);
+    await expect(api.answerInterviewStream("s", "draft", vi.fn())).rejects.toMatchObject({ status: 502, retryable: undefined });
+  });
+  it("preserves hint lock information and sends the draft", async () => {
+    const availableAt = "2026-10-10T02:00:30Z";
+    respond({ error: "Hint locked", code: "hint_locked", availableAt }, 409);
+    await expect(api.interviewHint("s", "draft")).rejects.toMatchObject({ code: "hint_locked", availableAt, status: 409 });
+    expect(await request().json()).toEqual({ draft: "draft" });
+  });
+  it("aborts an active answer stream without a terminal event", async () => {
+    const controller = transferableAbortController(); const onEvent = vi.fn(() => controller.abort());
+    events([{ type: "question", kind: "question", stage: "coding" }, { type: "delta", text: "unfinished" }]);
+    await expect(api.answerInterviewStream("s", "draft", onEvent, controller.signal)).rejects.toMatchObject({ name: "AbortError" });
   });
 });

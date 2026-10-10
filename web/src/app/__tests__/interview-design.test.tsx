@@ -5,9 +5,9 @@ import InterviewPage from "../interview/page";
 import SystemDesignPage from "../system-design/page";
 
 const mocks = vi.hoisted(() => ({
-  startInterview: vi.fn(),
+  startInterviewStream: vi.fn(),
   getInterview: vi.fn(),
-  answerInterview: vi.fn(),
+  answerInterviewStream: vi.fn(),
   getInterviewReport: vi.fn(),
   transcribeSpeech: vi.fn(),
   evaluateExplanation: vi.fn(),
@@ -38,9 +38,9 @@ vi.mock("@/lib/api", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/lib/api")>();
   return { ...original, api: {
     ...original.api,
-    startInterview: mocks.startInterview,
+    startInterviewStream: mocks.startInterviewStream,
     getInterview: mocks.getInterview,
-    answerInterview: mocks.answerInterview,
+    answerInterviewStream: mocks.answerInterviewStream,
     getInterviewReport: mocks.getInterviewReport,
     transcribeSpeech: mocks.transcribeSpeech,
     evaluateExplanation: mocks.evaluateExplanation,
@@ -55,7 +55,7 @@ const candidate = (id: string, stage: string, content: string) => ({
   id, role: "candidate", stage, content, metadata_json: { kind: "answer" }, created_at: "2026-09-19T12:01:00Z",
 });
 const detail = (stage: string, messages: unknown[], status = "active") => ({
-  session: { id: "session-1", company: "google", current_stage: stage, status }, messages,
+  session: { id: "session-1", company: "google", current_stage: stage, status, persona: "neutral", mode: "fixed" }, messages,
 });
 const designResult = {
   summary: "The write path needs a clearer failure policy.",
@@ -76,7 +76,8 @@ beforeEach(() => {
   Object.defineProperty(globalThis, "MediaRecorder", { configurable: true, value: undefined });
   Element.prototype.scrollIntoView = vi.fn();
   Element.prototype.scrollTo = vi.fn();
-  mocks.startInterview.mockResolvedValue({ session: { id: "session-1", currentStage: "behavioral", status: "active" } });
+  mocks.startInterviewStream.mockResolvedValue({ session: { id: "session-1", currentStage: "behavioral", status: "active", persona: "neutral", mode: "fixed" }, openingQuestion: { question: "behavioral question q1" } });
+  mocks.answerInterviewStream.mockResolvedValue({ action: "followup", stage: "behavioral", evaluation: { score: 7, strengths: [], weaknesses: [], suggestions: [] }, nextQuestion: { question: "behavioral question q2" } });
   mocks.getInterview.mockResolvedValue(detail("behavioral", [question("q1", "behavioral")]));
 });
 
@@ -89,14 +90,14 @@ async function startInterview(user: ReturnType<typeof userEvent.setup>) {
 describe("interview flow", () => {
   it("exposes company/difficulty selection and a durable start error", async () => {
     const user = userEvent.setup();
-    mocks.startInterview.mockRejectedValueOnce(new Error("Interview service unavailable"));
+    mocks.startInterviewStream.mockRejectedValueOnce(new Error("Interview service unavailable"));
     render(<InterviewPage />);
     await user.click(screen.getByRole("button", { name: /Amazon/ }));
     await user.click(screen.getByRole("button", { name: "Hard" }));
     expect(screen.getByRole("button", { name: /Amazon/ })).toHaveAttribute("aria-pressed", "true");
     await user.click(screen.getByRole("button", { name: "Start interview" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Interview service unavailable");
-    expect(mocks.startInterview).toHaveBeenCalledWith("amazon", "hard");
+    expect(mocks.startInterviewStream).toHaveBeenCalledWith({ company: "amazon", difficulty: "hard", persona: "neutral", mode: undefined }, expect.any(Function), expect.any(AbortSignal));
   });
 
   it("moves through a follow-up and all four stages with a multiline draft", async () => {
@@ -115,12 +116,14 @@ describe("interview flow", () => {
       const nextStage = index === 0 ? "behavioral" : stages[index] ?? "report";
       if (index < 4) messages = [...messages, question(`q${index + 2}`, nextStage, index === 0 ? "followup" : "question")];
       mocks.getInterview.mockResolvedValueOnce(detail(nextStage, messages, index === 4 ? "completed" : "active"));
+      mocks.answerInterviewStream.mockResolvedValueOnce({ action: index === 4 ? "completed" : index === 0 ? "followup" : "advance_stage", stage: nextStage, currentStage: nextStage,
+        evaluation: { score: 7, strengths: [], weaknesses: [], suggestions: [] }, nextQuestion: { question: `${nextStage} question q${index + 2}` } });
       if (index > 0) await user.type(screen.getByRole("textbox", { name: "Your answer" }), text);
       await user.click(screen.getByRole("button", { name: "Send answer" }));
-      if (index < 4) await screen.findByText(`${nextStage} question q${index + 2}`);
+      if (index < 4) await screen.findByText(`${nextStage} question q${index + 2}`, { selector: "p:not(.sr-only)" });
     }
-    expect(mocks.answerInterview).toHaveBeenCalledTimes(5);
-    expect(screen.getByText("Interview Complete", { selector: "h2" })).toBeInTheDocument();
+    expect(mocks.answerInterviewStream).toHaveBeenCalledTimes(5);
+    expect(screen.getByText("Interview Complete", { selector: "h1" })).toBeInTheDocument();
   });
 
   it("reconciles an accepted answer after refresh failure without another POST", async () => {
@@ -134,7 +137,7 @@ describe("interview flow", () => {
     mocks.getInterview.mockResolvedValueOnce(detail("coding", [question("q1", "behavioral"), candidate("a1", "behavioral", "Keep this answer"), question("q2", "coding") ]));
     await user.click(screen.getByRole("button", { name: "Refresh conversation" }));
     await screen.findByRole("heading", { name: /Stage 2\/4/ });
-    expect(mocks.answerInterview).toHaveBeenCalledTimes(1);
+    expect(mocks.answerInterviewStream).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("textbox", { name: "Your answer" })).toHaveValue("");
   });
 
@@ -145,8 +148,8 @@ describe("interview flow", () => {
     await user.click(screen.getByRole("button", { name: "Start interview" }));
     expect(await screen.findByText("Conversation unavailable")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Retry conversation" }));
-    expect(await screen.findByText("behavioral question q1")).toBeInTheDocument();
-    expect(mocks.startInterview).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText("behavioral question q1", { selector: "p:not(.sr-only)" })).toBeInTheDocument();
+    expect(mocks.startInterviewStream).toHaveBeenCalledTimes(1);
   });
 
   it("explains unavailable microphone and preserves report export", async () => {
@@ -154,6 +157,7 @@ describe("interview flow", () => {
     await startInterview(user);
     await user.click(screen.getByRole("button", { name: "Record voice" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Microphone recording is unavailable");
+    mocks.answerInterviewStream.mockResolvedValueOnce({ action: "completed", evaluation: { score: 7, strengths: [], weaknesses: [], suggestions: [] } });
     mocks.getInterview.mockResolvedValueOnce(detail("report", [question("q1", "behavioral"), candidate("a1", "behavioral", "done")], "completed"));
     await user.type(screen.getByRole("textbox", { name: "Your answer" }), "done");
     await user.click(screen.getByRole("button", { name: "Send answer" }));

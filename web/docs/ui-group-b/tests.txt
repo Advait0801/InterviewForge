@@ -1,0 +1,33 @@
+
+> web@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /Users/advait0801/Desktop/Development/InterviewForge/web
+
+ ✓ src/components/ui/__tests__/theme-provider.test.tsx (1 test) 118ms
+ ✓ src/components/layout/__tests__/navbar.test.tsx (3 tests) 462ms
+ ✓ src/app/__tests__/progress.test.tsx (4 tests) 460ms
+ ✓ src/app/__tests__/completion.test.tsx (7 tests) 864ms
+   ✓ completion pages > validates passwords locally and preserves values after a server error  462ms
+ ✓ src/hooks/__tests__/use-speech-recording.test.tsx (22 tests) 104ms
+ ✓ src/app/__tests__/workspaces.test.tsx (9 tests) 1005ms
+ ✓ src/app/__tests__/onboarding.test.tsx (7 tests) 1093ms
+ ✓ src/components/auth/__tests__/protected.test.tsx (2 tests) 68ms
+ ✓ src/components/ui/__tests__/controls.test.tsx (5 tests) 159ms
+ ✓ src/app/__tests__/discovery.test.tsx (6 tests) 1422ms
+   ✓ practice discovery > combines every catalogue filter, reports exact counts, and resets a no-match state  1224ms
+ ✓ src/components/__tests__/code-workspace-editor.test.tsx (2 tests) 18ms
+ ✓ src/lib/__tests__/api-contract.test.ts (22 tests) 34ms
+ ✓ src/lib/__tests__/session.test.ts (4 tests) 9ms
+ ✓ src/app/__tests__/interview-upgrades.test.tsx (21 tests) 1611ms
+ ✓ src/lib/__tests__/sse.test.ts (8 tests) 13ms
+ ✓ src/app/__tests__/interview-design.test.tsx (9 tests) 2418ms
+   ✓ interview flow > exposes company/difficulty selection and a durable start error  335ms
+   ✓ interview flow > moves through a follow-up and all four stages with a multiline draft  593ms
+   ✓ interview flow > shows microphone denial and appends a successful transcript before voice evaluation  682ms
+
+ Test Files  16 passed (16)
+      Tests  132 passed (132)
+   Start at  19:06:51
+   Duration  4.33s (transform 1.44s, setup 3.37s, collect 4.73s, tests 9.85s, environment 7.73s, prepare 1.18s)

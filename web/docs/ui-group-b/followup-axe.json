@@ -1,0 +1,42 @@
+{
+  "browser": "154.0.8037.98",
+  "observations": [
+    {
+      "theme": "light",
+      "messages": 40,
+      "scrollHeight": 6005,
+      "clientHeight": 583,
+      "tabIndex": 0,
+      "focusStyle": {
+        "outlineStyle": "solid",
+        "outlineWidth": "3px",
+        "outlineColor": "oklab(0.207678 -0.00293915 -0.0397103)",
+        "focusVisible": true
+      },
+      "keyboardScrolled": true,
+      "serious": [],
+      "scrollableRegionPassed": true,
+      "allViolations": []
+    },
+    {
+      "theme": "dark",
+      "messages": 40,
+      "scrollHeight": 6005,
+      "clientHeight": 583,
+      "tabIndex": 0,
+      "focusStyle": {
+        "outlineStyle": "solid",
+        "outlineWidth": "3px",
+        "outlineColor": "color(srgb 0.505882 0.54902 0.972549 / 0.55)",
+        "focusVisible": true
+      },
+      "keyboardScrolled": true,
+      "serious": [],
+      "scrollableRegionPassed": true,
+      "allViolations": []
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "passed": true
+}

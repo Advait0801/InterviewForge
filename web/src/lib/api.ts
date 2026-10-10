@@ -1,4 +1,5 @@
 import createClient from "openapi-fetch";
+import { readSse } from "./sse";
 import type { components, operations, paths } from "./api/schema";
 import { clearToken, getToken } from "./auth";
 
@@ -17,7 +18,7 @@ function endSession() {
 }
 
 export class ApiError extends Error {
-  constructor(message: string, public readonly status: number, public readonly retryable?: boolean) {
+  constructor(message: string, public readonly status: number, public readonly retryable?: boolean, public readonly code?: string, public readonly availableAt?: string) {
     super(message);
     this.name = "ApiError";
   }
@@ -46,17 +47,54 @@ function authHeaders(auth = true) {
 async function unwrap<T>(pending: Promise<{ data?: T; error?: unknown; response: Response }>): Promise<T> {
   const { data, error, response } = await pending;
   if (!response.ok) {
-    let message = `Request failed (${response.status})`;
-    let retryable: boolean | undefined;
-    if (typeof error === "object" && error !== null) {
-      if ("error" in error && typeof error.error === "string") message = error.error;
-      else if ("detail" in error && typeof error.detail === "string") message = error.detail;
-      if ("retryable" in error && typeof error.retryable === "boolean") retryable = error.retryable;
-    }
-    throw new ApiError(message, response.status, retryable);
+    throw responseError(error, response.status);
   }
   if (data === undefined) throw new ApiError("The server returned an empty response. Please try again.", response.status);
   return data;
+}
+
+function responseError(error: unknown, status: number): ApiError {
+  let message = `Request failed (${status})`;
+  let retryable: boolean | undefined;
+  let code: string | undefined;
+  let availableAt: string | undefined;
+  if (typeof error === "object" && error !== null) {
+    if ("error" in error && typeof error.error === "string") message = error.error;
+    else if ("detail" in error && typeof error.detail === "string") message = error.detail;
+    if ("retryable" in error && typeof error.retryable === "boolean") retryable = error.retryable;
+    if ("code" in error && typeof error.code === "string") code = error.code;
+    if ("availableAt" in error && typeof error.availableAt === "string") availableAt = error.availableAt;
+  }
+  return new ApiError(message, status, retryable, code, availableAt);
+}
+
+export type Persona = components["schemas"]["Persona"];
+export type InterviewMode = components["schemas"]["InterviewMode"];
+export type InterviewStart = components["schemas"]["InterviewStart"];
+export type AnswerOutcome = components["schemas"]["AnswerOutcome"];
+export type Evaluation = components["schemas"]["Evaluation"];
+export type InterviewHint = components["schemas"]["InterviewHint"];
+export type AgentNote = components["schemas"]["AgentNote"];
+export type Challenge = components["schemas"]["Challenge"];
+export type StartStreamEvent = components["schemas"]["InterviewStartStreamEvent"];
+export type AnswerStreamEvent = components["schemas"]["InterviewAnswerStreamEvent"];
+export type StartInterviewOptions = operations["startInterviewStream"]["requestBody"]["content"]["application/json"];
+
+type StreamEvent = StartStreamEvent | AnswerStreamEvent;
+async function consumeStream<E extends StreamEvent>(
+  pending: Promise<{ response: Response; error?: unknown }>,
+  onEvent: (event: E) => void,
+  signal?: AbortSignal,
+): Promise<Extract<E, { type: "done" }>["result"]> {
+  const { response, error } = await pending;
+  if (!response.ok) throw responseError(error, response.status);
+  if (!response.body) throw new ApiError("The server returned an empty interview stream.", response.status);
+  for await (const event of readSse<E>(response.body, signal)) {
+    if (event.type === "error") throw new ApiError(event.error, event.status, event.retryable);
+    onEvent(event);
+    if (event.type === "done") return event.result;
+  }
+  throw new ApiError("The interview stream ended before confirmation. Refresh the conversation to check this turn.", 502);
 }
 
 export type Problem = components["schemas"]["ProblemSummary"];
@@ -157,8 +195,18 @@ export const api = {
   },
   startInterview: (company: string, difficulty?: string) =>
     unwrap(client.POST("/interviews", { headers: authHeaders(), body: { company: companyValue(company), difficulty } })),
-  getInterview: (id: string) =>
-    unwrap(client.GET("/interviews/{id}", { params: { path: { id } }, headers: authHeaders() })),
+  startInterviewStream: (options: StartInterviewOptions, onEvent: (event: StartStreamEvent) => void, signal?: AbortSignal) =>
+    consumeStream<StartStreamEvent>(client.POST("/interviews/stream", {
+      headers: authHeaders(), body: options, parseAs: "stream", signal,
+    }), onEvent, signal),
+  answerInterviewStream: (id: string, answer: string, onEvent: (event: AnswerStreamEvent) => void, signal?: AbortSignal) =>
+    consumeStream<AnswerStreamEvent>(client.POST("/interviews/{id}/answer/stream", {
+      params: { path: { id } }, headers: authHeaders(), body: { answer }, parseAs: "stream", signal,
+    }), onEvent, signal),
+  interviewHint: (id: string, draft?: string, signal?: AbortSignal) =>
+    unwrap(client.POST("/interviews/{id}/hint", { params: { path: { id } }, headers: authHeaders(), body: { draft }, signal })),
+  getInterview: (id: string, signal?: AbortSignal) =>
+    unwrap(client.GET("/interviews/{id}", { params: { path: { id } }, headers: authHeaders(), signal })),
   answerInterview: (id: string, answer: string) =>
     unwrap(client.POST("/interviews/{id}/answer", { params: { path: { id } }, headers: authHeaders(), body: { answer } })),
   transcribeSpeech: (audioBase64: string, mimeType = "audio/webm", filename?: string) =>

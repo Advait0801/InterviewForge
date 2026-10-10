@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
@@ -9,11 +9,15 @@ import { Button } from "@/components/ui/button";
 import { StatePanel } from "@/components/ui/state-panel";
 import { StatusPill } from "@/components/ui/status-pill";
 import { toast } from "sonner";
-import { api, InterviewMessage, InterviewReport, VoiceEvaluation } from "@/lib/api";
+import { api, type InterviewReport, type VoiceEvaluation, type Persona, type InterviewMode } from "@/lib/api";
 import { useSpeechRecording } from "@/hooks/use-speech-recording";
 import { VoiceRecordingFeedback } from "@/components/voice-recording-feedback";
 import { speechError, type SpeechError } from "@/lib/speech";
-import { downloadInterviewPdf } from "@/lib/interviewPdf";
+import { useInterview } from "@/components/interview/use-interview";
+import { Preferences } from "@/components/interview/preferences";
+import { Conversation, StreamingQuestion } from "@/components/interview/conversation";
+import { Hints } from "@/components/interview/hints";
+import { VoiceEvalCard, InterviewReportCard } from "@/components/interview/result-cards";
 
 type Company = "amazon" | "google" | "meta" | "apple";
 type Difficulty = "easy" | "medium" | "hard";
@@ -78,17 +82,13 @@ function stageIndex(stage: string): number {
 export default function InterviewPage() {
   const [selectedCompany, setSelectedCompany] = useState<Company>("google");
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>("medium");
-  const [starting, setStarting] = useState(false);
-
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [currentStage, setCurrentStage] = useState<string>("behavioral");
-  const [sessionStatus, setSessionStatus] = useState<string>("active");
-  const [messages, setMessages] = useState<InterviewMessage[]>([]);
-  const [answer, setAnswer] = useState("");
-  const [typing, setTyping] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [startError, setStartError] = useState<string | null>(null);
-  const [syncPending, setSyncPending] = useState(false);
+  const [selectedPersona, setSelectedPersona] = useState<Persona>("neutral");
+  const [selectedMode, setSelectedMode] = useState<InterviewMode | undefined>();
+  const [hintBusy, setHintBusy] = useState(false);
+  const interview = useInterview();
+  const { sessionId, currentStage, sessionStatus, messages, answer, setAnswer, error, startError, syncPending, lastQuestion } = interview;
+  const typing = interview.busy;
+  const starting = !sessionId && typing;
   const [evaluatingVoice, setEvaluatingVoice] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<string>("");
@@ -96,10 +96,6 @@ export default function InterviewPage() {
   const [voiceEval, setVoiceEval] = useState<VoiceEvaluation | null>(null);
   const [report, setReport] = useState<InterviewReport | null>(null);
   const [loadingReport, setLoadingReport] = useState(false);
-  const acceptedAnswerRef = useRef<string | null>(null);
-  const sendInFlightRef = useRef(false);
-  const chatScrollRef = useRef<HTMLDivElement | null>(null);
-
   const speech = useSpeechRecording((text) => {
     setTranscript(text);
     setAnswer((previous) => previous ? `${previous}\n\n${text}` : text);
@@ -108,105 +104,13 @@ export default function InterviewPage() {
   });
   const { recording, transcribing, toggleRecording } = speech;
 
-  const lastQuestion = useMemo(
-    () =>
-      [...messages]
-        .reverse()
-        .find(
-          (m) =>
-            m.role === "assistant" &&
-            (m.metadata_json?.kind === "question" || m.metadata_json?.kind === "followup"),
-        ),
-    [messages],
-  );
-
-  const startSession = async () => {
-    setStartError(null);
-    setStarting(true);
-    let createdId: string | null = null;
-    try {
-      const started = await api.startInterview(selectedCompany, selectedDifficulty);
-      createdId = started.session.id;
-      setSessionId(createdId);
-      setCurrentStage(started.session.currentStage);
-      const detail = await api.getInterview(started.session.id);
-      setMessages(detail.messages);
-      setCurrentStage(detail.session.current_stage);
-      setSessionStatus(detail.session.status);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to start interview";
-      toast.error(msg);
-      if (createdId) setError(msg);
-      else setStartError(msg);
-    } finally {
-      setStarting(false);
-    }
-  };
-
-  const refreshSession = async (id: string, acceptedAnswer: string | null = null) => {
-    const detail = await api.getInterview(id);
-    if (acceptedAnswer !== null) {
-      const questionPosition = detail.messages.findIndex((message) => message.id === lastQuestion?.id);
-      const answerConfirmed = questionPosition >= 0 && detail.messages.some((message, index) =>
-        index > questionPosition && message.role === "candidate" && message.content === acceptedAnswer);
-      if (!answerConfirmed) {
-        throw new Error("This answer has not appeared in the transcript yet. Refresh again before continuing; it will not be sent twice.");
-      }
-    }
-    setMessages(detail.messages);
-    setCurrentStage(detail.session.current_stage);
-    setSessionStatus(detail.session.status);
-    if (acceptedAnswer !== null && acceptedAnswerRef.current === acceptedAnswer) {
-      acceptedAnswerRef.current = null;
-      setAnswer((previous) => previous === acceptedAnswer ? "" : previous);
-    }
-    setSyncPending(false);
-    setError(null);
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setTimeout(() => chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: reduceMotion ? "instant" : "smooth" }), 100);
-  };
-
-  const submitAnswer = async () => {
-    if (!sessionId || !answer.trim() || sendInFlightRef.current) return;
-    if (acceptedAnswerRef.current) {
-      setTyping(true);
-      try {
-        await refreshSession(sessionId, acceptedAnswerRef.current);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Could not refresh this interview");
-      } finally {
-        setTyping(false);
-      }
-      return;
-    }
-    const submittedAnswer = answer;
-    sendInFlightRef.current = true;
-    setTyping(true);
-    setError(null);
-    try {
-      await api.answerInterview(sessionId, submittedAnswer);
-      acceptedAnswerRef.current = submittedAnswer;
-      setSyncPending(true);
-      await refreshSession(sessionId, submittedAnswer);
-    } catch (err) {
-      if (!acceptedAnswerRef.current) {
-        acceptedAnswerRef.current = submittedAnswer;
-        setSyncPending(true);
-        try {
-          await refreshSession(sessionId, submittedAnswer);
-          return;
-        } catch {
-          // The server may still complete this request. Reconcile before any retry.
-        }
-      }
-      const msg = err instanceof Error ? err.message : "Could not confirm this answer. Refresh the conversation before continuing.";
-      toast.error(msg);
-      setError(msg);
-    } finally {
-      sendInFlightRef.current = false;
-      setTyping(false);
-    }
-  };
+  const startSession = () => interview.startSession({ company: selectedCompany, difficulty: selectedDifficulty, persona: selectedPersona, mode: selectedMode });
+  const submitAnswer = interview.submitAnswer;
+  const refreshSession = interview.refreshSession;
+  const setError = interview.setError;
+  const questionPosition = messages.findIndex((message) => message.id === lastQuestion?.id);
+  const currentHints = messages.slice(questionPosition + 1).filter((message) => message.metadata_json.kind === "hint");
+  const questionsInStage = messages.filter((message) => message.stage === currentStage && (message.metadata_json.kind === "question" || message.metadata_json.kind === "followup")).length;
 
   const stageIdx = stageIndex(currentStage);
   const isCompleted = sessionStatus === "completed";
@@ -215,6 +119,7 @@ export default function InterviewPage() {
     <Protected>
       <PageShell>
         <div>
+          <p className="sr-only" aria-live="polite" aria-atomic="true">{interview.announcement}</p>
           {!sessionId ? (
             /* ── Pre-session setup ── */
             <div className="space-y-8">
@@ -235,6 +140,7 @@ export default function InterviewPage() {
                       key={c.value}
                       type="button"
                       aria-pressed={selectedCompany === c.value}
+                      disabled={starting}
                       onClick={() => setSelectedCompany(c.value)}
                       className={`rounded-lg border-2 p-4 text-left transition-colors ${c.color} ${
                         selectedCompany === c.value
@@ -284,6 +190,7 @@ export default function InterviewPage() {
                         key={d.value}
                         type="button"
                         aria-pressed={selectedDifficulty === d.value}
+                        disabled={starting}
                         onClick={() => setSelectedDifficulty(d.value)}
                         className={`rounded-lg border px-5 py-2.5 text-sm font-semibold transition-colors ${
                           selectedDifficulty === d.value
@@ -301,6 +208,9 @@ export default function InterviewPage() {
                 </p>
               </div>
 
+              <Preferences persona={selectedPersona} mode={selectedMode} onPersona={setSelectedPersona} onMode={setSelectedMode} disabled={starting} />
+              <StreamingQuestion question={interview.preview} evaluation={interview.evaluation} busy={starting} phase={interview.phase} />
+              {starting && <Button variant="ghost" onClick={interview.cancel}>Cancel</Button>}
               {/* Stages overview */}
               <div>
                 <h2 className="mb-3 text-lg font-semibold">Interview Stages</h2>
@@ -320,7 +230,7 @@ export default function InterviewPage() {
               {/* Start button */}
               <div className="flex flex-wrap items-center gap-4">
                 <Button onClick={startSession} loading={starting} loadingLabel="Starting interview">
-                  Start interview
+                  {startError ? "Retry interview" : "Start interview"}
                 </Button>
                 {startError && <p className="text-sm text-error" role="alert">{startError}</p>}
               </div>
@@ -332,7 +242,7 @@ export default function InterviewPage() {
                   <ul className="space-y-2 text-sm text-text-secondary">
                     <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span>Think aloud — interviewers value your reasoning process.</li>
                     <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span>Use the voice recorder to practice explaining solutions verbally.</li>
-                    <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span>Each stage has 1-2 questions with follow-ups before advancing.</li>
+                    <li className="flex items-start gap-2"><span className="mt-0.5 text-primary">▸</span>Classic stages have up to 2 questions; Adaptive stages have up to 3.</li>
                   </ul>
                 </Card>
               </div>
@@ -343,19 +253,19 @@ export default function InterviewPage() {
               {/* Stage progress bar */}
               <div className="border-b border-border pb-5">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-bold">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h1 className="text-lg font-bold">
                       {isCompleted
                         ? "Interview Complete"
                         : `Stage ${stageIdx + 1}/${STAGES.length}: ${STAGES[stageIdx]?.label ?? currentStage}`}
-                    </h2>
+                    </h1>
                     <StatusPill
                       label={selectedCompany.charAt(0).toUpperCase() + selectedCompany.slice(1)}
-                      tone="secondary"
+                      tone="neutral"
                     />
                   </div>
                   <div className="flex items-center gap-2" role="status">
-                    <StatusPill label={typing ? "Processing answer" : isCompleted ? "Done" : "Ready"} tone={isCompleted ? "success" : "secondary"} />
+                    <StatusPill label={typing ? interview.phase : isCompleted ? "Done" : "Ready"} tone={isCompleted ? "success" : "neutral"} />
                     {recording && <StatusPill label="Recording" tone="warning" />}
                   </div>
                 </div>
@@ -384,8 +294,9 @@ export default function InterviewPage() {
                 </div>
               </div>
 
+              <p className="text-sm text-text-secondary">Tone: <span className="capitalize">{interview.persona}</span> · Mode: {interview.mode === "agent" ? "Adaptive" : "Classic"}{!isCompleted && ` · Question ${questionsInStage || 1} of up to ${interview.mode === "agent" ? 3 : 2} in this stage`}</p>
               {/* Chat area */}
-              <section aria-label="Interview conversation" className="space-y-4">
+              <section aria-label="Interview workspace" className="space-y-4">
                 {messages.length === 0 && error && sessionId && (
                   <StatePanel
                     tone="error"
@@ -397,51 +308,11 @@ export default function InterviewPage() {
                     }}>Retry conversation</Button>}
                   />
                 )}
-                <div ref={chatScrollRef} className="max-h-[min(65vh,680px)] min-h-[300px] space-y-3 overflow-y-auto border-y border-border py-4" aria-live="polite" aria-relevant="additions">
-                  {messages.map((m, idx) => {
-                    const prevMsg = idx > 0 ? messages[idx - 1] : null;
-                    const showStageTransition = prevMsg && prevMsg.stage !== m.stage && m.role === "assistant";
+                <Conversation messages={messages} preview={interview.preview} evaluation={interview.evaluation} busy={typing} phase={interview.phase} announcement={interview.announcement} />
+                {!isCompleted && !typing && (messages.length === 0 || !lastQuestion) && !error && <StatePanel tone="neutral" title="Question unavailable" description="The current question is missing. Reload the conversation to continue." action={<Button variant="ghost" onClick={() => { if (sessionId) void refreshSession(sessionId); }}>Refresh conversation</Button>} />}
+                {syncPending && (!lastQuestion || isCompleted) && <Button variant="ghost" disabled={typing} onClick={() => { if (sessionId) void refreshSession(sessionId); }}>Refresh conversation</Button>}
+                {typing && <Button variant="ghost" onClick={interview.cancel}>Cancel</Button>}
 
-                    return (
-                      <div key={m.id}>
-                        {showStageTransition && (
-                          <div className="my-4 flex items-center gap-3">
-                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-                            <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                              {STAGES.find((s) => s.key === m.stage)?.label ?? m.stage}
-                            </span>
-                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-                          </div>
-                        )}
-                        <div
-                          className={`max-w-3xl rounded-lg border p-4 text-sm ${
-                            m.role === "assistant"
-                              ? "border-primary/30 bg-primary/5"
-                              : m.role === "candidate"
-                                ? "border-border bg-surface/60"
-                                : "border-secondary/30 bg-secondary/5"
-                          }`}
-                        >
-                          <div className="mb-1.5 flex items-center gap-2">
-                            <p className="text-xs font-semibold uppercase text-text-secondary">{m.role}</p>
-                            {m.role === "assistant" && m.metadata_json?.kind != null && (
-                              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary border border-primary/20">
-                                {String(m.metadata_json.kind as string)}
-                              </span>
-                            )}
-                          </div>
-                          <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {typing && (
-                    <div className="flex items-center gap-2 text-sm text-text-secondary" role="status">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                      Processing your answer...
-                    </div>
-                  )}
-                </div>
 
                 {transcript && (
                   <div className="rounded-xl border border-secondary/30 bg-secondary/5 p-4 text-sm">
@@ -461,12 +332,12 @@ export default function InterviewPage() {
                       placeholder="Explain your reasoning and answer..."
                       value={answer}
                       onChange={(e) => setAnswer(e.target.value)}
-                      disabled={typing || syncPending}
+                      disabled={typing || syncPending || interview.retryAnswer !== null}
                       className="w-full resize-y rounded-lg border border-border bg-surface px-4 py-3 text-sm leading-6 text-text-primary focus:border-primary focus:outline-none"
                     />
                     <div className="flex flex-wrap gap-2">
-                    <Button onClick={submitAnswer} loading={typing} loadingLabel="Processing answer" disabled={!answer.trim() || recording || transcribing}>{syncPending ? "Refresh conversation" : "Send answer"}</Button>
-                    <Button variant={recording ? "danger" : "ghost"} onClick={toggleRecording} disabled={typing || transcribing || evaluatingVoice}>
+                    <Button onClick={submitAnswer} loading={typing} loadingLabel="Processing answer" disabled={(!answer.trim() && !syncPending) || recording || transcribing || hintBusy || !lastQuestion}>{syncPending ? "Refresh conversation" : interview.retryAnswer !== null ? "Retry answer" : "Send answer"}</Button>
+                    <Button variant={recording ? "danger" : "ghost"} onClick={toggleRecording} disabled={typing || transcribing || evaluatingVoice || syncPending || interview.retryAnswer !== null}>
                       {recording ? "Stop recording" : "Record voice"}
                     </Button>
                     {lastQuestion && (
@@ -494,7 +365,8 @@ export default function InterviewPage() {
                       </Button>
                     )}
                     </div>
-                    <VoiceRecordingFeedback speech={speech} disabled={typing || evaluatingVoice} />
+                    {lastQuestion && <Hints key={lastQuestion.id} sessionId={sessionId} question={lastQuestion} hints={currentHints} draft={answer} disabled={typing || syncPending || interview.retryAnswer !== null || recording || transcribing} onHint={(message) => interview.setMessages((previous) => [...previous, message])} onReload={() => refreshSession(sessionId)} onBusy={setHintBusy} />}
+                    <VoiceRecordingFeedback speech={speech} disabled={typing || evaluatingVoice || syncPending || interview.retryAnswer !== null} />
                     {voiceEvaluationError && <div className="space-y-2">
                       <p className="text-sm text-error" role="alert">{voiceEvaluationError.message}</p>
                       {!voiceEvaluationError.retryable && <Button variant="ghost" disabled={typing || evaluatingVoice || recording || transcribing} onClick={() => { setVoiceEvaluationError(null); void toggleRecording(); }}>Record again</Button>}
@@ -511,7 +383,7 @@ export default function InterviewPage() {
                       <p className="mb-4 text-sm text-text-secondary">
                         You finished all four stages. Review the conversation above to see feedback from each round.
                       </p>
-                      <div className="flex items-center justify-center gap-3">
+                      <div className="flex flex-wrap items-center justify-center gap-3">
                         {!report && !loadingReport && (
                           <Button onClick={async () => {
                             if (!sessionId) return;
@@ -538,18 +410,14 @@ export default function InterviewPage() {
                           </div>
                         )}
                         <Button variant="ghost" onClick={() => {
-                          setSessionId(null);
-                          setMessages([]);
-                          setCurrentStage("behavioral");
-                          setSessionStatus("active");
+                          interview.reset();
+                          setHintBusy(false);
                           setTranscript("");
                           speech.reset();
                           setVoiceEvaluationError(null);
                           setError(null);
                           setReport(null);
                           setReportError(null);
-                          setSyncPending(false);
-                          acceptedAnswerRef.current = null;
                           setAnswer("");
                           setVoiceEval(null);
                         }}>
@@ -568,166 +436,12 @@ export default function InterviewPage() {
                   </div>
                 )}
 
-                {error && messages.length > 0 && <p className="text-sm text-error" role="alert">{error}</p>}
+                {error && (messages.length > 0 || interview.preview) && <p className="text-sm text-error" role="alert">{error}</p>}
               </section>
             </div>
           )}
         </div>
       </PageShell>
     </Protected>
-  );
-}
-
-function ScoreBar({ label, score, notes }: { label: string; score: number; notes: string }) {
-  const pct = (score / 10) * 100;
-  const color = score >= 7 ? "bg-accent" : score >= 4 ? "bg-warning" : "bg-error";
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between text-xs">
-        <span className="font-medium">{label}</span>
-        <span className="font-bold">{score}/10</span>
-      </div>
-      <div className="h-2 rounded-full bg-border">
-        <div className={`h-2 rounded-full ${color} transition-all duration-500`} style={{ width: `${pct}%` }} />
-      </div>
-      {notes && <p className="mt-0.5 text-[10px] text-text-secondary">{notes}</p>}
-    </div>
-  );
-}
-
-function VoiceEvalCard({ evaluation, onClose }: { evaluation: VoiceEvaluation; onClose: () => void }) {
-  const overallColor = evaluation.overallScore >= 7 ? "text-accent" : evaluation.overallScore >= 4 ? "text-warning" : "text-error";
-  return (
-    <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 text-sm space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h3 className="font-semibold">Voice Evaluation</h3>
-          <span className={`text-lg font-bold ${overallColor}`}>{evaluation.overallScore}/10</span>
-        </div>
-        <button type="button" aria-label="Close voice evaluation" onClick={onClose} className="rounded-lg p-1 text-text-secondary hover:bg-surface-hover hover:text-text-primary transition">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3L11 11M3 11L11 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-        </button>
-      </div>
-
-      <div className="space-y-3">
-        <ScoreBar label="Technical Correctness" score={evaluation.technicalCorrectness.score} notes={evaluation.technicalCorrectness.notes} />
-        <ScoreBar label="Communication Clarity" score={evaluation.communicationClarity.score} notes={evaluation.communicationClarity.notes} />
-        <ScoreBar label="Completeness" score={evaluation.completeness.score} notes={evaluation.completeness.notes} />
-      </div>
-
-      {evaluation.strengths.length > 0 && (
-        <div>
-          <p className="mb-1 text-xs font-semibold text-accent">Strengths</p>
-          <ul className="space-y-0.5 text-xs text-text-secondary">
-            {evaluation.strengths.map((s, i) => <li key={i} className="flex gap-1.5"><span className="text-accent">+</span>{s}</li>)}
-          </ul>
-        </div>
-      )}
-
-      {evaluation.weaknesses.length > 0 && (
-        <div>
-          <p className="mb-1 text-xs font-semibold text-error">Weaknesses</p>
-          <ul className="space-y-0.5 text-xs text-text-secondary">
-            {evaluation.weaknesses.map((w, i) => <li key={i} className="flex gap-1.5"><span className="text-error">-</span>{w}</li>)}
-          </ul>
-        </div>
-      )}
-
-      {evaluation.suggestions.length > 0 && (
-        <div>
-          <p className="mb-1 text-xs font-semibold text-secondary">Suggestions</p>
-          <ul className="space-y-0.5 text-xs text-text-secondary">
-            {evaluation.suggestions.map((s, i) => <li key={i} className="flex gap-1.5"><span className="text-secondary">*</span>{s}</li>)}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
-
-const STAGE_LABELS: Record<string, string> = {
-  behavioral: "Behavioral",
-  coding: "Coding",
-  system_design: "System Design",
-  core_cs: "Core CS",
-};
-
-function InterviewReportCard({
-  report,
-  messages,
-  companyLabel,
-}: {
-  report: InterviewReport;
-  messages: InterviewMessage[];
-  companyLabel: string;
-}) {
-  const overallColor = report.overallScore >= 7 ? "text-accent" : report.overallScore >= 4 ? "text-warning" : "text-error";
-  return (
-    <div className="rounded-xl border border-primary/30 bg-surface/80 p-6 space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-lg font-bold">Interview Report</h3>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-text-secondary">Overall:</span>
-          <span className={`text-2xl font-bold ${overallColor}`}>{report.overallScore}/10</span>
-          <Button
-            type="button"
-            variant="ghost"
-            className="min-h-11 touch-manipulation"
-            onClick={() => {
-              try {
-                downloadInterviewPdf({ report, messages, companyLabel });
-                toast.success("PDF downloaded");
-              } catch {
-                toast.error("Could not build PDF");
-              }
-            }}
-          >
-            Download PDF
-          </Button>
-        </div>
-      </div>
-
-      {report.stageScores && Object.keys(report.stageScores).length > 0 && (
-        <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-text-secondary">Stage Scores</h4>
-          {Object.entries(report.stageScores).map(([stage, data]) => (
-            <div key={stage}>
-              <ScoreBar
-                label={STAGE_LABELS[stage] || stage}
-                score={typeof data.score === "string" ? parseInt(data.score, 10) : data.score}
-                notes={data.feedback || ""}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {report.strengths?.length > 0 && (
-        <div>
-          <h4 className="mb-1.5 text-sm font-semibold text-accent">Strengths</h4>
-          <ul className="space-y-1 text-sm text-text-secondary">
-            {report.strengths.map((s, i) => <li key={i} className="flex gap-2"><span className="text-accent">+</span>{s}</li>)}
-          </ul>
-        </div>
-      )}
-
-      {report.weaknesses?.length > 0 && (
-        <div>
-          <h4 className="mb-1.5 text-sm font-semibold text-error">Areas for Improvement</h4>
-          <ul className="space-y-1 text-sm text-text-secondary">
-            {report.weaknesses.map((w, i) => <li key={i} className="flex gap-2"><span className="text-error">-</span>{w}</li>)}
-          </ul>
-        </div>
-      )}
-
-      {report.recommendations?.length > 0 && (
-        <div>
-          <h4 className="mb-1.5 text-sm font-semibold text-secondary">Recommendations</h4>
-          <ul className="space-y-1 text-sm text-text-secondary">
-            {report.recommendations.map((r, i) => <li key={i} className="flex gap-2"><span className="text-secondary">*</span>{r}</li>)}
-          </ul>
-        </div>
-      )}
-    </div>
   );
 }
