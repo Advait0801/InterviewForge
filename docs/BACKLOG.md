@@ -18,6 +18,19 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
   and contexts often contain the same chunk twice (found in D-066). Dedupe chunks by id and widen
   the live-fetch trigger for companies with thin coverage.
 
+## Found while verifying UI B (D-068)
+
+- **All 10 companies on the interview page** *(S, web)* — the backend supports 10; the page offers
+  Amazon, Google, Meta and Apple only (true on `main` before UI B too).
+- **Reopen an in-progress interview** *(S, web)* — leaving the page loses the interview on screen;
+  the session is intact server-side (`GET /interviews` lists it). Matters more now that leaving
+  mid-answer discards the turn.
+- **Per-call model timeout with fallback** *(S)* — provider clients have no request timeout; one
+  grading call took 42 s and an eval run once hung for 15 minutes. Bound each call and fall back
+  to the next provider when slow.
+- **Charge aborted calls** *(S)* — when the client leaves while an answer is being graded, the
+  ai-service finishes the call but its spend never reaches the session's counters (D-067).
+
 ## Alternative showpieces (considered and not chosen)
 
 - **Elo-rated adaptive difficulty** *(L, Loud)* — per-topic Elo for users *and* problems,

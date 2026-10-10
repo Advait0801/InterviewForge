@@ -285,7 +285,9 @@ Code auto-discovers only the root `CLAUDE.md`.
 - `docs/ROADMAP.md` — **the active plan** (local only, gitignored — plans never go in git):
   phase order, exit criteria, branch names, status.
   All `web/` changes are done by Advait in GPT 6 — Claude never edits `web/`; at a group's UI
-  step, stop and hand over one prompt, then verify the result.
+  step, stop and hand over one prompt, then verify the result. GPT commits locally without
+  pushing (Claude pushes after verifying), and every GPT commit ends with
+  `Co-Authored-By: GPT <model name> <noreply@openai.com>`.
 - `docs/BACKLOG.md` — what is deliberately not built yet (shipped items are deleted from it
   and recorded in DECISIONS; the verification rounds ran in D-058). Both phase plans (platform and UI) were retired on
   2026-09-20 once their workstreams merged; they live in git history at `4083f5e`.

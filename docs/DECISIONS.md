@@ -9,6 +9,53 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-09
 
+### D-068 — UI Group B shipped: the interview page streams, and exposes personas, hints, pushback and adaptive mode
+
+**What:** the web half of Group B, built by GPT/Codex from one handoff plus one follow-up (PR #19:
+`4a46751`, `e85af73`), verified independently before merge.
+- **Streaming:** the page starts and answers through the SSE endpoints (D-065). It uses a tested
+  reader (`web/src/lib/sse.ts`) and typed `api` stream methods (openapi-fetch `parseAs: "stream"`).
+  - The question appears as it's generated, and `done` replaces it with the authoritative text.
+  - The evaluation shows as soon as its event arrives.
+  - A retryable error keeps the answer and offers Retry; a 409 reloads the session; leaving
+    aborts the request.
+- **Personas, modes, hints, pushback (D-066, D-067):**
+  - tone and mode pickers on the start screen, shown in the session header;
+  - a hint button with a live countdown, inline "Hint n/3", and the penalty with the raw score on
+    the next evaluation;
+  - a pushback callout quoting claim vs evidence;
+  - `pivot` handled, with a "Why this question?" disclosure of the agent's rationale.
+- `metadata_json` / `report_json` are narrowed on `kind`; the `never` workarounds from D-064 are
+  gone. `page.tsx` went from 733 to 447 lines, split into `web/src/components/interview/`.
+
+**Verified (by Claude):**
+- web 135 tests (was 96), lint, tsc, build; contract check clean; the only `fetch(` is the
+  client adapter.
+- Live against the stack:
+  - the opening question streamed in 4 chunks and was then replaced;
+  - Friendly + Adaptive shown;
+  - hint locked → unlocked at 30 s → shown → re-locked, with the penalty on the next grade;
+  - an Adaptive probe and then a pivot within one stage, each with its rationale;
+  - pushback rendered with the challenge flag enabled temporarily (`backend/.env` restored);
+  - leaving mid-answer logged `stream_client_gone` and stored nothing;
+  - no console errors.
+- axe: one serious violation the handoff's own audit missed. The conversation scroll region wasn't
+  keyboard-focusable, which only shows once the transcript overflows. The region existed on `main`
+  too; fixed in the follow-up. After it: 0 violations in light and dark with a scrolling
+  transcript, Tab reaches it with a visible focus ring, and arrow keys scroll it. 320 px and
+  reduced motion pass.
+- Method note: an axe colour-contrast "failure" (1.04:1) right after switching theme was the
+  buttons' CSS colour transition, not a defect. Wait for transitions before scanning.
+
+**Process notes:**
+- GPT commits locally and doesn't push; Claude pushed the branch after verifying.
+- From now on GPT's commits end with `Co-Authored-By: GPT <model name> <noreply@openai.com>`
+  (Advait). The two UI B commits predate that.
+
+**Found, not fixed (BACKLOG):** only 4 of 10 companies selectable; no way to reopen an
+in-progress interview after leaving the page; no per-call model timeout (one grading call took
+42 s); an aborted grading call's spend isn't charged to the interview.
+
 ### D-067 — Agentic interviewer behind a mode switch; every interview's model cost recorded and capped
 
 **Why:** Phase 6, the last backend phase of Group B. The interview was a fixed loop: behavioral,
