@@ -13,16 +13,16 @@ const MINUTE = 60_000;
  * that -- the snapshot is stable within a render pass, and React re-renders
  * when it changes.
  *
- * Bucketed to the minute because the only consumer renders relative-day labels;
- * an unbucketed snapshot would return a new value on every call and loop.
+ * Bucketed to the requested resolution (a minute by default for relative dates).
+ * Countdown consumers can request seconds without changing date consumers.
  */
-function subscribe(onStoreChange: () => void) {
-  const id = setInterval(onStoreChange, MINUTE);
+function subscribe(onStoreChange: () => void, resolution: number) {
+  const id = setInterval(onStoreChange, resolution);
   return () => clearInterval(id);
 }
 
-function getSnapshot() {
-  return Math.floor(Date.now() / MINUTE) * MINUTE;
+function getSnapshot(resolution: number) {
+  return Math.floor(Date.now() / resolution) * resolution;
 }
 
 function getServerSnapshot() {
@@ -30,6 +30,10 @@ function getServerSnapshot() {
   return 0;
 }
 
-export function useNow(): number {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+export function useNow(resolution = MINUTE): number {
+  return useSyncExternalStore(
+    (onStoreChange) => subscribe(onStoreChange, resolution),
+    () => getSnapshot(resolution),
+    getServerSnapshot,
+  );
 }

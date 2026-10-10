@@ -1,0 +1,65 @@
+{
+  "browser": "154.0.8037.98",
+  "fixtures": [
+    {
+      "name": "setup-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "pushback-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "report-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "keyboard-report-light",
+      "download": "interviewforge-report-00000000.pdf",
+      "infiniteAnimations": 0
+    },
+    {
+      "name": "setup-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "pushback-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "report-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "keyboard-report-dark",
+      "download": "interviewforge-report-00000000.pdf",
+      "infiniteAnimations": 0
+    }
+  ],
+  "live": {
+    "startAbortRecordedNothing": true,
+    "startDistinctPartialTexts": 3,
+    "evaluationBeforeQuestion": true,
+    "answerAbortRecordedNothing": true,
+    "answerDistinctPartialTexts": 3,
+    "answerRecorded": true
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "notes": [
+    "Cancellation was verified at the question envelope while generation was pending. An earlier attempt to cancel after the first visible delta raced completed generation and recorded a session; abort cannot undo a committed turn."
+  ],
+  "passed": true
+}
