@@ -10,11 +10,13 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Interviewer intelligence
 
-- **Agentic interviewer** *(L, Loud)* — replace the fixed
-  `behavioral → coding → system_design → core_cs` state machine (max one follow-up per stage)
-  with a tool-using agent that probes, pivots or moves on. The RAG half of this project is
-  sophisticated; the orchestration half is an if/else chain in `interviews.routes.ts`, and
-  that gap is what a thorough interviewer will find.
+- **Interview-wide question budget for the agent** *(S)* — the agentic interviewer (D-067) fills
+  the third question in nearly every stage. Give it a budget for the whole interview (say 10
+  questions across 4 stages) so it must spend extra questions where it learns most; expect lower
+  cost and clearer adaptivity. Measure with `app.eval.simulate_interviews`.
+- **Thin-company retrieval** *(S)* — Uber and Microsoft contexts return other companies' documents,
+  and contexts often contain the same chunk twice (found in D-066). Dedupe chunks by id and widen
+  the live-fetch trigger for companies with thin coverage.
 
 ## Alternative showpieces (considered and not chosen)
 

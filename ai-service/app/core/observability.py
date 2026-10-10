@@ -28,6 +28,26 @@ _correlation_id: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
 )
 
 
+# Model calls made while serving the current request (D-067). Set by the HTTP middleware
+# and reported in the `x-llm-usage` header (and a stream's `done` event), so the backend can
+# charge each call to the interview that caused it.
+USAGE_HEADER = "x-llm-usage"
+_request_usage: contextvars.ContextVar[Optional[Dict[str, Any]]] = contextvars.ContextVar(
+    "request_usage", default=None
+)
+
+
+def start_request_usage() -> Dict[str, Any]:
+    usage: Dict[str, Any] = {"calls": 0, "costUsd": 0.0}
+    _request_usage.set(usage)
+    return usage
+
+
+def current_usage() -> Dict[str, Any]:
+    usage = _request_usage.get() or {"calls": 0, "costUsd": 0.0}
+    return {"calls": usage["calls"], "costUsd": round(usage["costUsd"], 6)}
+
+
 def set_correlation_id(value: Optional[str]) -> None:
     _correlation_id.set(value)
 
@@ -119,6 +139,10 @@ def record(call: LLMCall) -> None:
     _totals.output_tokens += call.output_tokens
     _totals.cost_usd += call.cost_usd
     _totals.by_chain[call.chain] = _totals.by_chain.get(call.chain, 0) + 1
+    usage = _request_usage.get()
+    if usage is not None:
+        usage["calls"] += 1
+        usage["costUsd"] += call.cost_usd
     log.info(json.dumps(call.as_log()))
 
 

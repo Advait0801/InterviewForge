@@ -603,6 +603,7 @@ paths:
                   default: true
                   description: Ground questions in the caller's resume when one is indexed.
                 persona: { $ref: "#/components/schemas/Persona" }
+                mode: { $ref: "#/components/schemas/InterviewMode" }
       responses:
         "201":
           description: The new session and its opening question.
@@ -642,6 +643,7 @@ paths:
                   default: true
                   description: Ground questions in the caller's resume when one is indexed.
                 persona: { $ref: "#/components/schemas/Persona" }
+                mode: { $ref: "#/components/schemas/InterviewMode" }
       responses:
         "200":
           description: An event stream; the schema describes one event's `data`.
@@ -1300,6 +1302,12 @@ components:
     InterviewStage:
       type: string
       enum: [behavioral, coding, system_design, core_cs, report]
+    InterviewMode:
+      type: string
+      enum: [fixed, agent]
+      description: |
+        `fixed`: behavioral, coding, system design, core CS, at most one follow-up each. `agent`: an
+        agent probes, pivots or moves on within guardrails (D-067). Defaults to `INTERVIEW_MODE`.
     Persona:
       type: string
       enum: [neutral, friendly, terse, adversarial]
@@ -1540,7 +1548,7 @@ components:
     InterviewSessionSummary:
       type: object
       additionalProperties: false
-      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, created_at, updated_at, persona]
+      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, created_at, updated_at, persona, mode, llm_calls, llm_cost_usd]
       properties:
         id: { $ref: "#/components/schemas/Uuid" }
         user_id: { $ref: "#/components/schemas/Uuid" }
@@ -1550,13 +1558,16 @@ components:
         stage_turn_count: { type: integer }
         resume_grounded: { type: boolean }
         persona: { $ref: "#/components/schemas/Persona" }
+        mode: { $ref: "#/components/schemas/InterviewMode" }
+        llm_calls: { type: integer, description: Model calls made for this interview (D-067). }
+        llm_cost_usd: { type: number, description: Their estimated cost in USD; what the per-interview cap checks. }
         created_at: { $ref: "#/components/schemas/Timestamp" }
         updated_at: { $ref: "#/components/schemas/Timestamp" }
 
     InterviewSession:
       type: object
       additionalProperties: false
-      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, report_json, created_at, updated_at, persona]
+      required: [id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, report_json, created_at, updated_at, persona, mode, llm_calls, llm_cost_usd]
       properties:
         id: { $ref: "#/components/schemas/Uuid" }
         user_id: { $ref: "#/components/schemas/Uuid" }
@@ -1566,6 +1577,9 @@ components:
         stage_turn_count: { type: integer }
         resume_grounded: { type: boolean }
         persona: { $ref: "#/components/schemas/Persona" }
+        mode: { $ref: "#/components/schemas/InterviewMode" }
+        llm_calls: { type: integer, description: Model calls made for this interview (D-067). }
+        llm_cost_usd: { type: number, description: Their estimated cost in USD; what the per-interview cap checks. }
         report_json:
           description: The stored report once generated.
           oneOf:
@@ -1712,6 +1726,20 @@ components:
             - { $ref: "#/components/schemas/Timestamp" }
             - { type: "null" }
 
+    AgentNote:
+      type: object
+      description: |
+        Agent-mode interviews only (D-067): the move the agent chose, or `fallback` (it failed or
+        proposed something not allowed; the fixed rule decided) or `not_consulted` (only one move
+        was allowed, or the interview reached its cost cap).
+      additionalProperties: false
+      required: [decided, rationale, steps, searches]
+      properties:
+        decided: { type: string, enum: [probe, pivot, advance, finish, fallback, not_consulted] }
+        rationale: { type: string }
+        steps: { type: integer }
+        searches: { type: integer }
+
     AnswerOutcome:
       oneOf:
         - type: object
@@ -1723,6 +1751,18 @@ components:
             stage: { $ref: "#/components/schemas/InterviewStage" }
             evaluation: { $ref: "#/components/schemas/Evaluation" }
             nextQuestion: { $ref: "#/components/schemas/Followup" }
+            agent: { $ref: "#/components/schemas/AgentNote" }
+        - type: object
+          description: Agent mode only. A new question on another topic in the same stage.
+          additionalProperties: false
+          required: [action, sessionId, stage, evaluation, nextQuestion]
+          properties:
+            action: { type: string, const: pivot }
+            sessionId: { $ref: "#/components/schemas/Uuid" }
+            stage: { $ref: "#/components/schemas/InterviewStage" }
+            evaluation: { $ref: "#/components/schemas/Evaluation" }
+            nextQuestion: { $ref: "#/components/schemas/Followup" }
+            agent: { $ref: "#/components/schemas/AgentNote" }
         - type: object
           additionalProperties: false
           required: [action, sessionId, previousStage, currentStage, evaluation, nextQuestion]
@@ -1733,6 +1773,7 @@ components:
             currentStage: { $ref: "#/components/schemas/InterviewStage" }
             evaluation: { $ref: "#/components/schemas/Evaluation" }
             nextQuestion: { $ref: "#/components/schemas/InterviewQuestion" }
+            agent: { $ref: "#/components/schemas/AgentNote" }
         - type: object
           additionalProperties: false
           required: [action, sessionId, evaluation]
@@ -1740,6 +1781,7 @@ components:
             action: { type: string, const: completed }
             sessionId: { $ref: "#/components/schemas/Uuid" }
             evaluation: { $ref: "#/components/schemas/Evaluation" }
+            agent: { $ref: "#/components/schemas/AgentNote" }
 
     StoredInterviewReport:
       type: object
@@ -1819,6 +1861,7 @@ components:
           oneOf:
             - { $ref: "#/components/schemas/LiveIngestion" }
             - { type: "null" }
+        agent: { $ref: "#/components/schemas/AgentNote" }
 
     FollowupMetadata:
       type: object
@@ -1829,6 +1872,7 @@ components:
         focus: { type: string }
         reason: { type: string }
         challenge: { $ref: "#/components/schemas/Challenge" }
+        agent: { $ref: "#/components/schemas/AgentNote" }
 
     HintMetadata:
       type: object
@@ -1865,7 +1909,7 @@ components:
         session:
           type: object
           additionalProperties: false
-          required: [id, company, currentStage, status, resumeGrounded, persona]
+          required: [id, company, currentStage, status, resumeGrounded, persona, mode]
           properties:
             id: { $ref: "#/components/schemas/Uuid" }
             company: { $ref: "#/components/schemas/Company" }
@@ -1873,6 +1917,7 @@ components:
             status: { type: string, const: active }
             resumeGrounded: { type: boolean }
             persona: { $ref: "#/components/schemas/Persona" }
+            mode: { $ref: "#/components/schemas/InterviewMode" }
         openingQuestion: { $ref: "#/components/schemas/InterviewQuestion" }
 
     StreamQuestionStart:

@@ -9,6 +9,9 @@ export type SessionRow = {
   stage_turn_count: number;
   resume_grounded: boolean;
   persona: string;
+  mode: string;
+  llm_calls: number;
+  llm_cost_usd: number;
   report_json: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
@@ -38,7 +41,7 @@ export type TurnUpdate = { set: string; params: unknown[] };
 export async function listSessions(userId: string): Promise<Omit<SessionRow, "report_json">[]> {
   const result = await query<SessionRow>(
     `SELECT id, user_id, company, current_stage, status, stage_turn_count, resume_grounded,
-              persona, created_at, updated_at
+              persona, mode, llm_calls, llm_cost_usd, created_at, updated_at
        FROM interview_sessions
        WHERE user_id = $1
        ORDER BY created_at DESC
@@ -51,7 +54,7 @@ export async function listSessions(userId: string): Promise<Omit<SessionRow, "re
 export async function findSession(sessionId: string, userId: string): Promise<SessionRow | null> {
   const result = await query<SessionRow>(
     `SELECT id, user_id, company, current_stage, status, stage_turn_count, resume_grounded,
-            persona, report_json, created_at, updated_at
+            persona, mode, llm_calls, llm_cost_usd, report_json, created_at, updated_at
      FROM interview_sessions
      WHERE id = $1 AND user_id = $2`,
     [sessionId, userId]
@@ -86,12 +89,31 @@ export async function findLatestQuestion(sessionId: string, stage: string): Prom
 
 export async function insertSession(
   db: Queryable,
-  row: { id: string; userId: string; company: string; stage: string; resumeGrounded: boolean; persona: string }
+  row: {
+    id: string;
+    userId: string;
+    company: string;
+    stage: string;
+    resumeGrounded: boolean;
+    persona: string;
+    mode: string;
+  }
 ): Promise<void> {
   await db.query(
-    `INSERT INTO interview_sessions (id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, persona)
-         VALUES ($1, $2, $3, $4, 'active', 0, $5, $6)`,
-    [row.id, row.userId, row.company, row.stage, row.resumeGrounded, row.persona]
+    `INSERT INTO interview_sessions (id, user_id, company, current_stage, status, stage_turn_count, resume_grounded, persona, mode)
+         VALUES ($1, $2, $3, $4, 'active', 0, $5, $6, $7)`,
+    [row.id, row.userId, row.company, row.stage, row.resumeGrounded, row.persona, row.mode]
+  );
+}
+
+/**
+ * Charge model calls to a session (D-067). An increment, not a set, and outside any turn
+ * transaction: spend is recorded even when the turn it paid for failed.
+ */
+export async function addUsage(sessionId: string, calls: number, costUsd: number): Promise<void> {
+  await query(
+    `UPDATE interview_sessions SET llm_calls = llm_calls + $2, llm_cost_usd = llm_cost_usd + $3 WHERE id = $1`,
+    [sessionId, calls, costUsd]
   );
 }
 

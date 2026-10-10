@@ -579,6 +579,62 @@ def challenge_verify_chain(provider: Optional[str] = None):
     return prompt | _get_llm(provider) | parser
 
 
+class AgentStep(BaseModel):
+    thought: str = Field(description="One or two sentences: what you noticed and why you're taking this step.")
+    tool: str = Field(description="search_context or decide.")
+    query: str = Field(default="", description="search_context only: what to look up.")
+    action: str = Field(default="", description="decide only: probe, pivot, advance or finish.")
+    question: str = Field(default="", description="decide only: the next question, required for probe and pivot.")
+    focus: str = Field(default="", description="decide only: the concept the next question targets.")
+    rationale: str = Field(default="", description="decide only: why this move, in one sentence.")
+
+
+def agent_step_chain(provider: Optional[str] = None):
+    """One step of the interviewer agent (D-067): search the corpus, or decide the next move.
+
+    A JSON step, not native tool calling: Gemini now requires a `thought_signature` on
+    function-call turns that langchain-google-genai 2.0.0 drops, so returning a tool result
+    fails with a 400. The loop in app/interview/agent.py runs the tool and feeds the
+    observation back as text, which works the same on every provider."""
+    parser = JsonOutputParser(pydantic_object=AgentStep)
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "{persona_instructions}You are InterviewForge's interviewer for a {company} interview. Time is "
+            "limited: a stage normally takes one or two questions, and every extra question costs the "
+            "candidate time you could spend on the next stage. After each answer you choose the next move:\n"
+            "- advance: move to the next stage once this stage's signal is clear -- the answer was solid "
+            "(grader score 7 or more), or you already probed and the picture didn't change. This is the "
+            "default.\n"
+            "- probe: one deeper follow-up on the same topic, only for a specific doubt one more question "
+            "can resolve: the answer was vague, partly wrong, or skipped the hard part. Name the doubt in "
+            "your rationale.\n"
+            "- pivot: a new topic in the same stage, rarely: only when the answer was strong but narrow and "
+            "a core area of this stage is still untested.\n"
+            "- finish: end the interview (last stage only).\n"
+            "Never use a question just because one is left.\n"
+            "Allowed moves now: {allowed_actions}. Questions left in this stage: {questions_left}.\n"
+            "Tool: search_context(query) searches {company}'s interview material for this stage. Use it "
+            "before writing a pivot question, or to check a technical point before probing. At most "
+            "{max_searches} searches per turn.\n"
+            "Each step returns ONE JSON object: either a search (tool \"search_context\" with a query) or "
+            "the decision (tool \"decide\" with action, focus, rationale, and question for probe or pivot). "
+            "A question is one question, in the company's style, and never reveals the answer.\n"
+            "Return valid JSON only.\n{format_instructions}"
+        )),
+        ("human", (
+            "## Company style\n{company_style}\n\n"
+            "## Stage\n{stage} ({stage_position})\n\n"
+            "## This stage so far\n{stage_transcript}\n\n"
+            "## Latest question\n{question}\n\n"
+            "## Candidate answer\n{answer}\n\n"
+            "## Grader's score for that answer\n{score}/10\n\n"
+            "## Evaluation of that answer\n{evaluation}\n\n"
+            "## Your steps so far this turn\n{scratchpad}"
+        )),
+    ]).partial(format_instructions=parser.get_format_instructions(), persona_instructions="")
+    return prompt | _get_llm(provider) | parser
+
+
 class InterviewReportOutput(BaseModel):
     overallScore: int = Field(ge=1, le=10, description="Overall interview score from 1 to 10.")
     stageScores: Dict[str, Dict[str, str]] = Field(

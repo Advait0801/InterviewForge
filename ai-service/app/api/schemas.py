@@ -109,6 +109,29 @@ class ResumePurgeResponse(BaseModel):
     verified: bool
 
 
+class AgentTraceStep(BaseModel):
+    tool: str
+    query: Optional[str] = None
+    hits: Optional[int] = None
+    action: Optional[str] = None
+    automatic: Optional[bool] = None
+
+
+class AgentTurnResponse(BaseModel):
+    """`action` is one of the allowed moves, or `fallback` (the fixed flow should run)."""
+
+    action: Literal["probe", "pivot", "advance", "finish", "fallback"]
+    question: str
+    focus: str
+    rationale: str
+    thought: str
+    fallback: bool
+    context: str
+    trace: List[AgentTraceStep]
+    steps: int
+    proposed: Optional[str] = None
+
+
 class HintResponse(BaseModel):
     hint: str
     level: int
@@ -139,16 +162,29 @@ class StreamError(BaseModel):
     type: Literal["error"]
     status: int
     detail: str
+    usage: Optional["LLMUsage"] = None
+
+
+class LLMUsage(BaseModel):
+    """Model calls made while serving one request (D-067). Estimated cost, not billing."""
+
+    calls: int
+    costUsd: float
+
+
+StreamError.model_rebuild()
 
 
 class NextQuestionStreamDone(BaseModel):
     type: Literal["done"]
     result: NextQuestionResponse
+    usage: LLMUsage
 
 
 class FollowupStreamDone(BaseModel):
     type: Literal["done"]
     result: StructuredFollowupOutput
+    usage: LLMUsage
 
 
 class NextQuestionStreamEvent(RootModel):
@@ -169,6 +205,7 @@ def documented(model: type[BaseModel]) -> Dict[int, Dict[str, type[BaseModel]]]:
 
 
 __all__ = [
+    "AgentTurnResponse",
     "ChallengeResponse",
     "CodeReviewOutput",
     "FollowupStreamDone",
@@ -176,6 +213,7 @@ __all__ = [
     "HintResponse",
     "InterviewReportResponse",
     "LiveIngestion",
+    "LLMUsage",
     "NextQuestionResponse",
     "NextQuestionStreamDone",
     "NextQuestionStreamEvent",
