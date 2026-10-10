@@ -1,8 +1,16 @@
-import type { TestCase } from "./test-cases";
+import type { CaseResult, TestCase } from "./test-cases";
+
+export type CustomCaseResult = CaseResult & {
+  input: string;
+  judged: boolean;
+  expectedOutput?: string;
+  inputError?: string;
+};
 
 export type RunResult = {
   passed: boolean;
-  results: Array<{ passed: boolean; actualOutput?: string; error?: string }>;
+  results: CaseResult[];
+  customResults?: CustomCaseResult[];
   runtimeMs?: number;
   memoryKb?: number;
 };
@@ -21,15 +29,17 @@ export type RunRequest = {
   code: string;
   testCases: TestCase[];
   slug: string;
+  /** Run only: the user's inputs, judged against the reference solution's output on them. */
+  customCases?: { inputs: string[]; reference: { language: string; code: string } };
 };
 
-export async function runCode(request: RunRequest): Promise<RunResult> {
+async function post<T>(route: string, body: unknown): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${codeRunnerUrl()}/run`, {
+    response = await fetch(`${codeRunnerUrl()}${route}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
+      body: JSON.stringify(body),
     });
   } catch (err) {
     console.error("Code runner unreachable", err);
@@ -42,5 +52,18 @@ export async function runCode(request: RunRequest): Promise<RunResult> {
     throw new CodeRunnerFailedError(`Code runner returned ${response.status}`);
   }
 
-  return (await response.json()) as RunResult;
+  return (await response.json()) as T;
+}
+
+export async function runCode(request: RunRequest): Promise<RunResult> {
+  return post<RunResult>("/run", request);
+}
+
+/**
+ * Check custom inputs against the problem's signature: one message per input, null when
+ * it's usable. No sandbox runs, so this is called directly rather than through the queue.
+ */
+export async function validateCustomInputs(slug: string, inputs: string[]): Promise<(string | null)[]> {
+  const { errors } = await post<{ errors: (string | null)[] }>("/validate", { slug, inputs });
+  return errors;
 }

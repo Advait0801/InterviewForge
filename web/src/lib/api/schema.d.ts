@@ -297,10 +297,16 @@ export interface paths {
         get: operations["listSubmissions"];
         put?: never;
         /**
-         * @description `run` executes the public examples and records nothing (200). `submit` runs the full
-         *     suite, records the submission, and on a pass completes the problem in every learning
-         *     path that contains it (201). Hidden cases come back as `{ passed, hidden: true }`,
-         *     except the first failing one (D-057).
+         * @description `run` executes the public examples, plus any `customInputs`, and records nothing (200).
+         *     `submit` runs the full suite, records the submission, and on a pass completes the problem
+         *     in every learning path that contains it (201). Hidden cases come back as
+         *     `{ passed, hidden: true }`, except the first failing one (D-057).
+         *
+         *     Custom inputs (run only) use the examples' format. Each is checked against the
+         *     problem's signature first: a malformed one is a 400 with `customInputErrors`, before
+         *     anything runs. Their expected outputs come from the problem's reference solution.
+         *     Every failing case the client can see carries a `diff` saying where its output first
+         *     goes wrong.
          */
         post: operations["createSubmission"];
         delete?: never;
@@ -752,6 +758,11 @@ export interface components {
              */
             code?: string;
             retryable?: boolean;
+            /** @description With "Invalid custom test case" (400), which inputs are unusable and why. */
+            customInputErrors?: {
+                index: number;
+                error: string;
+            }[];
             /** @description With `hint_locked`, when the next hint unlocks. */
             availableAt?: components["schemas"]["Timestamp"];
             details?: unknown;
@@ -762,7 +773,7 @@ export interface components {
         /** @enum {string} */
         Difficulty: "easy" | "medium" | "hard";
         /** @enum {string} */
-        Language: "python3" | "c" | "cpp" | "java";
+        Language: "python3" | "c" | "cpp" | "java" | "javascript" | "go" | "rust";
         /**
          * @description Case-insensitive on input; responses use the lower-case form.
          * @enum {string}
@@ -863,17 +874,71 @@ export interface components {
             is_solved: boolean;
             is_bookmarked: boolean;
         };
+        /**
+         * @description Where a failing output first departs from the expected one. `path` indexes into the
+         *     output (`[]` is the whole value; for a design problem `[i]` is the i-th operation).
+         */
+        OutputDiff: {
+            /** @constant */
+            kind: "format";
+        } | {
+            /** @constant */
+            kind: "type";
+            path: components["schemas"]["DiffPath"];
+            expectedType: string;
+            actualType: string;
+        } | {
+            /** @constant */
+            kind: "value";
+            path: components["schemas"]["DiffPath"];
+            expected: string | number | boolean | null;
+            actual: string | number | boolean | null;
+            charIndex?: number;
+        } | {
+            /** @constant */
+            kind: "length";
+            path: components["schemas"]["DiffPath"];
+            expectedLength: number;
+            actualLength: number;
+        } | {
+            /** @constant */
+            kind: "items";
+            missing: unknown[];
+            unexpected: unknown[];
+            expectedLength: number;
+            actualLength: number;
+        };
+        DiffPath: number[];
         CaseResult: {
             passed: boolean;
             actualOutput?: string;
             error?: string;
+            diff?: components["schemas"]["OutputDiff"];
+        };
+        CustomCaseResult: {
+            input: string;
+            /** @description False when there was nothing to judge against; `inputError` says why. */
+            judged: boolean;
+            /** @description Always false when not judged. */
+            passed: boolean;
+            /** @description The reference solution's output on this input. Present when judged. */
+            expectedOutput?: string;
+            actualOutput?: string;
+            /** @description The user's code failed on this input. */
+            error?: string;
+            /** @description Why the case wasn't judged. */
+            inputError?: string;
+            diff?: components["schemas"]["OutputDiff"];
         };
         RunResult: {
             /** @constant */
             mode: "run";
+            /** @description Every example passed, and every judged custom case. */
             passed: boolean;
             results: components["schemas"]["CaseResult"][];
             testCases: components["schemas"]["TestCase"][];
+            /** @description One per custom input, in order; empty when none were sent. */
+            customResults: components["schemas"]["CustomCaseResult"][];
             runtimeMs?: number;
         };
         SubmitCaseResult: {
@@ -884,6 +949,7 @@ export interface components {
             expectedOutput: string;
             /** @constant */
             hidden: false;
+            diff?: components["schemas"]["OutputDiff"];
         } | {
             passed: boolean;
             /** @constant */
@@ -1960,6 +2026,11 @@ export interface operations {
                      * @enum {string}
                      */
                     mode?: "run" | "submit";
+                    /**
+                     * @description Run only. The user's own inputs in the examples' format, e.g.
+                     *     `nums = [3, 3], target = 6`, or two JSON lines for a design problem.
+                     */
+                    customInputs?: string[];
                 };
             };
         };

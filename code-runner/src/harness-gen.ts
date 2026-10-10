@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { ProblemMeta } from "./problem-meta";
 import { SupportedLanguage } from "./types";
+import { generateGoMain, goSolutionFile } from "./harness-go";
+import { generateRust } from "./harness-rust";
 
 function loadHarness(filename: string): string {
   const candidates = [
@@ -14,17 +16,24 @@ function loadHarness(filename: string): string {
   throw new Error(`Harness file not found: ${filename}`);
 }
 
-let _python3Harness: string | null = null;
-function getPython3Harness(): string {
-  if (!_python3Harness) _python3Harness = loadHarness("python3.py");
-  return _python3Harness;
+const harnessCache = new Map<string, string>();
+function getHarness(filename: string): string {
+  let h = harnessCache.get(filename);
+  if (h === undefined) {
+    h = loadHarness(filename);
+    harnessCache.set(filename, h);
+  }
+  return h;
 }
+
+/** `code` goes into `filename`; Go's solution is a second file next to it. */
+export type GeneratedCode = { code: string; filename: string; extraFiles?: Array<{ name: string; content: string }> };
 
 export function generateCode(
   language: SupportedLanguage,
   userCode: string,
   meta: ProblemMeta
-): { code: string; filename: string } {
+): GeneratedCode {
   switch (language) {
     case "python3":
       return generatePython3(userCode);
@@ -34,12 +43,33 @@ export function generateCode(
       return generateJava(userCode, meta);
     case "c":
       return generateC(userCode, meta);
+    case "javascript":
+      return generateJavaScript(userCode, meta);
+    case "go":
+      return { code: generateGoMain(meta), filename: "main.go", extraFiles: [{ name: "solution.go", content: goSolutionFile(userCode) }] };
+    case "rust":
+      return { code: generateRust(userCode, meta), filename: "main.rs" };
   }
 }
 
+// A function replacement: a string one would expand `$&`, `$'` and friends in
+// the user's code (a JavaScript regex replacement, say) instead of copying it.
 function generatePython3(userCode: string): { code: string; filename: string } {
-  const combined = getPython3Harness().replace("{USER_CODE}", userCode);
+  const combined = getHarness("python3.py").replace("{USER_CODE}", () => userCode);
   return { code: combined, filename: "run.py" };
+}
+
+/**
+ * The user's code comes first so a syntax error's line number matches the
+ * editor. The harness's helpers are function declarations, hoisted above it.
+ */
+function generateJavaScript(userCode: string, meta: ProblemMeta): { code: string; filename: string } {
+  const name = meta.isDesign ? meta.className : meta.methodName || "solve";
+  const target = `const __IF_TARGET = typeof ${name} !== "undefined" ? ${name} : undefined;`;
+  const combined = getHarness("javascript.js")
+    .replace("{USER_CODE}", () => userCode)
+    .replace("{TARGET}", () => target);
+  return { code: combined, filename: "run.js" };
 }
 
 // ── C++ helpers ──────────────────────────────────────────────────────

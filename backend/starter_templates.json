@@ -12,7 +12,10 @@
     "python3": "class Solution:\n    def twoSum(self, nums: List[int], target: int) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* twoSum(int* nums, int numsSize, int target, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nvar twoSum = function(nums, target) {\n    \n};",
+    "go": "func twoSum(nums []int, target int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {\n        \n    }\n}"
   },
   "reverse-string": {
     "meta": {
@@ -26,7 +29,10 @@
     "python3": "class Solution:\n    def reverseString(self, s: List[str]) -> None:\n        \"\"\"\n        Do not return anything, modify s in-place instead.\n        \"\"\"\n        pass",
     "cpp": "class Solution {\npublic:\n    void reverseString(vector<char>& s) {\n        \n    }\n};",
     "c": "void reverseString(char* s, int sSize) {\n    \n}",
-    "java": "class Solution {\n    public void reverseString(char[] s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public void reverseString(char[] s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {character[]} s\n * @return {void} Do not return anything, modify s in-place instead.\n */\nvar reverseString = function(s) {\n    \n};",
+    "go": "func reverseString(s []byte) {\n    \n}",
+    "rust": "impl Solution {\n    pub fn reverse_string(s: &mut Vec<char>) {\n        \n    }\n}"
   },
   "valid-parentheses": {
     "meta": {
@@ -40,7 +46,10 @@
     "python3": "class Solution:\n    def isValid(self, s: str) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isValid(string s) {\n        \n    }\n};",
     "c": "#include <stdbool.h>\n\nbool isValid(char* s) {\n    \n}",
-    "java": "class Solution {\n    public boolean isValid(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isValid(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {boolean}\n */\nvar isValid = function(s) {\n    \n};",
+    "go": "func isValid(s string) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn is_valid(s: String) -> bool {\n        \n    }\n}"
   },
   "best-time-to-buy-and-sell-stock": {
     "meta": {
@@ -54,7 +63,10 @@
     "python3": "class Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        \n    }\n};",
     "c": "int maxProfit(int* prices, int pricesSize) {\n    \n}",
-    "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} prices\n * @return {number}\n */\nvar maxProfit = function(prices) {\n    \n};",
+    "go": "func maxProfit(prices []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn max_profit(prices: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "merge-two-sorted-lists": {
     "meta": {
@@ -69,7 +81,10 @@
     "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:\n        pass",
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {\n        \n    }\n};",
     "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* mergeTwoLists(struct ListNode* list1, struct ListNode* list2) {\n    \n}",
-    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {\n        \n    }\n}"
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} list1\n * @param {ListNode} list2\n * @return {ListNode}\n */\nvar mergeTwoLists = function(list1, list2) {\n    \n};",
+    "go": "/**\n * Definition for singly-linked list.\n * type ListNode struct {\n *     Val int\n *     Next *ListNode\n * }\n */\nfunc mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {\n    \n}",
+    "rust": "// Definition for singly-linked list.\n// #[derive(PartialEq, Eq, Clone, Debug)]\n// pub struct ListNode {\n//   pub val: i32,\n//   pub next: Option<Box<ListNode>>\n// }\n//\n// impl ListNode {\n//   #[inline]\n//   fn new(val: i32) -> Self {\n//     ListNode {\n//       next: None,\n//       val\n//     }\n//   }\n// }\n\nimpl Solution {\n    pub fn merge_two_lists(list1: Option<Box<ListNode>>, list2: Option<Box<ListNode>>) -> Option<Box<ListNode>> {\n        \n    }\n}"
   },
   "missing-number": {
     "meta": {
@@ -83,7 +98,10 @@
     "python3": "class Solution:\n    def missingNumber(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int missingNumber(vector<int>& nums) {\n        \n    }\n};",
     "c": "int missingNumber(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int missingNumber(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int missingNumber(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar missingNumber = function(nums) {\n    \n};",
+    "go": "func missingNumber(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn missing_number(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "longest-substring-without-repeating-characters": {
     "meta": {
@@ -97,7 +115,10 @@
     "python3": "class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        \n    }\n};",
     "c": "int lengthOfLongestSubstring(char* s) {\n    \n}",
-    "java": "class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar lengthOfLongestSubstring = function(s) {\n    \n};",
+    "go": "func lengthOfLongestSubstring(s string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn length_of_longest_substring(s: String) -> i32 {\n        \n    }\n}"
   },
   "3sum": {
     "meta": {
@@ -111,7 +132,10 @@
     "python3": "class Solution:\n    def threeSum(self, nums: List[int]) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** threeSum(int* nums, int numsSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<Integer>> threeSum(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<Integer>> threeSum(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number[][]}\n */\nvar threeSum = function(nums) {\n    \n};",
+    "go": "func threeSum(nums []int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "product-of-array-except-self": {
     "meta": {
@@ -125,7 +149,10 @@
     "python3": "class Solution:\n    def productExceptSelf(self, nums: List[int]) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> productExceptSelf(vector<int>& nums) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* productExceptSelf(int* nums, int numsSize, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public int[] productExceptSelf(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[] productExceptSelf(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number[]}\n */\nvar productExceptSelf = function(nums) {\n    \n};",
+    "go": "func productExceptSelf(nums []int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn product_except_self(nums: Vec<i32>) -> Vec<i32> {\n        \n    }\n}"
   },
   "number-of-islands": {
     "meta": {
@@ -139,7 +166,10 @@
     "python3": "class Solution:\n    def numIslands(self, grid: List[List[str]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        \n    }\n};",
     "c": "int numIslands(char** grid, int gridSize, int* gridColSize) {\n    \n}",
-    "java": "class Solution {\n    public int numIslands(char[][] grid) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int numIslands(char[][] grid) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {character[][]} grid\n * @return {number}\n */\nvar numIslands = function(grid) {\n    \n};",
+    "go": "func numIslands(grid [][]byte) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn num_islands(grid: Vec<Vec<char>>) -> i32 {\n        \n    }\n}"
   },
   "course-schedule": {
     "meta": {
@@ -154,7 +184,10 @@
     "python3": "class Solution:\n    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {\n        \n    }\n};",
     "c": "#include <stdbool.h>\n\nbool canFinish(int numCourses, int** prerequisites, int prerequisitesSize, int* prerequisitesColSize) {\n    \n}",
-    "java": "class Solution {\n    public boolean canFinish(int numCourses, int[][] prerequisites) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean canFinish(int numCourses, int[][] prerequisites) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} numCourses\n * @param {number[][]} prerequisites\n * @return {boolean}\n */\nvar canFinish = function(numCourses, prerequisites) {\n    \n};",
+    "go": "func canFinish(numCourses int, prerequisites [][]int) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn can_finish(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> bool {\n        \n    }\n}"
   },
   "coin-change": {
     "meta": {
@@ -169,7 +202,10 @@
     "python3": "class Solution:\n    def coinChange(self, coins: List[int], amount: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int coinChange(vector<int>& coins, int amount) {\n        \n    }\n};",
     "c": "int coinChange(int* coins, int coinsSize, int amount) {\n    \n}",
-    "java": "class Solution {\n    public int coinChange(int[] coins, int amount) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int coinChange(int[] coins, int amount) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} coins\n * @param {number} amount\n * @return {number}\n */\nvar coinChange = function(coins, amount) {\n    \n};",
+    "go": "func coinChange(coins []int, amount int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn coin_change(coins: Vec<i32>, amount: i32) -> i32 {\n        \n    }\n}"
   },
   "top-k-frequent-elements": {
     "meta": {
@@ -184,7 +220,10 @@
     "python3": "class Solution:\n    def topKFrequent(self, nums: List[int], k: int) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* topKFrequent(int* nums, int numsSize, int k, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public int[] topKFrequent(int[] nums, int k) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[] topKFrequent(int[] nums, int k) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} k\n * @return {number[]}\n */\nvar topKFrequent = function(nums, k) {\n    \n};",
+    "go": "func topKFrequent(nums []int, k int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn top_k_frequent(nums: Vec<i32>, k: i32) -> Vec<i32> {\n        \n    }\n}"
   },
   "lowest-common-ancestor-of-a-binary-search-tree": {
     "meta": {
@@ -200,7 +239,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.left = None\n#         self.right = None\nclass Solution:\n    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nstruct TreeNode* lowestCommonAncestor(struct TreeNode* root, struct TreeNode* p, struct TreeNode* q) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode(int x) { val = x; }\n * }\n */\nclass Solution {\n    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode(int x) { val = x; }\n * }\n */\nclass Solution {\n    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @param {TreeNode} p\n * @param {TreeNode} q\n * @return {TreeNode}\n */\nvar lowestCommonAncestor = function(root, p, q) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc lowestCommonAncestor(root *TreeNode, p *TreeNode, q *TreeNode) *TreeNode {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn lowest_common_ancestor(root: Option<Rc<RefCell<TreeNode>>>, p: Option<Rc<RefCell<TreeNode>>>, q: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {\n        \n    }\n}"
   },
   "implement-trie-prefix-tree": {
     "meta": {
@@ -215,7 +257,10 @@
     "python3": "class Trie:\n\n    def __init__(self):\n        pass\n\n    def insert(self, word: str) -> None:\n        pass\n\n    def search(self, word: str) -> bool:\n        pass\n\n    def startsWith(self, prefix: str) -> bool:\n        pass",
     "cpp": "class Trie {\npublic:\n    Trie() {\n        \n    }\n    \n    void insert(string word) {\n        \n    }\n    \n    bool search(string word) {\n        \n    }\n    \n    bool startsWith(string prefix) {\n        \n    }\n};",
     "c": "#include <stdbool.h>\n#include <stdlib.h>\n\ntypedef struct Trie {\n    \n} Trie;\n\nTrie* trieCreate() {\n    \n}\n\nvoid trieInsert(Trie* obj, char* word) {\n    \n}\n\nbool trieSearch(Trie* obj, char* word) {\n    \n}\n\nbool trieStartsWith(Trie* obj, char* prefix) {\n    \n}\n\nvoid trieFree(Trie* obj) {\n    \n}",
-    "java": "class Trie {\n\n    public Trie() {\n        \n    }\n    \n    public void insert(String word) {\n        \n    }\n    \n    public boolean search(String word) {\n        \n    }\n    \n    public boolean startsWith(String prefix) {\n        \n    }\n}"
+    "java": "class Trie {\n\n    public Trie() {\n        \n    }\n    \n    public void insert(String word) {\n        \n    }\n    \n    public boolean search(String word) {\n        \n    }\n    \n    public boolean startsWith(String prefix) {\n        \n    }\n}",
+    "javascript": "class Trie {\n    constructor() {\n        \n    }\n\n    /**\n     * @param {string} word\n     * @return {void}\n     */\n    insert(word) {\n        \n    }\n\n    /**\n     * @param {string} word\n     * @return {boolean}\n     */\n    search(word) {\n        \n    }\n\n    /**\n     * @param {string} prefix\n     * @return {boolean}\n     */\n    startsWith(prefix) {\n        \n    }\n}",
+    "go": "type Trie struct {\n    \n}\n\n\nfunc Constructor() Trie {\n    \n}\n\n\nfunc (this *Trie) Insert(word string) {\n    \n}\n\n\nfunc (this *Trie) Search(word string) bool {\n    \n}\n\n\nfunc (this *Trie) StartsWith(prefix string) bool {\n    \n}",
+    "rust": "struct Trie {\n\n}\n\nimpl Trie {\n\n    fn new() -> Self {\n        \n    }\n\n    fn insert(&mut self, word: String) {\n        \n    }\n\n    fn search(&mut self, word: String) -> bool {\n        \n    }\n\n    fn starts_with(&mut self, prefix: String) -> bool {\n        \n    }\n}"
   },
   "task-scheduler": {
     "meta": {
@@ -230,7 +275,10 @@
     "python3": "class Solution:\n    def leastInterval(self, tasks: List[str], n: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int leastInterval(vector<char>& tasks, int n) {\n        \n    }\n};",
     "c": "int leastInterval(char* tasks, int tasksSize, int n) {\n    \n}",
-    "java": "class Solution {\n    public int leastInterval(char[] tasks, int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int leastInterval(char[] tasks, int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {character[]} tasks\n * @param {number} n\n * @return {number}\n */\nvar leastInterval = function(tasks, n) {\n    \n};",
+    "go": "func leastInterval(tasks []byte, n int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn least_interval(tasks: Vec<char>, n: i32) -> i32 {\n        \n    }\n}"
   },
   "trapping-rain-water": {
     "meta": {
@@ -244,7 +292,10 @@
     "python3": "class Solution:\n    def trap(self, height: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        \n    }\n};",
     "c": "int trap(int* height, int heightSize) {\n    \n}",
-    "java": "class Solution {\n    public int trap(int[] height) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int trap(int[] height) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} height\n * @return {number}\n */\nvar trap = function(height) {\n    \n};",
+    "go": "func trap(height []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn trap(height: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "merge-k-sorted-lists": {
     "meta": {
@@ -258,7 +309,10 @@
     "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:\n        pass",
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* mergeKLists(vector<ListNode*>& lists) {\n        \n    }\n};",
     "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* mergeKLists(struct ListNode** lists, int listsSize) {\n    \n}",
-    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode mergeKLists(ListNode[] lists) {\n        \n    }\n}"
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode mergeKLists(ListNode[] lists) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode[]} lists\n * @return {ListNode}\n */\nvar mergeKLists = function(lists) {\n    \n};",
+    "go": "/**\n * Definition for singly-linked list.\n * type ListNode struct {\n *     Val int\n *     Next *ListNode\n * }\n */\nfunc mergeKLists(lists []*ListNode) *ListNode {\n    \n}",
+    "rust": "// Definition for singly-linked list.\n// #[derive(PartialEq, Eq, Clone, Debug)]\n// pub struct ListNode {\n//   pub val: i32,\n//   pub next: Option<Box<ListNode>>\n// }\n//\n// impl ListNode {\n//   #[inline]\n//   fn new(val: i32) -> Self {\n//     ListNode {\n//       next: None,\n//       val\n//     }\n//   }\n// }\n\nimpl Solution {\n    pub fn merge_k_lists(lists: Vec<Option<Box<ListNode>>>) -> Option<Box<ListNode>> {\n        \n    }\n}"
   },
   "word-search-ii": {
     "meta": {
@@ -273,7 +327,10 @@
     "python3": "class Solution:\n    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nchar** findWords(char** board, int boardSize, int* boardColSize, char** words, int wordsSize, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public List<String> findWords(char[][] board, String[] words) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<String> findWords(char[][] board, String[] words) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {character[][]} board\n * @param {string[]} words\n * @return {string[]}\n */\nvar findWords = function(board, words) {\n    \n};",
+    "go": "func findWords(board [][]byte, words []string) []string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn find_words(board: Vec<Vec<char>>, words: Vec<String>) -> Vec<String> {\n        \n    }\n}"
   },
   "median-of-two-sorted-arrays": {
     "meta": {
@@ -288,7 +345,10 @@
     "python3": "class Solution:\n    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:\n        pass",
     "cpp": "class Solution {\npublic:\n    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {\n        \n    }\n};",
     "c": "double findMedianSortedArrays(int* nums1, int nums1Size, int* nums2, int nums2Size) {\n    \n}",
-    "java": "class Solution {\n    public double findMedianSortedArrays(int[] nums1, int[] nums2) {\n        \n    }\n}"
+    "java": "class Solution {\n    public double findMedianSortedArrays(int[] nums1, int[] nums2) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums1\n * @param {number[]} nums2\n * @return {number}\n */\nvar findMedianSortedArrays = function(nums1, nums2) {\n    \n};",
+    "go": "func findMedianSortedArrays(nums1 []int, nums2 []int) float64 {\n    \n}",
+    "rust": "impl Solution {\n    pub fn find_median_sorted_arrays(nums1: Vec<i32>, nums2: Vec<i32>) -> f64 {\n        \n    }\n}"
   },
   "serialize-and-deserialize-binary-tree": {
     "meta": {
@@ -302,7 +362,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode(object):\n#     def __init__(self, x):\n#         self.val = x\n#         self.left = None\n#         self.right = None\nclass Codec:\n\n    def serialize(self, root):\n        \"\"\"Encodes a tree to a single string.\"\"\"\n        pass\n\n    def deserialize(self, data):\n        \"\"\"Decodes your encoded data to tree.\"\"\"\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}\n * };\n */\nclass Codec {\npublic:\n    string serialize(TreeNode* root) {\n        \n    }\n\n    TreeNode* deserialize(string data) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nchar* serialize(struct TreeNode* root) {\n    \n}\n\nstruct TreeNode* deserialize(char* data) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode(int x) { val = x; }\n * }\n */\npublic class Codec {\n\n    public String serialize(TreeNode root) {\n        \n    }\n\n    public TreeNode deserialize(String data) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode(int x) { val = x; }\n * }\n */\npublic class Codec {\n\n    public String serialize(TreeNode root) {\n        \n    }\n\n    public TreeNode deserialize(String data) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\nclass Codec {\n    constructor() {\n        \n    }\n\n    /**\n     * @param {TreeNode} root\n     * @return {string}\n     */\n    serialize(root) {\n        \n    }\n\n    /**\n     * @param {string} data\n     * @return {TreeNode}\n     */\n    deserialize(data) {\n        \n    }\n}",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\ntype Codec struct {\n    \n}\n\n\nfunc Constructor() Codec {\n    \n}\n\n\nfunc (this *Codec) Serialize(root *TreeNode) string {\n    \n}\n\n\nfunc (this *Codec) Deserialize(data string) *TreeNode {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nstruct Codec {\n\n}\n\nimpl Codec {\n\n    fn new() -> Self {\n        \n    }\n\n    fn serialize(&mut self, root: Option<Rc<RefCell<TreeNode>>>) -> String {\n        \n    }\n\n    fn deserialize(&mut self, data: String) -> Option<Rc<RefCell<TreeNode>>> {\n        \n    }\n}"
   },
   "find-median-from-data-stream": {
     "meta": {
@@ -316,7 +379,10 @@
     "python3": "class MedianFinder:\n\n    def __init__(self):\n        pass\n\n    def addNum(self, num: int) -> None:\n        pass\n\n    def findMedian(self) -> float:\n        pass",
     "cpp": "class MedianFinder {\npublic:\n    MedianFinder() {\n        \n    }\n    \n    void addNum(int num) {\n        \n    }\n    \n    double findMedian() {\n        \n    }\n};",
     "c": "#include <stdlib.h>\n\ntypedef struct {\n    \n} MedianFinder;\n\nMedianFinder* medianFinderCreate() {\n    \n}\n\nvoid medianFinderAddNum(MedianFinder* obj, int num) {\n    \n}\n\ndouble medianFinderFindMedian(MedianFinder* obj) {\n    \n}\n\nvoid medianFinderFree(MedianFinder* obj) {\n    \n}",
-    "java": "class MedianFinder {\n\n    public MedianFinder() {\n        \n    }\n    \n    public void addNum(int num) {\n        \n    }\n    \n    public double findMedian() {\n        \n    }\n}"
+    "java": "class MedianFinder {\n\n    public MedianFinder() {\n        \n    }\n    \n    public void addNum(int num) {\n        \n    }\n    \n    public double findMedian() {\n        \n    }\n}",
+    "javascript": "class MedianFinder {\n    constructor() {\n        \n    }\n\n    /**\n     * @param {number} num\n     * @return {void}\n     */\n    addNum(num) {\n        \n    }\n\n    /**\n     * @return {number}\n     */\n    findMedian() {\n        \n    }\n}",
+    "go": "type MedianFinder struct {\n    \n}\n\n\nfunc Constructor() MedianFinder {\n    \n}\n\n\nfunc (this *MedianFinder) AddNum(num int) {\n    \n}\n\n\nfunc (this *MedianFinder) FindMedian() float64 {\n    \n}",
+    "rust": "struct MedianFinder {\n\n}\n\nimpl MedianFinder {\n\n    fn new() -> Self {\n        \n    }\n\n    fn add_num(&mut self, num: i32) {\n        \n    }\n\n    fn find_median(&mut self) -> f64 {\n        \n    }\n}"
   },
   "contains-duplicate": {
     "meta": {
@@ -328,7 +394,10 @@
     "python3": "class Solution:\n    def containsDuplicate(self, nums: List[int]) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool containsDuplicate(vector<int>& nums) {\n        \n    }\n};",
     "c": "#include <stdbool.h>\n\nbool containsDuplicate(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public boolean containsDuplicate(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean containsDuplicate(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {boolean}\n */\nvar containsDuplicate = function(nums) {\n    \n};",
+    "go": "func containsDuplicate(nums []int) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn contains_duplicate(nums: Vec<i32>) -> bool {\n        \n    }\n}"
   },
   "valid-palindrome": {
     "meta": {
@@ -340,7 +409,10 @@
     "python3": "class Solution:\n    def isPalindrome(self, s: str) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isPalindrome(string s) {\n        \n    }\n};",
     "c": "#include <stdbool.h>\n\nbool isPalindrome(char* s) {\n    \n}",
-    "java": "class Solution {\n    public boolean isPalindrome(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isPalindrome(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {boolean}\n */\nvar isPalindrome = function(s) {\n    \n};",
+    "go": "func isPalindrome(s string) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn is_palindrome(s: String) -> bool {\n        \n    }\n}"
   },
   "maximum-subarray": {
     "meta": {
@@ -352,7 +424,10 @@
     "python3": "class Solution:\n    def maxSubArray(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int maxSubArray(vector<int>& nums) {\n        \n    }\n};",
     "c": "int maxSubArray(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int maxSubArray(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int maxSubArray(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar maxSubArray = function(nums) {\n    \n};",
+    "go": "func maxSubArray(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn max_sub_array(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "climbing-stairs": {
     "meta": {
@@ -364,7 +439,10 @@
     "python3": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int climbStairs(int n) {\n        \n    }\n};",
     "c": "int climbStairs(int n) {\n    \n}",
-    "java": "class Solution {\n    public int climbStairs(int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int climbStairs(int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} n\n * @return {number}\n */\nvar climbStairs = function(n) {\n    \n};",
+    "go": "func climbStairs(n int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn climb_stairs(n: i32) -> i32 {\n        \n    }\n}"
   },
   "linked-list-cycle": {
     "meta": {
@@ -379,7 +457,10 @@
     "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.next = None\nclass Solution:\n    def hasCycle(self, head: Optional[ListNode]) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool hasCycle(ListNode *head) {\n        \n    }\n};",
     "c": "bool hasCycle(struct ListNode *head) {\n    \n}",
-    "java": "public class Solution {\n    public boolean hasCycle(ListNode head) {\n        \n    }\n}"
+    "java": "public class Solution {\n    public boolean hasCycle(ListNode head) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} head\n * @return {boolean}\n */\nvar hasCycle = function(head) {\n    \n};",
+    "go": "/**\n * Definition for singly-linked list.\n * type ListNode struct {\n *     Val int\n *     Next *ListNode\n * }\n */\nfunc hasCycle(head *ListNode) bool {\n    \n}",
+    "rust": "// Definition for singly-linked list. Unlike LeetCode's other Rust list\n// problems, the list is Rc<RefCell<...>> here: a Box list can't have a cycle.\n// #[derive(Debug)]\n// pub struct ListNode {\n//   pub val: i32,\n//   pub next: Option<Rc<RefCell<ListNode>>>\n// }\n//\n// impl ListNode {\n//   #[inline]\n//   fn new(val: i32) -> Self {\n//     ListNode {\n//       next: None,\n//       val\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn has_cycle(head: Option<Rc<RefCell<ListNode>>>) -> bool {\n        \n    }\n}"
   },
   "invert-binary-tree": {
     "meta": {
@@ -391,7 +472,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:\n        pass",
     "cpp": "class Solution {\npublic:\n    TreeNode* invertTree(TreeNode* root) {\n        \n    }\n};",
     "c": "struct TreeNode* invertTree(struct TreeNode* root) {\n    \n}",
-    "java": "class Solution {\n    public TreeNode invertTree(TreeNode root) {\n        \n    }\n}"
+    "java": "class Solution {\n    public TreeNode invertTree(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {TreeNode}\n */\nvar invertTree = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc invertTree(root *TreeNode) *TreeNode {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn invert_tree(root: Option<Rc<RefCell<TreeNode>>>) -> Option<Rc<RefCell<TreeNode>>> {\n        \n    }\n}"
   },
   "container-with-most-water": {
     "meta": {
@@ -403,7 +487,10 @@
     "python3": "class Solution:\n    def maxArea(self, height: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        \n    }\n};",
     "c": "int maxArea(int* height, int heightSize) {\n    \n}",
-    "java": "class Solution {\n    public int maxArea(int[] height) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int maxArea(int[] height) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} height\n * @return {number}\n */\nvar maxArea = function(height) {\n    \n};",
+    "go": "func maxArea(height []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn max_area(height: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "search-in-rotated-sorted-array": {
     "meta": {
@@ -415,7 +502,10 @@
     "python3": "class Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        \n    }\n};",
     "c": "int search(int* nums, int numsSize, int target) {\n    \n}",
-    "java": "class Solution {\n    public int search(int[] nums, int target) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int search(int[] nums, int target) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number}\n */\nvar search = function(nums, target) {\n    \n};",
+    "go": "func search(nums []int, target int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn search(nums: Vec<i32>, target: i32) -> i32 {\n        \n    }\n}"
   },
   "group-anagrams": {
     "meta": {
@@ -427,7 +517,10 @@
     "python3": "class Solution:\n    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        \n    }\n};",
     "c": "char*** groupAnagrams(char** strs, int strsSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<String>> groupAnagrams(String[] strs) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<String>> groupAnagrams(String[] strs) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string[]} strs\n * @return {string[][]}\n */\nvar groupAnagrams = function(strs) {\n    \n};",
+    "go": "func groupAnagrams(strs []string) [][]string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {\n        \n    }\n}"
   },
   "rotate-image": {
     "meta": {
@@ -439,7 +532,10 @@
     "python3": "class Solution:\n    def rotate(self, matrix: List[List[int]]) -> None:\n        pass",
     "cpp": "class Solution {\npublic:\n    void rotate(vector<vector<int>>& matrix) {\n        \n    }\n};",
     "c": "void rotate(int** matrix, int matrixSize, int* matrixColSize) {\n    \n}",
-    "java": "class Solution {\n    public void rotate(int[][] matrix) {\n        \n    }\n}"
+    "java": "class Solution {\n    public void rotate(int[][] matrix) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} matrix\n * @return {void} Do not return anything, modify matrix in-place instead.\n */\nvar rotate = function(matrix) {\n    \n};",
+    "go": "func rotate(matrix [][]int) {\n    \n}",
+    "rust": "impl Solution {\n    pub fn rotate(matrix: &mut Vec<Vec<i32>>) {\n        \n    }\n}"
   },
   "validate-binary-search-tree": {
     "meta": {
@@ -451,7 +547,10 @@
     "python3": "class Solution:\n    def isValidBST(self, root: Optional[TreeNode]) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isValidBST(TreeNode* root) {\n        \n    }\n};",
     "c": "bool isValidBST(struct TreeNode* root) {\n    \n}",
-    "java": "class Solution {\n    public boolean isValidBST(TreeNode root) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isValidBST(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {boolean}\n */\nvar isValidBST = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc isValidBST(root *TreeNode) bool {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn is_valid_bst(root: Option<Rc<RefCell<TreeNode>>>) -> bool {\n        \n    }\n}"
   },
   "binary-tree-level-order-traversal": {
     "meta": {
@@ -463,7 +562,10 @@
     "python3": "class Solution:\n    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        \n    }\n};",
     "c": "int** levelOrder(struct TreeNode* root, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<Integer>> levelOrder(TreeNode root) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<Integer>> levelOrder(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {number[][]}\n */\nvar levelOrder = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc levelOrder(root *TreeNode) [][]int {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn level_order(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "rotting-oranges": {
     "meta": {
@@ -475,7 +577,10 @@
     "python3": "class Solution:\n    def orangesRotting(self, grid: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int orangesRotting(vector<vector<int>>& grid) {\n        \n    }\n};",
     "c": "int orangesRotting(int** grid, int gridSize, int* gridColSize) {\n    \n}",
-    "java": "class Solution {\n    public int orangesRotting(int[][] grid) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int orangesRotting(int[][] grid) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} grid\n * @return {number}\n */\nvar orangesRotting = function(grid) {\n    \n};",
+    "go": "func orangesRotting(grid [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn oranges_rotting(grid: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "word-break": {
     "meta": {
@@ -487,7 +592,10 @@
     "python3": "class Solution:\n    def wordBreak(self, s: str, wordDict: List[str]) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool wordBreak(string s, vector<string>& wordDict) {\n        \n    }\n};",
     "c": "bool wordBreak(char* s, char** wordDict, int wordDictSize) {\n    \n}",
-    "java": "class Solution {\n    public boolean wordBreak(String s, List<String> wordDict) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean wordBreak(String s, List<String> wordDict) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @param {string[]} wordDict\n * @return {boolean}\n */\nvar wordBreak = function(s, wordDict) {\n    \n};",
+    "go": "func wordBreak(s string, wordDict []string) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn word_break(s: String, word_dict: Vec<String>) -> bool {\n        \n    }\n}"
   },
   "longest-valid-parentheses": {
     "meta": {
@@ -499,7 +607,10 @@
     "python3": "class Solution:\n    def longestValidParentheses(self, s: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int longestValidParentheses(string s) {\n        \n    }\n};",
     "c": "int longestValidParentheses(char* s) {\n    \n}",
-    "java": "class Solution {\n    public int longestValidParentheses(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int longestValidParentheses(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar longestValidParentheses = function(s) {\n    \n};",
+    "go": "func longestValidParentheses(s string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn longest_valid_parentheses(s: String) -> i32 {\n        \n    }\n}"
   },
   "minimum-window-substring": {
     "meta": {
@@ -511,7 +622,10 @@
     "python3": "class Solution:\n    def minWindow(self, s: str, t: str) -> str:\n        pass",
     "cpp": "class Solution {\npublic:\n    string minWindow(string s, string t) {\n        \n    }\n};",
     "c": "char* minWindow(char* s, char* t) {\n    \n}",
-    "java": "class Solution {\n    public String minWindow(String s, String t) {\n        \n    }\n}"
+    "java": "class Solution {\n    public String minWindow(String s, String t) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @param {string} t\n * @return {string}\n */\nvar minWindow = function(s, t) {\n    \n};",
+    "go": "func minWindow(s string, t string) string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn min_window(s: String, t: String) -> String {\n        \n    }\n}"
   },
   "edit-distance": {
     "meta": {
@@ -523,7 +637,10 @@
     "python3": "class Solution:\n    def minDistance(self, word1: str, word2: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int minDistance(string word1, string word2) {\n        \n    }\n};",
     "c": "int minDistance(char* word1, char* word2) {\n    \n}",
-    "java": "class Solution {\n    public int minDistance(String word1, String word2) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int minDistance(String word1, String word2) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} word1\n * @param {string} word2\n * @return {number}\n */\nvar minDistance = function(word1, word2) {\n    \n};",
+    "go": "func minDistance(word1 string, word2 string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn min_distance(word1: String, word2: String) -> i32 {\n        \n    }\n}"
   },
   "largest-rectangle-in-histogram": {
     "meta": {
@@ -535,7 +652,10 @@
     "python3": "class Solution:\n    def largestRectangleArea(self, heights: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int largestRectangleArea(vector<int>& heights) {\n        \n    }\n};",
     "c": "int largestRectangleArea(int* heights, int heightsSize) {\n    \n}",
-    "java": "class Solution {\n    public int largestRectangleArea(int[] heights) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int largestRectangleArea(int[] heights) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} heights\n * @return {number}\n */\nvar largestRectangleArea = function(heights) {\n    \n};",
+    "go": "func largestRectangleArea(heights []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn largest_rectangle_area(heights: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "n-queens": {
     "meta": {
@@ -547,7 +667,10 @@
     "python3": "class Solution:\n    def solveNQueens(self, n: int) -> List[List[str]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<string>> solveNQueens(int n) {\n        \n    }\n};",
     "c": "char*** solveNQueens(int n, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<String>> solveNQueens(int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<String>> solveNQueens(int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} n\n * @return {string[][]}\n */\nvar solveNQueens = function(n) {\n    \n};",
+    "go": "func solveNQueens(n int) [][]string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn solve_n_queens(n: i32) -> Vec<Vec<String>> {\n        \n    }\n}"
   },
   "maximum-profit-in-job-scheduling": {
     "meta": {
@@ -563,7 +686,10 @@
     "python3": "class Solution:\n    def jobScheduling(self, startTime: List[int], endTime: List[int], profit: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int jobScheduling(vector<int>& startTime, vector<int>& endTime, vector<int>& profit) {\n        \n    }\n};",
     "c": "int jobScheduling(int* startTime, int startTimeSize, int* endTime, int endTimeSize, int* profit, int profitSize) {\n    \n}",
-    "java": "class Solution {\n    public int jobScheduling(int[] startTime, int[] endTime, int[] profit) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int jobScheduling(int[] startTime, int[] endTime, int[] profit) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} startTime\n * @param {number[]} endTime\n * @param {number[]} profit\n * @return {number}\n */\nvar jobScheduling = function(startTime, endTime, profit) {\n    \n};",
+    "go": "func jobScheduling(startTime []int, endTime []int, profit []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn job_scheduling(start_time: Vec<i32>, end_time: Vec<i32>, profit: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "valid-anagram": {
     "meta": {
@@ -578,7 +704,10 @@
     "python3": "class Solution:\n    def isAnagram(self, s: str, t: str) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isAnagram(string s, string t) {\n        \n    }\n};",
     "c": "bool isAnagram(char* s, char* t) {\n    \n}",
-    "java": "class Solution {\n    public boolean isAnagram(String s, String t) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isAnagram(String s, String t) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @param {string} t\n * @return {boolean}\n */\nvar isAnagram = function(s, t) {\n    \n};",
+    "go": "func isAnagram(s string, t string) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn is_anagram(s: String, t: String) -> bool {\n        \n    }\n}"
   },
   "reverse-linked-list": {
     "meta": {
@@ -592,7 +721,10 @@
     "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        pass",
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        \n    }\n};",
     "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* reverseList(struct ListNode* head) {\n    \n}",
-    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode reverseList(ListNode head) {\n        \n    }\n}"
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode reverseList(ListNode head) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} head\n * @return {ListNode}\n */\nvar reverseList = function(head) {\n    \n};",
+    "go": "/**\n * Definition for singly-linked list.\n * type ListNode struct {\n *     Val int\n *     Next *ListNode\n * }\n */\nfunc reverseList(head *ListNode) *ListNode {\n    \n}",
+    "rust": "// Definition for singly-linked list.\n// #[derive(PartialEq, Eq, Clone, Debug)]\n// pub struct ListNode {\n//   pub val: i32,\n//   pub next: Option<Box<ListNode>>\n// }\n//\n// impl ListNode {\n//   #[inline]\n//   fn new(val: i32) -> Self {\n//     ListNode {\n//       next: None,\n//       val\n//     }\n//   }\n// }\n\nimpl Solution {\n    pub fn reverse_list(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {\n        \n    }\n}"
   },
   "maximum-depth-of-binary-tree": {
     "meta": {
@@ -606,7 +738,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def maxDepth(self, root: Optional[TreeNode]) -> int:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int maxDepth(TreeNode* root) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nint maxDepth(struct TreeNode* root) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int maxDepth(TreeNode root) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int maxDepth(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {number}\n */\nvar maxDepth = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc maxDepth(root *TreeNode) int {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn max_depth(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {\n        \n    }\n}"
   },
   "same-tree": {
     "meta": {
@@ -621,7 +756,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    bool isSameTree(TreeNode* p, TreeNode* q) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nbool isSameTree(struct TreeNode* p, struct TreeNode* q) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public boolean isSameTree(TreeNode p, TreeNode q) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public boolean isSameTree(TreeNode p, TreeNode q) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} p\n * @param {TreeNode} q\n * @return {boolean}\n */\nvar isSameTree = function(p, q) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc isSameTree(p *TreeNode, q *TreeNode) bool {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn is_same_tree(p: Option<Rc<RefCell<TreeNode>>>, q: Option<Rc<RefCell<TreeNode>>>) -> bool {\n        \n    }\n}"
   },
   "symmetric-tree": {
     "meta": {
@@ -635,7 +773,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isSymmetric(self, root: Optional[TreeNode]) -> bool:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    bool isSymmetric(TreeNode* root) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nbool isSymmetric(struct TreeNode* root) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public boolean isSymmetric(TreeNode root) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public boolean isSymmetric(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {boolean}\n */\nvar isSymmetric = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc isSymmetric(root *TreeNode) bool {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn is_symmetric(root: Option<Rc<RefCell<TreeNode>>>) -> bool {\n        \n    }\n}"
   },
   "binary-search": {
     "meta": {
@@ -650,7 +791,10 @@
     "python3": "class Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        \n    }\n};",
     "c": "int search(int* nums, int numsSize, int target) {\n    \n}",
-    "java": "class Solution {\n    public int search(int[] nums, int target) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int search(int[] nums, int target) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number}\n */\nvar search = function(nums, target) {\n    \n};",
+    "go": "func search(nums []int, target int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn search(nums: Vec<i32>, target: i32) -> i32 {\n        \n    }\n}"
   },
   "ransom-note": {
     "meta": {
@@ -665,7 +809,10 @@
     "python3": "class Solution:\n    def canConstruct(self, ransomNote: str, magazine: str) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool canConstruct(string ransomNote, string magazine) {\n        \n    }\n};",
     "c": "bool canConstruct(char* ransomNote, char* magazine) {\n    \n}",
-    "java": "class Solution {\n    public boolean canConstruct(String ransomNote, String magazine) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean canConstruct(String ransomNote, String magazine) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} ransomNote\n * @param {string} magazine\n * @return {boolean}\n */\nvar canConstruct = function(ransomNote, magazine) {\n    \n};",
+    "go": "func canConstruct(ransomNote string, magazine string) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn can_construct(ransom_note: String, magazine: String) -> bool {\n        \n    }\n}"
   },
   "majority-element": {
     "meta": {
@@ -679,7 +826,10 @@
     "python3": "class Solution:\n    def majorityElement(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int majorityElement(vector<int>& nums) {\n        \n    }\n};",
     "c": "int majorityElement(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int majorityElement(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int majorityElement(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar majorityElement = function(nums) {\n    \n};",
+    "go": "func majorityElement(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn majority_element(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "single-number": {
     "meta": {
@@ -693,7 +843,10 @@
     "python3": "class Solution:\n    def singleNumber(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        \n    }\n};",
     "c": "int singleNumber(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int singleNumber(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int singleNumber(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar singleNumber = function(nums) {\n    \n};",
+    "go": "func singleNumber(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn single_number(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "move-zeroes": {
     "meta": {
@@ -707,7 +860,10 @@
     "python3": "class Solution:\n    def moveZeroes(self, nums: List[int]) -> None:\n        pass",
     "cpp": "class Solution {\npublic:\n    void moveZeroes(vector<int>& nums) {\n        \n    }\n};",
     "c": "void moveZeroes(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public void moveZeroes(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public void moveZeroes(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {void} Do not return anything, modify nums in-place instead.\n */\nvar moveZeroes = function(nums) {\n    \n};",
+    "go": "func moveZeroes(nums []int) {\n    \n}",
+    "rust": "impl Solution {\n    pub fn move_zeroes(nums: &mut Vec<i32>) {\n        \n    }\n}"
   },
   "palindrome-number": {
     "meta": {
@@ -721,7 +877,10 @@
     "python3": "class Solution:\n    def isPalindrome(self, x: int) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isPalindrome(int x) {\n        \n    }\n};",
     "c": "bool isPalindrome(int x) {\n    \n}",
-    "java": "class Solution {\n    public boolean isPalindrome(int x) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isPalindrome(int x) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} x\n * @return {boolean}\n */\nvar isPalindrome = function(x) {\n    \n};",
+    "go": "func isPalindrome(x int) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn is_palindrome(x: i32) -> bool {\n        \n    }\n}"
   },
   "roman-to-integer": {
     "meta": {
@@ -735,7 +894,10 @@
     "python3": "class Solution:\n    def romanToInt(self, s: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int romanToInt(string s) {\n        \n    }\n};",
     "c": "int romanToInt(char* s) {\n    \n}",
-    "java": "class Solution {\n    public int romanToInt(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int romanToInt(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar romanToInt = function(s) {\n    \n};",
+    "go": "func romanToInt(s string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn roman_to_int(s: String) -> i32 {\n        \n    }\n}"
   },
   "longest-common-prefix": {
     "meta": {
@@ -749,7 +911,10 @@
     "python3": "class Solution:\n    def longestCommonPrefix(self, strs: List[str]) -> str:\n        pass",
     "cpp": "class Solution {\npublic:\n    string longestCommonPrefix(vector<string>& strs) {\n        \n    }\n};",
     "c": "char* longestCommonPrefix(char** strs, int strsSize) {\n    \n}",
-    "java": "class Solution {\n    public String longestCommonPrefix(String[] strs) {\n        \n    }\n}"
+    "java": "class Solution {\n    public String longestCommonPrefix(String[] strs) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string[]} strs\n * @return {string}\n */\nvar longestCommonPrefix = function(strs) {\n    \n};",
+    "go": "func longestCommonPrefix(strs []string) string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn longest_common_prefix(strs: Vec<String>) -> String {\n        \n    }\n}"
   },
   "plus-one": {
     "meta": {
@@ -763,7 +928,10 @@
     "python3": "class Solution:\n    def plusOne(self, digits: List[int]) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> plusOne(vector<int>& digits) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* plusOne(int* digits, int digitsSize, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public int[] plusOne(int[] digits) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[] plusOne(int[] digits) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} digits\n * @return {number[]}\n */\nvar plusOne = function(digits) {\n    \n};",
+    "go": "func plusOne(digits []int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn plus_one(digits: Vec<i32>) -> Vec<i32> {\n        \n    }\n}"
   },
   "sqrtx": {
     "meta": {
@@ -777,7 +945,10 @@
     "python3": "class Solution:\n    def mySqrt(self, x: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int mySqrt(int x) {\n        \n    }\n};",
     "c": "int mySqrt(int x) {\n    \n}",
-    "java": "class Solution {\n    public int mySqrt(int x) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int mySqrt(int x) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} x\n * @return {number}\n */\nvar mySqrt = function(x) {\n    \n};",
+    "go": "func mySqrt(x int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn my_sqrt(x: i32) -> i32 {\n        \n    }\n}"
   },
   "merge-sorted-array": {
     "meta": {
@@ -794,7 +965,10 @@
     "python3": "class Solution:\n    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:\n        pass",
     "cpp": "class Solution {\npublic:\n    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {\n        \n    }\n};",
     "c": "void merge(int* nums1, int nums1Size, int m, int* nums2, int nums2Size, int n) {\n    \n}",
-    "java": "class Solution {\n    public void merge(int[] nums1, int m, int[] nums2, int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public void merge(int[] nums1, int m, int[] nums2, int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums1\n * @param {number} m\n * @param {number[]} nums2\n * @param {number} n\n * @return {void} Do not return anything, modify nums1 in-place instead.\n */\nvar merge = function(nums1, m, nums2, n) {\n    \n};",
+    "go": "func merge(nums1 []int, m int, nums2 []int, n int) {\n    \n}",
+    "rust": "impl Solution {\n    pub fn merge(nums1: &mut Vec<i32>, m: i32, nums2: Vec<i32>, n: i32) {\n        \n    }\n}"
   },
   "pascals-triangle": {
     "meta": {
@@ -808,7 +982,10 @@
     "python3": "class Solution:\n    def generate(self, numRows: int) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> generate(int numRows) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** generate(int numRows, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<Integer>> generate(int numRows) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<Integer>> generate(int numRows) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} numRows\n * @return {number[][]}\n */\nvar generate = function(numRows) {\n    \n};",
+    "go": "func generate(numRows int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn generate(num_rows: i32) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "diameter-of-binary-tree": {
     "meta": {
@@ -822,7 +999,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int diameterOfBinaryTree(TreeNode* root) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nint diameterOfBinaryTree(struct TreeNode* root) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int diameterOfBinaryTree(TreeNode root) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int diameterOfBinaryTree(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {number}\n */\nvar diameterOfBinaryTree = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc diameterOfBinaryTree(root *TreeNode) int {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn diameter_of_binary_tree(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {\n        \n    }\n}"
   },
   "balanced-binary-tree": {
     "meta": {
@@ -836,7 +1016,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isBalanced(self, root: Optional[TreeNode]) -> bool:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    bool isBalanced(TreeNode* root) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nbool isBalanced(struct TreeNode* root) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public boolean isBalanced(TreeNode root) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public boolean isBalanced(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {boolean}\n */\nvar isBalanced = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc isBalanced(root *TreeNode) bool {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn is_balanced(root: Option<Rc<RefCell<TreeNode>>>) -> bool {\n        \n    }\n}"
   },
   "middle-of-the-linked-list": {
     "meta": {
@@ -850,7 +1033,10 @@
     "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def middleNode(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        pass",
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* middleNode(ListNode* head) {\n        \n    }\n};",
     "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* middleNode(struct ListNode* head) {\n    \n}",
-    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode middleNode(ListNode head) {\n        \n    }\n}"
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode middleNode(ListNode head) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} head\n * @return {ListNode}\n */\nvar middleNode = function(head) {\n    \n};",
+    "go": "/**\n * Definition for singly-linked list.\n * type ListNode struct {\n *     Val int\n *     Next *ListNode\n * }\n */\nfunc middleNode(head *ListNode) *ListNode {\n    \n}",
+    "rust": "// Definition for singly-linked list.\n// #[derive(PartialEq, Eq, Clone, Debug)]\n// pub struct ListNode {\n//   pub val: i32,\n//   pub next: Option<Box<ListNode>>\n// }\n//\n// impl ListNode {\n//   #[inline]\n//   fn new(val: i32) -> Self {\n//     ListNode {\n//       next: None,\n//       val\n//     }\n//   }\n// }\n\nimpl Solution {\n    pub fn middle_node(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {\n        \n    }\n}"
   },
   "palindrome-linked-list": {
     "meta": {
@@ -864,7 +1050,10 @@
     "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def isPalindrome(self, head: Optional[ListNode]) -> bool:\n        pass",
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    bool isPalindrome(ListNode* head) {\n        \n    }\n};",
     "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nbool isPalindrome(struct ListNode* head) {\n    \n}",
-    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public boolean isPalindrome(ListNode head) {\n        \n    }\n}"
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public boolean isPalindrome(ListNode head) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} head\n * @return {boolean}\n */\nvar isPalindrome = function(head) {\n    \n};",
+    "go": "/**\n * Definition for singly-linked list.\n * type ListNode struct {\n *     Val int\n *     Next *ListNode\n * }\n */\nfunc isPalindrome(head *ListNode) bool {\n    \n}",
+    "rust": "// Definition for singly-linked list.\n// #[derive(PartialEq, Eq, Clone, Debug)]\n// pub struct ListNode {\n//   pub val: i32,\n//   pub next: Option<Box<ListNode>>\n// }\n//\n// impl ListNode {\n//   #[inline]\n//   fn new(val: i32) -> Self {\n//     ListNode {\n//       next: None,\n//       val\n//     }\n//   }\n// }\n\nimpl Solution {\n    pub fn is_palindrome(head: Option<Box<ListNode>>) -> bool {\n        \n    }\n}"
   },
   "intersection-of-two-arrays": {
     "meta": {
@@ -879,7 +1068,10 @@
     "python3": "class Solution:\n    def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> intersection(vector<int>& nums1, vector<int>& nums2) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* intersection(int* nums1, int nums1Size, int* nums2, int nums2Size, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public int[] intersection(int[] nums1, int[] nums2) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[] intersection(int[] nums1, int[] nums2) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums1\n * @param {number[]} nums2\n * @return {number[]}\n */\nvar intersection = function(nums1, nums2) {\n    \n};",
+    "go": "func intersection(nums1 []int, nums2 []int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn intersection(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {\n        \n    }\n}"
   },
   "happy-number": {
     "meta": {
@@ -893,7 +1085,10 @@
     "python3": "class Solution:\n    def isHappy(self, n: int) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isHappy(int n) {\n        \n    }\n};",
     "c": "bool isHappy(int n) {\n    \n}",
-    "java": "class Solution {\n    public boolean isHappy(int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isHappy(int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} n\n * @return {boolean}\n */\nvar isHappy = function(n) {\n    \n};",
+    "go": "func isHappy(n int) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn is_happy(n: i32) -> bool {\n        \n    }\n}"
   },
   "is-subsequence": {
     "meta": {
@@ -908,7 +1103,10 @@
     "python3": "class Solution:\n    def isSubsequence(self, s: str, t: str) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isSubsequence(string s, string t) {\n        \n    }\n};",
     "c": "bool isSubsequence(char* s, char* t) {\n    \n}",
-    "java": "class Solution {\n    public boolean isSubsequence(String s, String t) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isSubsequence(String s, String t) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @param {string} t\n * @return {boolean}\n */\nvar isSubsequence = function(s, t) {\n    \n};",
+    "go": "func isSubsequence(s string, t string) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn is_subsequence(s: String, t: String) -> bool {\n        \n    }\n}"
   },
   "counting-bits": {
     "meta": {
@@ -922,7 +1120,10 @@
     "python3": "class Solution:\n    def countBits(self, n: int) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> countBits(int n) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* countBits(int n, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public int[] countBits(int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[] countBits(int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} n\n * @return {number[]}\n */\nvar countBits = function(n) {\n    \n};",
+    "go": "func countBits(n int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn count_bits(n: i32) -> Vec<i32> {\n        \n    }\n}"
   },
   "fizz-buzz": {
     "meta": {
@@ -936,7 +1137,10 @@
     "python3": "class Solution:\n    def fizzBuzz(self, n: int) -> List[str]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<string> fizzBuzz(int n) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nchar** fizzBuzz(int n, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public List<String> fizzBuzz(int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<String> fizzBuzz(int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} n\n * @return {string[]}\n */\nvar fizzBuzz = function(n) {\n    \n};",
+    "go": "func fizzBuzz(n int) []string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn fizz_buzz(n: i32) -> Vec<String> {\n        \n    }\n}"
   },
   "search-insert-position": {
     "meta": {
@@ -951,7 +1155,10 @@
     "python3": "class Solution:\n    def searchInsert(self, nums: List[int], target: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int searchInsert(vector<int>& nums, int target) {\n        \n    }\n};",
     "c": "int searchInsert(int* nums, int numsSize, int target) {\n    \n}",
-    "java": "class Solution {\n    public int searchInsert(int[] nums, int target) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int searchInsert(int[] nums, int target) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number}\n */\nvar searchInsert = function(nums, target) {\n    \n};",
+    "go": "func searchInsert(nums []int, target int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn search_insert(nums: Vec<i32>, target: i32) -> i32 {\n        \n    }\n}"
   },
   "add-binary": {
     "meta": {
@@ -966,7 +1173,10 @@
     "python3": "class Solution:\n    def addBinary(self, a: str, b: str) -> str:\n        pass",
     "cpp": "class Solution {\npublic:\n    string addBinary(string a, string b) {\n        \n    }\n};",
     "c": "char* addBinary(char* a, char* b) {\n    \n}",
-    "java": "class Solution {\n    public String addBinary(String a, String b) {\n        \n    }\n}"
+    "java": "class Solution {\n    public String addBinary(String a, String b) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} a\n * @param {string} b\n * @return {string}\n */\nvar addBinary = function(a, b) {\n    \n};",
+    "go": "func addBinary(a string, b string) string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn add_binary(a: String, b: String) -> String {\n        \n    }\n}"
   },
   "binary-tree-inorder-traversal": {
     "meta": {
@@ -980,7 +1190,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    vector<int> inorderTraversal(TreeNode* root) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\n/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* inorderTraversal(struct TreeNode* root, int* returnSize) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public List<Integer> inorderTraversal(TreeNode root) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public List<Integer> inorderTraversal(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {number[]}\n */\nvar inorderTraversal = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc inorderTraversal(root *TreeNode) []int {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn inorder_traversal(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {\n        \n    }\n}"
   },
   "flood-fill": {
     "meta": {
@@ -997,7 +1210,10 @@
     "python3": "class Solution:\n    def floodFill(self, image: List[List[int]], sr: int, sc: int, color: int) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int color) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** floodFill(int** image, int imageSize, int* imageColSize, int sr, int sc, int color, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public int[][] floodFill(int[][] image, int sr, int sc, int color) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[][] floodFill(int[][] image, int sr, int sc, int color) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} image\n * @param {number} sr\n * @param {number} sc\n * @param {number} color\n * @return {number[][]}\n */\nvar floodFill = function(image, sr, sc, color) {\n    \n};",
+    "go": "func floodFill(image [][]int, sr int, sc int, color int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn flood_fill(image: Vec<Vec<i32>>, sr: i32, sc: i32, color: i32) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "island-perimeter": {
     "meta": {
@@ -1011,7 +1227,10 @@
     "python3": "class Solution:\n    def islandPerimeter(self, grid: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int islandPerimeter(vector<vector<int>>& grid) {\n        \n    }\n};",
     "c": "int islandPerimeter(int** grid, int gridSize, int* gridColSize) {\n    \n}",
-    "java": "class Solution {\n    public int islandPerimeter(int[][] grid) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int islandPerimeter(int[][] grid) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} grid\n * @return {number}\n */\nvar islandPerimeter = function(grid) {\n    \n};",
+    "go": "func islandPerimeter(grid [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn island_perimeter(grid: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "add-two-numbers": {
     "meta": {
@@ -1026,7 +1245,10 @@
     "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:\n        pass",
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        \n    }\n};",
     "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* addTwoNumbers(struct ListNode* l1, struct ListNode* l2) {\n    \n}",
-    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {\n        \n    }\n}"
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} l1\n * @param {ListNode} l2\n * @return {ListNode}\n */\nvar addTwoNumbers = function(l1, l2) {\n    \n};",
+    "go": "/**\n * Definition for singly-linked list.\n * type ListNode struct {\n *     Val int\n *     Next *ListNode\n * }\n */\nfunc addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {\n    \n}",
+    "rust": "// Definition for singly-linked list.\n// #[derive(PartialEq, Eq, Clone, Debug)]\n// pub struct ListNode {\n//   pub val: i32,\n//   pub next: Option<Box<ListNode>>\n// }\n//\n// impl ListNode {\n//   #[inline]\n//   fn new(val: i32) -> Self {\n//     ListNode {\n//       next: None,\n//       val\n//     }\n//   }\n// }\n\nimpl Solution {\n    pub fn add_two_numbers(l1: Option<Box<ListNode>>, l2: Option<Box<ListNode>>) -> Option<Box<ListNode>> {\n        \n    }\n}"
   },
   "generate-parentheses": {
     "meta": {
@@ -1040,7 +1262,10 @@
     "python3": "class Solution:\n    def generateParenthesis(self, n: int) -> List[str]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<string> generateParenthesis(int n) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nchar** generateParenthesis(int n, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public List<String> generateParenthesis(int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<String> generateParenthesis(int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} n\n * @return {string[]}\n */\nvar generateParenthesis = function(n) {\n    \n};",
+    "go": "func generateParenthesis(n int) []string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn generate_parenthesis(n: i32) -> Vec<String> {\n        \n    }\n}"
   },
   "remove-nth-node-from-end-of-list": {
     "meta": {
@@ -1055,7 +1280,10 @@
     "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:\n        pass",
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* removeNthFromEnd(ListNode* head, int n) {\n        \n    }\n};",
     "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* removeNthFromEnd(struct ListNode* head, int n) {\n    \n}",
-    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode removeNthFromEnd(ListNode head, int n) {\n        \n    }\n}"
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode removeNthFromEnd(ListNode head, int n) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} head\n * @param {number} n\n * @return {ListNode}\n */\nvar removeNthFromEnd = function(head, n) {\n    \n};",
+    "go": "/**\n * Definition for singly-linked list.\n * type ListNode struct {\n *     Val int\n *     Next *ListNode\n * }\n */\nfunc removeNthFromEnd(head *ListNode, n int) *ListNode {\n    \n}",
+    "rust": "// Definition for singly-linked list.\n// #[derive(PartialEq, Eq, Clone, Debug)]\n// pub struct ListNode {\n//   pub val: i32,\n//   pub next: Option<Box<ListNode>>\n// }\n//\n// impl ListNode {\n//   #[inline]\n//   fn new(val: i32) -> Self {\n//     ListNode {\n//       next: None,\n//       val\n//     }\n//   }\n// }\n\nimpl Solution {\n    pub fn remove_nth_from_end(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {\n        \n    }\n}"
   },
   "search-a-2d-matrix": {
     "meta": {
@@ -1070,7 +1298,10 @@
     "python3": "class Solution:\n    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool searchMatrix(vector<vector<int>>& matrix, int target) {\n        \n    }\n};",
     "c": "bool searchMatrix(int** matrix, int matrixSize, int* matrixColSize, int target) {\n    \n}",
-    "java": "class Solution {\n    public boolean searchMatrix(int[][] matrix, int target) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean searchMatrix(int[][] matrix, int target) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} matrix\n * @param {number} target\n * @return {boolean}\n */\nvar searchMatrix = function(matrix, target) {\n    \n};",
+    "go": "func searchMatrix(matrix [][]int, target int) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn search_matrix(matrix: Vec<Vec<i32>>, target: i32) -> bool {\n        \n    }\n}"
   },
   "find-minimum-in-rotated-sorted-array": {
     "meta": {
@@ -1084,7 +1315,10 @@
     "python3": "class Solution:\n    def findMin(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int findMin(vector<int>& nums) {\n        \n    }\n};",
     "c": "int findMin(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int findMin(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int findMin(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar findMin = function(nums) {\n    \n};",
+    "go": "func findMin(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn find_min(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "kth-largest-element-in-an-array": {
     "meta": {
@@ -1099,7 +1333,10 @@
     "python3": "class Solution:\n    def findKthLargest(self, nums: List[int], k: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int findKthLargest(vector<int>& nums, int k) {\n        \n    }\n};",
     "c": "int findKthLargest(int* nums, int numsSize, int k) {\n    \n}",
-    "java": "class Solution {\n    public int findKthLargest(int[] nums, int k) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int findKthLargest(int[] nums, int k) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} k\n * @return {number}\n */\nvar findKthLargest = function(nums, k) {\n    \n};",
+    "go": "func findKthLargest(nums []int, k int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn find_kth_largest(nums: Vec<i32>, k: i32) -> i32 {\n        \n    }\n}"
   },
   "subsets": {
     "meta": {
@@ -1113,7 +1350,10 @@
     "python3": "class Solution:\n    def subsets(self, nums: List[int]) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** subsets(int* nums, int numsSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<Integer>> subsets(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<Integer>> subsets(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number[][]}\n */\nvar subsets = function(nums) {\n    \n};",
+    "go": "func subsets(nums []int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn subsets(nums: Vec<i32>) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "combination-sum": {
     "meta": {
@@ -1128,7 +1368,10 @@
     "python3": "class Solution:\n    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** combinationSum(int* candidates, int candidatesSize, int target, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<Integer>> combinationSum(int[] candidates, int target) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<Integer>> combinationSum(int[] candidates, int target) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} candidates\n * @param {number} target\n * @return {number[][]}\n */\nvar combinationSum = function(candidates, target) {\n    \n};",
+    "go": "func combinationSum(candidates []int, target int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn combination_sum(candidates: Vec<i32>, target: i32) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "letter-combinations-of-a-phone-number": {
     "meta": {
@@ -1142,7 +1385,10 @@
     "python3": "class Solution:\n    def letterCombinations(self, digits: str) -> List[str]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<string> letterCombinations(string digits) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nchar** letterCombinations(char* digits, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public List<String> letterCombinations(String digits) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<String> letterCombinations(String digits) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} digits\n * @return {string[]}\n */\nvar letterCombinations = function(digits) {\n    \n};",
+    "go": "func letterCombinations(digits string) []string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn letter_combinations(digits: String) -> Vec<String> {\n        \n    }\n}"
   },
   "word-search": {
     "meta": {
@@ -1157,7 +1403,10 @@
     "python3": "class Solution:\n    def exist(self, board: List[List[str]], word: str) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool exist(vector<vector<char>>& board, string word) {\n        \n    }\n};",
     "c": "bool exist(char** board, int boardSize, int* boardColSize, char* word) {\n    \n}",
-    "java": "class Solution {\n    public boolean exist(char[][] board, String word) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean exist(char[][] board, String word) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {character[][]} board\n * @param {string} word\n * @return {boolean}\n */\nvar exist = function(board, word) {\n    \n};",
+    "go": "func exist(board [][]byte, word string) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn exist(board: Vec<Vec<char>>, word: String) -> bool {\n        \n    }\n}"
   },
   "spiral-matrix": {
     "meta": {
@@ -1171,7 +1420,10 @@
     "python3": "class Solution:\n    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> spiralOrder(vector<vector<int>>& matrix) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* spiralOrder(int** matrix, int matrixSize, int* matrixColSize, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public List<Integer> spiralOrder(int[][] matrix) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<Integer> spiralOrder(int[][] matrix) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} matrix\n * @return {number[]}\n */\nvar spiralOrder = function(matrix) {\n    \n};",
+    "go": "func spiralOrder(matrix [][]int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn spiral_order(matrix: Vec<Vec<i32>>) -> Vec<i32> {\n        \n    }\n}"
   },
   "set-matrix-zeroes": {
     "meta": {
@@ -1185,7 +1437,10 @@
     "python3": "class Solution:\n    def setZeroes(self, matrix: List[List[int]]) -> None:\n        pass",
     "cpp": "class Solution {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {\n        \n    }\n};",
     "c": "void setZeroes(int** matrix, int matrixSize, int* matrixColSize) {\n    \n}",
-    "java": "class Solution {\n    public void setZeroes(int[][] matrix) {\n        \n    }\n}"
+    "java": "class Solution {\n    public void setZeroes(int[][] matrix) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} matrix\n * @return {void} Do not return anything, modify matrix in-place instead.\n */\nvar setZeroes = function(matrix) {\n    \n};",
+    "go": "func setZeroes(matrix [][]int) {\n    \n}",
+    "rust": "impl Solution {\n    pub fn set_zeroes(matrix: &mut Vec<Vec<i32>>) {\n        \n    }\n}"
   },
   "jump-game": {
     "meta": {
@@ -1199,7 +1454,10 @@
     "python3": "class Solution:\n    def canJump(self, nums: List[int]) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        \n    }\n};",
     "c": "bool canJump(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public boolean canJump(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean canJump(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {boolean}\n */\nvar canJump = function(nums) {\n    \n};",
+    "go": "func canJump(nums []int) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn can_jump(nums: Vec<i32>) -> bool {\n        \n    }\n}"
   },
   "unique-paths": {
     "meta": {
@@ -1214,7 +1472,10 @@
     "python3": "class Solution:\n    def uniquePaths(self, m: int, n: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int uniquePaths(int m, int n) {\n        \n    }\n};",
     "c": "int uniquePaths(int m, int n) {\n    \n}",
-    "java": "class Solution {\n    public int uniquePaths(int m, int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int uniquePaths(int m, int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} m\n * @param {number} n\n * @return {number}\n */\nvar uniquePaths = function(m, n) {\n    \n};",
+    "go": "func uniquePaths(m int, n int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn unique_paths(m: i32, n: i32) -> i32 {\n        \n    }\n}"
   },
   "longest-increasing-subsequence": {
     "meta": {
@@ -1228,7 +1489,10 @@
     "python3": "class Solution:\n    def lengthOfLIS(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int lengthOfLIS(vector<int>& nums) {\n        \n    }\n};",
     "c": "int lengthOfLIS(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int lengthOfLIS(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int lengthOfLIS(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar lengthOfLIS = function(nums) {\n    \n};",
+    "go": "func lengthOfLIS(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn length_of_lis(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "house-robber": {
     "meta": {
@@ -1242,7 +1506,10 @@
     "python3": "class Solution:\n    def rob(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int rob(vector<int>& nums) {\n        \n    }\n};",
     "c": "int rob(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int rob(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int rob(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar rob = function(nums) {\n    \n};",
+    "go": "func rob(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn rob(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "house-robber-ii": {
     "meta": {
@@ -1256,7 +1523,10 @@
     "python3": "class Solution:\n    def rob(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int rob(vector<int>& nums) {\n        \n    }\n};",
     "c": "int rob(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int rob(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int rob(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar rob = function(nums) {\n    \n};",
+    "go": "func rob(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn rob(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "decode-ways": {
     "meta": {
@@ -1270,7 +1540,10 @@
     "python3": "class Solution:\n    def numDecodings(self, s: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int numDecodings(string s) {\n        \n    }\n};",
     "c": "int numDecodings(char* s) {\n    \n}",
-    "java": "class Solution {\n    public int numDecodings(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int numDecodings(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar numDecodings = function(s) {\n    \n};",
+    "go": "func numDecodings(s string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn num_decodings(s: String) -> i32 {\n        \n    }\n}"
   },
   "partition-equal-subset-sum": {
     "meta": {
@@ -1284,7 +1557,10 @@
     "python3": "class Solution:\n    def canPartition(self, nums: List[int]) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool canPartition(vector<int>& nums) {\n        \n    }\n};",
     "c": "bool canPartition(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public boolean canPartition(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean canPartition(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {boolean}\n */\nvar canPartition = function(nums) {\n    \n};",
+    "go": "func canPartition(nums []int) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn can_partition(nums: Vec<i32>) -> bool {\n        \n    }\n}"
   },
   "longest-common-subsequence": {
     "meta": {
@@ -1299,7 +1575,10 @@
     "python3": "class Solution:\n    def longestCommonSubsequence(self, text1: str, text2: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int longestCommonSubsequence(string text1, string text2) {\n        \n    }\n};",
     "c": "int longestCommonSubsequence(char* text1, char* text2) {\n    \n}",
-    "java": "class Solution {\n    public int longestCommonSubsequence(String text1, String text2) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int longestCommonSubsequence(String text1, String text2) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} text1\n * @param {string} text2\n * @return {number}\n */\nvar longestCommonSubsequence = function(text1, text2) {\n    \n};",
+    "go": "func longestCommonSubsequence(text1 string, text2 string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn longest_common_subsequence(text1: String, text2: String) -> i32 {\n        \n    }\n}"
   },
   "merge-intervals": {
     "meta": {
@@ -1313,7 +1592,10 @@
     "python3": "class Solution:\n    def merge(self, intervals: List[List[int]]) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** merge(int** intervals, int intervalsSize, int* intervalsColSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public int[][] merge(int[][] intervals) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[][] merge(int[][] intervals) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} intervals\n * @return {number[][]}\n */\nvar merge = function(intervals) {\n    \n};",
+    "go": "func merge(intervals [][]int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn merge(intervals: Vec<Vec<i32>>) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "insert-interval": {
     "meta": {
@@ -1328,7 +1610,10 @@
     "python3": "class Solution:\n    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** insert(int** intervals, int intervalsSize, int* intervalsColSize, int* newInterval, int newIntervalSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public int[][] insert(int[][] intervals, int[] newInterval) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[][] insert(int[][] intervals, int[] newInterval) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} intervals\n * @param {number[]} newInterval\n * @return {number[][]}\n */\nvar insert = function(intervals, newInterval) {\n    \n};",
+    "go": "func insert(intervals [][]int, newInterval []int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn insert(intervals: Vec<Vec<i32>>, new_interval: Vec<i32>) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "non-overlapping-intervals": {
     "meta": {
@@ -1342,7 +1627,10 @@
     "python3": "class Solution:\n    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int eraseOverlapIntervals(vector<vector<int>>& intervals) {\n        \n    }\n};",
     "c": "int eraseOverlapIntervals(int** intervals, int intervalsSize, int* intervalsColSize) {\n    \n}",
-    "java": "class Solution {\n    public int eraseOverlapIntervals(int[][] intervals) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int eraseOverlapIntervals(int[][] intervals) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} intervals\n * @return {number}\n */\nvar eraseOverlapIntervals = function(intervals) {\n    \n};",
+    "go": "func eraseOverlapIntervals(intervals [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn erase_overlap_intervals(intervals: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "daily-temperatures": {
     "meta": {
@@ -1356,7 +1644,10 @@
     "python3": "class Solution:\n    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> dailyTemperatures(vector<int>& temperatures) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* dailyTemperatures(int* temperatures, int temperaturesSize, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public int[] dailyTemperatures(int[] temperatures) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[] dailyTemperatures(int[] temperatures) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} temperatures\n * @return {number[]}\n */\nvar dailyTemperatures = function(temperatures) {\n    \n};",
+    "go": "func dailyTemperatures(temperatures []int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn daily_temperatures(temperatures: Vec<i32>) -> Vec<i32> {\n        \n    }\n}"
   },
   "evaluate-reverse-polish-notation": {
     "meta": {
@@ -1370,7 +1661,10 @@
     "python3": "class Solution:\n    def evalRPN(self, tokens: List[str]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int evalRPN(vector<string>& tokens) {\n        \n    }\n};",
     "c": "int evalRPN(char** tokens, int tokensSize) {\n    \n}",
-    "java": "class Solution {\n    public int evalRPN(String[] tokens) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int evalRPN(String[] tokens) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string[]} tokens\n * @return {number}\n */\nvar evalRPN = function(tokens) {\n    \n};",
+    "go": "func evalRPN(tokens []string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn eval_rpn(tokens: Vec<String>) -> i32 {\n        \n    }\n}"
   },
   "binary-tree-right-side-view": {
     "meta": {
@@ -1384,7 +1678,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    vector<int> rightSideView(TreeNode* root) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\n/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* rightSideView(struct TreeNode* root, int* returnSize) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public List<Integer> rightSideView(TreeNode root) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public List<Integer> rightSideView(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {number[]}\n */\nvar rightSideView = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc rightSideView(root *TreeNode) []int {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn right_side_view(root: Option<Rc<RefCell<TreeNode>>>) -> Vec<i32> {\n        \n    }\n}"
   },
   "kth-smallest-element-in-a-bst": {
     "meta": {
@@ -1399,7 +1696,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int kthSmallest(TreeNode* root, int k) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nint kthSmallest(struct TreeNode* root, int k) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int kthSmallest(TreeNode root, int k) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int kthSmallest(TreeNode root, int k) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @param {number} k\n * @return {number}\n */\nvar kthSmallest = function(root, k) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc kthSmallest(root *TreeNode, k int) int {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn kth_smallest(root: Option<Rc<RefCell<TreeNode>>>, k: i32) -> i32 {\n        \n    }\n}"
   },
   "construct-binary-tree-from-preorder-and-inorder-traversal": {
     "meta": {
@@ -1414,7 +1714,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nstruct TreeNode* buildTree(int* preorder, int preorderSize, int* inorder, int inorderSize) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public TreeNode buildTree(int[] preorder, int[] inorder) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public TreeNode buildTree(int[] preorder, int[] inorder) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {number[]} preorder\n * @param {number[]} inorder\n * @return {TreeNode}\n */\nvar buildTree = function(preorder, inorder) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc buildTree(preorder []int, inorder []int) *TreeNode {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn build_tree(preorder: Vec<i32>, inorder: Vec<i32>) -> Option<Rc<RefCell<TreeNode>>> {\n        \n    }\n}"
   },
   "count-good-nodes-in-binary-tree": {
     "meta": {
@@ -1428,7 +1731,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def goodNodes(self, root: TreeNode) -> int:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int goodNodes(TreeNode* root) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nint goodNodes(struct TreeNode* root) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int goodNodes(TreeNode root) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int goodNodes(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {number}\n */\nvar goodNodes = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc goodNodes(root *TreeNode) int {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn good_nodes(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {\n        \n    }\n}"
   },
   "pacific-atlantic-water-flow": {
     "meta": {
@@ -1442,7 +1748,10 @@
     "python3": "class Solution:\n    def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** pacificAtlantic(int** heights, int heightsSize, int* heightsColSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<Integer>> pacificAtlantic(int[][] heights) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<Integer>> pacificAtlantic(int[][] heights) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} heights\n * @return {number[][]}\n */\nvar pacificAtlantic = function(heights) {\n    \n};",
+    "go": "func pacificAtlantic(heights [][]int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn pacific_atlantic(heights: Vec<Vec<i32>>) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "number-of-provinces": {
     "meta": {
@@ -1456,7 +1765,10 @@
     "python3": "class Solution:\n    def findCircleNum(self, isConnected: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int findCircleNum(vector<vector<int>>& isConnected) {\n        \n    }\n};",
     "c": "int findCircleNum(int** isConnected, int isConnectedSize, int* isConnectedColSize) {\n    \n}",
-    "java": "class Solution {\n    public int findCircleNum(int[][] isConnected) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int findCircleNum(int[][] isConnected) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} isConnected\n * @return {number}\n */\nvar findCircleNum = function(isConnected) {\n    \n};",
+    "go": "func findCircleNum(isConnected [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn find_circle_num(is_connected: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "gas-station": {
     "meta": {
@@ -1471,7 +1783,10 @@
     "python3": "class Solution:\n    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {\n        \n    }\n};",
     "c": "int canCompleteCircuit(int* gas, int gasSize, int* cost, int costSize) {\n    \n}",
-    "java": "class Solution {\n    public int canCompleteCircuit(int[] gas, int[] cost) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int canCompleteCircuit(int[] gas, int[] cost) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} gas\n * @param {number[]} cost\n * @return {number}\n */\nvar canCompleteCircuit = function(gas, cost) {\n    \n};",
+    "go": "func canCompleteCircuit(gas []int, cost []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn can_complete_circuit(gas: Vec<i32>, cost: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "sort-colors": {
     "meta": {
@@ -1485,7 +1800,10 @@
     "python3": "class Solution:\n    def sortColors(self, nums: List[int]) -> None:\n        pass",
     "cpp": "class Solution {\npublic:\n    void sortColors(vector<int>& nums) {\n        \n    }\n};",
     "c": "void sortColors(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public void sortColors(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public void sortColors(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {void} Do not return anything, modify nums in-place instead.\n */\nvar sortColors = function(nums) {\n    \n};",
+    "go": "func sortColors(nums []int) {\n    \n}",
+    "rust": "impl Solution {\n    pub fn sort_colors(nums: &mut Vec<i32>) {\n        \n    }\n}"
   },
   "find-the-duplicate-number": {
     "meta": {
@@ -1499,7 +1817,10 @@
     "python3": "class Solution:\n    def findDuplicate(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int findDuplicate(vector<int>& nums) {\n        \n    }\n};",
     "c": "int findDuplicate(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int findDuplicate(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int findDuplicate(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar findDuplicate = function(nums) {\n    \n};",
+    "go": "func findDuplicate(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn find_duplicate(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "longest-consecutive-sequence": {
     "meta": {
@@ -1513,7 +1834,10 @@
     "python3": "class Solution:\n    def longestConsecutive(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        \n    }\n};",
     "c": "int longestConsecutive(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int longestConsecutive(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int longestConsecutive(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar longestConsecutive = function(nums) {\n    \n};",
+    "go": "func longestConsecutive(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn longest_consecutive(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "valid-sudoku": {
     "meta": {
@@ -1527,7 +1851,10 @@
     "python3": "class Solution:\n    def isValidSudoku(self, board: List[List[str]]) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isValidSudoku(vector<vector<char>>& board) {\n        \n    }\n};",
     "c": "bool isValidSudoku(char** board, int boardSize, int* boardColSize) {\n    \n}",
-    "java": "class Solution {\n    public boolean isValidSudoku(char[][] board) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isValidSudoku(char[][] board) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {character[][]} board\n * @return {boolean}\n */\nvar isValidSudoku = function(board) {\n    \n};",
+    "go": "func isValidSudoku(board [][]byte) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn is_valid_sudoku(board: Vec<Vec<char>>) -> bool {\n        \n    }\n}"
   },
   "subarray-sum-equals-k": {
     "meta": {
@@ -1542,7 +1869,10 @@
     "python3": "class Solution:\n    def subarraySum(self, nums: List[int], k: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int subarraySum(vector<int>& nums, int k) {\n        \n    }\n};",
     "c": "int subarraySum(int* nums, int numsSize, int k) {\n    \n}",
-    "java": "class Solution {\n    public int subarraySum(int[] nums, int k) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int subarraySum(int[] nums, int k) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} k\n * @return {number}\n */\nvar subarraySum = function(nums, k) {\n    \n};",
+    "go": "func subarraySum(nums []int, k int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn subarray_sum(nums: Vec<i32>, k: i32) -> i32 {\n        \n    }\n}"
   },
   "maximum-product-subarray": {
     "meta": {
@@ -1556,7 +1886,10 @@
     "python3": "class Solution:\n    def maxProduct(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int maxProduct(vector<int>& nums) {\n        \n    }\n};",
     "c": "int maxProduct(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int maxProduct(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int maxProduct(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar maxProduct = function(nums) {\n    \n};",
+    "go": "func maxProduct(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn max_product(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "palindromic-substrings": {
     "meta": {
@@ -1570,7 +1903,10 @@
     "python3": "class Solution:\n    def countSubstrings(self, s: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int countSubstrings(string s) {\n        \n    }\n};",
     "c": "int countSubstrings(char* s) {\n    \n}",
-    "java": "class Solution {\n    public int countSubstrings(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int countSubstrings(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar countSubstrings = function(s) {\n    \n};",
+    "go": "func countSubstrings(s string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn count_substrings(s: String) -> i32 {\n        \n    }\n}"
   },
   "coin-change-ii": {
     "meta": {
@@ -1585,7 +1921,10 @@
     "python3": "class Solution:\n    def change(self, amount: int, coins: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int change(int amount, vector<int>& coins) {\n        \n    }\n};",
     "c": "int change(int amount, int* coins, int coinsSize) {\n    \n}",
-    "java": "class Solution {\n    public int change(int amount, int[] coins) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int change(int amount, int[] coins) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} amount\n * @param {number[]} coins\n * @return {number}\n */\nvar change = function(amount, coins) {\n    \n};",
+    "go": "func change(amount int, coins []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn change(amount: i32, coins: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "target-sum": {
     "meta": {
@@ -1600,7 +1939,10 @@
     "python3": "class Solution:\n    def findTargetSumWays(self, nums: List[int], target: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int findTargetSumWays(vector<int>& nums, int target) {\n        \n    }\n};",
     "c": "int findTargetSumWays(int* nums, int numsSize, int target) {\n    \n}",
-    "java": "class Solution {\n    public int findTargetSumWays(int[] nums, int target) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int findTargetSumWays(int[] nums, int target) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number}\n */\nvar findTargetSumWays = function(nums, target) {\n    \n};",
+    "go": "func findTargetSumWays(nums []int, target int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn find_target_sum_ways(nums: Vec<i32>, target: i32) -> i32 {\n        \n    }\n}"
   },
   "rotate-array": {
     "meta": {
@@ -1615,7 +1957,10 @@
     "python3": "class Solution:\n    def rotate(self, nums: List[int], k: int) -> None:\n        pass",
     "cpp": "class Solution {\npublic:\n    void rotate(vector<int>& nums, int k) {\n        \n    }\n};",
     "c": "void rotate(int* nums, int numsSize, int k) {\n    \n}",
-    "java": "class Solution {\n    public void rotate(int[] nums, int k) {\n        \n    }\n}"
+    "java": "class Solution {\n    public void rotate(int[] nums, int k) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} k\n * @return {void} Do not return anything, modify nums in-place instead.\n */\nvar rotate = function(nums, k) {\n    \n};",
+    "go": "func rotate(nums []int, k int) {\n    \n}",
+    "rust": "impl Solution {\n    pub fn rotate(nums: &mut Vec<i32>, k: i32) {\n        \n    }\n}"
   },
   "koko-eating-bananas": {
     "meta": {
@@ -1630,7 +1975,10 @@
     "python3": "class Solution:\n    def minEatingSpeed(self, piles: List[int], h: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int minEatingSpeed(vector<int>& piles, int h) {\n        \n    }\n};",
     "c": "int minEatingSpeed(int* piles, int pilesSize, int h) {\n    \n}",
-    "java": "class Solution {\n    public int minEatingSpeed(int[] piles, int h) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int minEatingSpeed(int[] piles, int h) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} piles\n * @param {number} h\n * @return {number}\n */\nvar minEatingSpeed = function(piles, h) {\n    \n};",
+    "go": "func minEatingSpeed(piles []int, h int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn min_eating_speed(piles: Vec<i32>, h: i32) -> i32 {\n        \n    }\n}"
   },
   "min-stack": {
     "meta": {
@@ -1646,7 +1994,10 @@
     "python3": "class MinStack:\n\n    def __init__(self):\n        pass\n\n    def push(self, val: int) -> None:\n        pass\n\n    def pop(self) -> None:\n        pass\n\n    def top(self) -> int:\n        pass\n\n    def getMin(self) -> int:\n        pass",
     "cpp": "class MinStack {\npublic:\n    MinStack() {\n        \n    }\n    \n    void push(int val) {\n        \n    }\n    \n    void pop() {\n        \n    }\n    \n    int top() {\n        \n    }\n    \n    int getMin() {\n        \n    }\n};",
     "c": "typedef struct {\n    \n} MinStack;\n\n\nMinStack* minStackCreate() {\n    \n}\n\nvoid minStackPush(MinStack* obj, int val) {\n    \n}\n\nvoid minStackPop(MinStack* obj) {\n    \n}\n\nint minStackTop(MinStack* obj) {\n    \n}\n\nint minStackGetMin(MinStack* obj) {\n    \n}\n\nvoid minStackFree(MinStack* obj) {\n    \n}",
-    "java": "class MinStack {\n\n    public MinStack() {\n        \n    }\n    \n    public void push(int val) {\n        \n    }\n    \n    public void pop() {\n        \n    }\n    \n    public int top() {\n        \n    }\n    \n    public int getMin() {\n        \n    }\n}"
+    "java": "class MinStack {\n\n    public MinStack() {\n        \n    }\n    \n    public void push(int val) {\n        \n    }\n    \n    public void pop() {\n        \n    }\n    \n    public int top() {\n        \n    }\n    \n    public int getMin() {\n        \n    }\n}",
+    "javascript": "class MinStack {\n    constructor() {\n        \n    }\n\n    /**\n     * @param {number} val\n     * @return {void}\n     */\n    push(val) {\n        \n    }\n\n    /**\n     * @return {void}\n     */\n    pop() {\n        \n    }\n\n    /**\n     * @return {number}\n     */\n    top() {\n        \n    }\n\n    /**\n     * @return {number}\n     */\n    getMin() {\n        \n    }\n}",
+    "go": "type MinStack struct {\n    \n}\n\n\nfunc Constructor() MinStack {\n    \n}\n\n\nfunc (this *MinStack) Push(val int) {\n    \n}\n\n\nfunc (this *MinStack) Pop() {\n    \n}\n\n\nfunc (this *MinStack) Top() int {\n    \n}\n\n\nfunc (this *MinStack) GetMin() int {\n    \n}",
+    "rust": "struct MinStack {\n\n}\n\nimpl MinStack {\n\n    fn new() -> Self {\n        \n    }\n\n    fn push(&mut self, val: i32) {\n        \n    }\n\n    fn pop(&mut self) {\n        \n    }\n\n    fn top(&mut self) -> i32 {\n        \n    }\n\n    fn get_min(&mut self) -> i32 {\n        \n    }\n}"
   },
   "lru-cache": {
     "meta": {
@@ -1661,7 +2012,10 @@
     "python3": "class LRUCache:\n\n    def __init__(self, capacity: int):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass",
     "cpp": "class LRUCache {\npublic:\n    LRUCache(int capacity) {\n        \n    }\n    \n    int get(int key) {\n        \n    }\n    \n    void put(int key, int value) {\n        \n    }\n};",
     "c": "typedef struct {\n    \n} LRUCache;\n\n\nLRUCache* lRUCacheCreate(int capacity) {\n    \n}\n\nint lRUCacheGet(LRUCache* obj, int key) {\n    \n}\n\nvoid lRUCachePut(LRUCache* obj, int key, int value) {\n    \n}\n\nvoid lRUCacheFree(LRUCache* obj) {\n    \n}",
-    "java": "class LRUCache {\n\n    public LRUCache(int capacity) {\n        \n    }\n    \n    public int get(int key) {\n        \n    }\n    \n    public void put(int key, int value) {\n        \n    }\n}"
+    "java": "class LRUCache {\n\n    public LRUCache(int capacity) {\n        \n    }\n    \n    public int get(int key) {\n        \n    }\n    \n    public void put(int key, int value) {\n        \n    }\n}",
+    "javascript": "class LRUCache {\n    /**\n     * @param {number} capacity\n     */\n    constructor(capacity) {\n        \n    }\n\n    /**\n     * @param {number} key\n     * @return {number}\n     */\n    get(key) {\n        \n    }\n\n    /**\n     * @param {number} key\n     * @param {number} value\n     * @return {void}\n     */\n    put(key, value) {\n        \n    }\n}",
+    "go": "type LRUCache struct {\n    \n}\n\n\nfunc Constructor(capacity int) LRUCache {\n    \n}\n\n\nfunc (this *LRUCache) Get(key int) int {\n    \n}\n\n\nfunc (this *LRUCache) Put(key int, value int) {\n    \n}",
+    "rust": "struct LRUCache {\n\n}\n\nimpl LRUCache {\n\n    fn new(capacity: i32) -> Self {\n        \n    }\n\n    fn get(&mut self, key: i32) -> i32 {\n        \n    }\n\n    fn put(&mut self, key: i32, value: i32) {\n        \n    }\n}"
   },
   "time-based-key-value-store": {
     "meta": {
@@ -1675,7 +2029,10 @@
     "python3": "class TimeMap:\n\n    def __init__(self):\n        pass\n\n    def set(self, key: str, value: str, timestamp: int) -> None:\n        pass\n\n    def get(self, key: str, timestamp: int) -> str:\n        pass",
     "cpp": "class TimeMap {\npublic:\n    TimeMap() {\n        \n    }\n    \n    void set(string key, string value, int timestamp) {\n        \n    }\n    \n    string get(string key, int timestamp) {\n        \n    }\n};",
     "c": "typedef struct {\n    \n} TimeMap;\n\n\nTimeMap* timeMapCreate() {\n    \n}\n\nvoid timeMapSet(TimeMap* obj, char* key, char* value, int timestamp) {\n    \n}\n\nchar* timeMapGet(TimeMap* obj, char* key, int timestamp) {\n    \n}\n\nvoid timeMapFree(TimeMap* obj) {\n    \n}",
-    "java": "class TimeMap {\n\n    public TimeMap() {\n        \n    }\n    \n    public void set(String key, String value, int timestamp) {\n        \n    }\n    \n    public String get(String key, int timestamp) {\n        \n    }\n}"
+    "java": "class TimeMap {\n\n    public TimeMap() {\n        \n    }\n    \n    public void set(String key, String value, int timestamp) {\n        \n    }\n    \n    public String get(String key, int timestamp) {\n        \n    }\n}",
+    "javascript": "class TimeMap {\n    constructor() {\n        \n    }\n\n    /**\n     * @param {string} key\n     * @param {string} value\n     * @param {number} timestamp\n     * @return {void}\n     */\n    set(key, value, timestamp) {\n        \n    }\n\n    /**\n     * @param {string} key\n     * @param {number} timestamp\n     * @return {string}\n     */\n    get(key, timestamp) {\n        \n    }\n}",
+    "go": "type TimeMap struct {\n    \n}\n\n\nfunc Constructor() TimeMap {\n    \n}\n\n\nfunc (this *TimeMap) Set(key string, value string, timestamp int) {\n    \n}\n\n\nfunc (this *TimeMap) Get(key string, timestamp int) string {\n    \n}",
+    "rust": "struct TimeMap {\n\n}\n\nimpl TimeMap {\n\n    fn new() -> Self {\n        \n    }\n\n    fn set(&mut self, key: String, value: String, timestamp: i32) {\n        \n    }\n\n    fn get(&mut self, key: String, timestamp: i32) -> String {\n        \n    }\n}"
   },
   "regular-expression-matching": {
     "meta": {
@@ -1690,7 +2047,10 @@
     "python3": "class Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isMatch(string s, string p) {\n        \n    }\n};",
     "c": "bool isMatch(char* s, char* p) {\n    \n}",
-    "java": "class Solution {\n    public boolean isMatch(String s, String p) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isMatch(String s, String p) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @param {string} p\n * @return {boolean}\n */\nvar isMatch = function(s, p) {\n    \n};",
+    "go": "func isMatch(s string, p string) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn is_match(s: String, p: String) -> bool {\n        \n    }\n}"
   },
   "wildcard-matching": {
     "meta": {
@@ -1705,7 +2065,10 @@
     "python3": "class Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        pass",
     "cpp": "class Solution {\npublic:\n    bool isMatch(string s, string p) {\n        \n    }\n};",
     "c": "bool isMatch(char* s, char* p) {\n    \n}",
-    "java": "class Solution {\n    public boolean isMatch(String s, String p) {\n        \n    }\n}"
+    "java": "class Solution {\n    public boolean isMatch(String s, String p) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @param {string} p\n * @return {boolean}\n */\nvar isMatch = function(s, p) {\n    \n};",
+    "go": "func isMatch(s string, p string) bool {\n    \n}",
+    "rust": "impl Solution {\n    pub fn is_match(s: String, p: String) -> bool {\n        \n    }\n}"
   },
   "first-missing-positive": {
     "meta": {
@@ -1719,7 +2082,10 @@
     "python3": "class Solution:\n    def firstMissingPositive(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int firstMissingPositive(vector<int>& nums) {\n        \n    }\n};",
     "c": "int firstMissingPositive(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int firstMissingPositive(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int firstMissingPositive(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar firstMissingPositive = function(nums) {\n    \n};",
+    "go": "func firstMissingPositive(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn first_missing_positive(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "sliding-window-maximum": {
     "meta": {
@@ -1734,7 +2100,10 @@
     "python3": "class Solution:\n    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> maxSlidingWindow(vector<int>& nums, int k) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* maxSlidingWindow(int* nums, int numsSize, int k, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public int[] maxSlidingWindow(int[] nums, int k) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int[] maxSlidingWindow(int[] nums, int k) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} k\n * @return {number[]}\n */\nvar maxSlidingWindow = function(nums, k) {\n    \n};",
+    "go": "func maxSlidingWindow(nums []int, k int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn max_sliding_window(nums: Vec<i32>, k: i32) -> Vec<i32> {\n        \n    }\n}"
   },
   "word-ladder": {
     "meta": {
@@ -1750,7 +2119,10 @@
     "python3": "class Solution:\n    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int ladderLength(string beginWord, string endWord, vector<string>& wordList) {\n        \n    }\n};",
     "c": "int ladderLength(char* beginWord, char* endWord, char** wordList, int wordListSize) {\n    \n}",
-    "java": "class Solution {\n    public int ladderLength(String beginWord, String endWord, List<String> wordList) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int ladderLength(String beginWord, String endWord, List<String> wordList) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} beginWord\n * @param {string} endWord\n * @param {string[]} wordList\n * @return {number}\n */\nvar ladderLength = function(beginWord, endWord, wordList) {\n    \n};",
+    "go": "func ladderLength(beginWord string, endWord string, wordList []string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn ladder_length(begin_word: String, end_word: String, word_list: Vec<String>) -> i32 {\n        \n    }\n}"
   },
   "binary-tree-maximum-path-sum": {
     "meta": {
@@ -1764,7 +2136,10 @@
     "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def maxPathSum(self, root: Optional[TreeNode]) -> int:\n        pass",
     "cpp": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int maxPathSum(TreeNode* root) {\n        \n    }\n};",
     "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nint maxPathSum(struct TreeNode* root) {\n    \n}",
-    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int maxPathSum(TreeNode root) {\n        \n    }\n}"
+    "java": "/**\n * Definition for a binary tree node.\n * public class TreeNode {\n *     int val;\n *     TreeNode left;\n *     TreeNode right;\n *     TreeNode() {}\n *     TreeNode(int val) { this.val = val; }\n *     TreeNode(int val, TreeNode left, TreeNode right) {\n *         this.val = val;\n *         this.left = left;\n *         this.right = right;\n *     }\n * }\n */\nclass Solution {\n    public int maxPathSum(TreeNode root) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for a binary tree node.\n * function TreeNode(val, left, right) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.left = (left===undefined ? null : left)\n *     this.right = (right===undefined ? null : right)\n * }\n */\n/**\n * @param {TreeNode} root\n * @return {number}\n */\nvar maxPathSum = function(root) {\n    \n};",
+    "go": "/**\n * Definition for a binary tree node.\n * type TreeNode struct {\n *     Val int\n *     Left *TreeNode\n *     Right *TreeNode\n * }\n */\nfunc maxPathSum(root *TreeNode) int {\n    \n}",
+    "rust": "// Definition for a binary tree node.\n// #[derive(Debug, PartialEq, Eq)]\n// pub struct TreeNode {\n//   pub val: i32,\n//   pub left: Option<Rc<RefCell<TreeNode>>>,\n//   pub right: Option<Rc<RefCell<TreeNode>>>,\n// }\n//\n// impl TreeNode {\n//   #[inline]\n//   pub fn new(val: i32) -> Self {\n//     TreeNode {\n//       val,\n//       left: None,\n//       right: None\n//     }\n//   }\n// }\n\nuse std::rc::Rc;\nuse std::cell::RefCell;\n\nimpl Solution {\n    pub fn max_path_sum(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {\n        \n    }\n}"
   },
   "reverse-nodes-in-k-group": {
     "meta": {
@@ -1779,7 +2154,10 @@
     "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:\n        pass",
     "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* reverseKGroup(ListNode* head, int k) {\n        \n    }\n};",
     "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* reverseKGroup(struct ListNode* head, int k) {\n    \n}",
-    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode reverseKGroup(ListNode head, int k) {\n        \n    }\n}"
+    "java": "/**\n * Definition for singly-linked list.\n * public class ListNode {\n *     int val;\n *     ListNode next;\n *     ListNode() {}\n *     ListNode(int val) { this.val = val; }\n *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n * }\n */\nclass Solution {\n    public ListNode reverseKGroup(ListNode head, int k) {\n        \n    }\n}",
+    "javascript": "/**\n * Definition for singly-linked list.\n * function ListNode(val, next) {\n *     this.val = (val===undefined ? 0 : val)\n *     this.next = (next===undefined ? null : next)\n * }\n */\n/**\n * @param {ListNode} head\n * @param {number} k\n * @return {ListNode}\n */\nvar reverseKGroup = function(head, k) {\n    \n};",
+    "go": "/**\n * Definition for singly-linked list.\n * type ListNode struct {\n *     Val int\n *     Next *ListNode\n * }\n */\nfunc reverseKGroup(head *ListNode, k int) *ListNode {\n    \n}",
+    "rust": "// Definition for singly-linked list.\n// #[derive(PartialEq, Eq, Clone, Debug)]\n// pub struct ListNode {\n//   pub val: i32,\n//   pub next: Option<Box<ListNode>>\n// }\n//\n// impl ListNode {\n//   #[inline]\n//   fn new(val: i32) -> Self {\n//     ListNode {\n//       next: None,\n//       val\n//     }\n//   }\n// }\n\nimpl Solution {\n    pub fn reverse_k_group(head: Option<Box<ListNode>>, k: i32) -> Option<Box<ListNode>> {\n        \n    }\n}"
   },
   "longest-increasing-path-in-a-matrix": {
     "meta": {
@@ -1793,7 +2171,10 @@
     "python3": "class Solution:\n    def longestIncreasingPath(self, matrix: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int longestIncreasingPath(vector<vector<int>>& matrix) {\n        \n    }\n};",
     "c": "int longestIncreasingPath(int** matrix, int matrixSize, int* matrixColSize) {\n    \n}",
-    "java": "class Solution {\n    public int longestIncreasingPath(int[][] matrix) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int longestIncreasingPath(int[][] matrix) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} matrix\n * @return {number}\n */\nvar longestIncreasingPath = function(matrix) {\n    \n};",
+    "go": "func longestIncreasingPath(matrix [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn longest_increasing_path(matrix: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "burst-balloons": {
     "meta": {
@@ -1807,7 +2188,10 @@
     "python3": "class Solution:\n    def maxCoins(self, nums: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int maxCoins(vector<int>& nums) {\n        \n    }\n};",
     "c": "int maxCoins(int* nums, int numsSize) {\n    \n}",
-    "java": "class Solution {\n    public int maxCoins(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int maxCoins(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number}\n */\nvar maxCoins = function(nums) {\n    \n};",
+    "go": "func maxCoins(nums []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn max_coins(nums: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "distinct-subsequences": {
     "meta": {
@@ -1822,7 +2206,10 @@
     "python3": "class Solution:\n    def numDistinct(self, s: str, t: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int numDistinct(string s, string t) {\n        \n    }\n};",
     "c": "int numDistinct(char* s, char* t) {\n    \n}",
-    "java": "class Solution {\n    public int numDistinct(String s, String t) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int numDistinct(String s, String t) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @param {string} t\n * @return {number}\n */\nvar numDistinct = function(s, t) {\n    \n};",
+    "go": "func numDistinct(s string, t string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn num_distinct(s: String, t: String) -> i32 {\n        \n    }\n}"
   },
   "best-time-to-buy-and-sell-stock-iv": {
     "meta": {
@@ -1837,7 +2224,10 @@
     "python3": "class Solution:\n    def maxProfit(self, k: int, prices: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int maxProfit(int k, vector<int>& prices) {\n        \n    }\n};",
     "c": "int maxProfit(int k, int* prices, int pricesSize) {\n    \n}",
-    "java": "class Solution {\n    public int maxProfit(int k, int[] prices) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int maxProfit(int k, int[] prices) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} k\n * @param {number[]} prices\n * @return {number}\n */\nvar maxProfit = function(k, prices) {\n    \n};",
+    "go": "func maxProfit(k int, prices []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn max_profit(k: i32, prices: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "candy": {
     "meta": {
@@ -1851,7 +2241,10 @@
     "python3": "class Solution:\n    def candy(self, ratings: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int candy(vector<int>& ratings) {\n        \n    }\n};",
     "c": "int candy(int* ratings, int ratingsSize) {\n    \n}",
-    "java": "class Solution {\n    public int candy(int[] ratings) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int candy(int[] ratings) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} ratings\n * @return {number}\n */\nvar candy = function(ratings) {\n    \n};",
+    "go": "func candy(ratings []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn candy(ratings: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "basic-calculator": {
     "meta": {
@@ -1865,7 +2258,10 @@
     "python3": "class Solution:\n    def calculate(self, s: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int calculate(string s) {\n        \n    }\n};",
     "c": "int calculate(char* s) {\n    \n}",
-    "java": "class Solution {\n    public int calculate(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int calculate(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar calculate = function(s) {\n    \n};",
+    "go": "func calculate(s string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn calculate(s: String) -> i32 {\n        \n    }\n}"
   },
   "count-of-smaller-numbers-after-self": {
     "meta": {
@@ -1879,7 +2275,10 @@
     "python3": "class Solution:\n    def countSmaller(self, nums: List[int]) -> List[int]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<int> countSmaller(vector<int>& nums) {\n        \n    }\n};",
     "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* countSmaller(int* nums, int numsSize, int* returnSize) {\n    \n}",
-    "java": "class Solution {\n    public List<Integer> countSmaller(int[] nums) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<Integer> countSmaller(int[] nums) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @return {number[]}\n */\nvar countSmaller = function(nums) {\n    \n};",
+    "go": "func countSmaller(nums []int) []int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn count_smaller(nums: Vec<i32>) -> Vec<i32> {\n        \n    }\n}"
   },
   "maximal-rectangle": {
     "meta": {
@@ -1893,7 +2292,10 @@
     "python3": "class Solution:\n    def maximalRectangle(self, matrix: List[List[str]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int maximalRectangle(vector<vector<char>>& matrix) {\n        \n    }\n};",
     "c": "int maximalRectangle(char** matrix, int matrixSize, int* matrixColSize) {\n    \n}",
-    "java": "class Solution {\n    public int maximalRectangle(char[][] matrix) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int maximalRectangle(char[][] matrix) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {character[][]} matrix\n * @return {number}\n */\nvar maximalRectangle = function(matrix) {\n    \n};",
+    "go": "func maximalRectangle(matrix [][]byte) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn maximal_rectangle(matrix: Vec<Vec<char>>) -> i32 {\n        \n    }\n}"
   },
   "palindrome-partitioning-ii": {
     "meta": {
@@ -1907,7 +2309,10 @@
     "python3": "class Solution:\n    def minCut(self, s: str) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int minCut(string s) {\n        \n    }\n};",
     "c": "int minCut(char* s) {\n    \n}",
-    "java": "class Solution {\n    public int minCut(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int minCut(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nvar minCut = function(s) {\n    \n};",
+    "go": "func minCut(s string) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn min_cut(s: String) -> i32 {\n        \n    }\n}"
   },
   "minimum-number-of-refueling-stops": {
     "meta": {
@@ -1923,7 +2328,10 @@
     "python3": "class Solution:\n    def minRefuelStops(self, target: int, startFuel: int, stations: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int minRefuelStops(int target, int startFuel, vector<vector<int>>& stations) {\n        \n    }\n};",
     "c": "int minRefuelStops(int target, int startFuel, int** stations, int stationsSize, int* stationsColSize) {\n    \n}",
-    "java": "class Solution {\n    public int minRefuelStops(int target, int startFuel, int[][] stations) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int minRefuelStops(int target, int startFuel, int[][] stations) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} target\n * @param {number} startFuel\n * @param {number[][]} stations\n * @return {number}\n */\nvar minRefuelStops = function(target, startFuel, stations) {\n    \n};",
+    "go": "func minRefuelStops(target int, startFuel int, stations [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn min_refuel_stops(target: i32, start_fuel: i32, stations: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "swim-in-rising-water": {
     "meta": {
@@ -1937,7 +2345,10 @@
     "python3": "class Solution:\n    def swimInWater(self, grid: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int swimInWater(vector<vector<int>>& grid) {\n        \n    }\n};",
     "c": "int swimInWater(int** grid, int gridSize, int* gridColSize) {\n    \n}",
-    "java": "class Solution {\n    public int swimInWater(int[][] grid) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int swimInWater(int[][] grid) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} grid\n * @return {number}\n */\nvar swimInWater = function(grid) {\n    \n};",
+    "go": "func swimInWater(grid [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn swim_in_water(grid: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "cherry-pickup": {
     "meta": {
@@ -1951,7 +2362,10 @@
     "python3": "class Solution:\n    def cherryPickup(self, grid: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int cherryPickup(vector<vector<int>>& grid) {\n        \n    }\n};",
     "c": "int cherryPickup(int** grid, int gridSize, int* gridColSize) {\n    \n}",
-    "java": "class Solution {\n    public int cherryPickup(int[][] grid) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int cherryPickup(int[][] grid) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} grid\n * @return {number}\n */\nvar cherryPickup = function(grid) {\n    \n};",
+    "go": "func cherryPickup(grid [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn cherry_pickup(grid: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "split-array-largest-sum": {
     "meta": {
@@ -1966,7 +2380,10 @@
     "python3": "class Solution:\n    def splitArray(self, nums: List[int], k: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int splitArray(vector<int>& nums, int k) {\n        \n    }\n};",
     "c": "int splitArray(int* nums, int numsSize, int k) {\n    \n}",
-    "java": "class Solution {\n    public int splitArray(int[] nums, int k) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int splitArray(int[] nums, int k) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} k\n * @return {number}\n */\nvar splitArray = function(nums, k) {\n    \n};",
+    "go": "func splitArray(nums []int, k int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn split_array(nums: Vec<i32>, k: i32) -> i32 {\n        \n    }\n}"
   },
   "n-queens-ii": {
     "meta": {
@@ -1980,7 +2397,10 @@
     "python3": "class Solution:\n    def totalNQueens(self, n: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int totalNQueens(int n) {\n        \n    }\n};",
     "c": "int totalNQueens(int n) {\n    \n}",
-    "java": "class Solution {\n    public int totalNQueens(int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int totalNQueens(int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} n\n * @return {number}\n */\nvar totalNQueens = function(n) {\n    \n};",
+    "go": "func totalNQueens(n int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn total_n_queens(n: i32) -> i32 {\n        \n    }\n}"
   },
   "shortest-palindrome": {
     "meta": {
@@ -1994,7 +2414,10 @@
     "python3": "class Solution:\n    def shortestPalindrome(self, s: str) -> str:\n        pass",
     "cpp": "class Solution {\npublic:\n    string shortestPalindrome(string s) {\n        \n    }\n};",
     "c": "char* shortestPalindrome(char* s) {\n    \n}",
-    "java": "class Solution {\n    public String shortestPalindrome(String s) {\n        \n    }\n}"
+    "java": "class Solution {\n    public String shortestPalindrome(String s) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {string} s\n * @return {string}\n */\nvar shortestPalindrome = function(s) {\n    \n};",
+    "go": "func shortestPalindrome(s string) string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn shortest_palindrome(s: String) -> String {\n        \n    }\n}"
   },
   "max-points-on-a-line": {
     "meta": {
@@ -2008,7 +2431,10 @@
     "python3": "class Solution:\n    def maxPoints(self, points: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int maxPoints(vector<vector<int>>& points) {\n        \n    }\n};",
     "c": "int maxPoints(int** points, int pointsSize, int* pointsColSize) {\n    \n}",
-    "java": "class Solution {\n    public int maxPoints(int[][] points) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int maxPoints(int[][] points) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} points\n * @return {number}\n */\nvar maxPoints = function(points) {\n    \n};",
+    "go": "func maxPoints(points [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn max_points(points: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "critical-connections-in-a-network": {
     "meta": {
@@ -2023,7 +2449,10 @@
     "python3": "class Solution:\n    def criticalConnections(self, n: int, connections: List[List[int]]) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** criticalConnections(int n, int** connections, int connectionsSize, int* connectionsColSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<Integer>> criticalConnections(int n, List<List<Integer>> connections) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<Integer>> criticalConnections(int n, List<List<Integer>> connections) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} n\n * @param {number[][]} connections\n * @return {number[][]}\n */\nvar criticalConnections = function(n, connections) {\n    \n};",
+    "go": "func criticalConnections(n int, connections [][]int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn critical_connections(n: i32, connections: Vec<Vec<i32>>) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "trapping-rain-water-ii": {
     "meta": {
@@ -2037,7 +2466,10 @@
     "python3": "class Solution:\n    def trapRainWater(self, heightMap: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int trapRainWater(vector<vector<int>>& heightMap) {\n        \n    }\n};",
     "c": "int trapRainWater(int** heightMap, int heightMapSize, int* heightMapColSize) {\n    \n}",
-    "java": "class Solution {\n    public int trapRainWater(int[][] heightMap) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int trapRainWater(int[][] heightMap) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} heightMap\n * @return {number}\n */\nvar trapRainWater = function(heightMap) {\n    \n};",
+    "go": "func trapRainWater(heightMap [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn trap_rain_water(height_map: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "the-skyline-problem": {
     "meta": {
@@ -2051,7 +2483,10 @@
     "python3": "class Solution:\n    def getSkyline(self, buildings: List[List[int]]) -> List[List[int]]:\n        pass",
     "cpp": "class Solution {\npublic:\n    vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {\n        \n    }\n};",
     "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** getSkyline(int** buildings, int buildingsSize, int* buildingsColSize, int* returnSize, int** returnColumnSizes) {\n    \n}",
-    "java": "class Solution {\n    public List<List<Integer>> getSkyline(int[][] buildings) {\n        \n    }\n}"
+    "java": "class Solution {\n    public List<List<Integer>> getSkyline(int[][] buildings) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} buildings\n * @return {number[][]}\n */\nvar getSkyline = function(buildings) {\n    \n};",
+    "go": "func getSkyline(buildings [][]int) [][]int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn get_skyline(buildings: Vec<Vec<i32>>) -> Vec<Vec<i32>> {\n        \n    }\n}"
   },
   "number-of-digit-one": {
     "meta": {
@@ -2065,7 +2500,10 @@
     "python3": "class Solution:\n    def countDigitOne(self, n: int) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int countDigitOne(int n) {\n        \n    }\n};",
     "c": "int countDigitOne(int n) {\n    \n}",
-    "java": "class Solution {\n    public int countDigitOne(int n) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int countDigitOne(int n) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} n\n * @return {number}\n */\nvar countDigitOne = function(n) {\n    \n};",
+    "go": "func countDigitOne(n int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn count_digit_one(n: i32) -> i32 {\n        \n    }\n}"
   },
   "integer-to-english-words": {
     "meta": {
@@ -2079,7 +2517,10 @@
     "python3": "class Solution:\n    def numberToWords(self, num: int) -> str:\n        pass",
     "cpp": "class Solution {\npublic:\n    string numberToWords(int num) {\n        \n    }\n};",
     "c": "char* numberToWords(int num) {\n    \n}",
-    "java": "class Solution {\n    public String numberToWords(int num) {\n        \n    }\n}"
+    "java": "class Solution {\n    public String numberToWords(int num) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number} num\n * @return {string}\n */\nvar numberToWords = function(num) {\n    \n};",
+    "go": "func numberToWords(num int) string {\n    \n}",
+    "rust": "impl Solution {\n    pub fn number_to_words(num: i32) -> String {\n        \n    }\n}"
   },
   "dungeon-game": {
     "meta": {
@@ -2093,7 +2534,10 @@
     "python3": "class Solution:\n    def calculateMinimumHP(self, dungeon: List[List[int]]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int calculateMinimumHP(vector<vector<int>>& dungeon) {\n        \n    }\n};",
     "c": "int calculateMinimumHP(int** dungeon, int dungeonSize, int* dungeonColSize) {\n    \n}",
-    "java": "class Solution {\n    public int calculateMinimumHP(int[][] dungeon) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int calculateMinimumHP(int[][] dungeon) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[][]} dungeon\n * @return {number}\n */\nvar calculateMinimumHP = function(dungeon) {\n    \n};",
+    "go": "func calculateMinimumHP(dungeon [][]int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn calculate_minimum_hp(dungeon: Vec<Vec<i32>>) -> i32 {\n        \n    }\n}"
   },
   "best-time-to-buy-and-sell-stock-iii": {
     "meta": {
@@ -2107,7 +2551,10 @@
     "python3": "class Solution:\n    def maxProfit(self, prices: List[int]) -> int:\n        pass",
     "cpp": "class Solution {\npublic:\n    int maxProfit(vector<int>& prices) {\n        \n    }\n};",
     "c": "int maxProfit(int* prices, int pricesSize) {\n    \n}",
-    "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        \n    }\n}"
+    "java": "class Solution {\n    public int maxProfit(int[] prices) {\n        \n    }\n}",
+    "javascript": "/**\n * @param {number[]} prices\n * @return {number}\n */\nvar maxProfit = function(prices) {\n    \n};",
+    "go": "func maxProfit(prices []int) int {\n    \n}",
+    "rust": "impl Solution {\n    pub fn max_profit(prices: Vec<i32>) -> i32 {\n        \n    }\n}"
   },
   "lfu-cache": {
     "meta": {
@@ -2122,6 +2569,9 @@
     "python3": "class LFUCache:\n\n    def __init__(self, capacity: int):\n        pass\n\n    def get(self, key: int) -> int:\n        pass\n\n    def put(self, key: int, value: int) -> None:\n        pass",
     "cpp": "class LFUCache {\npublic:\n    LFUCache(int capacity) {\n        \n    }\n    \n    int get(int key) {\n        \n    }\n    \n    void put(int key, int value) {\n        \n    }\n};",
     "c": "typedef struct {\n    \n} LFUCache;\n\n\nLFUCache* lFUCacheCreate(int capacity) {\n    \n}\n\nint lFUCacheGet(LFUCache* obj, int key) {\n    \n}\n\nvoid lFUCachePut(LFUCache* obj, int key, int value) {\n    \n}\n\nvoid lFUCacheFree(LFUCache* obj) {\n    \n}",
-    "java": "class LFUCache {\n\n    public LFUCache(int capacity) {\n        \n    }\n    \n    public int get(int key) {\n        \n    }\n    \n    public void put(int key, int value) {\n        \n    }\n}"
+    "java": "class LFUCache {\n\n    public LFUCache(int capacity) {\n        \n    }\n    \n    public int get(int key) {\n        \n    }\n    \n    public void put(int key, int value) {\n        \n    }\n}",
+    "javascript": "class LFUCache {\n    /**\n     * @param {number} capacity\n     */\n    constructor(capacity) {\n        \n    }\n\n    /**\n     * @param {number} key\n     * @return {number}\n     */\n    get(key) {\n        \n    }\n\n    /**\n     * @param {number} key\n     * @param {number} value\n     * @return {void}\n     */\n    put(key, value) {\n        \n    }\n}",
+    "go": "type LFUCache struct {\n    \n}\n\n\nfunc Constructor(capacity int) LFUCache {\n    \n}\n\n\nfunc (this *LFUCache) Get(key int) int {\n    \n}\n\n\nfunc (this *LFUCache) Put(key int, value int) {\n    \n}",
+    "rust": "struct LFUCache {\n\n}\n\nimpl LFUCache {\n\n    fn new(capacity: i32) -> Self {\n        \n    }\n\n    fn get(&mut self, key: i32) -> i32 {\n        \n    }\n\n    fn put(&mut self, key: i32, value: i32) {\n        \n    }\n}"
   }
 }

@@ -14,8 +14,11 @@ import { UUID_REGEX, sendDomainError, sendInternalError } from "./http";
 const router = Router();
 
 /** What code-runner executes (code-runner/src/types.ts SupportedLanguage). */
-const LANGUAGES = ["python3", "c", "cpp", "java"] as const;
+const LANGUAGES = ["python3", "c", "cpp", "java", "javascript", "go", "rust"] as const;
 const MODES = ["run", "submit"] as const;
+/** Custom inputs per Run, and characters per input. */
+const MAX_CUSTOM_INPUTS = 10;
+const MAX_CUSTOM_INPUT_LENGTH = 10_000;
 
 router.get("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
@@ -79,11 +82,12 @@ router.get("/:id", requireAuth, async (req: AuthRequest, res) => {
 
 router.post("/", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
-  const { problemId, language, code, mode = "submit" } = req.body as {
+  const { problemId, language, code, mode = "submit", customInputs } = req.body as {
     problemId?: string;
     language?: string;
     code?: string;
     mode?: "run" | "submit";
+    customInputs?: unknown;
   };
 
   if (!problemId || !language || !code) {
@@ -103,9 +107,33 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
   if (!(MODES as readonly string[]).includes(mode)) {
     return res.status(400).json({ error: "mode must be run or submit" });
   }
+  if (customInputs !== undefined) {
+    if (mode !== "run") {
+      // Submit is judged on the problem's own suite only.
+      return res.status(400).json({ error: "customInputs are only accepted with mode run" });
+    }
+    if (
+      !Array.isArray(customInputs) ||
+      customInputs.length > MAX_CUSTOM_INPUTS ||
+      !customInputs.every(
+        (i) => typeof i === "string" && i.trim().length > 0 && i.length <= MAX_CUSTOM_INPUT_LENGTH
+      )
+    ) {
+      return res.status(400).json({
+        error: `customInputs must be up to ${MAX_CUSTOM_INPUTS} non-empty strings of at most ${MAX_CUSTOM_INPUT_LENGTH} characters`,
+      });
+    }
+  }
 
   try {
-    const { status, body } = await executeSubmission({ userId, problemId, language, code, mode });
+    const { status, body } = await executeSubmission({
+      userId,
+      problemId,
+      language,
+      code,
+      mode,
+      customInputs: customInputs as string[] | undefined,
+    });
     return res.status(status).json(body);
   } catch (err) {
     if (err instanceof DomainError) return sendDomainError(res, err);

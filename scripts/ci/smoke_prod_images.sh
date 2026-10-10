@@ -68,6 +68,27 @@ else
   fail "backend: openapi/openapi.yaml missing from image"
 fi
 
+# The custom-test-case oracle (Group C, Phase 7): Run with custom inputs reads the
+# problem's Python reference solution at runtime.
+if in_image backend "test -s /app/reference_solutions/two-sum/solution.py && test \$(ls /app/reference_solutions | wc -l) -eq 150"; then
+  pass "backend: reference_solutions present (150 problems)"
+else
+  fail "backend: reference_solutions missing or incomplete"
+fi
+
+# Every language's harness must be generatable inside the image. The Python and
+# JavaScript ones are files tsc doesn't copy; the image shipped without them, so
+# every Python run would have failed in production, and /health never noticed.
+for lang in python3 c cpp java javascript go rust; do
+  if docker run --rm --entrypoint node "$(img code-runner)" -e "
+      const meta = require('/app/dist/problem-meta').PROBLEM_META['two-sum'];
+      require('/app/dist/harness-gen').generateCode('$lang', '', meta);" >/dev/null 2>&1; then
+    pass "code-runner: $lang harness generates"
+  else
+    fail "code-runner: $lang harness can't be generated in the image"
+  fi
+done
+
 for f in tests .pytest_cache .corpus_cache; do
   if in_image ai-service "test ! -e /app/$f"; then
     pass "ai-service: $f excluded"

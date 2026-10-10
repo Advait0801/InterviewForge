@@ -6,7 +6,10 @@
  * dropping a flag would pass CI. Each assertion names the attack it prevents.
  */
 import { describe, it, expect } from "vitest";
-import { buildContainerConfig } from "../runner";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { buildContainerConfig, LANGUAGE_IMAGES, sandboxConfigFor } from "../runner";
+import { SUPPORTED_LANGUAGES } from "../types";
 
 const cfg = buildContainerConfig("interviewforge-python-sandbox:latest", ["sh", "-c", "true"]);
 const host = cfg.HostConfig;
@@ -84,5 +87,30 @@ describe("sandbox container configuration", () => {
     const c = buildContainerConfig("some-image:tag", ["sh", "-c", "echo hi"]);
     expect(c.Image).toBe("some-image:tag");
     expect(c.Cmd).toEqual(["sh", "-c", "echo hi"]);
+  });
+});
+
+describe("every language gets the same sandbox", () => {
+  // JavaScript, Go and Rust (Phase 7) must be hardened exactly like the original
+  // four. Comparing each config with Python's, minus image and command, means a
+  // flag can't be dropped (or loosened) for one language alone.
+  const { Image: _i, Cmd: _c, ...reference } = sandboxConfigFor("python3");
+
+  it.each(SUPPORTED_LANGUAGES)("%s", (language) => {
+    const { Image, Cmd, ...rest } = sandboxConfigFor(language);
+    expect(rest).toEqual(reference);
+    expect(Image).toBe(LANGUAGE_IMAGES[language]);
+    // Code and input are read from the upload dir; anything written goes to the tmpfs.
+    expect(Cmd.join(" ")).toContain("/home/runner/");
+    expect(Cmd.join(" ")).not.toMatch(/-o \/home\/runner/);
+  });
+
+  it.each(SUPPORTED_LANGUAGES)("%s's image is built from a Dockerfile that drops to the runner user", (language) => {
+    const name = LANGUAGE_IMAGES[language].replace(/^interviewforge-/, "").replace(/:latest$/, "");
+    const dockerfile = readFileSync(join(__dirname, "..", "..", "..", "docker", "sandboxes", name, "Dockerfile"), "utf8");
+    expect(dockerfile).toMatch(/useradd[^\n]*\brunner\b/);
+    // The last USER wins; it must be runner, or the image's default user is root.
+    const users = [...dockerfile.matchAll(/^USER\s+(\S+)/gm)].map((m) => m[1]);
+    expect(users.at(-1)).toBe("runner");
   });
 });

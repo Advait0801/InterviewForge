@@ -2,10 +2,16 @@ import * as submissions from "../repositories/submissions.repository";
 import { findProblemForExecution } from "../repositories/problems.repository";
 import { markCompletedInEveryPath } from "../repositories/learning-paths.repository";
 import { reviewCode } from "./ai.service";
-import { CodeRunnerFailedError, CodeRunnerUnreachableError } from "./code-runner.client";
+import {
+  CodeRunnerFailedError,
+  CodeRunnerUnreachableError,
+  validateCustomInputs,
+  type RunRequest,
+} from "./code-runner.client";
+import { referenceSolution } from "./reference-solutions";
 import { RunQueueBusyError, RunQueueUnavailableError, runQueued } from "./run-queue";
 import { bumpCacheVersion } from "./cache";
-import { DomainError, notFound } from "./errors";
+import { DomainError, badRequest, notFound } from "./errors";
 import { clientSubmitResults, exampleCases } from "./test-cases";
 
 export type { SubmissionFilters } from "../repositories/submissions.repository";
@@ -41,10 +47,40 @@ export async function reviewSubmission(id: string, userId: string) {
   });
 }
 
+/** A dependency being down is a retryable 503, not a 500 that implies a bug here. */
+function runnerError(err: unknown): unknown {
+  // The same shape as the ai-service's Chroma-down response.
+  if (err instanceof CodeRunnerUnreachableError || err instanceof RunQueueUnavailableError) {
+    return new DomainError(503, "Code runner unavailable", { retryable: true });
+  }
+  if (err instanceof RunQueueBusyError) {
+    return new DomainError(503, "Code runner is busy. Try again in a moment.", { retryable: true });
+  }
+  if (err instanceof CodeRunnerFailedError) return new DomainError(502, "Code runner unavailable");
+  return err;
+}
+
 /**
- * Run code against a problem. "run" uses the public examples and records nothing;
- * "submit" runs the full suite, hidden cases included, records the submission and, on
- * a pass, completes the problem in every learning path that contains it.
+ * The user's own inputs, checked and paired with the reference solution that will produce
+ * their expected outputs. They only ever join a Run, alongside the public examples; the
+ * hidden suite is never read for them.
+ */
+async function customCasesFor(slug: string, inputs: string[]): Promise<RunRequest["customCases"]> {
+  const reference = referenceSolution(slug);
+  if (!reference) throw badRequest("Custom test cases aren't available for this problem");
+  // Checked before queueing, so a typo costs no sandbox and gets a 400 naming the input.
+  const errors = await validateCustomInputs(slug, inputs);
+  const invalid = errors.flatMap((error, index) => (error ? [{ index, error }] : []));
+  if (invalid.length) {
+    throw new DomainError(400, "Invalid custom test case", { customInputErrors: invalid });
+  }
+  return { inputs, reference };
+}
+
+/**
+ * Run code against a problem. "run" uses the public examples, plus any custom inputs, and
+ * records nothing; "submit" runs the full suite, hidden cases included, records the
+ * submission and, on a pass, completes the problem in every learning path that contains it.
  */
 export async function executeSubmission(input: {
   userId: string;
@@ -52,6 +88,7 @@ export async function executeSubmission(input: {
   language: string;
   code: string;
   mode: "run" | "submit";
+  customInputs?: string[];
 }) {
   const problem = await findProblemForExecution(input.problemId);
   if (!problem) throw notFound("Problem not found");
@@ -61,19 +98,20 @@ export async function executeSubmission(input: {
 
   let runResult;
   try {
+    const customCases =
+      input.mode === "run" && input.customInputs?.length
+        ? await customCasesFor(problem.slug, input.customInputs)
+        : undefined;
     // Through the bounded queue (D-063): at most CODE_RUN_CONCURRENCY sandboxes at once.
-    runResult = await runQueued({ language: input.language, code: input.code, testCases, slug: problem.slug });
+    runResult = await runQueued({
+      language: input.language,
+      code: input.code,
+      testCases,
+      slug: problem.slug,
+      ...(customCases ? { customCases } : {}),
+    });
   } catch (err) {
-    // A dependency being down is a retryable 503, not a 500 that implies a bug here --
-    // the same shape as the ai-service's Chroma-down response.
-    if (err instanceof CodeRunnerUnreachableError || err instanceof RunQueueUnavailableError) {
-      throw new DomainError(503, "Code runner unavailable", { retryable: true });
-    }
-    if (err instanceof RunQueueBusyError) {
-      throw new DomainError(503, "Code runner is busy. Try again in a moment.", { retryable: true });
-    }
-    if (err instanceof CodeRunnerFailedError) throw new DomainError(502, "Code runner unavailable");
-    throw err;
+    throw runnerError(err);
   }
 
   if (input.mode === "run") {
@@ -84,6 +122,7 @@ export async function executeSubmission(input: {
         passed: runResult.passed,
         results: runResult.results,
         testCases,
+        customResults: runResult.customResults ?? [],
         runtimeMs: runResult.runtimeMs,
       },
     };

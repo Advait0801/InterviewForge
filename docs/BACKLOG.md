@@ -31,6 +31,15 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 - **Charge aborted calls** *(S)* — when the client leaves while an answer is being graded, the
   ai-service finishes the call but its spend never reaches the session's counters (D-067).
 
+## Found while building the coding engine (D-069)
+
+- **Memory for compiled languages counts the compiler** *(S)* — `memoryKb` samples the whole
+  container, so C++ reports ~230 MB for any solution (g++'s peak), Go and Rust ~55–75 MB. Sample
+  only after compilation, or report compile and run separately.
+- **Weak-margin test data** *(S)* — two plausible bugs are caught by very few cases: an LRU cache
+  whose `get` doesn't refresh recency (5 of 50) and a number-of-islands search that never looks up
+  (2 of 50). Strengthen those generators as D-042 did, to fail at least ~8 cases.
+
 ## Alternative showpieces (considered and not chosen)
 
 - **Elo-rated adaptive difficulty** *(L, Loud)* — per-topic Elo for users *and* problems,
@@ -41,9 +50,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Engineering credibility
 
-- **More languages** *(M)* — JS, Go, Rust: a Dockerfile and harness each.
-- **Custom test cases + failing-case diff view** *(S)* — the gap between "toy judge" and "tool
-  I'd actually use".
 - **Real email delivery** *(S)* — SES or Resend for verification and reset (F-07).
 
 ## Product

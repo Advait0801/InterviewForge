@@ -8,6 +8,10 @@ sleeps first so runs overlap, while a sampler counts live sandbox containers wit
 it measures what code-runner actually started. Exits 1 if the peak exceeds --cap.
 
 Run mode records no submissions. Needs the dev stack and the python sandbox image.
+
+`--custom` adds custom inputs to every Run (Group C, Phase 7). Such a job runs two
+sandboxes, the reference solution and then the user's code, so this checks they never
+overlap: the peak, counted across every sandbox image, must still not exceed the cap.
 """
 import argparse
 import json
@@ -21,7 +25,7 @@ import urllib.request
 from pathlib import Path
 
 API = "http://localhost:4000/api"
-SANDBOX = "interviewforge-python-sandbox:latest"
+CUSTOM_INPUTS = ["nums = [3, 3], target = 6", "nums = [1, 5, 9], target = 14", "nums = [-4, 10, 8, 2], target = 10"]
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -38,10 +42,9 @@ def call(method, path, body=None, token=None, timeout=180):
 
 
 def live_sandboxes() -> int:
-    out = subprocess.run(
-        ["docker", "ps", "-q", "--filter", f"ancestor={SANDBOX}"], capture_output=True, text=True, check=True
-    ).stdout
-    return len(out.split())
+    """Running containers of any interviewforge-*-sandbox image."""
+    out = subprocess.run(["docker", "ps", "--format", "{{.Image}}"], capture_output=True, text=True, check=True).stdout
+    return sum(1 for image in out.split() if image.startswith("interviewforge-") and "-sandbox" in image)
 
 
 def main():
@@ -50,6 +53,7 @@ def main():
     ap.add_argument("--cap", type=int, default=4, help="expected CODE_RUN_CONCURRENCY")
     ap.add_argument("--sleep", type=float, default=1.5, help="seconds each run sleeps")
     ap.add_argument("--no-assert", action="store_true", help="report only (for a baseline run)")
+    ap.add_argument("--custom", action="store_true", help="add custom inputs to every run (two sandboxes per job)")
     args = ap.parse_args()
 
     stamp = str(int(time.time()))
@@ -71,8 +75,14 @@ def main():
 
     def fire(i):
         t0 = time.time()
-        status, body = call("POST", "/submissions", {"problemId": problem["id"], "language": "python3", "code": code, "mode": "run"}, token)
-        results.append({"i": i, "status": status, "passed": body.get("passed"), "error": body.get("error"), "seconds": time.time() - t0})
+        payload = {"problemId": problem["id"], "language": "python3", "code": code, "mode": "run"}
+        if args.custom:
+            payload["customInputs"] = CUSTOM_INPUTS
+        status, body = call("POST", "/submissions", payload, token)
+        custom_ok = not args.custom or (
+            len(body.get("customResults", [])) == len(CUSTOM_INPUTS) and all(c.get("passed") for c in body["customResults"])
+        )
+        results.append({"i": i, "status": status, "passed": body.get("passed") and custom_ok, "error": body.get("error"), "seconds": time.time() - t0})
 
     sampler = threading.Thread(target=sample)
     sampler.start()
@@ -93,6 +103,7 @@ def main():
     latencies = sorted(r["seconds"] for r in results)
     report = {
         "requests": args.requests,
+        "custom_inputs": args.custom,
         "statuses": statuses,
         "all_passed": all(r["passed"] for r in results if r["status"] == 200),
         "peak_live_sandboxes": peak,

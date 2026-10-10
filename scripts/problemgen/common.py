@@ -22,6 +22,7 @@ import zlib
 from collections import deque
 
 from curation import companies_for
+from language_templates import NEW_LANGS, templates_for
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PROBLEMS_JSON = os.path.join(ROOT, "backend", "leetcode_problems.json")
@@ -212,10 +213,20 @@ def _template_entry(spec):
             f'      "returnType": {json.dumps(spec["ret"])}',
             "    },",
         ]
-    langs = ["python3", "cpp", "c", "java"]
+    if spec.get("design"):
+        meta = {"className": spec["className"], "isDesign": True,
+                "constructorParams": [{"name": n, "type": t} for n, t in spec.get("ctor") or []],
+                "methods": [{"name": name, "params": [{"name": n, "type": t} for n, t in params], "returnType": ret}
+                            for name, params, ret in spec["methods"]]}
+    else:
+        meta = {"className": "Solution", "methodName": spec["method"],
+                "params": [{"name": n, "type": t} for n, t in spec["params"]], "returnType": spec["ret"]}
+    # JavaScript, Go and Rust follow from the signature (language_templates.py).
+    templates = {**spec["templates"], **templates_for(meta)}
+    langs = ["python3", "cpp", "c", "java", *NEW_LANGS]
     for i, lang in enumerate(langs):
         comma = "," if i < len(langs) - 1 else ""
-        lines.append(f"    {json.dumps(lang)}: {json.dumps(spec['templates'][lang])}{comma}")
+        lines.append(f"    {json.dumps(lang)}: {json.dumps(templates[lang])}{comma}")
     lines.append("  }")
     return "\n".join(lines)
 

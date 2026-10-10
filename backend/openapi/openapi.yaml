@@ -481,10 +481,16 @@ paths:
       tags: [submissions]
       operationId: createSubmission
       description: |
-        `run` executes the public examples and records nothing (200). `submit` runs the full
-        suite, records the submission, and on a pass completes the problem in every learning
-        path that contains it (201). Hidden cases come back as `{ passed, hidden: true }`,
-        except the first failing one (D-057).
+        `run` executes the public examples, plus any `customInputs`, and records nothing (200).
+        `submit` runs the full suite, records the submission, and on a pass completes the problem
+        in every learning path that contains it (201). Hidden cases come back as
+        `{ passed, hidden: true }`, except the first failing one (D-057).
+
+        Custom inputs (run only) use the examples' format. Each is checked against the
+        problem's signature first: a malformed one is a 400 with `customInputErrors`, before
+        anything runs. Their expected outputs come from the problem's reference solution.
+        Every failing case the client can see carries a `diff` saying where its output first
+        goes wrong.
       requestBody:
         required: true
         content:
@@ -497,6 +503,13 @@ paths:
                 language: { $ref: "#/components/schemas/Language" }
                 code: { type: string }
                 mode: { type: string, enum: [run, submit], default: submit }
+                customInputs:
+                  type: array
+                  maxItems: 10
+                  description: |
+                    Run only. The user's own inputs in the examples' format, e.g.
+                    `nums = [3, 3], target = 6`, or two JSON lines for a design problem.
+                  items: { type: string, minLength: 1, maxLength: 10000 }
       responses:
         "200":
           description: Run result.
@@ -1278,6 +1291,16 @@ components:
             `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes.
             Hints (D-066): `hints_exhausted` and `hint_locked` (409).
         retryable: { type: boolean }
+        customInputErrors:
+          type: array
+          description: With "Invalid custom test case" (400), which inputs are unusable and why.
+          items:
+            type: object
+            additionalProperties: false
+            required: [index, error]
+            properties:
+              index: { type: integer, minimum: 0 }
+              error: { type: string }
         availableAt:
           $ref: "#/components/schemas/Timestamp"
           description: With `hint_locked`, when the next hint unlocks.
@@ -1294,7 +1317,7 @@ components:
       enum: [easy, medium, hard]
     Language:
       type: string
-      enum: [python3, c, cpp, java]
+      enum: [python3, c, cpp, java, javascript, go, rust]
     Company:
       type: string
       description: Case-insensitive on input; responses use the lower-case form.
@@ -1447,27 +1470,107 @@ components:
         is_solved: { type: boolean }
         is_bookmarked: { type: boolean }
 
+    OutputDiff:
+      description: |
+        Where a failing output first departs from the expected one. `path` indexes into the
+        output (`[]` is the whole value; for a design problem `[i]` is the i-th operation).
+      oneOf:
+        - type: object
+          description: The output isn't JSON (a stray print, say).
+          additionalProperties: false
+          required: [kind]
+          properties:
+            kind: { type: string, const: format }
+        - type: object
+          description: A different JSON type at `path`.
+          additionalProperties: false
+          required: [kind, path, expectedType, actualType]
+          properties:
+            kind: { type: string, const: type }
+            path: { $ref: "#/components/schemas/DiffPath" }
+            expectedType: { type: string }
+            actualType: { type: string }
+        - type: object
+          description: The first differing value; `charIndex` is the first differing character of two strings.
+          additionalProperties: false
+          required: [kind, path, expected, actual]
+          properties:
+            kind: { type: string, const: value }
+            path: { $ref: "#/components/schemas/DiffPath" }
+            expected: { type: [string, number, boolean, "null"] }
+            actual: { type: [string, number, boolean, "null"] }
+            charIndex: { type: integer, minimum: 0 }
+        - type: object
+          description: Everything up to the shorter length matched, but the arrays at `path` differ in length.
+          additionalProperties: false
+          required: [kind, path, expectedLength, actualLength]
+          properties:
+            kind: { type: string, const: length }
+            path: { $ref: "#/components/schemas/DiffPath" }
+            expectedLength: { type: integer }
+            actualLength: { type: integer }
+        - type: object
+          description: An answer in any order. What's missing and what shouldn't be there (at most 10 each).
+          additionalProperties: false
+          required: [kind, missing, unexpected, expectedLength, actualLength]
+          properties:
+            kind: { type: string, const: items }
+            missing: { type: array, maxItems: 10, items: {} }
+            unexpected: { type: array, maxItems: 10, items: {} }
+            expectedLength: { type: integer }
+            actualLength: { type: integer }
+
+    DiffPath:
+      type: array
+      items: { type: integer, minimum: 0 }
+
     CaseResult:
       type: object
+      additionalProperties: false
       required: [passed]
       properties:
         passed: { type: boolean }
         actualOutput: { type: string }
         error: { type: string }
+        diff: { $ref: "#/components/schemas/OutputDiff" }
+
+    CustomCaseResult:
+      type: object
+      additionalProperties: false
+      required: [input, judged, passed]
+      properties:
+        input: { type: string }
+        judged:
+          type: boolean
+          description: False when there was nothing to judge against; `inputError` says why.
+        passed: { type: boolean, description: Always false when not judged. }
+        expectedOutput:
+          type: string
+          description: The reference solution's output on this input. Present when judged.
+        actualOutput: { type: string }
+        error: { type: string, description: The user's code failed on this input. }
+        inputError: { type: string, description: Why the case wasn't judged. }
+        diff: { $ref: "#/components/schemas/OutputDiff" }
 
     RunResult:
       type: object
       additionalProperties: false
-      required: [mode, passed, results, testCases]
+      required: [mode, passed, results, testCases, customResults]
       properties:
         mode: { type: string, const: run }
-        passed: { type: boolean }
+        passed:
+          type: boolean
+          description: Every example passed, and every judged custom case.
         results:
           type: array
           items: { $ref: "#/components/schemas/CaseResult" }
         testCases:
           type: array
           items: { $ref: "#/components/schemas/TestCase" }
+        customResults:
+          type: array
+          description: One per custom input, in order; empty when none were sent.
+          items: { $ref: "#/components/schemas/CustomCaseResult" }
         runtimeMs: { type: number }
 
     SubmitCaseResult:
@@ -1482,6 +1585,7 @@ components:
             input: { type: string }
             expectedOutput: { type: string }
             hidden: { type: boolean, const: false }
+            diff: { $ref: "#/components/schemas/OutputDiff" }
         - type: object
           description: Any other hidden case.
           additionalProperties: false

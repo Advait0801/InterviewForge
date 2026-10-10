@@ -46,7 +46,8 @@ backend/openapi/openapi.yaml # the Express API contract (D-062); served at /api/
 backend/src/generated/       # ai-service types generated from ai-service/openapi.json — never hand-edit
 backend/sql_migrations/      # 001_init.sql … 016_interview_agent_cost.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
-backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
+backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java,js,go,rs}, run by scripts/verify_problems.py;
+#                              the .py ones are also the runtime oracle for custom test cases
 scripts/problemgen/          # problem specs + independent oracles that generate the data files
 scripts/problemgen/curation.py # company tags for all 150 problems; overrides the generators (D-044)
 
@@ -61,7 +62,7 @@ ai-service/seed_data/documents.json  # the RAG corpus
 
 code-runner/src/runner.ts    # container lifecycle, tar packing, output comparison
 code-runner/src/harness-gen.ts # per-language test harness generation
-docker/sandboxes/            # python / c / cpp / java sandbox images
+docker/sandboxes/            # python / c / cpp / java / javascript / go / rust sandbox images
 ```
 
 ## Conventions
@@ -203,10 +204,21 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
   suite alone has already been proven blind to three defects here.
 
 **Code-runner**
-- Languages: python, c, cpp, java. Images: `interviewforge-{lang}-sandbox:latest`.
+- Languages: python3, c, cpp, java, javascript, go, rust. Images:
+  `interviewforge-{python,c,cpp,java,javascript,go,rust}-sandbox:latest`, all run with the same
+  `buildContainerConfig` (a test compares every language's config with Python's) (D-069).
 - User code runs **only** in an ephemeral container that is removed in a `finally`.
   Never write user code to a host path, never reuse a container across requests —
   per-request isolation is what makes concurrent submissions safe.
+- A job holds **at most one sandbox at a time**. A Run with custom inputs runs the Python
+  reference first, then the user's code, sequentially; running them in parallel would double
+  the live sandboxes past `CODE_RUN_CONCURRENCY` (D-069).
+- JavaScript/Go/Rust starter code is generated from `meta` by
+  `scripts/problemgen/language_templates.py` (`--check` for drift); don't hand-edit those keys.
+- Harness files (`src/harnesses/*.py|.js`) aren't compiled by tsc; `Dockerfile.prod` copies them
+  into `dist/harnesses`, and the smoke test generates every language's harness in the image.
+- The dev code-runner's file watcher can stop reloading on the bind mount. Before a live
+  check that depends on a code-runner edit, `docker compose restart code-runner`.
 
 ## Commands
 
@@ -223,7 +235,8 @@ docker compose exec backend npx ts-node scripts/seed_learning_paths.ts # seed pa
 docker compose exec ai-service python scripts/seed_rag.py              # seed RAG corpus
 
 python scripts/verify_resume_isolation.py   # Phase 5: cross-user isolation + deletion, live stack
-python scripts/verify_problems.py           # Phase 7: every problem x 4 languages via the real code-runner
+python scripts/verify_problems.py           # every problem x 7 languages via the real code-runner (1,050 cells)
+python scripts/verify_coding_engine.py      # Group C Phase 7: custom inputs, diffs, hidden cases, 7 languages (D-069); live stack
 python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
 python scripts/verify_streaming.py          # SSE interview streams, disconnect, 409, timings (D-065); live stack
 python scripts/verify_streaming.py --measure 6  # JSON vs stream latency medians at the ai-service
@@ -239,6 +252,8 @@ docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tun
 bash scripts/ci/smoke_prod_images.sh  # prod image contents + boot; build tags first (see its header)
 bash scripts/ci/check_api_contract.sh # generated API types match their specs
 python scripts/load_test_run_queue.py --requests 20 --cap 4   # Phase 3: the run cap holds (D-063)
+python scripts/load_test_run_queue.py --requests 20 --cap 4 --custom  # ...with two sandboxes per job (D-069)
+python scripts/problemgen/language_templates.py --check      # JS/Go/Rust starter code matches the signatures
 cd backend && REDIS_TEST_URL=redis://localhost:6380 npm test  # incl. queue/cache integration tests
 cd backend && npm run gen:ai-types     # after re-exporting ai-service/openapi.json
 cd backend && npm run gen:web-client   # writes web/src/lib/api/schema.d.ts (UI A / GPT)

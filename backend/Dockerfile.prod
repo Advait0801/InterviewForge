@@ -15,6 +15,8 @@ COPY --from=builder /app/problem_hints.json ./
 COPY --from=builder /app/problem_editorials.json ./
 COPY --from=builder /app/starter_templates.json ./
 COPY --from=builder /app/scripts ./scripts
+# Read at runtime: the oracle for custom test cases (services/reference-solutions.ts).
+COPY --from=builder /app/reference_solutions ./reference_solutions
 # Read at runtime: served at /api/openapi.json (D-062).
 COPY --from=builder /app/openapi ./openapi
 EXPOSE 4000

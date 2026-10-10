@@ -7,6 +7,124 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-10-10
+
+### D-069 — Coding engine: custom test cases, failing-case diffs, JavaScript/Go/Rust; runs 2 s faster
+
+**Why:** Group C, Phase 7. The judge ran only the four examples and the hidden suite, reported a
+wrong answer as two JSON lines to compare by eye, and supported four languages. Exit criteria:
+custom test cases and a failing-case diff; JavaScript, Go and Rust hardened exactly like the
+existing four; verified across all 150 problems the D-042 way; runs still through the D-063 queue.
+
+**Decided:**
+- **Custom test cases are judged against the reference solution.** `customInputs` (Run only, up to
+  10, each ≤ 10,000 characters, the examples' format) get their expected output from the
+  problem's Python reference (`backend/reference_solutions/<slug>/solution.py`, now shipped in
+  the prod image). A user doesn't have to know the answer, as on LeetCode.
+  - Before anything is queued, `POST /validate` on code-runner checks each input against the
+    signature (types, names, int32 range, one-character chars, level-order trees; LCA's `p`/`q`
+    must be in the tree, the cycle's `pos` an index). A bad input is a 400 with
+    `customInputErrors: [{ index, error }]` and costs no sandbox. All 7,500 existing inputs pass
+    the validator (tested), so pasting an example never gets rejected.
+  - An input the reference itself can't run (e.g. `top` on an empty stack) comes back
+    `judged: false` with `inputError`, alongside what the user's code did.
+  - Custom cases never touch the hidden suite: they ride with the four examples and come back
+    in their own `customResults`. Submit refuses them.
+  - **One sandbox per job at a time.** The reference runs first, then the user's code, in the same
+    queued job. So the queue's cap is still the cap on live containers. Running them in
+    parallel would double the containers per job, and the load test catches that (below).
+  - Problem-specific constraints ("exactly one answer") aren't validated. For an input with
+    several valid answers, the order-independent comparison applies as it does to the real
+    cases; beyond that the reference's answer is the one judged.
+- **Diffs** (`code-runner/src/diff.ts`): every failing case gets a `diff`, with the same rules as
+  `compareOutputs`, so a diff exists exactly when the case failed (tested over the edge cases):
+  - `value` at a `path` (the first differing element; for strings also `charIndex`);
+  - `length` (every shared element matched, but the arrays differ in length);
+  - `type`;
+  - `format` (the output isn't JSON);
+  - for order-independent answers, `items`: what's missing and what's unexpected, as multisets,
+    at most 10 each.
+
+  A design problem's `path[0]` is the operation index. A diff is part of its case's result, so
+  `clientSubmitResults` (D-057) passes it exactly where the case is visible: examples, custom
+  cases and the first failing hidden case. Every other hidden case is still exactly
+  `{ passed, hidden: true }` (tested at the route and live).
+- **JavaScript, Go, Rust**, following LeetCode's conventions: JS functions and classes; Go funcs
+  with `Constructor` and exported methods; Rust `impl Solution` with snake_case names,
+  `Option<Box<ListNode>>` and `Option<Rc<RefCell<TreeNode>>>`.
+  - The user's code keeps the editor's line numbers in compiler errors. It comes first in JS and
+    Rust. Go gets its own `solution.go`, with an `ifimports` tool in the image that adds missing
+    standard-library imports on line 1 without reformatting (goimports would shift every line).
+  - Rust's harness lives in its own module, so its `use`s can't clash with the user's.
+  - Rust's linked-list-cycle uses `Rc<RefCell<ListNode>>`: a Box list can't have a cycle, which
+    is why LeetCode offers no Rust for it.
+  - Go ships no prebuilt standard library; the image warms a build cache, without which every run
+    recompiles `fmt` and `encoding/json` on one CPU.
+  - The starter code follows mechanically from each problem's signature:
+    `scripts/problemgen/language_templates.py` writes it for all 150 (`--check` for drift), and
+    `common.py` emits it for future problems. All 108 generator-owned entries still reproduce
+    byte for byte.
+- **Hardening is the same config, not a copy of it.** `sandboxConfigFor(lang)` uses one
+  `buildContainerConfig`, and a test compares every language's config with Python's (minus image
+  and command). Another asserts each Dockerfile's last `USER` is `runner`.
+
+**Found and fixed:**
+- **Every Run took ~2 s, whatever the code** (pre-existing, D-033). The memory sampler's
+  non-streaming `docker stats` call waits for a second reading to compute CPU deltas, and the
+  run waited for the in-flight call after the program had exited. Samples are now `one-shot`,
+  and the wait after exit is capped at 150 ms.
+  - Wall time for two-sum, 50 cases: JavaScript 2.0 → 0.14 s, Python 2.0 → 0.18 s, Go 0.27 s,
+    Rust 0.65 s, Java 0.7 s, C++ 0.95 s.
+  - `memoryKb`, previously missing for short runs, is now reported. For compiled languages it
+    includes the compiler's peak (C++ ~230 MB), which was always so and is now visible (BACKLOG).
+- **The production code-runner image couldn't run Python** (pre-existing). `Dockerfile.prod`
+  copied only `dist/`, and the harness files are plain files tsc doesn't copy, so every Python
+  run in a prod build failed with "Harness file not found". JavaScript would have too. The smoke
+  test only checked `/health`. It now generates every language's harness inside the image (and
+  failed on the old one before the fix), and checks the backend image carries all 150
+  reference solutions.
+- **The Rust harness had no list reader or writer.** `verify_problems.py` caught it on its first
+  run (8 problems). A unit test now checks that every converter the generated Rust calls is
+  defined; it fails for exactly those 8 when the helpers are removed.
+
+**Verified:**
+- `verify_problems.py`: **1,050/1,050 cells** (150 problems × 7 languages), against the
+  independent oracles, on freshly restarted services.
+- **Mutation:** a plausible bug planted in each new language's reference for 15 problems, one per
+  harness path (in-place voids, lists, trees, node references, cycle, design with constructor,
+  double, string grid, order-independent outputs). All 45 caught, every failing case judged on
+  real output with a diff. Where the planted bug is the same, it fails the same number of cases
+  in all three languages.
+  - Low margins worth knowing: lru-cache's missed recency refresh fails only 5 of 50 cases, and
+    number-of-islands without the "up" direction fails 2 of 50 (BACKLOG).
+- **Adversarial, per new language, through the real runner:**
+  - writing `/etc/passwd`: blocked;
+  - a TCP connect to 1.1.1.1: unreachable;
+  - 200 forked processes: capped at 121–127 (`PidsLimit` 128, runtime threads included);
+  - an infinite loop: TLE at 15 s, no containers left.
+
+  Control: the same images without the flags allowed 203 processes, a root write and the network.
+- **Queue:** `load_test_run_queue.py --custom` (20 simultaneous Runs, each with 3 custom
+  inputs): peak 4 live sandboxes at cap 4, 20/20 correct. With the runner mutated to hold a second
+  sandbox for the whole job: peak 8, FAIL.
+  - Method note: the dev code-runner's file watcher had silently stopped reloading, so the first
+    two mutation runs tested unmutated code and "passed". Live checks now restart it explicitly.
+- `verify_coding_engine.py` (new) 20/20:
+  - starter code in all 7 languages for all 150 problems;
+  - Run and Submit in 7 languages on list, tree, design and in-place problems;
+  - custom inputs: judged, malformed, unjudged and limits;
+  - diffs, and hidden-case redaction;
+  - 0 `openapi_violation`.
+
+  A Run with 3 custom inputs costs ~0.17 s more (the reference's sandbox). `verify_phase7` 46/46.
+- Tests:
+  - code-runner 424 (was 48): diff, validator over every existing input, generators for all 150
+    signatures, per-language config, and the custom-case orchestration with an injected executor
+    (sequencing, input filtering, judging; each mutation-checked);
+  - backend 330 (was 309);
+  - web 135, lint and tsc on the regenerated types; ai-service untouched;
+  - prod images: smoke test passes; CI builds all 7 sandboxes.
+
 ## 2026-10-09
 
 ### D-068 — UI Group B shipped: the interview page streams, and exposes personas, hints, pushback and adaptive mode
