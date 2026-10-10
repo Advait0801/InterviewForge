@@ -296,7 +296,7 @@ export default function InterviewPage() {
 
               <p className="text-sm text-text-secondary">Tone: <span className="capitalize">{interview.persona}</span> · Mode: {interview.mode === "agent" ? "Adaptive" : "Classic"}{!isCompleted && ` · Question ${questionsInStage || 1} of up to ${interview.mode === "agent" ? 3 : 2} in this stage`}</p>
               {/* Chat area */}
-              <section aria-label="Interview conversation" className="space-y-4">
+              <section aria-label="Interview workspace" className="space-y-4">
                 {messages.length === 0 && error && sessionId && (
                   <StatePanel
                     tone="error"

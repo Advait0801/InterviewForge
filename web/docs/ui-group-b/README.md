@@ -47,3 +47,15 @@ The harness creates a disposable QA account, intercepts interview fixtures, runs
 No missing endpoint or generated type was found; no API workaround was added. Pushback, adaptive decisions, hints and reports use deterministic fixtures rather than relying on paid model output or the challenge feature flag. Live checks cover opening/answer streaming and pending-generation cancellation, rather than completing a whole live interview. Real microphone and assistive-technology behavior are outside this browser run; existing mocked voice tests pass.
 
 An initial attempt to cancel after the first visible delta raced completed generation and produced a session. The subsequent cancellation checks stop at the question envelope while generation is still pending and verify no persistence. An abort cannot undo a turn the backend has already committed; the frontend preserves reconciliation when a terminal result is uncertain.
+
+## Follow-up: scroll focus and hint pluralisation
+
+The conversation scroll container now has `tabIndex={0}`, `role="region"` and the accessible name “Interview conversation”. The existing shared `[tabindex]:focus-visible` rule supplies its visible outline; the outer section is named “Interview workspace” to distinguish the landmarks. Evaluation hint counts use “1 hint used” and “N hints used”. Three regression cases cover keyboard focus/name and singular/plural wording.
+
+Before: 16 test files, 132 tests. After: 17 files, 135 tests, all passing. Bare ESLint and production build pass; see `followup-tests.txt`, `followup-lint.txt` and `followup-build.txt`.
+
+`verify-followup.mjs` audits the actual interview page using a 40-message fixture without focusable transcript children. In both themes, the region has 6005 px of content in a 583 px viewport. Tab reaches the region, its focus outline is visible (3 px solid), and ArrowDown scrolls it. Axe reports zero violations, including zero serious/critical violations, and explicitly passes `scrollable-region-focusable`. See `followup-axe.json`. No live model call is required.
+
+```sh
+PLAYWRIGHT_MODULE=/tmp/interviewforge-ui-b/node_modules/playwright/index.mjs node web/docs/ui-group-b/verify-followup.mjs
+```

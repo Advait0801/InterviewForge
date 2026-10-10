@@ -24,7 +24,7 @@ export function Conversation({ messages, preview, evaluation, busy, phase, annou
     pane?.scrollTo({ top: pane.scrollHeight, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
   }, [messages.length, announcement]);
   return <>
-    <div ref={scrollRef} className="max-h-[min(65vh,680px)] min-h-[300px] space-y-3 overflow-y-auto border-y border-border py-4">
+    <div ref={scrollRef} tabIndex={0} role="region" aria-label="Interview conversation" className="max-h-[min(65vh,680px)] min-h-[300px] space-y-3 overflow-y-auto border-y border-border py-4">
       {messages.map((message, index) => {
         const metadata = message.metadata_json;
         const hint = metadata.kind === "hint";
