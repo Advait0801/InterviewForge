@@ -1,6 +1,231 @@
 {
   "components": {
     "schemas": {
+      "AgentTraceStep": {
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "automatic": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Automatic"
+          },
+          "hits": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hits"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query"
+          },
+          "tool": {
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool"
+        ],
+        "title": "AgentTraceStep",
+        "type": "object"
+      },
+      "AgentTurnRequest": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "enum": [
+                "probe",
+                "pivot",
+                "advance",
+                "finish"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Allowed Actions",
+            "type": "array"
+          },
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "company": {
+            "examples": [
+              "google"
+            ],
+            "title": "Company",
+            "type": "string"
+          },
+          "evaluation": {
+            "title": "Evaluation",
+            "type": "object"
+          },
+          "persona": {
+            "anyOf": [
+              {
+                "enum": [
+                  "neutral",
+                  "friendly",
+                  "terse",
+                  "adversarial"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persona"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "questions_left": {
+            "minimum": 0.0,
+            "title": "Questions Left",
+            "type": "integer"
+          },
+          "stage": {
+            "examples": [
+              "coding"
+            ],
+            "title": "Stage",
+            "type": "string"
+          },
+          "stage_position": {
+            "examples": [
+              "2 of 4"
+            ],
+            "title": "Stage Position",
+            "type": "string"
+          },
+          "stage_transcript": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TranscriptTurn"
+            },
+            "title": "Stage Transcript",
+            "type": "array"
+          }
+        },
+        "required": [
+          "company",
+          "stage",
+          "stage_position",
+          "allowed_actions",
+          "questions_left",
+          "question",
+          "answer",
+          "evaluation"
+        ],
+        "title": "AgentTurnRequest",
+        "type": "object"
+      },
+      "AgentTurnResponse": {
+        "description": "`action` is one of the allowed moves, or `fallback` (the fixed flow should run).",
+        "properties": {
+          "action": {
+            "enum": [
+              "probe",
+              "pivot",
+              "advance",
+              "finish",
+              "fallback"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "context": {
+            "title": "Context",
+            "type": "string"
+          },
+          "fallback": {
+            "title": "Fallback",
+            "type": "boolean"
+          },
+          "focus": {
+            "title": "Focus",
+            "type": "string"
+          },
+          "proposed": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposed"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "rationale": {
+            "title": "Rationale",
+            "type": "string"
+          },
+          "steps": {
+            "title": "Steps",
+            "type": "integer"
+          },
+          "thought": {
+            "title": "Thought",
+            "type": "string"
+          },
+          "trace": {
+            "items": {
+              "$ref": "#/components/schemas/AgentTraceStep"
+            },
+            "title": "Trace",
+            "type": "array"
+          }
+        },
+        "required": [
+          "action",
+          "question",
+          "focus",
+          "rationale",
+          "thought",
+          "fallback",
+          "context",
+          "trace",
+          "steps"
+        ],
+        "title": "AgentTurnResponse",
+        "type": "object"
+      },
       "ArchitectureEdge": {
         "properties": {
           "label": {
@@ -415,11 +640,15 @@
             ],
             "title": "Type",
             "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/LLMUsage"
           }
         },
         "required": [
           "type",
-          "result"
+          "result",
+          "usage"
         ],
         "title": "FollowupStreamDone",
         "type": "object"
@@ -798,6 +1027,25 @@
         "title": "InterviewReportResponse",
         "type": "object"
       },
+      "LLMUsage": {
+        "description": "Model calls made while serving one request (D-067). Estimated cost, not billing.",
+        "properties": {
+          "calls": {
+            "title": "Calls",
+            "type": "integer"
+          },
+          "costUsd": {
+            "title": "Costusd",
+            "type": "number"
+          }
+        },
+        "required": [
+          "calls",
+          "costUsd"
+        ],
+        "title": "LLMUsage",
+        "type": "object"
+      },
       "LiveIngestion": {
         "description": "`triggered` and `reason` always; the rest only once a live fetch was attempted.",
         "properties": {
@@ -1093,11 +1341,15 @@
             ],
             "title": "Type",
             "type": "string"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/LLMUsage"
           }
         },
         "required": [
           "type",
-          "result"
+          "result",
+          "usage"
         ],
         "title": "NextQuestionStreamDone",
         "type": "object"
@@ -1528,6 +1780,16 @@
             ],
             "title": "Type",
             "type": "string"
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LLMUsage"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -1758,6 +2020,24 @@
         "title": "TranscriptResponse",
         "type": "object"
       },
+      "TranscriptTurn": {
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "TranscriptTurn",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -1922,6 +2202,48 @@
         "summary": "Review Code",
         "tags": [
           "code-review"
+        ]
+      }
+    },
+    "/api/interview/agent/turn": {
+      "post": {
+        "description": "The interviewer agent's next move (D-067). The backend says which moves are allowed and\nenforces them again; `fallback` means the agent produced nothing usable and the backend\nshould run the fixed flow for this turn. A provider outage is a 429/503 as elsewhere.",
+        "operationId": "agent_turn_api_interview_agent_turn_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentTurnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTurnResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Agent Turn",
+        "tags": [
+          "interview"
         ]
       }
     },

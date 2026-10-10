@@ -771,6 +771,12 @@ export interface components {
         /** @enum {string} */
         InterviewStage: "behavioral" | "coding" | "system_design" | "core_cs" | "report";
         /**
+         * @description `fixed`: behavioral, coding, system design, core CS, at most one follow-up each. `agent`: an
+         *     agent probes, pivots or moves on within guardrails (D-067). Defaults to `INTERVIEW_MODE`.
+         * @enum {string}
+         */
+        InterviewMode: "fixed" | "agent";
+        /**
          * @description The interviewer's tone for the whole session (D-066). Retrieval and grading ignore it.
          * @default neutral
          * @enum {string}
@@ -935,6 +941,11 @@ export interface components {
             stage_turn_count: number;
             resume_grounded: boolean;
             persona: components["schemas"]["Persona"];
+            mode: components["schemas"]["InterviewMode"];
+            /** @description Model calls made for this interview (D-067). */
+            llm_calls: number;
+            /** @description Their estimated cost in USD; what the per-interview cap checks. */
+            llm_cost_usd: number;
             created_at: components["schemas"]["Timestamp"];
             updated_at: components["schemas"]["Timestamp"];
         };
@@ -948,6 +959,11 @@ export interface components {
             stage_turn_count: number;
             resume_grounded: boolean;
             persona: components["schemas"]["Persona"];
+            mode: components["schemas"]["InterviewMode"];
+            /** @description Model calls made for this interview (D-067). */
+            llm_calls: number;
+            /** @description Their estimated cost in USD; what the per-interview cap checks. */
+            llm_cost_usd: number;
             /** @description The stored report once generated. */
             report_json: components["schemas"]["StoredInterviewReport"] | null;
             created_at: components["schemas"]["Timestamp"];
@@ -1044,6 +1060,18 @@ export interface components {
             penalty: number;
             nextAvailableAt: components["schemas"]["Timestamp"] | null;
         };
+        /**
+         * @description Agent-mode interviews only (D-067): the move the agent chose, or `fallback` (it failed or
+         *     proposed something not allowed; the fixed rule decided) or `not_consulted` (only one move
+         *     was allowed, or the interview reached its cost cap).
+         */
+        AgentNote: {
+            /** @enum {string} */
+            decided: "probe" | "pivot" | "advance" | "finish" | "fallback" | "not_consulted";
+            rationale: string;
+            steps: number;
+            searches: number;
+        };
         AnswerOutcome: {
             /** @constant */
             action: "followup";
@@ -1051,6 +1079,15 @@ export interface components {
             stage: components["schemas"]["InterviewStage"];
             evaluation: components["schemas"]["Evaluation"];
             nextQuestion: components["schemas"]["Followup"];
+            agent?: components["schemas"]["AgentNote"];
+        } | {
+            /** @constant */
+            action: "pivot";
+            sessionId: components["schemas"]["Uuid"];
+            stage: components["schemas"]["InterviewStage"];
+            evaluation: components["schemas"]["Evaluation"];
+            nextQuestion: components["schemas"]["Followup"];
+            agent?: components["schemas"]["AgentNote"];
         } | {
             /** @constant */
             action: "advance_stage";
@@ -1059,11 +1096,13 @@ export interface components {
             currentStage: components["schemas"]["InterviewStage"];
             evaluation: components["schemas"]["Evaluation"];
             nextQuestion: components["schemas"]["InterviewQuestion"];
+            agent?: components["schemas"]["AgentNote"];
         } | {
             /** @constant */
             action: "completed";
             sessionId: components["schemas"]["Uuid"];
             evaluation: components["schemas"]["Evaluation"];
+            agent?: components["schemas"]["AgentNote"];
         };
         /** @description The report as generated and stored (`report_json`). LLM output; may carry extra keys. */
         StoredInterviewReport: {
@@ -1104,6 +1143,7 @@ export interface components {
             resumeEvidence: components["schemas"]["ResumeEvidence"][];
             retrievalConfidence: components["schemas"]["RetrievalConfidence"] | null;
             liveIngestion: components["schemas"]["LiveIngestion"] | null;
+            agent?: components["schemas"]["AgentNote"];
         };
         /** @description The stage's follow-up question (role `assistant`). */
         FollowupMetadata: {
@@ -1115,6 +1155,7 @@ export interface components {
             focus: string;
             reason: string;
             challenge?: components["schemas"]["Challenge"];
+            agent?: components["schemas"]["AgentNote"];
         };
         /** @description A hint the candidate asked for (role `assistant`, D-066). */
         HintMetadata: {
@@ -1155,6 +1196,7 @@ export interface components {
                 status: "active";
                 resumeGrounded: boolean;
                 persona: components["schemas"]["Persona"];
+                mode: components["schemas"]["InterviewMode"];
             };
             openingQuestion: components["schemas"]["InterviewQuestion"];
         };
@@ -2050,6 +2092,7 @@ export interface operations {
                      */
                     useResume?: boolean;
                     persona?: components["schemas"]["Persona"];
+                    mode?: components["schemas"]["InterviewMode"];
                 };
             };
         };
@@ -2088,6 +2131,7 @@ export interface operations {
                      */
                     useResume?: boolean;
                     persona?: components["schemas"]["Persona"];
+                    mode?: components["schemas"]["InterviewMode"];
                 };
             };
         };

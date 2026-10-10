@@ -22,6 +22,7 @@ from app.llm.chains import (
     ResumeGroundedQuestionOutput,
     StructuredFollowupOutput,
     StructuredQuestionOutput,
+    agent_step_chain,
     astream_with_fallback,
     challenge_chain,
     challenge_verify_chain,
@@ -40,6 +41,7 @@ from app.llm.chains import (
 from app.rag.service import RAGService
 from app.resume.store import ResumeStore
 from app.api.schemas import (
+    AgentTurnResponse,
     ChallengeResponse,
     FollowupStreamEvent,
     HintResponse,
@@ -169,6 +171,27 @@ class HintRequest(BaseModel):
     persona: Optional[Persona] = None
 
 
+AgentAction = Literal["probe", "pivot", "advance", "finish"]
+
+
+class TranscriptTurn(BaseModel):
+    role: str
+    content: str
+
+
+class AgentTurnRequest(BaseModel):
+    company: str = Field(..., examples=["google"])
+    stage: str = Field(..., examples=["coding"])
+    stage_position: str = Field(..., examples=["2 of 4"])
+    allowed_actions: List[AgentAction] = Field(..., min_length=1)
+    questions_left: int = Field(..., ge=0)
+    question: str
+    answer: str
+    evaluation: Dict[str, Any]
+    stage_transcript: List[TranscriptTurn] = []
+    persona: Optional[Persona] = None
+
+
 class ChallengeRequest(BaseModel):
     company: str = Field(..., examples=["amazon"])
     stage: str = Field(..., examples=["system_design"])
@@ -253,8 +276,10 @@ async def _stream_question(chain, payload: dict, output_model, finalize: Callabl
             outcome = "finished"
         except Exception as exc:
             outcome = "failed"
+            from app.core.observability import current_usage
+
             error = _llm_error(exc)
-            yield _sse({"type": "error", "status": error.status_code, "detail": error.detail})
+            yield _sse({"type": "error", "status": error.status_code, "detail": error.detail, "usage": current_usage()})
             return
         finally:
             if outcome == "cancelled":
@@ -266,10 +291,16 @@ async def _stream_question(chain, payload: dict, output_model, finalize: Callabl
         try:
             output_model.model_validate(last)
         except Exception as exc:
+            from app.core.observability import current_usage
+
             detail = f"LLM unavailable: incomplete output ({exc.__class__.__name__})"
-            yield _sse({"type": "error", "status": 503, "detail": detail})
+            yield _sse({"type": "error", "status": 503, "detail": detail, "usage": current_usage()})
             return
-        yield _sse({"type": "done", "result": finalize(last)})
+        from app.core.observability import current_usage
+
+        # Everything this request spent, retrieval's rerank included; the header can't carry
+        # it because it left before generation ran (D-067).
+        yield _sse({"type": "done", "result": finalize(last), "usage": current_usage()})
 
     return EventStreamResponse(events())
 
@@ -603,6 +634,44 @@ async def challenge(req: ChallengeRequest):
         "question": question,
         "reason": str(result.get("reason", "")),
     }
+
+
+@router.post("/agent/turn", responses=documented(AgentTurnResponse))
+async def agent_turn(req: AgentTurnRequest):
+    """The interviewer agent's next move (D-067). The backend says which moves are allowed and
+    enforces them again; `fallback` means the agent produced nothing usable and the backend
+    should run the fixed flow for this turn. A provider outage is a 429/503 as elsewhere."""
+    from app.interview.agent import MAX_SEARCHES, _transcript, run_agent
+
+    try:
+        get_company_profile(req.company)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    rag = _get_rag_service()
+    payload = {
+        "company": req.company,
+        "company_style": _safe_company_style(req.company),
+        "stage": req.stage,
+        "stage_position": req.stage_position,
+        "allowed_actions": ", ".join(req.allowed_actions),
+        "questions_left": req.questions_left,
+        "max_searches": MAX_SEARCHES,
+        "question": req.question,
+        "answer": req.answer,
+        "evaluation": json.dumps(req.evaluation),
+        "score": req.evaluation.get("score", "unknown"),
+        "stage_transcript": _transcript([t.model_dump() for t in req.stage_transcript]),
+        "persona_instructions": persona_instructions(req.persona),
+    }
+    try:
+        return await run_agent(
+            rag=rag, invoke=invoke_with_fallback, chain=agent_step_chain, payload=payload,
+            allowed=list(req.allowed_actions),
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        _raise_llm_http_error(exc)
 
 
 @router.post("/generate-report", responses=documented(InterviewReportResponse))

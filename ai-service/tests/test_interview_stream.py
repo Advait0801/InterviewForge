@@ -164,7 +164,12 @@ def test_a_failure_mid_stream_ends_with_an_error_event(client, interview, monkey
 
     events = _parse(client.post("/api/interview/next-question/stream", json=REQUEST).text)
 
-    assert events[-1] == {"type": "error", "status": 503, "detail": "LLM unavailable: 503 upstream"}
+    assert events[-1] == {
+        "type": "error",
+        "status": 503,
+        "detail": "LLM unavailable: 503 upstream",
+        "usage": {"calls": 0, "costUsd": 0.0},  # what was spent before failing (D-067)
+    }
     assert not any(e["type"] == "done" for e in events)
 
 
@@ -198,7 +203,8 @@ def test_followup_streams_with_the_same_contract(client, interview, monkeypatch)
     events = _parse(client.post("/api/interview/generate-followup/stream", json=FOLLOWUP_REQUEST).text)
 
     assert "".join(e["text"] for e in events if e["type"] == "delta") == "Why that index?"
-    assert events[-1] == {"type": "done", "result": partials[-1]}
+    assert events[-1]["type"] == "done" and events[-1]["result"] == partials[-1]
+    assert events[-1]["usage"] == {"calls": 0, "costUsd": 0.0}  # the fake stream records nothing
 
 
 # --- the real ASGI stack: disconnect and backpressure ------------------------

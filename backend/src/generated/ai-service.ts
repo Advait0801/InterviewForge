@@ -38,6 +38,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/interview/agent/turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Agent Turn
+         * @description The interviewer agent's next move (D-067). The backend says which moves are allowed and
+         *     enforces them again; `fallback` means the agent produced nothing usable and the backend
+         *     should run the fixed flow for this turn. A provider outage is a 429/503 as elsewhere.
+         */
+        post: operations["agent_turn_api_interview_agent_turn_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/interview/challenge": {
         parameters: {
             query?: never;
@@ -459,6 +481,83 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AgentTraceStep */
+        AgentTraceStep: {
+            /** Action */
+            action?: string | null;
+            /** Automatic */
+            automatic?: boolean | null;
+            /** Hits */
+            hits?: number | null;
+            /** Query */
+            query?: string | null;
+            /** Tool */
+            tool: string;
+        };
+        /** AgentTurnRequest */
+        AgentTurnRequest: {
+            /** Allowed Actions */
+            allowed_actions: ("probe" | "pivot" | "advance" | "finish")[];
+            /** Answer */
+            answer: string;
+            /**
+             * Company
+             * @example google
+             */
+            company: string;
+            /** Evaluation */
+            evaluation: Record<string, unknown>;
+            /** Persona */
+            persona?: ("neutral" | "friendly" | "terse" | "adversarial") | null;
+            /** Question */
+            question: string;
+            /** Questions Left */
+            questions_left: number;
+            /**
+             * Stage
+             * @example coding
+             */
+            stage: string;
+            /**
+             * Stage Position
+             * @example 2 of 4
+             */
+            stage_position: string;
+            /**
+             * Stage Transcript
+             * @default []
+             */
+            stage_transcript?: components["schemas"]["TranscriptTurn"][];
+        };
+        /**
+         * AgentTurnResponse
+         * @description `action` is one of the allowed moves, or `fallback` (the fixed flow should run).
+         */
+        AgentTurnResponse: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "probe" | "pivot" | "advance" | "finish" | "fallback";
+            /** Context */
+            context: string;
+            /** Fallback */
+            fallback: boolean;
+            /** Focus */
+            focus: string;
+            /** Proposed */
+            proposed?: string | null;
+            /** Question */
+            question: string;
+            /** Rationale */
+            rationale: string;
+            /** Steps */
+            steps: number;
+            /** Thought */
+            thought: string;
+            /** Trace */
+            trace: components["schemas"]["AgentTraceStep"][];
+        };
         /** ArchitectureEdge */
         ArchitectureEdge: {
             /**
@@ -684,6 +783,7 @@ export interface components {
              * @enum {string}
              */
             type: "done";
+            usage: components["schemas"]["LLMUsage"];
         };
         /**
          * FollowupStreamEvent
@@ -826,6 +926,16 @@ export interface components {
             weaknesses: string[];
         };
         /**
+         * LLMUsage
+         * @description Model calls made while serving one request (D-067). Estimated cost, not billing.
+         */
+        LLMUsage: {
+            /** Calls */
+            calls: number;
+            /** Costusd */
+            costUsd: number;
+        };
+        /**
          * LiveIngestion
          * @description `triggered` and `reason` always; the rest only once a live fetch was attempted.
          */
@@ -917,6 +1027,7 @@ export interface components {
              * @enum {string}
              */
             type: "done";
+            usage: components["schemas"]["LLMUsage"];
         };
         /**
          * NextQuestionStreamEvent
@@ -1109,6 +1220,7 @@ export interface components {
              * @enum {string}
              */
             type: "error";
+            usage?: components["schemas"]["LLMUsage"] | null;
         };
         /** StructuredEvaluationOutput */
         StructuredEvaluationOutput: {
@@ -1218,6 +1330,13 @@ export interface components {
             /** Transcript */
             transcript: string;
         };
+        /** TranscriptTurn */
+        TranscriptTurn: {
+            /** Content */
+            content: string;
+            /** Role */
+            role: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -1299,6 +1418,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CodeReviewOutput"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    agent_turn_api_interview_agent_turn_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentTurnRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentTurnResponse"];
                 };
             };
             /** @description Validation Error */

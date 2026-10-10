@@ -3,6 +3,7 @@ import { withTransaction } from "../db";
 import * as interviews from "../repositories/interviews.repository";
 import type { NewMessage, TurnUpdate } from "../repositories/interviews.repository";
 import {
+  agentTurn,
   checkChallenge,
   evaluateAnswer,
   generateFollowup,
@@ -11,6 +12,7 @@ import {
   generateReport,
   streamFollowup,
   streamNextQuestion,
+  type AgentDecision,
   type ChallengeResult,
   type Persona,
   type StructuredEvaluation,
@@ -24,11 +26,13 @@ import {
   buildEvaluationSummary,
   getDefaultDifficulty,
   getNextStage,
+  INTERVIEW_STAGES,
   isValidInterviewStage,
   normalizeCompany,
   shouldAskFollowup,
 } from "./interview-state.service";
 import { userHasResume } from "./resumes.service";
+import { type Usage, usageSoFar, withUsage } from "./llm-usage";
 
 /**
  * The interview loop: behavioral → coding → system_design → core_cs → report, with at
@@ -106,6 +110,39 @@ export function applyHintPenalty(evaluation: StructuredEvaluation, hintsUsed: nu
 /** Grounded challenge (D-066) runs only when enabled: it changes the follow-up UI B shows. */
 const challengeEnabled = () => process.env.INTERVIEW_CHALLENGE_ENABLED === "true";
 
+/**
+ * Agentic interviewer (D-067). In `agent` mode an agent picks the next move after each
+ * answer; these rules are the backend's, enforced whatever it says. `fixed` is the original
+ * loop, and stays the default until the interview UI shows agent moves (UI B).
+ */
+export const MODES = ["fixed", "agent"] as const;
+export type Mode = (typeof MODES)[number];
+export const MAX_STAGE_QUESTIONS = 3;
+const defaultMode = (): Mode => (process.env.INTERVIEW_MODE === "agent" ? "agent" : "fixed");
+/** Estimated model spend per interview past which the agent is no longer consulted. */
+const costCapUsd = () => Number(process.env.INTERVIEW_COST_CAP_USD ?? 0.02);
+
+export function isMode(value: unknown): value is Mode {
+  return typeof value === "string" && (MODES as readonly string[]).includes(value);
+}
+
+/** Charge an operation's model calls to its session; never fails the operation. */
+async function charge(sessionId: string, usage: Usage) {
+  try {
+    await interviews.addUsage(sessionId, usage.calls, usage.costUsd);
+  } catch (err) {
+    console.warn(JSON.stringify({ level: "warn", event: "usage_not_recorded", sessionId, ...usage, message: String(err) }));
+  }
+}
+
+/** What the agent decided, or why it wasn't asked; attached to agent-mode outcomes. */
+type AgentNote = {
+  decided: "probe" | "pivot" | "advance" | "finish" | "fallback" | "not_consulted";
+  rationale: string;
+  steps: number;
+  searches: number;
+};
+
 function questionMetadata(company: string, stage: string, question: StructuredQuestion) {
   return {
     kind: "question",
@@ -133,10 +170,26 @@ export async function startInterview(
     difficulty?: string;
     useResume?: boolean;
     persona?: Persona;
+    mode?: Mode;
   },
   stream?: TurnStream
 ) {
+  // Minted here rather than by the database default because the question is
+  // generated before the row exists, and the live-fetch limiter needs a session
+  // key to bound how much one interview can spend. Generating first and
+  // inserting after is deliberate: a failed generation leaves no orphan row (its
+  // spend then has no session to be charged to, and is only logged by the ai-service).
+  const sessionId = randomUUID();
+  return withUsage(() => openInterview(sessionId, input, stream), (usage) => charge(sessionId, usage));
+}
+
+async function openInterview(
+  sessionId: string,
+  input: Parameters<typeof startInterview>[0],
+  stream?: TurnStream
+) {
   const persona = input.persona ?? "neutral";
+  const mode = input.mode ?? defaultMode();
   const startingStage: InterviewStage = "behavioral";
   const stageDifficulty = input.difficulty ?? getDefaultDifficulty(startingStage);
 
@@ -144,12 +197,6 @@ export async function startInterview(
   // opts out explicitly, for practising a company's generic loop.
   const wantsResume = input.useResume !== false;
   const resumeGrounded = wantsResume && (await userHasResume(input.userId));
-
-  // Minted here rather than by the database default because the question is
-  // generated before the row exists, and the live-fetch limiter needs a session
-  // key to bound how much one interview can spend. Generating first and
-  // inserting after is deliberate: a failed generation leaves no orphan row.
-  const sessionId = randomUUID();
 
   const nextQuestion = await askQuestion(
     {
@@ -174,6 +221,7 @@ export async function startInterview(
       stage: startingStage,
       resumeGrounded,
       persona,
+      mode,
     });
     await interviews.insertMessage(tx, {
       sessionId,
@@ -192,6 +240,7 @@ export async function startInterview(
       status: "active",
       resumeGrounded: nextQuestion.resumeGrounded ?? false,
       persona,
+      mode,
     },
     openingQuestion: nextQuestion,
   };
@@ -209,6 +258,10 @@ export async function getSession(sessionId: string, userId: string) {
  * cost another model call or record the scores again.
  */
 export async function getReport(sessionId: string, userId: string) {
+  return withUsage(() => buildReport(sessionId, userId), (usage) => charge(sessionId, usage));
+}
+
+async function buildReport(sessionId: string, userId: string) {
   const session = await interviews.findSession(sessionId, userId);
   if (!session) throw sessionNotFound();
   if (session.status !== "completed") throw badRequest("Interview is not yet completed");
@@ -284,6 +337,10 @@ export async function submitAnswer(sessionId: string, userId: string, answer: st
 }
 
 export async function answerTurn(turn: Turn, userId: string, answer: string, stream?: TurnStream) {
+  return withUsage(() => runTurn(turn, userId, answer, stream), (usage) => charge(turn.session.id, usage));
+}
+
+async function runTurn(turn: Turn, userId: string, answer: string, stream?: TurnStream) {
   const { session, stage, latestQuestion, company: normalizedCompany } = turn;
   const sessionId = session.id;
   const persona = sessionPersona(session);
@@ -352,60 +409,159 @@ export async function answerTurn(turn: Turn, userId: string, answer: string, str
       for (const message of messages) await interviews.insertMessage(tx, message);
     });
 
-  if (challenge?.challenged || (shouldAskFollowup(session.stage_turn_count) && evaluation.shouldAskFollowup)) {
-    // A verified contradiction takes the stage's follow-up: pushing back on it is the most
-    // useful question to ask next. It arrives whole from the check, so it's sent as one delta.
-    const followup: StructuredFollowup & { challenge?: { claim: string; evidence: string } } =
-      challenge?.challenged
-        ? await (async () => {
-            await stream?.emit({ type: "question", kind: "followup", stage });
-            await stream?.emit({ type: "delta", text: challenge.question });
-            return {
-              question: challenge.question,
-              focus: "contradiction with the reference material",
-              reason: challenge.reason,
-              challenge: { claim: challenge.claim, evidence: challenge.evidence },
-            };
-          })()
-        : await askFollowup(
-            {
-              company: normalizedCompany,
-              stage,
-              question: latestQuestion.content,
-              answer,
-              evaluation,
-              persona,
-            },
-            stream
-          );
+  const nextStage = getNextStage(stage);
+  const agentMode = session.mode === "agent";
+  const questionsAsked = session.stage_turn_count + 1;
+  const roomInStage = questionsAsked < (agentMode ? MAX_STAGE_QUESTIONS : 2);
+
+  // The move. A verified challenge always wins (it's the stage's most useful follow-up). In
+  // agent mode the agent proposes; otherwise, or when it can't, the fixed rule decides.
+  let move: "challenge" | "followup" | "probe" | "pivot" | "advance" = "advance";
+  let decision: AgentDecision | null = null;
+  let agent: AgentNote | undefined;
+  if (challenge?.challenged && roomInStage) {
+    move = "challenge";
+  } else if (agentMode) {
+    ({ decision, note: agent } = await consultAgent());
+    if (decision?.action === "probe" || decision?.action === "pivot") move = decision.action;
+    else if (decision?.action === "advance" || decision?.action === "finish") move = "advance";
+    else move = shouldAskFollowup(session.stage_turn_count) && evaluation.shouldAskFollowup ? "followup" : "advance";
+  } else if (shouldAskFollowup(session.stage_turn_count) && evaluation.shouldAskFollowup) {
+    move = "followup";
+  }
+  const withAgent = <T extends object>(outcome: T) => (agent ? { ...outcome, agent } : outcome);
+
+  async function consultAgent(): Promise<{ decision: AgentDecision | null; note: AgentNote }> {
+    const skip = (rationale: string): { decision: null; note: AgentNote } => ({
+      decision: null,
+      note: { decided: "not_consulted", rationale, steps: 0, searches: 0 },
+    });
+    if (!roomInStage) return skip("only one move is allowed");
+    const spent = Number(session.llm_cost_usd ?? 0) + usageSoFar().costUsd;
+    if (spent >= costCapUsd()) return skip(`cost cap reached ($${spent.toFixed(4)} of $${costCapUsd()})`);
+
+    const stageMessages = (await interviews.listMessages(sessionId)).filter((m) => m.stage === stage);
+    // No second probe unless the last one helped: if the answer before this one in the stage
+    // scored as well or better, probing again is unlikely to change the picture. The agent
+    // was told this and ignored it in simulation (D-067), so it's a rule, not advice.
+    const earlierScores = stageMessages
+      .filter((m) => m.metadata_json.kind === "evaluation")
+      .map((m) => Number(m.metadata_json.score));
+    const previous = earlierScores[earlierScores.length - 1];
+    const probeStalled = previous !== undefined && !(evaluation.score > previous);
+    const allowed: AgentTurnRequestAction[] = [];
+    if (!probeStalled) allowed.push("probe");
+    allowed.push("pivot", nextStage === "report" ? "finish" : "advance");
+
+    try {
+      const result = await agentTurn(
+        {
+          company: normalizedCompany,
+          stage,
+          stage_position: `${INTERVIEW_STAGES.indexOf(stage) + 1} of ${INTERVIEW_STAGES.length}`,
+          allowed_actions: allowed,
+          questions_left: MAX_STAGE_QUESTIONS - questionsAsked,
+          question: latestQuestion.content,
+          answer,
+          evaluation,
+          stage_transcript: stageMessages.map((m) => ({ role: m.role, content: m.content })),
+          persona,
+        },
+        stream?.signal
+      );
+      // Enforced again here: the agent's word is a proposal.
+      const valid = result.action !== "fallback" && (allowed as string[]).includes(result.action);
+      const searches = result.trace.filter((t) => t.tool === "search_context").length;
+      return {
+        decision: valid ? result : null,
+        note: {
+          decided: valid ? (result.action as AgentNote["decided"]) : "fallback",
+          rationale: result.rationale,
+          steps: result.steps,
+          searches,
+        },
+      };
+    } catch (err) {
+      if (stream?.signal.aborted) throw err;
+      console.warn(JSON.stringify({ level: "warn", event: "agent_turn_failed", sessionId, message: String(err) }));
+      return { decision: null, note: { decided: "fallback", rationale: "the agent call failed", steps: 0, searches: 0 } };
+    }
+  }
+
+  if (move !== "advance") {
+    // Same stage, one more question: a challenge, the fixed flow's follow-up, or the
+    // agent's probe or pivot. The latter two arrive whole, so each is sent as one delta.
+    const sendWhole = async (kind: "question" | "followup", text: string) => {
+      await stream?.emit({ type: "question", kind, stage });
+      await stream?.emit({ type: "delta", text });
+    };
+    let content: string;
+    let metadata: Record<string, unknown>;
+    let nextQuestion: StructuredFollowup & { challenge?: { claim: string; evidence: string } };
+    if (move === "challenge") {
+      await sendWhole("followup", challenge!.question);
+      nextQuestion = {
+        question: challenge!.question,
+        focus: "contradiction with the reference material",
+        reason: challenge!.reason,
+        challenge: { claim: challenge!.claim, evidence: challenge!.evidence },
+      };
+      metadata = { kind: "followup", focus: nextQuestion.focus, reason: nextQuestion.reason, challenge: nextQuestion.challenge };
+    } else if (move === "followup") {
+      nextQuestion = await askFollowup(
+        { company: normalizedCompany, stage, question: latestQuestion.content, answer, evaluation, persona },
+        stream
+      );
+      metadata = { kind: "followup", focus: nextQuestion.focus, reason: nextQuestion.reason };
+    } else {
+      const d = decision!;
+      nextQuestion = { question: d.question, focus: d.focus, reason: d.rationale };
+      if (move === "probe") {
+        await sendWhole("followup", d.question);
+        metadata = { kind: "followup", focus: d.focus, reason: d.rationale, agent };
+      } else {
+        // A pivot is a new question: stored as one, with the context the agent searched, so
+        // hints and the challenge check are grounded like any other question.
+        await sendWhole("question", d.question);
+        metadata = {
+          kind: "question",
+          company: session.company,
+          stage,
+          reasoningFocus: d.focus,
+          expectedCompetencies: [],
+          context: d.context,
+          resumeGrounded: false,
+          groundedIn: null,
+          resumeEvidence: [],
+          retrievalConfidence: null,
+          liveIngestion: null,
+          agent,
+        };
+      }
+    }
+    content = nextQuestion.question;
 
     await commitTurn({ set: "stage_turn_count = stage_turn_count + 1", params: [] }, [
       answerMessage,
       evaluationMessage,
-      {
-        sessionId,
-        role: "assistant",
-        stage,
-        content: followup.question,
-        metadata: {
-          kind: "followup",
-          focus: followup.focus,
-          reason: followup.reason,
-          ...(followup.challenge ? { challenge: followup.challenge } : {}),
-        },
-      },
+      { sessionId, role: "assistant", stage, content, metadata },
     ]);
 
-    return { action: "followup", sessionId, stage, evaluation, nextQuestion: followup };
+    return withAgent({
+      action: move === "pivot" ? "pivot" : "followup",
+      sessionId,
+      stage,
+      evaluation,
+      nextQuestion,
+    });
   }
 
-  const nextStage = getNextStage(stage);
   if (nextStage === "report") {
     await commitTurn(
       { set: "current_stage = 'report', status = 'completed', stage_turn_count = 0", params: [] },
       [answerMessage, evaluationMessage]
     );
-    return { action: "completed", sessionId, evaluation };
+    return withAgent({ action: "completed", sessionId, evaluation });
   }
 
   const nextQuestion = await askQuestion(
@@ -432,19 +588,21 @@ export async function answerTurn(turn: Turn, userId: string, answer: string, str
       role: "assistant",
       stage: nextStage,
       content: nextQuestion.question,
-      metadata: questionMetadata(session.company, nextStage, nextQuestion),
+      metadata: { ...questionMetadata(session.company, nextStage, nextQuestion), ...(agent ? { agent } : {}) },
     },
   ]);
 
-  return {
+  return withAgent({
     action: "advance_stage",
     sessionId,
     previousStage: stage,
     currentStage: nextStage,
     evaluation,
     nextQuestion,
-  };
+  });
 }
+
+type AgentTurnRequestAction = "probe" | "pivot" | "advance" | "finish";
 
 /**
  * The next rung of the hint ladder for the question being answered (D-066). Refused with
@@ -453,6 +611,10 @@ export async function answerTurn(turn: Turn, userId: string, answer: string, str
  * and the hint count are still what they were: a concurrent hint or answer gets a 409.
  */
 export async function requestHint(sessionId: string, userId: string, draft?: string) {
+  return withUsage(() => giveHint(sessionId, userId, draft), (usage) => charge(sessionId, usage));
+}
+
+async function giveHint(sessionId: string, userId: string, draft?: string) {
   const { session, stage, latestQuestion, company } = await loadTurn(sessionId, userId);
   const hints = await interviews.listHintsSince(sessionId, stage, latestQuestion.created_at);
   if (hints.length >= MAX_HINTS) {

@@ -44,7 +44,7 @@ backend/src/repositories/    # all SQL, one file per table group; take a Queryab
 backend/src/db.ts            # query() over a pg Pool, plus withTransaction()
 backend/openapi/openapi.yaml # the Express API contract (D-062); served at /api/openapi.json
 backend/src/generated/       # ai-service types generated from ai-service/openapi.json — never hand-edit
-backend/sql_migrations/      # 001_init.sql … 015_interviewer_persona.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 016_interview_agent_cost.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java}, run by scripts/verify_problems.py
 scripts/problemgen/          # problem specs + independent oracles that generate the data files
@@ -55,7 +55,8 @@ ai-service/app/api/          # routers: rag, interview, speech, system_design, c
 ai-service/app/llm/chains.py # ALL LangChain chains + provider fallback live here
 ai-service/app/rag/          # chroma_client, chunking, embeddings, service
 ai-service/app/resume/       # parser.py (PDF -> sections), store.py (per-user namespaces)
-ai-service/app/interview/    # company_profiles.py, orchestrator.py (retrieval query building)
+ai-service/app/interview/    # company_profiles.py, orchestrator.py (retrieval query building),
+#                              agent.py (the interviewer agent's bounded JSON-step loop, D-067)
 ai-service/seed_data/documents.json  # the RAG corpus
 
 code-runner/src/runner.ts    # container lifecycle, tar packing, output comparison
@@ -147,6 +148,18 @@ docker/sandboxes/            # python / c / cpp / java sandbox images
 - `web/src/lib/api/schema.d.ts` is regenerated (never hand-edited) in the backend commit that
   changes the spec, so CI's drift check stays green.
 
+**Agentic interviewer and cost (D-067)**
+- `mode` (`fixed` | `agent`) is per session; default `INTERVIEW_MODE` (fixed until UI B). The
+  agent proposes a move; the backend's rules decide (`MAX_STAGE_QUESTIONS`, finish only on the last
+  stage, no stalled second probe) and anything else falls back to the fixed rule. Keep rules in
+  the backend, not in the prompt: the agent ignored prompt-only rules in simulation.
+- Every ai-service response reports its model calls in `x-llm-usage` (streams: in `done`/`error`).
+  `services/llm-usage.ts` sums them per operation and charges the session (`llm_calls`,
+  `llm_cost_usd`). A new operation that calls the ai-service on a session's behalf must run inside
+  `withUsage(..., charge)`, or its spend is invisible to the cap (`INTERVIEW_COST_CAP_USD`).
+- Gemini's native tool calling doesn't work with the pinned langchain-google-genai (missing
+  `thought_signature`); agents use JSON steps.
+
 **Multi-write routes**
 - Writes that must land together go through `db.withTransaction` (D-057). Keep LLM calls and
   code execution *outside* it. Inside a transaction `NOW()` is frozen — use
@@ -217,6 +230,8 @@ python scripts/verify_streaming.py --measure 6  # JSON vs stream latency medians
 python scripts/verify_interviewer.py        # personas, hint ladder + penalty, challenge wiring (D-066); live stack
 docker compose exec ai-service python -m app.eval.interviewer  # persona/hint/challenge quality, ~120 Gemini calls
 docker compose exec ai-service python -m app.eval.run --k 5 --no-filter --previous-answer strong  # why it stays off
+python scripts/verify_agent.py              # agent-mode interview: rules, notes, cost (D-067); --cap with a tiny INTERVIEW_COST_CAP_USD
+docker compose exec ai-service python -m app.eval.simulate_interviews  # 5 simulated interviews, agent vs fixed; ~150 Gemini calls
 python scripts/problemgen/batch1_easy.py    # regenerate a batch's data (idempotent; see D-042)
 python scripts/problemgen/apply_curation.py # write curated company tags into leetcode_problems.json
 docker compose exec ai-service python -m app.eval.calibrate_confidence  # re-tune the live-fetch gate

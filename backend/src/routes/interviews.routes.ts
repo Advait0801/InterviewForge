@@ -46,11 +46,12 @@ function sendInterviewError(res: Response, label: string, err: unknown) {
 
 /** The body of both start endpoints. */
 function parseStart(body: unknown) {
-  const { company, difficulty, useResume, persona } = (body ?? {}) as {
+  const { company, difficulty, useResume, persona, mode } = (body ?? {}) as {
     company?: string;
     difficulty?: string;
     useResume?: boolean;
     persona?: unknown;
+    mode?: unknown;
   };
   if (!company) return { error: "company is required" };
   const normalized = normalizeCompany(company);
@@ -58,7 +59,10 @@ function parseStart(body: unknown) {
   if (persona !== undefined && !interviews.isPersona(persona)) {
     return { error: `persona must be one of: ${interviews.PERSONAS.join(", ")}` };
   }
-  return { company: normalized, difficulty, useResume, persona };
+  if (mode !== undefined && !interviews.isMode(mode)) {
+    return { error: `mode must be one of: ${interviews.MODES.join(", ")}` };
+  }
+  return { company: normalized, difficulty, useResume, persona, mode };
 }
 
 router.get("/", requireAuth, async (req: AuthRequest, res) => {
@@ -72,7 +76,7 @@ router.get("/", requireAuth, async (req: AuthRequest, res) => {
 router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const parsed = parseStart(req.body);
   if ("error" in parsed) return res.status(400).json({ error: parsed.error });
-  const { company: normalizedCompany, difficulty, useResume, persona } = parsed;
+  const { company: normalizedCompany, difficulty, useResume, persona, mode } = parsed;
 
   try {
     const started = await interviews.startInterview({
@@ -81,6 +85,7 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
       difficulty,
       useResume,
       persona,
+      mode,
     });
     return res.status(201).json(started);
   } catch (err) {
@@ -96,12 +101,12 @@ router.post("/", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
 router.post("/stream", requireAuth, llmLimiter, async (req: AuthRequest, res) => {
   const parsed = parseStart(req.body);
   if ("error" in parsed) return res.status(400).json({ error: parsed.error });
-  const { company: normalizedCompany, difficulty, useResume, persona } = parsed;
+  const { company: normalizedCompany, difficulty, useResume, persona, mode } = parsed;
 
   const stream = openEventStream(req, res);
   try {
     const started = await interviews.startInterview(
-      { userId: req.user!.id, company: normalizedCompany, difficulty, useResume, persona },
+      { userId: req.user!.id, company: normalizedCompany, difficulty, useResume, persona, mode },
       stream.turn
     );
     await stream.send({ type: "done", result: started });

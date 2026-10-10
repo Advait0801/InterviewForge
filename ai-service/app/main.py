@@ -1,3 +1,5 @@
+import json
+
 from fastapi import FastAPI, Request
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -42,14 +44,21 @@ async def correlation_middleware(request: Request, call_next):
     """Adopt the backend's request id so logs from both services can be joined."""
     from app.core.observability import (
         CORRELATION_HEADER,
+        USAGE_HEADER,
+        current_usage,
         set_correlation_id,
+        start_request_usage,
     )
 
     incoming = request.headers.get(CORRELATION_HEADER)
     set_correlation_id(incoming)
+    start_request_usage()
     response = await call_next(request)
     if incoming:
         response.headers[CORRELATION_HEADER] = incoming
+    # Complete for JSON responses. A stream's headers leave before its generation runs, so
+    # streams report their total in the `done` event instead (D-067).
+    response.headers[USAGE_HEADER] = json.dumps(current_usage())
     return response
 
 

@@ -4,6 +4,7 @@ import {
   InterviewStage,
 } from "./interview-state.service";
 
+import { parseUsageHeader, recordUsage } from "./llm-usage";
 import { readEvents } from "./sse-reader";
 import {
   CORRELATION_HEADER,
@@ -53,6 +54,8 @@ export type CodeReviewResult = Schemas["CodeReviewOutput"];
 export type RecommendationAIResult = Schemas["RecommendationOutput"];
 export type HintResult = Schemas["HintResponse"];
 export type ChallengeResult = Schemas["ChallengeResponse"];
+export type AgentDecision = Schemas["AgentTurnResponse"];
+export type AgentTurnRequest = Schemas["AgentTurnRequest"];
 export type Persona = NonNullable<Schemas["NextQuestionRequest"]["persona"]>;
 
 /**
@@ -64,7 +67,8 @@ async function send(
   method: "POST" | "DELETE",
   path: string,
   payload: unknown,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  { meter = "always" }: { meter?: "always" | "errors" } = {}
 ): Promise<globalThis.Response> {
   let response: globalThis.Response;
   const correlationId = getCurrentCorrelationId();
@@ -106,6 +110,10 @@ async function send(
       durationMs: Date.now() - startedAt,
     })
   );
+
+  // Charged even when the response is an error: the calls were made (D-067). A stream's
+  // header is sent before its generation runs, so streams report in `done` instead.
+  if (meter === "always" || !response.ok) recordUsage(parseUsageHeader(response.headers.get("x-llm-usage")));
 
   if (!response.ok) {
     const text = await response.text();
@@ -162,7 +170,9 @@ async function streamQuestion<T>(path: string, payload: unknown, options: Questi
   let firstDeltaMs: number | null = null;
   let outcome = "aborted";
   try {
-    const response = await send("POST", path, payload, options.signal);
+    // An error before the stream opens is a JSON response whose header is complete; a stream's
+    // header isn't, so it's skipped and `done` carries the total.
+    const response = await send("POST", path, payload, options.signal, { meter: "errors" });
     if (!response.body) throw new AIServiceError(503, "AI service stream had no body");
     for await (const message of readEvents(response.body)) {
       const event = JSON.parse(message.data) as StreamEvent;
@@ -171,9 +181,11 @@ async function streamQuestion<T>(path: string, payload: unknown, options: Questi
         await options.onDelta(event.text);
       } else if (event.type === "done") {
         outcome = "done";
+        recordUsage(event.usage);
         return event.result as T;
       } else if (event.type === "error") {
         outcome = "error";
+        recordUsage(event.usage ?? undefined);
         throw new AIServiceError(event.status, event.detail, { detail: event.detail });
       }
     }
@@ -331,6 +343,26 @@ export async function generateHint(params: {
     draft: params.draft,
     persona: params.persona,
   });
+}
+
+/** The interviewer agent's next move (D-067); the caller enforces what's allowed again. */
+export async function agentTurn(params: AgentTurnRequest, signal?: AbortSignal): Promise<AgentDecision> {
+  return postJson<AgentDecision, "AgentTurnRequest">(
+    "/api/interview/agent/turn",
+    {
+      company: params.company,
+      stage: params.stage,
+      stage_position: params.stage_position,
+      allowed_actions: params.allowed_actions,
+      questions_left: params.questions_left,
+      question: params.question,
+      answer: params.answer,
+      evaluation: params.evaluation,
+      stage_transcript: params.stage_transcript,
+      persona: params.persona,
+    },
+    signal
+  );
 }
 
 /**

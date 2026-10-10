@@ -7,6 +7,102 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-10-09
+
+### D-067 — Agentic interviewer behind a mode switch; every interview's model cost recorded and capped
+
+**Why:** Phase 6, the last backend phase of Group B. The interview was a fixed loop: behavioral,
+coding, system design, core CS, with at most one follow-up each. The roadmap asked for an agent that
+decides to probe, pivot or move on, with cost per interview measured and capped, and the old flow
+kept behind a flag. Spend cap $1; the phase spent about **$0.27**, most of it the gpt-4o test
+candidate and judge.
+
+**Decided:**
+- **A JSON-step ReAct loop, not native tool calling.** Gemini now requires a `thought_signature`
+  on function-call turns, and the pinned langchain-google-genai 2.0.0 drops it, so returning a tool
+  result fails with a 400 (found in a two-call smoke test before building anything). Each step is
+  one JSON object, either `search_context(query)` or `decide`. The loop runs the search and feeds
+  the result back as text.
+  - It's at most 3 steps and 2 searches, and the same on every provider. It goes through
+    `invoke_with_fallback` like every other chain.
+  - Searches are local and dense-only: no reranker call, no live fetch.
+  - A pivot the agent didn't research is grounded automatically on its own focus.
+- **The backend owns the rules; the agent proposes.** `POST /api/interview/agent/turn` is told the
+  moves allowed right now and returns one of them or `fallback`. The backend checks it again.
+  - At most 3 questions per stage. `finish` only on the last stage, `advance` everywhere else.
+  - No second probe in a stage unless the last one raised the score. The prompt said so and the
+    agent ignored it in simulation, so it's a rule now.
+  - A rejected proposal, a failed call or `fallback` hands that turn to the fixed rule. The turn
+    never fails because of the agent.
+- **Moves:**
+  - probe → a `followup`;
+  - pivot → a new `question` in the same stage, stored with the context the agent searched, so
+    hints and the challenge check stay grounded. The outcome's `action` is `pivot`;
+  - advance → the usual next-stage question;
+  - finish → `completed`.
+
+  Agent-mode outcomes and question metadata carry an `agent` note: decided, rationale, steps,
+  searches. A verified challenge (D-066) still takes precedence.
+- **Mode:** `mode` on both start endpoints, stored on the session (migration 016). The default is
+  `INTERVIEW_MODE`, which stays `fixed` until UI B shows agent moves. Fixed mode's code path and
+  behaviour are unchanged; every pre-existing test passes untouched.
+- **Cost per interview, for both modes:**
+  - The ai-service meters every model call per request and reports it in an `x-llm-usage` header.
+    A stream's header leaves before generation runs, so streams report in their `done` or `error`
+    event instead.
+  - The backend sums usage per operation (AsyncLocalStorage) and adds it to
+    `interview_sessions.llm_calls` / `llm_cost_usd`. That covers start, turns, hints and the
+    report, even when the operation fails: the calls were made.
+  - Recording never fails an operation.
+- **Cap:** `INTERVIEW_COST_CAP_USD` (default 0.02, about 4× a typical agent interview). Once an
+  interview's recorded spend, plus spend earlier in the same turn, reaches it, the agent is no longer
+  consulted, and the interview continues on the fixed rules.
+
+**Measured** (`python -m app.eval.simulate_interviews`, recorded and replayed by pytest): 5 full
+interviews through the real backend.
+- **Candidates:** simulated in three styles, strong (gpt-4o), weak (vague but not wrong) and
+  confidently wrong (both gpt-4o-mini). The interviewer runs on Gemini.
+- **Judging:** each agent decision is judged by gpt-4o, which sees what the agent saw. The rule
+  checks read the stored transcript, not the API's claims.
+
+| | Result | Bar |
+|---|---|---|
+| Rule breaks (order, ≤3 per stage, finish only last) | **none** in 5 interviews | 0 |
+| Agent decisions judged sensible | **91%** of 23 | ≥ 80% |
+| Agent probes the weak candidate more than the strong | weak **75%** vs strong **71%** (wrong-facts 50%) | weak > strong |
+| Cost per interview | agent **$0.0049** (23 calls, 11.3 answers) vs fixed **$0.0033** (16 calls, 8 answers) | measured |
+| Agent failures needing fallback | 1 (a blocked second probe) | — |
+
+**What the numbers don't hide:**
+- The adaptivity margin is thin. The agent still fills the third question in nearly every stage.
+  When the new rule blocks a repeat probe, it pivots instead, and the judge's two "not sensible"
+  verdicts are exactly those pivots (it wanted a probe). So agent mode costs ~50% more per interview
+  for modest adaptivity.
+- In the first simulation the agent probed 87.5% of the time for every candidate. Two things
+  changed for the second run:
+  1. A gpt-4o-mini "strong" candidate averaged about 6/10 with the strict grader, so it wasn't a
+     strong candidate; the strong candidate became gpt-4o.
+  2. The no-stalled-probe rule was added.
+
+  A prompt asking for "advance by default" changed nothing on recorded turns. With an outright
+  excellent answer (9/10) the agent does advance.
+- The obvious next step is a whole-interview question budget the agent must spend where it learns
+  most, the way a real 45-minute interview forces it to (BACKLOG).
+
+**Verified:**
+- ai-service 532 (+24), including the agent loop on a fake model (bounded loop, forced decision,
+  every malformed or disallowed move a fallback, capped searches, automatic pivot grounding) and
+  per-request usage. Backend 308 (+22), including moves, guardrails, fallback, cap and usage
+  charging (also on failed turns). The allowed-move re-check and the cap each fail their tests when
+  removed. Web 96, lint and tsc on the regenerated types; code-runner 48; drift check clean.
+- Live:
+  - `scripts/verify_agent.py` 20/20: an agent-mode interview, 23 calls / $0.0041 recorded, agent
+    notes stored.
+  - `--cap` with a temporary $0.001 cap, 20/20: consulted for 2 turns, capped from turn 3, never
+    consulted again, and the interview completed. `backend/.env` was restored byte-identical.
+  - `verify_phase7` 46/46, `verify_resume_isolation` 43/43, `verify_streaming` 22/22,
+    `verify_interviewer` 14/14, 0 `openapi_violation`.
+
 ## 2026-10-08
 
 ### D-066 — Interviewer upgrades: personas, a hint ladder with a score penalty, grounded challenge; previous_answer stays off
