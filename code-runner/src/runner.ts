@@ -1,10 +1,12 @@
 import Docker from "dockerode";
 import { PROBLEM_META, ProblemMeta } from "./problem-meta";
-import { parseTestInput, compareOutputs } from "./input-parser";
+import { parseTestInput, compareOutputs, normalizeOutput } from "./input-parser";
 import { generateCode } from "./harness-gen";
+import { diffOutputs } from "./diff";
+import { validateInput } from "./validate-input";
 
-export type { TestCase, SupportedLanguage, RunRequest, RunResult } from "./types";
-import type { TestCase, SupportedLanguage, RunRequest, RunResult } from "./types";
+export type { TestCase, SupportedLanguage, RunRequest, RunResult, CaseResult, CustomCaseResult } from "./types";
+import type { TestCase, SupportedLanguage, RunRequest, RunResult, CaseResult, CustomCaseResult } from "./types";
 
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 
@@ -25,11 +27,14 @@ const TMPFS_SIZE_BYTES = 64 * 1024 * 1024;
 // mode=1777 gives normal /tmp semantics for the unprivileged runner user.
 const TMPFS_OPTS = `rw,exec,nosuid,nodev,mode=1777,size=${TMPFS_SIZE_BYTES}`;
 
-const LANGUAGE_IMAGES: Record<SupportedLanguage, string> = {
+export const LANGUAGE_IMAGES: Record<SupportedLanguage, string> = {
   python3: "interviewforge-python-sandbox:latest",
   c: "interviewforge-c-sandbox:latest",
   cpp: "interviewforge-cpp-sandbox:latest",
   java: "interviewforge-java-sandbox:latest",
+  javascript: "interviewforge-javascript-sandbox:latest",
+  go: "interviewforge-go-sandbox:latest",
+  rust: "interviewforge-rust-sandbox:latest",
 };
 
 function getCmd(lang: SupportedLanguage): string[] {
@@ -42,6 +47,14 @@ function getCmd(lang: SupportedLanguage): string[] {
       return ["sh", "-c", "cp /home/runner/Main.java /tmp/ && cd /tmp && javac -Xlint:none Main.java 2>&1 && java -cp /tmp Main < /home/runner/input.txt 2>&1"];
     case "c":
       return ["sh", "-c", "gcc -O2 -w -o /tmp/sol /home/runner/solution.c -lm 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1"];
+    case "javascript":
+      return ["sh", "-c", "node /home/runner/run.js < /home/runner/input.txt 2>&1"];
+    case "go":
+      // ifimports (docker/sandboxes/go-sandbox) adds missing standard-library
+      // imports on line 1, so error line numbers still match the editor.
+      return ["sh", "-c", "cp /home/runner/main.go /tmp/ && ifimports /home/runner/solution.go /tmp/solution.go && cd /tmp && go build -o /tmp/sol main.go solution.go 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1"];
+    case "rust":
+      return ["sh", "-c", "rustc -O -A warnings -o /tmp/sol /home/runner/main.rs 2>&1 && /tmp/sol < /home/runner/input.txt 2>&1"];
   }
 }
 
@@ -83,7 +96,14 @@ export function buildContainerConfig(image: string, cmd: string[]) {
   };
 }
 
+/** Every language gets the same container: only the image and command differ. */
+export function sandboxConfigFor(language: SupportedLanguage) {
+  return buildContainerConfig(LANGUAGE_IMAGES[language], getCmd(language));
+}
+
 const MEMORY_SAMPLE_INTERVAL_MS = 40;
+/** After the program exits, how long to wait for a sample already in flight. */
+const MEMORY_SAMPLE_GRACE_MS = 150;
 
 /**
  * Approximate peak memory, by sampling.
@@ -97,22 +117,27 @@ const MEMORY_SAMPLE_INTERVAL_MS = 40;
  *
  * Page cache is subtracted the same way `docker stats` does it, otherwise a
  * program that reads a large file looks like it allocated one.
+ *
+ * Each sample is `one-shot`. A plain non-streaming stats call waits for a second
+ * reading to compute CPU deltas -- one to two seconds -- and the run waited for
+ * that call after the program had exited, so every Run and Submit took about
+ * 2 s however fast the code was (measured in Phase 7). Memory needs no second
+ * reading. `peak` is shared so the caller can stop waiting without losing it.
  */
 async function samplePeakMemoryBytes(
   container: Docker.Container,
-  stop: { done: boolean }
-): Promise<number> {
-  let peak = 0;
-  while (!stop.done) {
+  state: { done: boolean; peak: number }
+): Promise<void> {
+  while (!state.done) {
     try {
-      const raw = (await container.stats({ stream: false })) as unknown as {
+      const raw = (await container.stats({ stream: false, "one-shot": true })) as unknown as {
         memory_stats?: { usage?: number; stats?: Record<string, number> };
       };
       const usage = raw?.memory_stats?.usage;
       if (typeof usage === "number") {
         const inactiveFile = raw?.memory_stats?.stats?.inactive_file ?? 0;
         const effective = Math.max(0, usage - inactiveFile);
-        if (effective > peak) peak = effective;
+        if (effective > state.peak) state.peak = effective;
       }
     } catch {
       // Container gone, or stats unavailable on this platform: keep what we have.
@@ -120,10 +145,21 @@ async function samplePeakMemoryBytes(
     }
     await new Promise((resolve) => setTimeout(resolve, MEMORY_SAMPLE_INTERVAL_MS));
   }
-  return peak;
 }
 
-export async function runCode(req: RunRequest): Promise<RunResult> {
+/**
+ * Run one program against the test cases.
+ *
+ * Without `customCases` that's one sandbox, as it always was. With them (Run
+ * only), the problem's reference solution runs first on the custom inputs to
+ * produce their expected outputs, then the user's code runs on the test cases
+ * and the custom inputs together. The two sandboxes run one after the other,
+ * never at once, so a queued job still holds at most one container and the
+ * queue's cap (D-063) is still the cap on live sandboxes.
+ */
+type Execute = (language: SupportedLanguage, code: string, testCases: TestCase[], meta: ProblemMeta) => Promise<RunResult>;
+
+export async function runCode(req: RunRequest, execute: Execute = executeInSandbox): Promise<RunResult> {
   const meta = req.slug ? PROBLEM_META[req.slug] : undefined;
 
   if (!meta) {
@@ -136,37 +172,89 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
     };
   }
 
-  const { code: combinedCode, filename } = generateCode(
-    req.language,
-    req.code,
-    meta
+  const custom = req.customCases;
+  if (!custom || custom.inputs.length === 0) {
+    return execute(req.language, req.code, req.testCases, meta);
+  }
+
+  // Inputs were validated before the job was queued; check again rather than
+  // trust it, since an unusable input would misalign the whole run.
+  const invalid = custom.inputs.map((input) => validateInput(input, meta));
+  const usable = custom.inputs.map((input, i) => ({ input, i })).filter(({ i }) => invalid[i] === null);
+
+  const expected: Array<{ output?: string; error?: string }> = custom.inputs.map((_, i) =>
+    invalid[i] !== null ? { error: `Invalid input: ${invalid[i]}` } : {}
   );
+  if (usable.length) {
+    const ref = await execute(
+      custom.reference.language,
+      custom.reference.code,
+      usable.map(({ input }) => ({ input, expectedOutput: "" })),
+      meta
+    );
+    usable.forEach(({ i }, k) => {
+      const r = ref.results[k];
+      if (r && !r.error && r.actualOutput !== undefined) expected[i] = { output: normalizeOutput(r.actualOutput) };
+      else expected[i] = { error: `The reference solution couldn't run this input: ${r?.error ?? "no output"}` };
+    });
+  }
+
+  // Only usable inputs reach the user's sandbox: one that doesn't parse would throw
+  // while the input file is built and take the examples down with it.
+  const extra = usable.map(({ input, i }) => ({ input, expectedOutput: expected[i].output ?? "" }));
+  const run = await execute(req.language, req.code, [...req.testCases, ...extra], meta);
+  const results = run.results.slice(0, req.testCases.length);
+  const userResult = new Map(usable.map(({ i }, k) => [i, run.results[req.testCases.length + k]]));
+  const customResults: CustomCaseResult[] = custom.inputs.map((input, i) => {
+    const r = userResult.get(i);
+    if (expected[i].output === undefined) {
+      // Nothing to judge against: report what the user's code did (if it ran), unjudged.
+      return { input, judged: false, passed: false, actualOutput: r?.actualOutput, error: r?.error, inputError: expected[i].error };
+    }
+    return { input, judged: true, expectedOutput: expected[i].output, ...(r ?? { passed: false, error: "No result" }) };
+  });
+
+  return {
+    passed: results.every((r) => r.passed) && customResults.every((r) => !r.judged || r.passed),
+    results,
+    customResults,
+    runtimeMs: run.runtimeMs,
+    memoryKb: run.memoryKb,
+  };
+}
+
+/** One sandbox: compile if needed, run every case, compare. */
+async function executeInSandbox(
+  language: SupportedLanguage,
+  code: string,
+  testCases: TestCase[],
+  meta: ProblemMeta
+): Promise<RunResult> {
+  const generated = generateCode(language, code, meta);
 
   const inputContent =
-    req.language === "python3"
-      ? buildJsonInput(req.testCases, meta)
-      : buildLinePerArgInput(req.testCases, meta);
+    language === "python3" || language === "javascript"
+      ? buildJsonInput(testCases, meta)
+      : buildLinePerArgInput(testCases, meta);
 
   const tarBuffer = createTarBuffer([
-    { name: filename, content: combinedCode },
+    { name: generated.filename, content: generated.code },
+    ...(generated.extraFiles ?? []),
     { name: "input.txt", content: inputContent },
   ]);
 
-  const image = LANGUAGE_IMAGES[req.language];
   let container: Docker.Container | null = null;
 
   try {
-    container = await docker.createContainer(
-      buildContainerConfig(image, getCmd(req.language))
-    );
+    container = await docker.createContainer(sandboxConfigFor(language));
 
     await container.putArchive(tarBuffer, { path: "/home/runner" });
 
     const startTime = Date.now();
     await container.start();
 
-    const memoryStop = { done: false };
-    const memorySampler = samplePeakMemoryBytes(container, memoryStop);
+    const memory = { done: false, peak: 0 };
+    const memorySampler = samplePeakMemoryBytes(container, memory);
 
     const waitResult = await Promise.race([
       container.wait() as Promise<{ StatusCode: number }>,
@@ -176,9 +264,9 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
     ]);
 
     const runtimeMs = Date.now() - startTime;
-    memoryStop.done = true;
-    const peakBytes = await memorySampler;
-    const memoryKb = peakBytes > 0 ? Math.round(peakBytes / 1024) : undefined;
+    memory.done = true;
+    await Promise.race([memorySampler, new Promise((resolve) => setTimeout(resolve, MEMORY_SAMPLE_GRACE_MS))]);
+    const memoryKb = memory.peak > 0 ? Math.round(memory.peak / 1024) : undefined;
     const rawOutput = await readContainerLogs(container);
 
     // Preserve 1:1 testcase/output alignment. Dropping empty lines can
@@ -191,7 +279,7 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
     if (waitResult.StatusCode !== 0 && lines.length === 0) {
       return {
         passed: false,
-        results: req.testCases.map(() => ({
+        results: testCases.map(() => ({
           passed: false,
           error: rawOutput.substring(0, 500) || "Runtime Error (non-zero exit)",
         })),
@@ -199,9 +287,9 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
       };
     }
 
-    if (lines.length !== req.testCases.length) {
-      const mismatchError = `Output count mismatch: got ${lines.length} lines for ${req.testCases.length} test cases`;
-      const results = req.testCases.map((_, idx) => ({
+    if (lines.length !== testCases.length) {
+      const mismatchError = `Output count mismatch: got ${lines.length} lines for ${testCases.length} test cases`;
+      const results = testCases.map((_, idx) => ({
         passed: false,
         actualOutput: idx < lines.length ? lines[idx] : "",
         error: mismatchError,
@@ -213,7 +301,7 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
       };
     }
 
-    const results = req.testCases.map((tc, idx) => {
+    const results: CaseResult[] = testCases.map((tc, idx) => {
       const actualLine = idx < lines.length ? lines[idx] : "";
 
       try {
@@ -230,7 +318,11 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
       }
 
       const passed = compareOutputs(actualLine, tc.expectedOutput, meta.unorderedOutput, meta.unorderedInner);
-      return { passed, actualOutput: actualLine };
+      if (passed) return { passed, actualOutput: actualLine };
+      // Where it goes wrong. Computed for every failing case; the backend decides
+      // which cases a client may see at all (D-057), and a diff goes with its case.
+      const diff = diffOutputs(actualLine, tc.expectedOutput, meta.unorderedOutput, meta.unorderedInner);
+      return diff ? { passed, actualOutput: actualLine, diff } : { passed, actualOutput: actualLine };
     });
 
     return {
@@ -250,7 +342,7 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
       }
       return {
         passed: false,
-        results: req.testCases.map(() => ({
+        results: testCases.map(() => ({
           passed: false,
           error: "Time Limit Exceeded",
         })),
@@ -261,7 +353,7 @@ export async function runCode(req: RunRequest): Promise<RunResult> {
     const msg = err instanceof Error ? err.message : "Unknown execution error";
     return {
       passed: false,
-      results: req.testCases.map(() => ({ passed: false, error: msg })),
+      results: testCases.map(() => ({ passed: false, error: msg })),
     };
   } finally {
     if (container) {

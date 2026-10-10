@@ -49,6 +49,9 @@ type StarterEntry = {
   cpp: string;
   c: string;
   java: string;
+  javascript: string;
+  go: string;
+  rust: string;
 };
 
 async function main() {
@@ -72,7 +75,15 @@ async function main() {
   for (const p of problems) {
     const tmpl = templates[p.slug];
     const starterCode = tmpl
-      ? { python3: tmpl.python3, cpp: tmpl.cpp, c: tmpl.c, java: tmpl.java }
+      ? {
+          python3: tmpl.python3,
+          cpp: tmpl.cpp,
+          c: tmpl.c,
+          java: tmpl.java,
+          javascript: tmpl.javascript,
+          go: tmpl.go,
+          rust: tmpl.rust,
+        }
       : {};
     const testCases = padTestCases(p.testCases);
     const hintList = p.hints?.length ? p.hints : hintsMap[p.slug];

@@ -26,10 +26,20 @@ const SUBMISSION = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 const CASES = Array.from({ length: 6 }, (_, i) => ({ input: `${i}`, expectedOutput: `${i}` }));
 
 // A stand-in code-runner on a real socket, so the route's own fetch is exercised.
+type RunnerBody = {
+  testCases: Array<{ input: string; expectedOutput: string }>;
+  language: string;
+  slug: string;
+  customCases?: { inputs: string[]; reference: { language: string; code: string } };
+};
 const runner = {
   mode: "pass" as "pass" | "fail" | "error" | "drop",
-  lastBody: null as null | { testCases: unknown[]; language: string; slug: string },
+  lastBody: null as null | RunnerBody,
+  /** /validate: inputs containing "bad" are reported unusable. */
+  validated: null as null | { slug: string; inputs: string[] },
+  validateMode: "ok" as "ok" | "drop",
 };
+const DIFF = { kind: "value", path: [], expected: 4, actual: "wrong" };
 let runnerServer: Server;
 let api: TestServer;
 
@@ -38,6 +48,13 @@ beforeAll(async () => {
     let raw = "";
     req.on("data", (c) => (raw += c));
     req.on("end", () => {
+      if (req.url === "/validate") {
+        runner.validated = JSON.parse(raw);
+        if (runner.validateMode === "drop") return req.socket.destroy();
+        const errors = runner.validated!.inputs.map((i) => (i.includes("bad") ? "target should be an integer." : null));
+        res.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify({ errors }));
+        return;
+      }
       runner.lastBody = JSON.parse(raw);
       if (runner.mode === "drop") return req.socket.destroy();
       if (runner.mode === "error") {
@@ -48,10 +65,18 @@ beforeAll(async () => {
       const cases = runner.lastBody!.testCases;
       const results = cases.map((_, i) => {
         const ok = runner.mode === "pass" || i < cases.length - 2;
-        return { passed: ok, actualOutput: ok ? `${i}` : "wrong" };
+        return ok ? { passed: true, actualOutput: `${i}` } : { passed: false, actualOutput: "wrong", diff: DIFF };
       });
+      const customResults = runner.lastBody!.customCases?.inputs.map((input) => ({
+        input,
+        judged: true,
+        expectedOutput: "[0,1]",
+        passed: false,
+        actualOutput: "[1,0,2]",
+        diff: { kind: "items", missing: [], unexpected: [2], expectedLength: 2, actualLength: 3 },
+      }));
       res.writeHead(200, { "Content-Type": "application/json" }).end(
-        JSON.stringify({ passed: results.every((r) => r.passed), results, runtimeMs: 12, memoryKb: 900 })
+        JSON.stringify({ passed: results.every((r) => r.passed), results, customResults, runtimeMs: 12, memoryKb: 900 })
       );
     });
   });
@@ -74,6 +99,8 @@ beforeEach(() => {
   ai.reviewCode.mockReset();
   runner.mode = "pass";
   runner.lastBody = null;
+  runner.validated = null;
+  runner.validateMode = "ok";
   db.handlers.push(
     {
       match: "SELECT id, slug, test_cases FROM problems WHERE id = $1",
@@ -166,9 +193,113 @@ describe("hidden test cases (D-057)", () => {
     expect(results[5]).toEqual({ passed: false, hidden: true });
   });
 
+  it("a diff goes with its case: shown for the first failing hidden case, never for the others", async () => {
+    runner.mode = "fail";
+    const r = await submit(valid);
+    expect(r.body.results[4].diff).toEqual(DIFF);
+    // The runner sent a diff for case 5 too; it must not survive the redaction.
+    expect(r.body.results[5]).toEqual({ passed: false, hidden: true });
+    expect(JSON.stringify(r.body.results.slice(5))).not.toContain("diff");
+  });
+
   it("a passing hidden case doesn't leak its output, which equals the expected answer", async () => {
     const r = await submit(valid);
     expect(r.body.results[5]).toEqual({ passed: true, hidden: true });
+  });
+});
+
+describe("languages", () => {
+  it.each(["python3", "c", "cpp", "java", "javascript", "go", "rust"])("accepts %s and passes it to the runner", async (language) => {
+    const r = await submit({ ...valid, language, mode: "run" });
+    expect(r.status).toBe(200);
+    expect(runner.lastBody!.language).toBe(language);
+  });
+});
+
+describe("custom test cases", () => {
+  const run = (customInputs: unknown) => submit({ ...valid, mode: "run", customInputs });
+
+  it("runs them with the examples, against the reference solution, and returns them separately", async () => {
+    const inputs = ["nums = [3, 3], target = 6", "nums = [1, 5, 9], target = 14"];
+    const r = await run(inputs);
+    expect(r.status).toBe(200);
+    expect(runner.validated).toEqual({ slug: "two-sum", inputs });
+    const sent = runner.lastBody!;
+    expect(sent.testCases).toHaveLength(4);
+    expect(sent.customCases!.inputs).toEqual(inputs);
+    expect(sent.customCases!.reference.language).toBe("python3");
+    expect(sent.customCases!.reference.code).toContain("def twoSum");
+    expect(r.body.customResults).toHaveLength(2);
+    expect(r.body.customResults[0]).toMatchObject({ input: inputs[0], judged: true, expectedOutput: "[0,1]" });
+    expect(r.body.customResults[0].diff.kind).toBe("items");
+  });
+
+  it("never touch the hidden suite", async () => {
+    await run(["nums = [3, 3], target = 6"]);
+    const body = JSON.stringify(runner.lastBody);
+    for (const hidden of CASES.slice(4)) expect(body).not.toContain(`"input":"${hidden.input}"`);
+    expect(runner.lastBody!.testCases).toEqual(CASES.slice(0, 4));
+  });
+
+  it("a run without them reports an empty list", async () => {
+    const r = await submit({ ...valid, mode: "run" });
+    expect(r.body.customResults).toEqual([]);
+    expect(runner.lastBody!.customCases).toBeUndefined();
+    expect(runner.validated).toBeNull();
+  });
+
+  it("are refused on submit, which is judged on the problem's own suite", async () => {
+    const r = await submit({ ...valid, customInputs: ["nums = [1, 2], target = 3"] });
+    expect(r.status).toBe(400);
+    expect(runner.lastBody).toBeNull();
+    expect(callsMatching(db, "INSERT INTO submissions")).toHaveLength(0);
+  });
+
+  it.each([
+    ["not an array", "nums = [1]"],
+    ["more than 10", Array.from({ length: 11 }, () => "nums = [1], target = 1")],
+    ["an empty input", ["  "]],
+    ["a non-string", [42]],
+    ["an input over 10,000 characters", ["x".repeat(10_001)]],
+  ])("400 on %s, before anything runs", async (_label, customInputs) => {
+    const r = await run(customInputs);
+    expect(r.status).toBe(400);
+    expect(runner.validated).toBeNull();
+    expect(runner.lastBody).toBeNull();
+  });
+
+  it("a malformed input is a 400 naming it, and no sandbox runs", async () => {
+    const r = await run(["nums = [1, 2], target = 3", "nums = [1], target = bad"]);
+    expect(r.status).toBe(400);
+    expect(r.body).toEqual({
+      error: "Invalid custom test case",
+      customInputErrors: [{ index: 1, error: "target should be an integer." }],
+    });
+    expect(runner.lastBody).toBeNull();
+  });
+
+  it("an unreachable runner during validation is a retryable 503", async () => {
+    runner.validateMode = "drop";
+    const r = await run(["nums = [1, 2], target = 3"]);
+    expect(r.status).toBe(503);
+    expect(r.body.retryable).toBe(true);
+  });
+
+  it("400 for a problem without a reference solution", async () => {
+    db.handlers.unshift({
+      match: "SELECT id, slug, test_cases FROM problems WHERE id = $1",
+      reply: [{ id: PROBLEM, slug: "not-a-real-problem", test_cases: CASES }],
+    });
+    const r = await run(["x = 1"]);
+    expect(r.status).toBe(400);
+    expect(r.body.error).toMatch(/aren't available/);
+    expect(runner.validated).toBeNull();
+  });
+
+  it("failing examples in a run carry their diff", async () => {
+    runner.mode = "fail";
+    const r = await submit({ ...valid, mode: "run" });
+    expect(r.body.results[3]).toEqual({ passed: false, actualOutput: "wrong", diff: DIFF });
   });
 });
 

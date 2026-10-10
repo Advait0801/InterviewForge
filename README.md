@@ -122,9 +122,9 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 - Bookmarking and solved-state tracking
 - Hand-curated company tags (3–5 per problem, from the 10 interview companies) driving
   "practice Amazon problems"-style filtering
-- Every problem is verified in all four languages: a reference solution runs through the real
-  sandbox against test cases whose expected outputs come from an independent brute-force oracle
-  (`scripts/verify_problems.py`, `scripts/problemgen/`)
+- Every problem is verified in seven languages (Python, C, C++, Java, JavaScript, Go, Rust): a
+  reference solution runs through the real sandbox against test cases whose expected outputs come
+  from an independent brute-force oracle (`scripts/verify_problems.py`, `scripts/problemgen/`)
 
 > The problems are the well-known ones from [LeetCode](https://leetcode.com): same numbers,
 > titles and function signatures, credited here. Problem statements, hints and test cases are
@@ -230,7 +230,7 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 | | |
 |---|---|
 | **Code runner** | Node.js service using Docker Engine API |
-| **Sandboxes** | Per-language images in `docker/sandboxes/` (python, c, cpp, java), unprivileged and resource-capped |
+| **Sandboxes** | Per-language images in `docker/sandboxes/` (python, c, cpp, java, javascript, go, rust), unprivileged and resource-capped |
 | **Database** | PostgreSQL 16 — 14 raw-SQL migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks, resumes, indexes and session revocation |
 | **Vector store** | ChromaDB 0.5.5 |
 | **Shared state** | Redis 7: rate-limit counters (backend and the ai-service's live-fetch limits), the BullMQ code-run queue with a global concurrency cap, and the leaderboard cache |
@@ -260,7 +260,7 @@ InterviewForge/
 │   ├── seed_data/          # documents.json (RAG corpus)
 │   └── scripts/            # seed_rag.py
 ├── code-runner/            # Sandbox orchestration service
-├── docker/sandboxes/       # Sandbox Dockerfiles (python, c, cpp, java)
+├── docker/sandboxes/       # Sandbox Dockerfiles (python, c, cpp, java, javascript, go, rust)
 ├── scripts/                # verify_*.py (live-stack checks), problemgen/ (specs + oracles),
 │                           # ci/smoke_prod_images.sh
 ├── .github/workflows/      # ci.yml: lint, tests, builds, prod-image smoke tests
@@ -299,7 +299,7 @@ cp code-runner/.env.example code-runner/.env
 #    - ai-service/.env: add GEMINI_API_KEY and/or OPENAI_API_KEY.
 
 # 3. Build the code-execution sandboxes (code-runner starts one per run)
-for lang in python c cpp java; do
+for lang in python c cpp java javascript go rust; do
   docker build -t interviewforge-$lang-sandbox:latest docker/sandboxes/$lang-sandbox/
 done
 
@@ -363,7 +363,8 @@ docker compose exec ai-service python -m pytest
 # Against the running stack
 python scripts/verify_phase7.py            # problems, filters, editorials, stats, streaks
 python scripts/verify_resume_isolation.py  # cross-user resume isolation and deletion
-python scripts/verify_problems.py          # every problem x 4 languages through the real sandbox
+python scripts/verify_problems.py          # every problem x 7 languages through the real sandbox
+python scripts/verify_coding_engine.py     # custom test cases, failing-case diffs, all 7 languages
 
 # Production images: build each Dockerfile.prod tagged :ci first (see the script header)
 bash scripts/ci/smoke_prod_images.sh
@@ -435,10 +436,9 @@ git clone <repo-url> ~/InterviewForge && cd ~/InterviewForge
 # and TRUST_PROXY=1, since Nginx sits in front and rate limits key on client IP
 
 # Build sandbox images
-docker build -t interviewforge-python-sandbox:latest docker/sandboxes/python-sandbox/
-docker build -t interviewforge-c-sandbox:latest docker/sandboxes/c-sandbox/
-docker build -t interviewforge-cpp-sandbox:latest docker/sandboxes/cpp-sandbox/
-docker build -t interviewforge-java-sandbox:latest docker/sandboxes/java-sandbox/
+for lang in python c cpp java javascript go rust; do
+  docker build -t interviewforge-$lang-sandbox:latest docker/sandboxes/$lang-sandbox/
+done
 
 # Start all services
 docker compose -f docker-compose.prod.yml up -d --build

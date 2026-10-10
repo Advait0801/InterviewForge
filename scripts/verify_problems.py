@@ -37,8 +37,9 @@ SOLUTIONS_DIR = os.path.join(ROOT, "backend", "reference_solutions")
 # Host port for code-runner in dev; services use code-runner:5000 internally.
 CODE_RUNNER = os.getenv("CODE_RUNNER_URL", "http://localhost:5050")
 
-LANGS = ["python3", "c", "cpp", "java"]
-FILENAMES = {"python3": "solution.py", "c": "solution.c", "cpp": "solution.cpp", "java": "solution.java"}
+LANGS = ["python3", "c", "cpp", "java", "javascript", "go", "rust"]
+FILENAMES = {"python3": "solution.py", "c": "solution.c", "cpp": "solution.cpp", "java": "solution.java",
+             "javascript": "solution.js", "go": "solution.go", "rust": "solution.rs"}
 
 
 def run(language: str, code: str, test_cases: list, slug: str) -> dict:

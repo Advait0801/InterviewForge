@@ -10,5 +10,9 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
+# The Python and JavaScript harnesses are plain files that tsc doesn't copy;
+# harness-gen loads them from dist/harnesses. Without this every Python and
+# JavaScript run fails in production with "Harness file not found" (Phase 7).
+COPY --from=builder /app/src/harnesses ./dist/harnesses
 EXPOSE 5000
 CMD ["node", "dist/index.js"]

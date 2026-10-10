@@ -8,7 +8,19 @@
  * user can debug it.
  */
 export type TestCase = { input: string; expectedOutput: string };
-export type CaseResult = { passed: boolean; actualOutput?: string; error?: string };
+
+/**
+ * Where a failing output departs from the expected one (code-runner/src/diff.ts). It's part
+ * of its case's result, so it reaches a client exactly when the case's contents do.
+ */
+export type OutputDiff =
+  | { kind: "format" }
+  | { kind: "type"; path: number[]; expectedType: string; actualType: string }
+  | { kind: "value"; path: number[]; expected: string | number | boolean | null; actual: string | number | boolean | null; charIndex?: number }
+  | { kind: "length"; path: number[]; expectedLength: number; actualLength: number }
+  | { kind: "items"; missing: unknown[]; unexpected: unknown[]; expectedLength: number; actualLength: number };
+
+export type CaseResult = { passed: boolean; actualOutput?: string; error?: string; diff?: OutputDiff };
 export type ClientCaseResult =
   | (CaseResult & { input: string; expectedOutput: string; hidden: false })
   | { passed: boolean; hidden: true };
