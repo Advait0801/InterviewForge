@@ -9,6 +9,86 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-11
 
+### D-071 — Interview replay, public share links that leak nothing, assessment proctoring
+
+**Why:** Group C, Phase 9. A finished interview could only be seen by its owner, and a timed
+assessment had a timer but no record of what happened during it. Exit criteria: public links
+expose no private data (tested), and proctoring events are recorded. No model calls.
+
+**Decided:**
+- **One allowlist serializer** (`services/replay.ts`) for both the owner's replay
+  (`GET /interviews/{id}/replay`) and a public link, so the owner previews exactly what a link
+  shows.
+  - It's built field by field because the data is hostile to sharing. A session and its messages
+    carry the user id, résumé excerpts, the retrieved context (which can include résumé
+    chunks), live-fetch URLs, the agent's rationale and model cost. Evaluations and the report
+    are model output that "may carry extra keys".
+  - What's shown:
+    - company, persona, mode, and the date (no times: events carry offsets in seconds);
+    - questions, follow-ups, answers and hints as text;
+    - evaluations as score, raw score, hint penalty and the three feedback lists;
+    - the report's score, known-stage scores and lists.
+  - A pushback follow-up shows `pushback: true` but not the evidence it quoted, which comes from
+    the retrieved context.
+  - An unknown message kind is skipped: a future private field stays private until it's added
+    on purpose.
+  - A résumé-grounded interview's questions can mention the résumé. That's the content being
+    shared; the create response returns `resumeGrounded` so the client can say so first.
+- **Links** (`POST`/`GET /interviews/{id}/share`, `DELETE …/share/{linkId}`, public
+  `GET /public/interviews/{token}`).
+  - The token is 32 random bytes, base64url. Only its SHA-256 is stored, plus a 4-character hint;
+    the token is shown once.
+  - Links work only for a completed interview with a **stored** report. The public page reads,
+    never generates, so a link can't spend model calls (409 `report_not_ready` otherwise).
+  - At most 5 active links per interview. Optional expiry (1–365 days) and an optional display
+    name chosen by the owner; nothing is taken from the account.
+  - The public route never reads `req.user`. A revoked, expired, unknown or malformed token gets
+    the same 404 body.
+  - Opening a link is one `UPDATE … RETURNING`, so a just-revoked link can't be served by a read
+    racing the revocation, and views are counted.
+  - Headers: `Cache-Control: no-store` (a revoked link must die in caches too),
+    `X-Robots-Tag: noindex, nofollow`, `Referrer-Policy: no-referrer` (the URL is the
+    credential).
+- **Proctoring** (`POST /assessments/{id}/events`).
+  - The browser batches events: tab hidden/visible, window blur/focus, paste/copy,
+    fullscreen exit/enter. Each is exactly `type`, `at` and, for paste or copy, `chars`.
+    Any other field is a 400, so pasted text can't be stored even by a client that sends it.
+  - Only the owner, only while the assessment is active (409 `assessment_closed`), timestamps
+    within a minute of the assessment's window, 1–50 per batch, 2000 per assessment (409
+    `event_limit`).
+  - `integrity` is on the assessment and on its submit result: tab switches, seconds hidden (an
+    unclosed hide counts to the finish or deadline), blurs, pastes and characters, largest
+    paste, copies, fullscreen exits.
+  - Flags at 3+ tab switches, 60+ seconds away, or a single paste of 200+ characters. They're
+    indicators for a reviewer and never change the score: a notification blurs a window, and
+    pasting your own snippet is fine.
+
+**Verified:**
+- **CANARY test** (`sharing.routes.test.ts`). Every private field of a seeded session carries
+  "CANARY": résumé excerpt, context, grounding, confidence reason, live-fetch URL, agent
+  rationale, challenge claim and evidence, evaluation and report extra keys, a non-stage report
+  key, an unknown message kind.
+  - Neither the owner's replay nor the public page contains it, nor any id, the cost, or a time
+    of day.
+  - Two careless widenings of the allowlist each fail it: spreading the evaluation, and
+    appending `groundedIn` to a question.
+- `scripts/verify_sharing.py` (new), **27/27** live. The shared interviews are written into
+  Postgres with the same canaries, so no model calls:
+  - the replay and the public page canary-free; the page equals the owner's preview plus the
+    chosen name, with the right headers, the same for a signed-in viewer, and views counted;
+  - the ai-service's call counter didn't move;
+  - only the SHA-256 stored;
+  - 409s for no report and a sixth link; another user can't list or revoke;
+  - revoked, expired, unknown and malformed all the same 404;
+  - proctoring: summary and flags, pasted text refused and not stored, another user 404, the
+    summary on the assessment and the submit result, 409 after submit;
+  - 0 `openapi_violation`.
+- Tests: backend **452** (was 411): canary, links, public page, proctoring routes, the integrity
+  summary. Web 135, lint and tsc on the regenerated types.
+
+**Found (BACKLOG):** sharing an assessment the same way; a retention window for raw proctoring
+events.
+
 ### D-070 — Learning features: Problem of the Day, an SM-2 review queue, personal paths from weak topics
 
 **Why:** Group C, Phase 8. Practice had no daily hook and no memory of what a user struggled

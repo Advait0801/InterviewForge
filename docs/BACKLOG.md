@@ -50,6 +50,13 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
   failures, hints). SM-2 normally lets the learner grade themselves too ("easy" / "hard"); worth
   adding once the UI shows the queue.
 
+## Found while building sharing and integrity (D-071)
+
+- **Share an assessment, not only an interview** *(S)* — public links cover interviews. An
+  assessment's score, problems and integrity summary could use the same token mechanism.
+- **Retention for proctoring events** *(S)* — `assessment_events` keeps everything forever. Drop
+  raw events some months after submission and keep only the summary.
+
 ## Alternative showpieces (considered and not chosen)
 
 - **Elo-rated adaptive difficulty** *(L, Loud)* — per-topic Elo for users *and* problems,
@@ -64,10 +71,7 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Product
 
-- **Session replay + shareable public report links** *(M, Loud)* — a permanent URL a recruiter
-  can open without signing up.
 - **Peer mock interviews** *(L)* — WebRTC over the dormant Socket.IO (F-06).
-- **Assessment proctoring** *(S)* — tab-switch and paste detection.
 - **Semantic caching** *(M)* — serve cached context within a similarity threshold of a recent
   query. Partially superseded by the Phase 4 write-back cache.
 

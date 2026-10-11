@@ -144,3 +144,27 @@ export async function complete(id: string, score: number): Promise<void> {
     [id, score]
   );
 }
+
+export type EventRow = { type: string; at: string; chars: number | null };
+
+export async function countEvents(assessmentId: string): Promise<number> {
+  const result = await query<{ n: number }>(`SELECT COUNT(*)::int AS n FROM assessment_events WHERE assessment_id = $1`, [assessmentId]);
+  return result.rows[0]?.n ?? 0;
+}
+
+export async function insertEvents(assessmentId: string, events: Array<{ type: string; at: string; chars: number | null }>): Promise<void> {
+  await query(
+    `INSERT INTO assessment_events (assessment_id, type, client_at, chars)
+       SELECT $1, * FROM unnest($2::text[], $3::timestamptz[], $4::int[])`,
+    [assessmentId, events.map((e) => e.type), events.map((e) => e.at), events.map((e) => e.chars)]
+  );
+}
+
+export async function listEvents(assessmentId: string): Promise<EventRow[]> {
+  const result = await query<EventRow>(
+    `SELECT type, client_at::text AS at, chars FROM assessment_events
+      WHERE assessment_id = $1 ORDER BY client_at, id`,
+    [assessmentId]
+  );
+  return result.rows;
+}

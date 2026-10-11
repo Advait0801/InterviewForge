@@ -24,7 +24,24 @@ beforeAll(async () => {
   api = await serve("/api/assessments", assessmentsRouter);
 });
 afterAll(() => api.close());
-beforeEach(() => resetDb(db));
+/** assessment_events, in memory: what the proctoring routes have recorded. */
+let stored: Array<{ type: string; at: string; chars: number | null }> = [];
+beforeEach(() => {
+  resetDb(db);
+  stored = [];
+  db.handlers.push(
+    { match: "SELECT type, client_at::text AS at, chars FROM assessment_events", reply: () => stored },
+    { match: "COUNT(*)::int AS n FROM assessment_events", reply: () => [{ n: stored.length }] },
+    {
+      match: "INSERT INTO assessment_events",
+      reply: (params) => {
+        const [, types, ats, chars] = params as [string, string[], string[], (number | null)[]];
+        types.forEach((type, i) => stored.push({ type, at: ats[i], chars: chars[i] }));
+        return [];
+      },
+    }
+  );
+});
 
 function assessment(overrides: Record<string, unknown> = {}) {
   return {
@@ -193,12 +210,97 @@ describe("POST /api/assessments/:id/submit", () => {
       { match: "UPDATE assessments SET status = 'completed'", reply: [] }
     );
     const r = await api.request("POST", `/api/assessments/${ASSESSMENT}/submit`);
-    expect(r.body).toMatchObject({ score: 33.33, passed: 1, total: 3, status: "completed" });
+    expect(r.body).toMatchObject({ score: 33.33, passed: 1, total: 3, status: "completed", integrity: { events: 0, flags: [] } });
   });
 
   it("can't be submitted twice", async () => {
     assessmentLookup(assessment({ status: "completed" }));
     const r = await api.request("POST", `/api/assessments/${ASSESSMENT}/submit`);
     expect(r.status).toBe(400);
+  });
+});
+
+describe("POST /api/assessments/:id/events (proctoring)", () => {
+  const at = (secondsAgo: number) => new Date(Date.now() - secondsAgo * 1000).toISOString();
+  const post = (events: unknown, token?: string | null) =>
+    api.request("POST", `/api/assessments/${ASSESSMENT}/events`, { body: { events }, ...(token !== undefined ? { token } : {}) });
+
+  it("records a batch and returns the summary, with flags", async () => {
+    assessmentLookup(assessment());
+    const r = await post([
+      { type: "tab_hidden", at: at(300) },
+      { type: "tab_visible", at: at(200) },
+      { type: "tab_hidden", at: at(150) },
+      { type: "tab_visible", at: at(140) },
+      { type: "tab_hidden", at: at(100) },
+      { type: "tab_visible", at: at(99) },
+      { type: "paste", at: at(90), chars: 450 },
+      { type: "copy", at: at(80), chars: 12 },
+      { type: "window_blur", at: at(70) },
+    ]);
+    expect(r.status).toBe(201);
+    expect(r.body.recorded).toBe(9);
+    expect(r.body.integrity).toMatchObject({
+      tabSwitches: 3,
+      hiddenSeconds: 111,
+      pastes: 1,
+      pastedChars: 450,
+      largestPaste: 450,
+      copies: 1,
+      windowBlurs: 1,
+    });
+    expect(r.body.integrity.flags).toEqual(["Left the tab 3 times", "Away from the tab for 111 seconds", "Pasted 450 characters at once"]);
+  });
+
+  it("the summary shows on the assessment too", async () => {
+    assessmentLookup(assessment());
+    db.handlers.push({ match: "FROM assessment_problems ap", reply: [assessmentProblem(PROBLEM_A, 0), assessmentProblem(PROBLEM_B, 1)] });
+    stored = [{ type: "paste", at: at(60), chars: 5 }];
+    const r = await api.request("GET", `/api/assessments/${ASSESSMENT}`);
+    expect(r.body.integrity).toMatchObject({ events: 1, pastes: 1, flags: [] });
+  });
+
+  it.each([
+    ["pasted text", [{ type: "paste", at: at(5), chars: 3, text: "abc" }], /unexpected field text/],
+    ["an unknown type", [{ type: "screenshot", at: at(5) }], /type must be/],
+    ["a paste without chars", [{ type: "paste", at: at(5) }], /needs chars/],
+    ["chars on a tab event", [{ type: "tab_hidden", at: at(5), chars: 1 }], /only for paste and copy/],
+    ["a bad timestamp", [{ type: "copy", at: "yesterday", chars: 1 }], /ISO 8601/],
+    ["an empty batch", [], /1-50/],
+    ["too many in a batch", Array.from({ length: 51 }, () => ({ type: "window_blur", at: at(5) })), /1-50/],
+  ])("400 for %s, recording nothing", async (_label, events, message) => {
+    assessmentLookup(assessment());
+    const r = await post(events);
+    expect(r.status).toBe(400);
+    expect(r.body.error).toMatch(message);
+    expect(stored).toHaveLength(0);
+  });
+
+  it("400 for an event stamped outside the assessment", async () => {
+    assessmentLookup(assessment());
+    const r = await post([{ type: "window_blur", at: at(60 * 60 * 3) }]);
+    expect(r.status).toBe(400);
+    expect(stored).toHaveLength(0);
+  });
+
+  it("409 once the assessment is submitted", async () => {
+    assessmentLookup(assessment({ status: "completed", finished_at: new Date().toISOString() }));
+    const r = await post([{ type: "window_blur", at: at(5) }]);
+    expect(r).toMatchObject({ status: 409, body: { code: "assessment_closed" } });
+  });
+
+  it("409 past the per-assessment limit", async () => {
+    assessmentLookup(assessment());
+    stored = Array.from({ length: 1990 }, () => ({ type: "window_blur", at: at(100), chars: null }));
+    const r = await post(Array.from({ length: 11 }, () => ({ type: "window_blur", at: at(5) })));
+    expect(r).toMatchObject({ status: 409, body: { code: "event_limit" } });
+    expect(stored).toHaveLength(1990);
+  });
+
+  it("404 for someone else's assessment; 401 anonymous", async () => {
+    assessmentLookup(assessment({ user_id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc" }));
+    expect((await post([{ type: "window_blur", at: at(5) }])).status).toBe(404);
+    expect((await post([{ type: "window_blur", at: at(5) }], null)).status).toBe(401);
+    expect(stored).toHaveLength(0);
   });
 });
