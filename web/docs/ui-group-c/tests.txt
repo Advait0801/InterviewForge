@@ -5,35 +5,34 @@
 
  RUN  v3.2.7 /Users/advait0801/Desktop/Development/InterviewForge/web
 
- ✓ src/components/layout/__tests__/navbar.test.tsx (3 tests) 433ms
- ✓ src/components/__tests__/group-c.test.tsx (36 tests) 594ms
- ✓ src/app/__tests__/completion.test.tsx (7 tests) 616ms
-   ✓ completion pages > validates passwords locally and preserves values after a server error  369ms
- ✓ src/app/__tests__/workspaces.test.tsx (10 tests) 855ms
- ✓ src/app/__tests__/onboarding.test.tsx (7 tests) 731ms
- ✓ src/app/__tests__/discovery.test.tsx (6 tests) 871ms
-   ✓ practice discovery > combines every catalogue filter, reports exact counts, and resets a no-match state  685ms
- ✓ src/app/__tests__/interview-upgrades.test.tsx (21 tests) 1070ms
- ✓ src/components/ui/__tests__/controls.test.tsx (5 tests) 133ms
- ✓ src/components/ui/__tests__/theme-provider.test.tsx (1 test) 93ms
- ✓ src/hooks/__tests__/use-proctoring.test.tsx (11 tests) 68ms
- ✓ src/hooks/__tests__/use-speech-recording.test.tsx (22 tests) 110ms
- ✓ src/app/__tests__/progress.test.tsx (4 tests) 357ms
- ✓ src/components/interview/__tests__/conversation.test.tsx (3 tests) 63ms
- ✓ src/app/__tests__/group-c.test.tsx (17 tests) 1627ms
-   ✓ Group C coding workspaces > persists cases, maps a rejected sent index past empties, and focuses the invalid input  327ms
- ✓ src/lib/__tests__/api-contract.test.ts (32 tests) 40ms
- ✓ src/components/ui/__tests__/app-toaster.test.tsx (1 test) 21ms
- ✓ src/components/auth/__tests__/protected.test.tsx (2 tests) 20ms
- ✓ src/components/__tests__/code-workspace-editor.test.tsx (2 tests) 13ms
+ ✓ src/components/layout/__tests__/navbar.test.tsx (3 tests) 420ms
+ ✓ src/app/__tests__/completion.test.tsx (7 tests) 578ms
+   ✓ completion pages > validates passwords locally and preserves values after a server error  352ms
+ ✓ src/components/__tests__/group-c.test.tsx (36 tests) 606ms
+ ✓ src/app/__tests__/onboarding.test.tsx (7 tests) 692ms
+ ✓ src/app/__tests__/workspaces.test.tsx (10 tests) 883ms
+ ✓ src/app/__tests__/discovery.test.tsx (6 tests) 963ms
+   ✓ practice discovery > combines every catalogue filter, reports exact counts, and resets a no-match state  726ms
+ ✓ src/components/interview/__tests__/conversation.test.tsx (3 tests) 69ms
+ ✓ src/app/__tests__/interview-upgrades.test.tsx (21 tests) 1184ms
+ ✓ src/components/ui/__tests__/controls.test.tsx (5 tests) 126ms
+ ✓ src/app/__tests__/progress.test.tsx (4 tests) 306ms
+ ✓ src/hooks/__tests__/use-speech-recording.test.tsx (22 tests) 103ms
+ ✓ src/components/ui/__tests__/theme-provider.test.tsx (1 test) 106ms
+ ✓ src/app/__tests__/group-c.test.tsx (17 tests) 1532ms
+ ✓ src/hooks/__tests__/use-proctoring.test.tsx (11 tests) 76ms
+ ✓ src/components/auth/__tests__/protected.test.tsx (2 tests) 25ms
+ ✓ src/lib/__tests__/api-contract.test.ts (32 tests) 41ms
+ ✓ src/components/__tests__/code-workspace-editor.test.tsx (2 tests) 11ms
+ ✓ src/lib/__tests__/sse.test.ts (8 tests) 13ms
  ✓ src/lib/__tests__/session.test.ts (4 tests) 8ms
- ✓ src/lib/__tests__/sse.test.ts (8 tests) 8ms
- ✓ src/app/__tests__/interview-design.test.tsx (9 tests) 2239ms
-   ✓ interview flow > moves through a follow-up and all four stages with a multiline draft  446ms
-   ✓ interview flow > shows microphone denial and appends a successful transcript before voice evaluation  695ms
+ ✓ src/components/ui/__tests__/app-toaster.test.tsx (1 test) 12ms
+ ✓ src/app/__tests__/interview-design.test.tsx (9 tests) 2203ms
+   ✓ interview flow > moves through a follow-up and all four stages with a multiline draft  455ms
+   ✓ interview flow > shows microphone denial and appends a successful transcript before voice evaluation  700ms
 
  Test Files  21 passed (21)
       Tests  211 passed (211)
-   Start at  00:53:27
-   Duration  3.72s (transform 1.36s, setup 3.43s, collect 4.58s, tests 9.97s, environment 7.49s, prepare 1.27s)
+   Start at  00:59:19
+   Duration  3.61s (transform 1.12s, setup 3.22s, collect 3.78s, tests 9.96s, environment 7.47s, prepare 1.01s)
 

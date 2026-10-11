@@ -13,7 +13,7 @@
   Generating static pages using 9 workers (5/20) 
   Generating static pages using 9 workers (10/20) 
   Generating static pages using 9 workers (15/20) 
-✓ Generating static pages using 9 workers (20/20) in 190.3ms
+✓ Generating static pages using 9 workers (20/20) in 188.7ms
   Finalizing page optimization ...
 
 Route (app)
