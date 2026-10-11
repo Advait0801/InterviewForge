@@ -18,7 +18,7 @@ function endSession() {
 }
 
 export class ApiError extends Error {
-  constructor(message: string, public readonly status: number, public readonly retryable?: boolean, public readonly code?: string, public readonly availableAt?: string) {
+  constructor(message: string, public readonly status: number, public readonly retryable?: boolean, public readonly code?: string, public readonly availableAt?: string, public readonly retryAfterSeconds?: number, public readonly customInputErrors?: { index: number; error: string }[]) {
     super(message);
     this.name = "ApiError";
   }
@@ -58,6 +58,8 @@ function responseError(error: unknown, status: number): ApiError {
   let retryable: boolean | undefined;
   let code: string | undefined;
   let availableAt: string | undefined;
+  let retryAfterSeconds: number | undefined;
+  let customInputErrors: { index: number; error: string }[] | undefined;
   if (typeof error === "object" && error !== null) {
     if ("error" in error && typeof error.error === "string") message = error.error;
     else if ("detail" in error && typeof error.detail === "string") message = error.detail;
@@ -65,7 +67,14 @@ function responseError(error: unknown, status: number): ApiError {
     if ("code" in error && typeof error.code === "string") code = error.code;
     if ("availableAt" in error && typeof error.availableAt === "string") availableAt = error.availableAt;
   }
-  return new ApiError(message, status, retryable, code, availableAt);
+  if (typeof error === "object" && error !== null) {
+    if ("retryAfterSeconds" in error && typeof error.retryAfterSeconds === "number") retryAfterSeconds = error.retryAfterSeconds;
+    if ("customInputErrors" in error && Array.isArray(error.customInputErrors)) {
+      customInputErrors = error.customInputErrors.filter((item): item is { index: number; error: string } =>
+        typeof item === "object" && item !== null && Number.isInteger(item.index) && typeof item.error === "string");
+    }
+  }
+  return new ApiError(message, status, retryable, code, availableAt, retryAfterSeconds, customInputErrors);
 }
 
 export type Persona = components["schemas"]["Persona"];
@@ -126,9 +135,26 @@ export type RecommendedProblemCard = components["schemas"]["ProblemCard"];
 export type RevisitProblemCard = components["schemas"]["Recommendations"]["revisit"][number];
 export type RecommendationsResponse = components["schemas"]["Recommendations"];
 
+export type Language = components["schemas"]["Language"];
+export type OutputDiff = components["schemas"]["OutputDiff"];
+export type CustomCaseResult = components["schemas"]["CustomCaseResult"];
+export type ReviewOutcome = components["schemas"]["ReviewOutcome"];
+export type DailyProblem = components["schemas"]["DailyProblem"];
+export type ReviewQueue = components["schemas"]["ReviewQueue"];
+export type ReviewItem = components["schemas"]["ReviewItem"];
+export type FocusTopic = components["schemas"]["FocusTopic"];
+export type InterviewReplay = components["schemas"]["InterviewReplay"];
+export type ReplayEvent = components["schemas"]["ReplayEvent"];
+export type ReplayReport = components["schemas"]["ReplayReport"];
+export type ShareLink = components["schemas"]["ShareLink"];
+export type Integrity = components["schemas"]["Integrity"];
+export type IntegrityEventType = components["schemas"]["IntegrityEventType"];
+export type IntegrityEvent = operations["recordAssessmentEvents"]["requestBody"]["content"]["application/json"]["events"][number];
+export type DailyHistory = Awaited<ReturnType<typeof api.getDailyHistory>>;
+
 // Preserve the public string argument signatures while validating the contract enums.
 function languageValue(value: string): components["schemas"]["Language"] {
-  const values: components["schemas"]["Language"][] = ["python3", "c", "cpp", "java"];
+  const values: components["schemas"]["Language"][] = ["python3", "c", "cpp", "java", "javascript", "go", "rust"];
   const language = values.find((item) => item === value);
   if (!language) throw new Error("Choose a supported coding language.");
   return language;
@@ -147,6 +173,20 @@ function difficultyMixValue(value: string): Assessment["difficulty_mix"] {
 }
 
 export const api = {
+  resendVerification: () => unwrap(client.POST("/auth/resend-verification", { headers: authHeaders() })),
+  recordHintViews: (id: string, count: number) => unwrap(client.POST("/problems/{id}/hints/viewed", { params: { path: { id } }, headers: authHeaders(), body: { count } })),
+  getDailyProblem: (date?: string, auth = true) => unwrap(client.GET("/problems/daily", { headers: authHeaders(auth), params: { query: { date } } })),
+  getDailyHistory: (days = 30, auth = true) => unwrap(client.GET("/problems/daily/history", { headers: authHeaders(auth), params: { query: { days } } })),
+  getReviewQueue: () => unwrap(client.GET("/review", { headers: authHeaders() })),
+  addToReview: (problemId: string) => unwrap(client.POST("/review/{problemId}", { headers: authHeaders(), params: { path: { problemId } } })),
+  removeFromReview: (problemId: string) => unwrap(client.DELETE("/review/{problemId}", { headers: authHeaders(), params: { path: { problemId } } })),
+  generateLearningPath: () => unwrap(client.POST("/learning-paths/generate", { headers: authHeaders() })),
+  getInterviewReplay: (id: string) => unwrap(client.GET("/interviews/{id}/replay", { headers: authHeaders(), params: { path: { id } } })),
+  createInterviewShare: (id: string, options: { displayName?: string | null; expiresInDays?: number | null }) => unwrap(client.POST("/interviews/{id}/share", { headers: authHeaders(), params: { path: { id } }, body: options })),
+  listInterviewShares: (id: string) => unwrap(client.GET("/interviews/{id}/share", { headers: authHeaders(), params: { path: { id } } })),
+  revokeInterviewShare: (id: string, linkId: string) => unwrap(client.DELETE("/interviews/{id}/share/{linkId}", { headers: authHeaders(), params: { path: { id, linkId } } })),
+  getPublicInterview: (token: string) => unwrap(client.GET("/public/interviews/{token}", { headers: authHeaders(false), params: { path: { token } } })),
+  recordAssessmentEvents: (id: string, events: IntegrityEvent[]) => unwrap(client.POST("/assessments/{id}/events", { headers: authHeaders(), params: { path: { id } }, body: { events } })),
   register: (username: string, email: string, password: string, fullName?: string) =>
     unwrap(client.POST("/auth/register", { body: { username, email, password, fullName } })),
   login: (identifier: string, password: string) =>
@@ -183,8 +223,8 @@ export const api = {
     unwrap(client.POST("/problem-bookmarks/{problemId}", { params: { path: { problemId } }, headers: authHeaders() })),
   removeBookmark: (problemId: string) =>
     unwrap(client.DELETE("/problem-bookmarks/{problemId}", { params: { path: { problemId } }, headers: authHeaders() })),
-  runCode: async (problemId: string, language: string, code: string) => {
-    const result = await unwrap(client.POST("/submissions", { headers: authHeaders(), body: { problemId, language: languageValue(language), code, mode: "run" } }));
+  runCode: async (problemId: string, language: string, code: string, customInputs?: string[]) => {
+    const result = await unwrap(client.POST("/submissions", { headers: authHeaders(), body: { problemId, language: languageValue(language), code, mode: "run", ...(customInputs?.length ? { customInputs } : {}) } }));
     if (result.mode !== "run") throw new Error("The server did not return a Run result.");
     return result;
   },

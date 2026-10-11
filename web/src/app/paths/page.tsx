@@ -7,6 +7,7 @@ import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Button, buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { GenerateFocusPath } from "@/components/focus-path";
 import { api, LearningPathSummary } from "@/lib/api";
 
 function levelColor(level: string) {
@@ -43,7 +44,7 @@ export default function LearningPathsPage() {
     setLoadError(null);
     try {
       const response = await api.getLearningPaths(true);
-      setPaths(response.paths);
+      setPaths([...response.paths].sort((a, b) => Number(Boolean(b.isPersonal)) - Number(Boolean(a.isPersonal))));
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Failed to load learning paths");
     } finally {
@@ -89,6 +90,7 @@ export default function LearningPathsPage() {
             </Link>
           </motion.header>
 
+          <GenerateFocusPath rebuild={paths.some((path) => path.isPersonal)} />
           {!loading && !loadError && paths.length > 0 ? (
             <section className="grid grid-cols-3 gap-2 sm:max-w-xl sm:gap-3" aria-label="Learning path summary">
               {[
@@ -149,6 +151,7 @@ export default function LearningPathsPage() {
                               {path.difficultyLevel}
                             </span>
                           </div>
+                          {path.isPersonal && <span className="mt-3 text-xs font-semibold text-primary">Personal</span>}
                           <h3 className="mt-4 break-words text-lg font-semibold text-text-primary transition-colors group-hover:text-primary">{path.title}</h3>
                           <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-text-secondary">{path.description}</p>
                           <div className="mt-auto pt-5">

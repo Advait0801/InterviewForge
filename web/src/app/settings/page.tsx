@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { PasswordField } from "@/components/ui/password-field";
 import { Avatar } from "@/components/ui/avatar";
 import { LoadingState, StatePanel } from "@/components/ui/state-panel";
+import { EmailConfirmation } from "@/components/email-confirmation";
 import { api } from "@/lib/api";
 import { clearToken, setToken } from "@/lib/auth";
 
@@ -23,6 +24,7 @@ type FieldErrors = {
 export default function SettingsPage() {
   const [user, setUser] = useState<{
     email: string;
+    email_verified: boolean;
     username: string | null;
     name: string | null;
     avatar_url: string | null;
@@ -226,6 +228,7 @@ export default function SettingsPage() {
                         </div>
                       ))}
                     </dl>
+                    <EmailConfirmation email={user.email} confirmed={user.email_verified} />
                   </>
                 ) : null}
               </Card>

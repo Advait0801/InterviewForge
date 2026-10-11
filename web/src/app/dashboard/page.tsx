@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { DailyProblemWidget } from "@/components/daily-problem";
+import { ReviewDue } from "@/components/review-due";
+import { EmailConfirmation } from "@/components/email-confirmation";
 import { useNow } from "@/lib/useNow";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
@@ -107,6 +110,7 @@ function ProblemCard({ problem, meta }: { problem: RecommendedProblemCard; meta?
 export default function DashboardPage() {
   const now = useNow();
   const [userName, setUserName] = useState<string | null>(null);
+  const [emailState, setEmailState] = useState<{ email: string; verified: boolean } | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     problemsAttempted: null,
@@ -127,6 +131,7 @@ export default function DashboardPage() {
     setProfileError(null);
     try {
       const response = await api.me();
+      setEmailState({ email: response.user.email, verified: response.user.email_verified });
       setUserName(response.user.name || response.user.username || response.user.email.split("@")[0]);
     } catch (error) {
       setProfileError(errorMessage(error, "Profile details are unavailable."));
@@ -188,6 +193,9 @@ export default function DashboardPage() {
     <Protected>
       <PageShell>
         <motion.div initial="hidden" animate="visible" className="space-y-8">
+          {emailState?.verified === false && <EmailConfirmation email={emailState.email} confirmed={false} banner />}
+          <DailyProblemWidget />
+          <ReviewDue />
           <motion.section variants={fadeUp} custom={0} className="relative overflow-hidden rounded-3xl border border-border bg-surface/75 p-6 sm:p-8" aria-labelledby="dashboard-title">
             <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-primary/12 blur-3xl" aria-hidden />
             <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">

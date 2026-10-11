@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AssessmentsPage from "../assessments/page";
 import ProblemWorkspacePage from "../problems/[id]/page";
 import AssessmentWorkspacePage, { formatAssessmentTime } from "../assessments/[id]/page";
-import type { Assessment, AssessmentProblem, ProblemDetail } from "@/lib/api";
+import type { Assessment, AssessmentProblem, ProblemDetail, Submission } from "@/lib/api";
 
 const mocks = vi.hoisted(() => ({
   router: { push: vi.fn() },
@@ -322,4 +322,17 @@ describe("assessment workspace", () => {
     expect(formatAssessmentTime(65_000)).toBe("1:05");
     expect(formatAssessmentTime(3_665_000)).toBe("1:01:05");
   });
+});
+
+it("preserves code edited while per-language submission history is still loading", async () => {
+  const user = userEvent.setup(); render(<ProblemWorkspacePage />);
+  await screen.findByRole("heading", { name: "Two Sum" });
+  await user.click(screen.getByRole("button", { name: "Editor" }));
+  const history = deferred<{ submissions: Submission[]; total: number; limit: number; offset: number }>();
+  mocks.getSubmissions.mockReturnValueOnce(history.promise);
+  await user.selectOptions(screen.getByLabelText("Language"), "cpp");
+  const editor = screen.getByRole("textbox", { name: "Code editor" });
+  await user.clear(editor); await user.type(editor, "fresh cpp draft");
+  await act(async () => { history.resolve({ submissions: [], total: 0, limit: 50, offset: 0 }); });
+  expect(editor).toHaveValue("fresh cpp draft");
 });

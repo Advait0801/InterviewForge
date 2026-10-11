@@ -11,7 +11,7 @@ vi.mock("@/components/layout/page-shell", () => ({ PageShell: ({ children }: { c
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/lib/api", async (original) => {
   const actual = await original<typeof import("@/lib/api")>();
-  return { ...actual, api: { ...actual.api, startInterviewStream: mocks.start, answerInterviewStream: mocks.answer, getInterview: mocks.get, interviewHint: mocks.hint } };
+  return { ...actual, api: { ...actual.api, listInterviews: vi.fn().mockResolvedValue({ sessions: [] }), startInterviewStream: mocks.start, answerInterviewStream: mocks.answer, getInterview: mocks.get, interviewHint: mocks.hint } };
 });
 const evaluation: components["schemas"]["Evaluation"] = { score: 5, rawScore: 7, hintPenalty: 2, hintsUsed: 2, strengths: ["Clear reasoning"], weaknesses: [], suggestions: [], shouldAskFollowup: true, followupFocus: "tradeoffs" };
 const opening: components["schemas"]["InterviewQuestion"] = { question: "Final opening question", reasoningFocus: "tradeoffs", expectedCompetencies: [], retrievalHits: 0, context: "", retrievalConfidence: null, liveIngestion: null, resumeGrounded: false, resumeHits: 0, resumeEvidence: [] };

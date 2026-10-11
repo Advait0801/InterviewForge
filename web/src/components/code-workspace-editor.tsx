@@ -2,16 +2,19 @@
 
 import Editor, { type BeforeMount, type OnMount } from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
-import { useSyncExternalStore } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { useTheme } from "@/components/ui/theme-provider";
 
-export type WorkspaceLanguage = "python3" | "cpp" | "c" | "java";
+export type WorkspaceLanguage = "python3" | "cpp" | "c" | "java" | "javascript" | "go" | "rust";
 
 const MONACO_LANG: Record<WorkspaceLanguage, string> = {
   python3: "python",
   cpp: "cpp",
   c: "c",
   java: "java",
+  javascript: "javascript",
+  go: "go",
+  rust: "rust",
 };
 
 function defineInterviewForgeThemes(monaco: typeof Monaco) {
@@ -82,6 +85,7 @@ export function CodeWorkspaceEditor({
   readOnly?: boolean;
   className?: string;
 }) {
+  const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const { theme } = useTheme();
   const reducedMotion = useSyncExternalStore(subscribeToReducedMotion, getReducedMotion, () => false);
   const editorTheme = theme === "dark" ? "interviewforge-dark" : "interviewforge-light";
@@ -91,12 +95,18 @@ export function CodeWorkspaceEditor({
   };
 
   const onMount: OnMount = (ed, monaco) => {
+    editorRef.current = ed;
     monaco.editor.setTheme(editorTheme);
     ed.layout();
   };
 
   return (
-    <div className={className ?? "min-h-0 min-w-0 flex-1"}>
+    <div data-proctoring-editor className={className ?? "min-h-0 min-w-0 flex-1"} onCopyCapture={() => {
+      const editor = editorRef.current;
+      const selection = editor?.getSelection();
+      const chars = selection ? editor?.getModel()?.getValueLengthInRange(selection) ?? 0 : 0;
+      document.dispatchEvent(new CustomEvent("if-editor-copy", { detail: { chars } }));
+    }}>
       <Editor
         height="100%"
         language={MONACO_LANG[language]}

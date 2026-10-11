@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 const mocks = vi.hoisted(() => ({
   pathname: "/problems/two-sum",
   me: vi.fn(),
+  getReviewQueue: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -14,7 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/api", () => ({
-  api: { me: mocks.me },
+  api: { me: mocks.me, getReviewQueue: mocks.getReviewQueue },
 }));
 
 function renderNavbar() {
@@ -23,6 +24,7 @@ function renderNavbar() {
 
 describe("Navbar", () => {
   beforeEach(() => {
+    mocks.getReviewQueue.mockResolvedValue({ counts: { due: 3 } });
     mocks.pathname = "/problems/two-sum";
     mocks.me.mockResolvedValue({ user: { avatar_url: null, name: "Ada Lovelace", username: "ada" } });
   });
@@ -58,6 +60,7 @@ describe("Navbar", () => {
     expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole("link", { name: "Account settings" })).toBeInTheDocument());
     expect(mocks.me).toHaveBeenCalledOnce();
+    expect(screen.getByLabelText("3 reviews due")).toHaveTextContent("3");
     expect(screen.getByRole("button", { name: "Logout" })).toBeInTheDocument();
   });
 });

@@ -12,6 +12,7 @@ import { api } from "@/lib/api";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/review", label: "Review" },
   { href: "/problems", label: "Practice" },
   { href: "/interview", label: "Interview" },
   { href: "/system-design", label: "System Design" },
@@ -23,6 +24,7 @@ const navLinks = [
 
 export function Navbar() {
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  const [reviewDue, setReviewDue] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
@@ -41,6 +43,16 @@ export function Navbar() {
     }
   }, []);
   
+  useEffect(() => {
+    if (!getToken() || pathname.startsWith("/share/")) return;
+    const refresh = () => {
+      void api.getReviewQueue().then((queue) => setReviewDue(queue.counts.due)).catch(() => setReviewDue(null));
+    };
+    refresh();
+    window.addEventListener("if-review-changed", refresh);
+    return () => window.removeEventListener("if-review-changed", refresh);
+  }, [pathname]);
+
   useEffect(() => {
     queueMicrotask(() => setMobileOpen(false));
   }, [pathname]);
@@ -82,7 +94,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Primary navigation" className="hidden items-center gap-0.5 min-[1320px]:flex">
+        <nav aria-label="Primary navigation" className="hidden items-center gap-0.5 min-[1440px]:flex">
           {navLinks.map((link) => {
             const isActive = isActiveRoute(link.href);
             return (
@@ -96,7 +108,7 @@ export function Navbar() {
                     : "text-text-primary/70 hover:text-text-primary"
                 }`}
               >
-                {link.label}
+                {link.label}{link.href === "/review" && isAuthed && reviewDue !== null && <span className="ml-1 rounded-full border border-border bg-surface px-1.5 text-xs" aria-label={`${reviewDue} reviews due`}>{reviewDue}</span>}
                 {isActive && (
                   <motion.div
                     layoutId="nav-indicator"
@@ -135,7 +147,7 @@ export function Navbar() {
         {/* Mobile hamburger */}
         <button
           ref={menuButtonRef}
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface/70 text-text-secondary transition-colors hover:border-primary/40 hover:text-text-primary min-[1320px]:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface/70 text-text-secondary transition-colors hover:border-primary/40 hover:text-text-primary min-[1440px]:hidden"
           onClick={() => setMobileOpen((v) => !v)}
           type="button"
           aria-label="Toggle menu"
@@ -165,7 +177,7 @@ export function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden border-t border-border bg-background/95 shadow-xl backdrop-blur-xl min-[1320px]:hidden"
+            className="overflow-hidden border-t border-border bg-background/95 shadow-xl backdrop-blur-xl min-[1440px]:hidden"
           >
             <nav aria-label="Mobile navigation" className="mx-auto grid w-full max-w-[1600px] gap-1 px-4 py-4 sm:grid-cols-2 sm:px-6 lg:px-8">
               {navLinks.map((link, index) => {
@@ -181,7 +193,7 @@ export function Navbar() {
                       isActive ? "bg-primary/10 text-primary" : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
                     }`}
                   >
-                    {link.label}
+                    {link.label}{link.href === "/review" && isAuthed && reviewDue !== null && <span className="ml-1 rounded-full border border-border bg-surface px-1.5 text-xs" aria-label={`${reviewDue} reviews due`}>{reviewDue}</span>}
                   </Link>
                 );
               })}

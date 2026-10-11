@@ -1,10 +1,15 @@
 "use client";
 
+import { OutputDiff } from "@/components/output-diff";
+import { ReviewOutcome } from "@/components/review-outcome";
+import { CustomCases, CustomResults, type CustomCase } from "@/components/custom-cases";
+import { ProgressiveHints } from "@/components/progressive-hints";
+import { AddToReview } from "@/components/add-to-review";
 import dynamic from "next/dynamic";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { api, CodeReview, ProblemDetail, Submission, SubmissionDetail } from "@/lib/api";
+import { api, ApiError, CodeReview, ProblemDetail, Submission, SubmissionDetail } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import type { WorkspaceLanguage } from "@/components/code-workspace-editor";
 import { EditorialView } from "@/components/editorial-view";
@@ -25,10 +30,13 @@ const LANGUAGES: { value: Language; label: string }[] = [
   { value: "cpp", label: "C++" },
   { value: "c", label: "C" },
   { value: "java", label: "Java" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "go", label: "Go" },
+  { value: "rust", label: "Rust" },
 ];
 
 const LANG_KEY = "if-preferred-lang";
-const VALID_LANGS = new Set<string>(["python3", "cpp", "c", "java"]);
+const VALID_LANGS = new Set<string>(["python3", "cpp", "c", "java", "javascript", "go", "rust"]);
 
 /** Number of example cases shown in the problem description. */
 const EXAMPLE_CASE_COUNT = 4;
@@ -54,46 +62,6 @@ function parseProblemHints(raw: string | null | undefined): string[] {
     .split(/\n---\n/)
     .map((s) => s.trim())
     .filter(Boolean);
-}
-
-// Reveal count resets when the hints change. That is done by remounting via a
-// `key` at the call site rather than a setState-in-effect, which is React's
-// documented answer to "reset state when a prop changes".
-function ProgressiveHints({ hints }: { hints: string[] }) {
-  const [revealed, setRevealed] = useState(0);
-
-  if (hints.length === 0) {
-    return <p className="text-sm text-text-secondary">No hints available for this problem yet.</p>;
-  }
-
-  return (
-    <div className="space-y-4">
-      {hints.slice(0, revealed).map((h, i) => (
-        <div key={i} className="rounded-xl border border-border bg-surface/60 p-4">
-          <p className="mb-1 text-[11px] font-semibold text-text-secondary">Hint {i + 1}</p>
-          <p className="text-sm leading-relaxed text-text-primary whitespace-pre-wrap">{h}</p>
-        </div>
-      ))}
-      {revealed < hints.length && (
-        <button
-          type="button"
-          onClick={() => setRevealed((r) => r + 1)}
-          className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/20"
-        >
-          {revealed === 0 ? "Show hint 1" : `Show hint ${revealed + 1}`}
-        </button>
-      )}
-      {revealed === hints.length && hints.length > 1 && (
-        <button
-          type="button"
-          onClick={() => setRevealed(0)}
-          className="text-xs font-medium text-text-secondary hover:text-primary"
-        >
-          Reset hints
-        </button>
-      )}
-    </div>
-  );
 }
 
 function getSavedLanguage(): Language {
@@ -186,6 +154,9 @@ export default function WorkspacePage() {
   const [mobilePane, setMobilePane] = useState<WorkspacePane>("problem");
   const [executionError, setExecutionError] = useState<string | null>(null);
   const [runResult, setRunResult] = useState<RunResponse | null>(null);
+  const [customCases, setCustomCases] = useState<CustomCase[]>([]);
+  const [customErrors, setCustomErrors] = useState<Record<string, string>>({});
+  const customInputRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<
@@ -234,27 +205,29 @@ export default function WorkspacePage() {
 
   const loadProblem = useCallback(async () => {
     if (!params.id) return;
-    if (!getToken()) {
-      router.push("/login");
-      return;
-    }
     const sequence = ++problemLoadSequenceRef.current;
     languageRequestRef.current += 1;
     setProblemLoading(true);
     setProblemError(null);
     setProblem(null);
     setRunResult(null);
+    setCustomErrors({});
+    try {
+      const stored: unknown = JSON.parse(sessionStorage.getItem(`if-custom-cases:${params.id}`) ?? "[]");
+      setCustomCases(Array.isArray(stored) ? stored.filter((c): c is CustomCase => typeof c === "object" && c !== null && typeof c.id === "string" && typeof c.input === "string" && c.input.length <= 10000).slice(0, 10) : []);
+    } catch { setCustomCases([]); }
     setShowResults(false);
     languageDraftsRef.current = {};
     const preferredLang = getSavedLanguage();
     setLanguage(preferredLang);
     try {
-      const res = await api.getProblem(params.id, true);
+      const res = await api.getProblem(params.id, Boolean(getToken()));
       if (sequence !== problemLoadSequenceRef.current) return;
       setProblem(res.problem);
       const starter = res.problem.starter_code?.[preferredLang] || "";
       let restoredCode = starter;
       try {
+        if (!getToken()) { setCode(starter); return; }
         const subRes = await api.getSubmissions({ problemId: params.id });
         if (sequence !== problemLoadSequenceRef.current) return;
         setSubmissions(subRes.submissions);
@@ -275,7 +248,7 @@ export default function WorkspacePage() {
     } finally {
       if (sequence === problemLoadSequenceRef.current) setProblemLoading(false);
     }
-  }, [params.id, router]);
+  }, [params.id]);
 
   useEffect(() => {
     void loadProblem();
@@ -360,6 +333,7 @@ export default function WorkspacePage() {
       return;
     }
     setCode(newStarter);
+    if (!getToken()) return;
     api.getSubmissions({ problemId: problem.id }).then(async (res) => {
       setSubmissions(res.submissions);
       const latest = res.submissions.find((submission) => submission.language === newLang);
@@ -375,21 +349,40 @@ export default function WorkspacePage() {
   };
 
   const handleCodeChange = (value: string) => {
+    // A delayed history response must not overwrite code already being edited.
+    languageRequestRef.current += 1;
     languageDraftsRef.current[language] = value;
     setCode(value);
   };
 
   const handleRun = async () => {
     if (!problem) return;
+    if (!getToken()) { router.push("/login"); return; }
+    const sentCases = customCases.filter((item) => item.input.trim());
+    setCustomErrors({});
+    setRunResult(null);
     setRunning(true);
     setExecutionError(null);
     setShowResults(true);
     setResultTab("result");
     try {
-      const res = await api.runCode(problem.id, language, code);
+      const res = await api.runCode(problem.id, language, code, sentCases.length ? sentCases.map((item) => item.input) : undefined);
       setRunResult({ ...res, mode: "run" });
       saveLanguage(language);
     } catch (err) {
+      if (err instanceof ApiError && err.status === 400 && err.customInputErrors?.length) {
+        const errors: Record<string, string> = {};
+        for (const item of err.customInputErrors) {
+          const target = sentCases[item.index];
+          if (target) errors[target.id] = item.error;
+        }
+        setCustomErrors(errors);
+        setResultTab("testcases");
+        setMobilePane("editor");
+        const first = sentCases.find((item) => errors[item.id]);
+        requestAnimationFrame(() => { if (first) customInputRefs.current[first.id]?.focus(); });
+        return;
+      }
       const message = err instanceof Error ? err.message : "Run failed";
       setExecutionError(message);
       toast.error(message);
@@ -400,6 +393,7 @@ export default function WorkspacePage() {
 
   const handleSubmit = async () => {
     if (!problem) return;
+    if (!getToken()) { router.push("/login"); return; }
     setSubmitting(true);
     setExecutionError(null);
     setShowResults(true);
@@ -407,6 +401,7 @@ export default function WorkspacePage() {
     try {
       const res = await api.submitCode(problem.id, language, code);
       setRunResult({ ...res, mode: "submit" });
+      window.dispatchEvent(new Event("if-review-changed"));
       setLastSubmissionId(res.submissionId);
       setAiReview(null);
       setAiReviewOpen(false);
@@ -597,6 +592,7 @@ export default function WorkspacePage() {
           >
             {problem.is_bookmarked ? "Bookmarked" : "Bookmark"}
           </button>
+          {getToken() && <AddToReview problemId={problem.id} />}
           <label className="sr-only" htmlFor="problem-language">Language</label>
           <select
             id="problem-language"
@@ -735,7 +731,7 @@ export default function WorkspacePage() {
               />
             )}
             {activeTab === "hints" && (
-              <ProgressiveHints key={problem.id} hints={parseProblemHints(problem.hints)} />
+              <ProgressiveHints key={problem.id} hints={parseProblemHints(problem.hints)} problemId={problem.id} />
             )}
             {activeTab === "aireview" && (
               <div className="space-y-4">
@@ -911,6 +907,11 @@ export default function WorkspacePage() {
                           <pre className="mono whitespace-pre-wrap break-all text-xs text-text-primary">{tc.input}</pre>
                         </div>
                       ))}
+                      <CustomCases cases={customCases} errors={customErrors} firstInput={exampleCases[0]?.input ?? ""} inputRefs={customInputRefs} disabled={running || submitting} onChange={(cases) => {
+                        setCustomCases(cases);
+                        setCustomErrors({});
+                        try { sessionStorage.setItem(`if-custom-cases:${problem.id}`, JSON.stringify(cases)); } catch { /* Storage may be disabled. */ }
+                      }} />
                     </div>
                   )}
                 </div>
@@ -1011,6 +1012,8 @@ function ResultPanel({
   const passedCount = result.results.filter((r) => r.passed).length;
   const totalCount = result.results.length;
   const isAccepted = result.passed;
+  const customResults = result.mode === "run" ? result.customResults ?? [] : [];
+  const judgedCases = customResults.filter((item) => item.judged);
   // Run echoes the example cases it used; Submit attaches each case to its result,
   // and only where the server allows it to be seen (D-057).
   const caseFor = (idx: number) => {
@@ -1034,7 +1037,7 @@ function ResultPanel({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className={`text-lg font-bold ${isAccepted ? "text-accent" : "text-error"}`}>
             {result.mode === "submit"
@@ -1042,18 +1045,19 @@ function ResultPanel({
                 ? "Accepted"
                 : "Wrong Answer"
               : isAccepted
-                ? "All Sample Cases Passed"
-                : "Sample Case Failed"}
+                ? "All judged cases passed"
+                : "Some cases failed"}
           </span>
         </div>
         <div className="flex items-center gap-3 text-xs text-text-secondary">
           <span>
-            {passedCount}/{totalCount} passed
+            {result.mode === "run" ? `${passedCount}/${totalCount} examples${customResults.length ? ` · ${judgedCases.filter((item) => item.passed).length}/${judgedCases.length} your cases` : ""}` : `${passedCount}/${totalCount} passed`}
           </span>
           {result.runtimeMs != null && <span>{result.runtimeMs}ms</span>}
         </div>
       </div>
 
+      {result.mode === "submit" && <ReviewOutcome outcome={result.review} />}
       {isSubmitBulk && (
         <p className="text-[11px] text-text-secondary">
           Showing all failed cases first; then up to {expandPassedCap} passed cases
@@ -1081,12 +1085,12 @@ function ResultPanel({
             >
               <div className="mb-1 flex items-center gap-2">
                 <span className={`text-xs font-semibold ${r.passed ? "text-accent" : "text-error"}`}>
-                  {r.passed ? "✓" : "✗"} Case {idx + 1}
+                  {r.passed ? "Passed" : "Failed"} case {idx + 1}
                 </span>
                 {"hidden" in r && r.hidden ? <span className="text-[11px] text-text-secondary">Hidden test case</span> : null}
               </div>
               {caseFor(idx) && (
-                <div className="mono space-y-0.5 text-xs">
+                <div className="mono space-y-0.5 break-all text-xs">
                   <div>
                     <span className="text-text-secondary">Input: </span>
                     <span className="text-text-primary">{caseFor(idx)!.input}</span>
@@ -1109,10 +1113,12 @@ function ResultPanel({
                   )}
                 </div>
               )}
+              {"diff" in r && r.diff && <OutputDiff diff={r.diff} />}
             </div>
           );
         })}
       </div>
+      <CustomResults results={customResults} />
     </div>
   );
 }
