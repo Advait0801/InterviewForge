@@ -235,6 +235,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/problems/daily": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The problem of the day (D-070): today's by default, or any day in the last 365. Chosen
+         *     deterministically from the date -- the weekday sets the difficulty (Mon-Tue easy, Wed-Fri
+         *     medium, weekend hard) and a seeded shuffle walks each difficulty without repeats -- and
+         *     recorded the first time it's asked for, so a past day never changes. Days are UTC.
+         *     Signed in, also the caller's progress on it and their daily streak.
+         */
+        get: operations["getProblemOfTheDay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/problems/daily/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The last `days` days' problems, newest first, recording any not yet recorded. */
+        get: operations["getProblemOfTheDayHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/problems/{id}/hints/viewed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description How many of the problem's hints the client has revealed. Never decreases. A pass after
+         *     hints counts as a weaker recall in the review queue.
+         */
+        post: operations["recordHintViews"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/problems/{id}": {
         parameters: {
             query?: never;
@@ -627,6 +687,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/learning-paths/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Build (or rebuild, replacing it) the caller's personal path from their weakest topics
+         *     (D-070). Deterministic: the same history gives the same path. A 409 carries a `code`:
+         *     `not_enough_history`, `no_weak_topics` or `nothing_left_to_practise`.
+         */
+        post: operations["generateLearningPath"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/learning-paths/{slug}": {
         parameters: {
             query?: never;
@@ -654,6 +735,44 @@ export interface paths {
         put?: never;
         post: operations["completePathProblem"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The caller's spaced-repetition queue (SM-2, D-070). Problems enter it from Submit: a
+         *     failure, or a pass after failed attempts or hints. A pass on a due problem reschedules
+         *     it; earlier passes are practice and change nothing. Days are UTC.
+         */
+        get: operations["getReviewQueue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/review/{problemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Queue a problem by hand, due today. 200 if it was already queued. */
+        post: operations["addToReviewQueue"];
+        delete: operations["removeFromReviewQueue"];
         options?: never;
         head?: never;
         patch?: never;
@@ -754,7 +873,8 @@ export interface components {
             error: string;
             /**
              * @description `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes.
-             *     Hints (D-066): `hints_exhausted` and `hint_locked` (409).
+             *     Hints (D-066): `hints_exhausted` and `hint_locked` (409). Personal paths (D-070):
+             *     `not_enough_history`, `no_weak_topics`, `nothing_left_to_practise` (409).
              */
             code?: string;
             retryable?: boolean;
@@ -964,6 +1084,7 @@ export interface components {
             passed: boolean;
             results: components["schemas"]["SubmitCaseResult"][];
             runtimeMs?: number;
+            review: components["schemas"]["ReviewOutcome"];
         };
         SubmissionSummary: {
             id: components["schemas"]["Uuid"];
@@ -1391,6 +1512,11 @@ export interface components {
             difficultyLevel: string;
             problemCount: number;
             completedCount: number;
+            /**
+             * @description The caller's own generated path (listed first). Always sent; not `required` only so
+             *     the web's existing typed fixtures still compile until UI C adopts it.
+             */
+            isPersonal?: boolean;
         };
         LearningPathDetail: {
             path: {
@@ -1401,6 +1527,9 @@ export interface components {
                 difficultyLevel: string;
                 problemCount: number;
                 completedCount: number;
+                isPersonal?: boolean;
+                /** @description Personal paths only. The weak topics it was built from, weakest first. */
+                focusTopics?: components["schemas"]["FocusTopic"][];
             };
             problems: {
                 problemId: components["schemas"]["Uuid"];
@@ -1409,7 +1538,85 @@ export interface components {
                 slug: string;
                 difficulty: components["schemas"]["Difficulty"];
                 isCompleted: boolean;
+                /** @description Personal paths only. The weak topic this problem practises. */
+                focusTopic?: string;
             }[];
+        };
+        FocusTopic: {
+            topic: string;
+            submissions: number;
+            failed: number;
+            /** @description Review-queue lapses after the first failure. */
+            lapses: number;
+            hintedProblems: number;
+            problemsSolved: number;
+            /** @description (failed + lapses + hintedProblems + 1) / (submissions + 2); weak at 0.4 and up. */
+            score: number;
+        };
+        /** @description A calendar date, YYYY-MM-DD (UTC days). */
+        Date: string;
+        ProblemBrief: {
+            id: components["schemas"]["Uuid"];
+            slug: string;
+            title: string;
+            difficulty: components["schemas"]["Difficulty"];
+            topics: string[];
+        };
+        /** @description Consecutive days the caller solved that day's problem on the day. `current` still counts while today is unsolved. */
+        DailyStreak: {
+            current: number;
+            best: number;
+        };
+        DailyProblem: {
+            date: components["schemas"]["Date"];
+            problem: components["schemas"]["ProblemBrief"];
+            /** @description Signed in. Solved on that day (UTC); "solved today" for today. */
+            solvedOnDay?: boolean;
+            /** @description Signed in. Solved at any time. */
+            solved?: boolean;
+            streak?: components["schemas"]["DailyStreak"];
+        };
+        ReviewItem: {
+            problemId: components["schemas"]["Uuid"];
+            slug: string;
+            title: string;
+            difficulty: components["schemas"]["Difficulty"];
+            topics: string[];
+            dueOn: components["schemas"]["Date"];
+            intervalDays: number;
+            repetitions: number;
+            easeFactor: number;
+            lapses: number;
+            lastQuality: number | null;
+            lastReviewedAt: string | null;
+            /**
+             * @description How it entered the queue.
+             * @enum {string}
+             */
+            source: "failed" | "struggled" | "manual" | "backfill";
+        };
+        ReviewQueue: {
+            today: components["schemas"]["Date"];
+            /** @description Due today or overdue; least-remembered first. */
+            due: components["schemas"]["ReviewItem"][];
+            upcoming: components["schemas"]["ReviewItem"][];
+            counts: {
+                due: number;
+                total: number;
+            };
+        };
+        /** @description What this submission did to the review queue; null when nothing (a clean first pass). */
+        ReviewOutcome: null | {
+            /** @enum {string} */
+            action: "enrolled" | "reviewed" | "lapsed";
+            /** @description The SM-2 grade given. */
+            quality: number;
+            dueOn: components["schemas"]["Date"];
+            intervalDays: number;
+        } | {
+            /** @constant */
+            action: "unchanged";
+            dueOn: components["schemas"]["Date"];
         };
         LeaderboardEntry: {
             rank: number;
@@ -1461,6 +1668,17 @@ export interface components {
             };
             content: {
                 "application/json": components["schemas"]["Error"];
+            };
+        };
+        /** @description Whether the problem was newly queued. */
+        ReviewAdded: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    added: boolean;
+                };
             };
         };
         /** @description Done. */
@@ -1880,6 +2098,100 @@ export interface operations {
             400: components["responses"]["Error"];
             401: components["responses"]["Error"];
             500: components["responses"]["Error"];
+        };
+    };
+    getProblemOfTheDay: {
+        parameters: {
+            query?: {
+                date?: components["schemas"]["Date"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description That day's problem. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyProblem"];
+                };
+            };
+            400: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    getProblemOfTheDayHistory: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One entry per day. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        days: {
+                            date: components["schemas"]["Date"];
+                            problem: components["schemas"]["ProblemBrief"];
+                            /** @description Signed in. Solved that day (UTC). */
+                            solvedOnDay?: boolean;
+                            /** @description Signed in. Solved at any time. */
+                            solved?: boolean;
+                        }[];
+                        streak?: components["schemas"]["DailyStreak"];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    recordHintViews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    count: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Hints viewed so far. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        hintsViewed: number;
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     getProblem: {
@@ -2673,6 +2985,30 @@ export interface operations {
             500: components["responses"]["Error"];
         };
     };
+    generateLearningPath: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The new personal path. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearningPathDetail"];
+                };
+            };
+            401: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
     getLearningPath: {
         parameters: {
             query?: never;
@@ -2704,6 +3040,68 @@ export interface operations {
             header?: never;
             path: {
                 slug: components["parameters"]["Slug"];
+                problemId: components["schemas"]["Uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Ok"];
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getReviewQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Due items first, then the next upcoming ones. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewQueue"];
+                };
+            };
+            401: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    addToReviewQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                problemId: components["schemas"]["Uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["ReviewAdded"];
+            201: components["responses"]["ReviewAdded"];
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    removeFromReviewQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
                 problemId: components["schemas"]["Uuid"];
             };
             cookie?: never;

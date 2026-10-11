@@ -32,6 +32,7 @@ tags:
   - name: leaderboard
   - name: recommendations
   - name: resumes
+  - name: review
 
 paths:
   # ───────────────────────────── auth ─────────────────────────────
@@ -372,6 +373,97 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+
+  /problems/daily:
+    get:
+      tags: [problems]
+      operationId: getProblemOfTheDay
+      description: |
+        The problem of the day (D-070): today's by default, or any day in the last 365. Chosen
+        deterministically from the date -- the weekday sets the difficulty (Mon-Tue easy, Wed-Fri
+        medium, weekend hard) and a seeded shuffle walks each difficulty without repeats -- and
+        recorded the first time it's asked for, so a past day never changes. Days are UTC.
+        Signed in, also the caller's progress on it and their daily streak.
+      security: [{}, { bearer: [] }]
+      parameters:
+        - { name: date, in: query, schema: { $ref: "#/components/schemas/Date" } }
+      responses:
+        "200":
+          description: That day's problem.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyProblem" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /problems/daily/history:
+    get:
+      tags: [problems]
+      operationId: getProblemOfTheDayHistory
+      description: The last `days` days' problems, newest first, recording any not yet recorded.
+      security: [{}, { bearer: [] }]
+      parameters:
+        - { name: days, in: query, schema: { type: integer, minimum: 1, maximum: 60, default: 30 } }
+      responses:
+        "200":
+          description: One entry per day.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [days]
+                properties:
+                  days:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [date, problem]
+                      properties:
+                        date: { $ref: "#/components/schemas/Date" }
+                        problem: { $ref: "#/components/schemas/ProblemBrief" }
+                        solvedOnDay: { type: boolean, description: Signed in. Solved that day (UTC). }
+                        solved: { type: boolean, description: Signed in. Solved at any time. }
+                  streak: { $ref: "#/components/schemas/DailyStreak" }
+        "400": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /problems/{id}/hints/viewed:
+    post:
+      tags: [problems]
+      operationId: recordHintViews
+      description: |
+        How many of the problem's hints the client has revealed. Never decreases. A pass after
+        hints counts as a weaker recall in the review queue.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [count]
+              properties:
+                count: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: Hints viewed so far.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [hintsViewed]
+                properties:
+                  hintsViewed: { type: integer, minimum: 1 }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /problems/{id}:
     get:
@@ -1062,6 +1154,25 @@ paths:
                     items: { $ref: "#/components/schemas/LearningPathSummary" }
         "500": { $ref: "#/components/responses/Error" }
 
+  /learning-paths/generate:
+    post:
+      tags: [learning-paths]
+      operationId: generateLearningPath
+      description: |
+        Build (or rebuild, replacing it) the caller's personal path from their weakest topics
+        (D-070). Deterministic: the same history gives the same path. A 409 carries a `code`:
+        `not_enough_history`, `no_weak_topics` or `nothing_left_to_practise`.
+      responses:
+        "201":
+          description: The new personal path.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LearningPathDetail" }
+        "401": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
   /learning-paths/{slug}:
     get:
       tags: [learning-paths]
@@ -1085,6 +1196,53 @@ paths:
       operationId: completePathProblem
       parameters:
         - { $ref: "#/components/parameters/Slug" }
+        - { name: problemId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── review ─────────────────────────────
+  /review:
+    get:
+      tags: [review]
+      operationId: getReviewQueue
+      description: |
+        The caller's spaced-repetition queue (SM-2, D-070). Problems enter it from Submit: a
+        failure, or a pass after failed attempts or hints. A pass on a due problem reschedules
+        it; earlier passes are practice and change nothing. Days are UTC.
+      responses:
+        "200":
+          description: Due items first, then the next upcoming ones.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReviewQueue" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /review/{problemId}:
+    post:
+      tags: [review]
+      operationId: addToReviewQueue
+      description: Queue a problem by hand, due today. 200 if it was already queued.
+      parameters:
+        - { name: problemId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+      responses:
+        "200": { $ref: "#/components/responses/ReviewAdded" }
+        "201": { $ref: "#/components/responses/ReviewAdded" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [review]
+      operationId: removeFromReviewQueue
+      parameters:
         - { name: problemId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
       responses:
         "200": { $ref: "#/components/responses/Ok" }
@@ -1258,6 +1416,16 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
+    ReviewAdded:
+      description: Whether the problem was newly queued.
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            required: [added]
+            properties:
+              added: { type: boolean }
     Ok:
       description: Done.
       content:
@@ -1289,7 +1457,8 @@ components:
           type: string
           description: |
             `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes.
-            Hints (D-066): `hints_exhausted` and `hint_locked` (409).
+            Hints (D-066): `hints_exhausted` and `hint_locked` (409). Personal paths (D-070):
+            `not_enough_history`, `no_weak_topics`, `nothing_left_to_practise` (409).
         retryable: { type: boolean }
         customInputErrors:
           type: array
@@ -1597,7 +1766,7 @@ components:
     SubmitResult:
       type: object
       additionalProperties: false
-      required: [mode, submissionId, status, passed, results]
+      required: [mode, submissionId, status, passed, results, review]
       properties:
         mode: { type: string, const: submit }
         submissionId: { $ref: "#/components/schemas/Uuid" }
@@ -1607,6 +1776,7 @@ components:
           type: array
           items: { $ref: "#/components/schemas/SubmitCaseResult" }
         runtimeMs: { type: number }
+        review: { $ref: "#/components/schemas/ReviewOutcome" }
 
     SubmissionSummary:
       type: object
@@ -2198,6 +2368,11 @@ components:
         difficultyLevel: { type: string }
         problemCount: { type: integer }
         completedCount: { type: integer }
+        isPersonal:
+          type: boolean
+          description: |
+            The caller's own generated path (listed first). Always sent; not `required` only so
+            the web's existing typed fixtures still compile until UI C adopts it.
 
     LearningPathDetail:
       type: object
@@ -2216,6 +2391,11 @@ components:
             difficultyLevel: { type: string }
             problemCount: { type: integer }
             completedCount: { type: integer }
+            isPersonal: { type: boolean }
+            focusTopics:
+              type: array
+              description: Personal paths only. The weak topics it was built from, weakest first.
+              items: { $ref: "#/components/schemas/FocusTopic" }
         problems:
           type: array
           items:
@@ -2229,6 +2409,122 @@ components:
               slug: { type: string }
               difficulty: { $ref: "#/components/schemas/Difficulty" }
               isCompleted: { type: boolean }
+              focusTopic: { type: string, description: Personal paths only. The weak topic this problem practises. }
+
+    FocusTopic:
+      type: object
+      additionalProperties: false
+      required: [topic, submissions, failed, lapses, hintedProblems, problemsSolved, score]
+      properties:
+        topic: { type: string }
+        submissions: { type: integer }
+        failed: { type: integer }
+        lapses: { type: integer, description: Review-queue lapses after the first failure. }
+        hintedProblems: { type: integer }
+        problemsSolved: { type: integer }
+        score:
+          type: number
+          description: (failed + lapses + hintedProblems + 1) / (submissions + 2); weak at 0.4 and up.
+
+    Date:
+      type: string
+      pattern: '^\d{4}-\d{2}-\d{2}$'
+      description: A calendar date, YYYY-MM-DD (UTC days).
+
+    ProblemBrief:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, difficulty, topics]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        slug: { type: string }
+        title: { type: string }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        topics: { type: array, items: { type: string } }
+
+    DailyStreak:
+      type: object
+      additionalProperties: false
+      required: [current, best]
+      description: Consecutive days the caller solved that day's problem on the day. `current` still counts while today is unsolved.
+      properties:
+        current: { type: integer, minimum: 0 }
+        best: { type: integer, minimum: 0 }
+
+    DailyProblem:
+      type: object
+      additionalProperties: false
+      required: [date, problem]
+      properties:
+        date: { $ref: "#/components/schemas/Date" }
+        problem: { $ref: "#/components/schemas/ProblemBrief" }
+        solvedOnDay: { type: boolean, description: Signed in. Solved on that day (UTC); "solved today" for today. }
+        solved: { type: boolean, description: Signed in. Solved at any time. }
+        streak: { $ref: "#/components/schemas/DailyStreak" }
+
+    ReviewItem:
+      type: object
+      additionalProperties: false
+      required: [problemId, slug, title, difficulty, topics, dueOn, intervalDays, repetitions, easeFactor, lapses, lastQuality, lastReviewedAt, source]
+      properties:
+        problemId: { $ref: "#/components/schemas/Uuid" }
+        slug: { type: string }
+        title: { type: string }
+        difficulty: { $ref: "#/components/schemas/Difficulty" }
+        topics: { type: array, items: { type: string } }
+        dueOn: { $ref: "#/components/schemas/Date" }
+        intervalDays: { type: integer, minimum: 0 }
+        repetitions: { type: integer, minimum: 0 }
+        easeFactor: { type: number, minimum: 1.3 }
+        lapses: { type: integer, minimum: 0 }
+        lastQuality: { type: [integer, "null"], minimum: 0, maximum: 5 }
+        lastReviewedAt: { type: [string, "null"] }
+        source:
+          type: string
+          enum: [failed, struggled, manual, backfill]
+          description: How it entered the queue.
+
+    ReviewQueue:
+      type: object
+      additionalProperties: false
+      required: [today, due, upcoming, counts]
+      properties:
+        today: { $ref: "#/components/schemas/Date" }
+        due:
+          type: array
+          description: Due today or overdue; least-remembered first.
+          items: { $ref: "#/components/schemas/ReviewItem" }
+        upcoming:
+          type: array
+          maxItems: 20
+          items: { $ref: "#/components/schemas/ReviewItem" }
+        counts:
+          type: object
+          additionalProperties: false
+          required: [due, total]
+          properties:
+            due: { type: integer }
+            total: { type: integer }
+
+    ReviewOutcome:
+      description: What this submission did to the review queue; null when nothing (a clean first pass).
+      oneOf:
+        - type: "null"
+        - type: object
+          additionalProperties: false
+          required: [action, quality, dueOn, intervalDays]
+          properties:
+            action: { type: string, enum: [enrolled, reviewed, lapsed] }
+            quality: { type: integer, minimum: 0, maximum: 5, description: The SM-2 grade given. }
+            dueOn: { $ref: "#/components/schemas/Date" }
+            intervalDays: { type: integer, minimum: 1 }
+        - type: object
+          additionalProperties: false
+          required: [action, dueOn]
+          description: Passed before it was due; the schedule is unchanged.
+          properties:
+            action: { type: string, const: unchanged }
+            dueOn: { $ref: "#/components/schemas/Date" }
 
     LeaderboardEntry:
       type: object

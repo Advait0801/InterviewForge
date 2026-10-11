@@ -44,7 +44,7 @@ backend/src/repositories/    # all SQL, one file per table group; take a Queryab
 backend/src/db.ts            # query() over a pg Pool, plus withTransaction()
 backend/openapi/openapi.yaml # the Express API contract (D-062); served at /api/openapi.json
 backend/src/generated/       # ai-service types generated from ai-service/openapi.json — never hand-edit
-backend/sql_migrations/      # 001_init.sql … 016_interview_agent_cost.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 017_learning_features.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java,js,go,rs}, run by scripts/verify_problems.py;
 #                              the .py ones are also the runtime oracle for custom test cases
@@ -203,6 +203,17 @@ docker/sandboxes/            # python / c / cpp / java / javascript / go / rust 
 - Changing any of this means re-running `scripts/verify_resume_isolation.py`; the unit
   suite alone has already been proven blind to three defects here.
 
+**Learning features (D-070)**
+- Problem of the Day, review queue and personal paths are deterministic: no `random()`. A day's
+  problem is computed by `services/daily.ts` and recorded in `daily_problems` on first ask;
+  never recompute or rewrite a recorded day. All dates are UTC days.
+- The review queue changes only on Submit, inside the submission's transaction
+  (`review.service.ts recordSubmission`). SM-2 itself (`sm2.ts`) is pure; keep grading rules
+  out of it.
+- A personal learning path (`learning_paths.owner_user_id`) is visible only to its owner: 404 for
+  anyone else, never listed, and `markCompletedInEveryPath` never writes progress on another
+  user's path. Any new query over `learning_paths` must keep that filter.
+
 **Code-runner**
 - Languages: python3, c, cpp, java, javascript, go, rust. Images:
   `interviewforge-{python,c,cpp,java,javascript,go,rust}-sandbox:latest`, all run with the same
@@ -237,6 +248,7 @@ docker compose exec ai-service python scripts/seed_rag.py              # seed RA
 python scripts/verify_resume_isolation.py   # Phase 5: cross-user isolation + deletion, live stack
 python scripts/verify_problems.py           # every problem x 7 languages via the real code-runner (1,050 cells)
 python scripts/verify_coding_engine.py      # Group C Phase 7: custom inputs, diffs, hidden cases, 7 languages (D-069); live stack
+python scripts/verify_learning.py           # Group C Phase 8: POTD, SM-2 review queue, personal paths (D-070); live stack
 python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
 python scripts/verify_streaming.py          # SSE interview streams, disconnect, 409, timings (D-065); live stack
 python scripts/verify_streaming.py --measure 6  # JSON vs stream latency medians at the ai-service

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { AuthRequest, optionalAuth, requireAuth } from "../middleware/auth.middleware";
 import { DomainError } from "../services/errors";
-import { completeProblem, getPath, listPaths } from "../services/learning-paths.service";
+import { completeProblem, generatePath, getPath, listPaths } from "../services/learning-paths.service";
 import { UUID_REGEX, sendDomainError, sendInternalError } from "./http";
 
 const router = Router();
@@ -12,6 +12,16 @@ router.get("/", optionalAuth, async (req: AuthRequest, res) => {
     return res.json({ paths: await listPaths(req.user?.id) });
   } catch (err) {
     return sendInternalError(res, "List learning paths error", err);
+  }
+});
+
+/** Build (or rebuild) the caller's personal path from their weak topics. */
+router.post("/generate", requireAuth, async (req: AuthRequest, res) => {
+  try {
+    return res.status(201).json(await generatePath(req.user!.id));
+  } catch (err) {
+    if (err instanceof DomainError) return sendDomainError(res, err);
+    return sendInternalError(res, "Generate learning path error", err);
   }
 });
 

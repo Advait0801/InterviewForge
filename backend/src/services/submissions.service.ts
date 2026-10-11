@@ -1,3 +1,4 @@
+import { withTransaction } from "../db";
 import * as submissions from "../repositories/submissions.repository";
 import { findProblemForExecution } from "../repositories/problems.repository";
 import { markCompletedInEveryPath } from "../repositories/learning-paths.repository";
@@ -13,6 +14,7 @@ import { RunQueueBusyError, RunQueueUnavailableError, runQueued } from "./run-qu
 import { bumpCacheVersion } from "./cache";
 import { DomainError, badRequest, notFound } from "./errors";
 import { clientSubmitResults, exampleCases } from "./test-cases";
+import { recordSubmission } from "./review.service";
 
 export type { SubmissionFilters } from "../repositories/submissions.repository";
 
@@ -81,6 +83,8 @@ async function customCasesFor(slug: string, inputs: string[]): Promise<RunReques
  * Run code against a problem. "run" uses the public examples, plus any custom inputs, and
  * records nothing; "submit" runs the full suite, hidden cases included, records the
  * submission and, on a pass, completes the problem in every learning path that contains it.
+ * Submit also updates the review queue (review.service.ts), in the same transaction as the
+ * submission: a submission is never stored without its review effect, or the reverse.
  */
 export async function executeSubmission(input: {
   userId: string;
@@ -129,19 +133,23 @@ export async function executeSubmission(input: {
   }
 
   const status = runResult.passed ? "passed" : "failed";
-  const submissionId = await submissions.insertSubmission({
-    userId: input.userId,
-    problemId: input.problemId,
-    language: input.language,
-    code: input.code,
-    status,
-    runtimeMs: runResult.runtimeMs ?? null,
-    memoryKb: runResult.memoryKb ?? null,
+  // Code execution is done; only the writes are inside the transaction (D-057).
+  const { submissionId, review } = await withTransaction(async (tx) => {
+    const submissionId = await submissions.insertSubmission(tx, {
+      userId: input.userId,
+      problemId: input.problemId,
+      language: input.language,
+      code: input.code,
+      status,
+      runtimeMs: runResult.runtimeMs ?? null,
+      memoryKb: runResult.memoryKb ?? null,
+    });
+    if (status === "passed") {
+      await markCompletedInEveryPath(tx, input.userId, input.problemId);
+    }
+    const review = await recordSubmission(tx, { userId: input.userId, problemId: input.problemId, passed: runResult.passed });
+    return { submissionId, review };
   });
-
-  if (status === "passed") {
-    await markCompletedInEveryPath(input.userId, input.problemId);
-  }
   // Any new submission can change rankings and acceptance rates.
   await bumpCacheVersion("leaderboard");
 
@@ -155,6 +163,7 @@ export async function executeSubmission(input: {
       // Hidden cases are reduced to pass/fail, except the first failing one (D-057).
       results: clientSubmitResults(testCases, runResult.results),
       runtimeMs: runResult.runtimeMs,
+      review,
     },
   };
 }

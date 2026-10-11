@@ -7,6 +7,92 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-10-11
+
+### D-070 — Learning features: Problem of the Day, an SM-2 review queue, personal paths from weak topics
+
+**Why:** Group C, Phase 8. Practice had no daily hook and no memory of what a user struggled
+with, and the recommendations endpoint picks with `random()`, so nothing a user follows over days
+stays put. Exit criteria: deterministic selection, route tests, live checks. No model calls.
+
+**Decided:**
+- **Problem of the Day** (`GET /problems/daily[?date=]`, `/problems/daily/history?days=`).
+  - The pick is a pure function of the date (`services/daily.ts`). The weekday sets the
+    difficulty: Mon–Tue easy, Wed–Fri medium, the weekend hard. Each difficulty walks a seeded
+    shuffle (FNV-1a seed, mulberry32) of its slug-sorted pool, one problem per day of that
+    difficulty, so nothing repeats until the pool is used up.
+  - A new cycle never starts with the problem the last one ended on. That happens about once in
+    43–64 boundaries, so a two-year test never hit it; the test scans a century of days, and
+    fails with the guard removed.
+  - Each day is recorded in `daily_problems` the first time anyone asks, and is never
+    recomputed. Growing the catalogue reshuffles future days but can't rewrite history.
+    Concurrent first requests insert with `ON CONFLICT DO NOTHING` and read back.
+  - Days are UTC. Signed in, the response adds `solvedOnDay`, `solved` and a daily streak, which
+    counts days the user solved *that day's* problem *on that day*. `current` still counts from
+    yesterday while today is unsolved.
+- **SM-2 review queue** (`GET /review`, `POST`/`DELETE /review/{problemId}`).
+  - `sm2.ts` is textbook SM-2: the ease factor is updated first and sets the interval;
+    intervals go 1, 6, then round(previous × EF); EF has a floor of 1.3. It's pure, tested
+    against hand-computed sequences.
+  - Grades come from Submit, never Run, inside the submission's own transaction (submission,
+    path progress and review land together):
+    - a failure is quality 1 (a lapse, due tomorrow) and enrols the problem;
+    - a pass enrols a problem only if the user struggled with it (failed attempts or hints
+      shown), graded `passQuality` = 5 − min(failures, 2) − (hints ? 1 : 0), never below 3. A
+      clean first pass never enters the queue;
+    - a pass on a queued problem is graded only once it's due. Solving early is practice and
+      leaves the schedule alone, as SM-2 intends. A failure is a lapse whenever it happens.
+  - Hints are revealed in the browser, so `POST /problems/{id}/hints/viewed {count}` records the
+    count. It never decreases; anything more than the problem's hint count is a 400.
+  - Migration 017 backfills every past failure into its user's queue, due today (25 rows locally).
+- **Personal path from weak topics** (`POST /learning-paths/generate`).
+  - Per topic, a Laplace-smoothed struggle rate: (failed + later lapses + hinted problems + 1) /
+    (submissions + 2), weak at 0.4 and up with 2+ submissions; the 3 weakest are the focus.
+  - Problems are the unsolved ones in those topics, easiest first, preferring ones that cover
+    several focus topics, alternated across topics, at most 10. The weights are in
+    `services/weakness.ts`.
+  - Deterministic: the same history gives the same path, whatever order rows arrive in.
+  - It reuses `learning_paths` with an `owner_user_id`, so progress tracking works unchanged. One
+    per user; regenerating replaces it in one transaction.
+  - Private: another user or an anonymous caller gets a 404 (read or complete). It's never in
+    their list. `markCompletedInEveryPath` now writes progress only on curated paths and the
+    caller's own. The slug is `focus-` plus a hash, never the user id.
+  - Responses carry each focus topic's numbers and each problem's `focusTopic`.
+  - Without enough to go on it's a 409 with a `code`: `not_enough_history` (fewer than 3
+    submissions), `no_weak_topics`, `nothing_left_to_practise`.
+- `SubmitResult.review` reports what the submit did to the queue (`enrolled`, `reviewed`,
+  `lapsed` or `unchanged`, plus the grade and the due date), so UI C can say "added to your
+  reviews, due tomorrow".
+- `isPersonal` is always sent but isn't `required` in the spec: making it required broke a
+  typed fixture in a web test, and Claude doesn't edit `web/`. UI C can tighten it.
+
+**Verified:**
+- `scripts/verify_learning.py` (new), **34/34** live:
+  - today's problem stable and of the weekday's difficulty, recorded; a future date is a 400;
+  - 6 concurrent first requests for an unrecorded day agree, with exactly one row;
+  - 60 days of history with no repeats;
+  - solving today's problem gives a streak of 1, for that user only;
+  - the review queue end to end, with due dates moved back in Postgres to stand in for waiting:
+    enrol on failure, nothing on a clean pass, unchanged when early, then intervals **1 → 6 →
+    14** (= round(6 × 2.26)), a lapse back to 1, hint-then-pass graded 4, manual add/remove;
+  - the personal path: 409 without history; built from the user's failures (stack, string);
+    every problem unsolved and on-topic; identical when rebuilt; one per user;
+  - privacy: 404 for another user and for anonymous, not in their list, and no progress row on
+    anyone else's path; solving a path problem counts on it;
+  - 0 `openapi_violation`.
+- Mutation:
+  - visibility check removed → the privacy test fails;
+  - cycle-boundary guard removed → the century test fails;
+  - the transaction-order tests pin submission and review writes between BEGIN and COMMIT.
+- `verify_coding_engine` 20/20 and `verify_phase7` 46/46 after the submit path became
+  transactional.
+- Tests: backend **411** (was 330): SM-2 sequences, a full year of daily picks, the planner, and
+  route tests for every endpoint including privacy and transactions. Web 135, lint and tsc on the
+  regenerated types; code-runner 424; ai-service untouched.
+
+**Found (BACKLOG):** topic names are inconsistent (`BFS` vs `breadth-first-search`), so the
+weakness score splits one topic in two; and SM-2's self-grading isn't offered yet.
+
 ## 2026-10-10
 
 ### D-069 — Coding engine: custom test cases, failing-case diffs, JavaScript/Go/Rust; runs 2 s faster
