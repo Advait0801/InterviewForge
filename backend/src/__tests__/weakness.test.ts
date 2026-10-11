@@ -18,7 +18,24 @@ describe("scoreTopic", () => {
     expect(scoreTopic(stat("a", 1, 1))).toBe(0.667);
     expect(scoreTopic(stat("a", 10, 6))).toBe(0.583);
     expect(scoreTopic(stat("a", 3, 0))).toBe(0.2);
-    expect(scoreTopic(stat("a", 4, 1, { lapses: 1, hintedProblems: 1 }))).toBe(0.667);
+    expect(scoreTopic(stat("a", 4, 1, { lapses: 1, hintedProblems: 1 }))).toBe(0.5);
+  });
+
+  it("stays between 0 and 1, and rises with every failure, lapse and hint", () => {
+    // D-070 scored this 1.75 (7 / 4).
+    expect(scoreTopic(stat("a", 2, 2, { lapses: 2, hintedProblems: 2 }))).toBe(0.875);
+    for (let submissions = 0; submissions <= 6; submissions++)
+      for (let failed = 0; failed <= submissions; failed++)
+        for (let lapses = 0; lapses <= 4; lapses++)
+          for (let hintedProblems = 0; hintedProblems <= 4; hintedProblems++) {
+            const s = stat("a", submissions, failed, { lapses, hintedProblems });
+            const score = scoreTopic(s);
+            expect(score).toBeGreaterThan(0);
+            expect(score).toBeLessThan(1);
+            expect(scoreTopic({ ...s, lapses: lapses + 1 })).toBeGreaterThan(score);
+            expect(scoreTopic({ ...s, hintedProblems: hintedProblems + 1 })).toBeGreaterThan(score);
+            if (failed < submissions) expect(scoreTopic({ ...s, failed: failed + 1 })).toBeGreaterThan(score);
+          }
   });
 });
 

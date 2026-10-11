@@ -4,13 +4,16 @@
  * recommendations endpoint picks with random(); a path a user follows over days must not
  * reshuffle every time they look at it.)
  *
- * A topic's struggle score is a smoothed failure rate:
+ * A topic's struggle score is a smoothed rate of struggles over events:
  *
- *   score = (failed submissions + review lapses + hinted problems + 1) / (submissions + 2)
+ *   struggles = failed submissions + review lapses + hinted problems
+ *   score     = (struggles + 1) / (submissions + lapses + hinted problems + 2)
  *
- * The +1/+2 (Laplace) keeps one bad attempt from outranking a long record: 1 fail of 1
- * scores 0.67, 6 fails of 10 scores 0.58, 0 of 3 scores 0.2. A topic is weak at 0.4 and up,
- * with at least two submissions behind it.
+ * A lapse or a hint is an event as well as a struggle, so the score stays below 1 however
+ * many there are, and still rises with each one. (D-070 divided by submissions alone, which
+ * reached 1.75; D-074.) The +1/+2 (Laplace) keeps one bad attempt from outranking a long
+ * record: 1 fail of 1 scores 0.67, 6 fails of 10 scores 0.58, 0 of 3 scores 0.2. A topic is
+ * weak at 0.4 and up, with at least two submissions behind it.
  */
 
 export type TopicStats = {
@@ -47,7 +50,8 @@ export class NoPlanError extends Error {
 }
 
 export function scoreTopic(t: TopicStats): number {
-  return Math.round(((t.failed + t.lapses + t.hintedProblems + 1) / (t.submissions + 2)) * 1000) / 1000;
+  const extra = t.lapses + t.hintedProblems;
+  return Math.round(((t.failed + extra + 1) / (t.submissions + extra + 2)) * 1000) / 1000;
 }
 
 export function weakTopics(stats: TopicStats[]): FocusTopic[] {

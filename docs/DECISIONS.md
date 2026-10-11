@@ -9,6 +9,28 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-11
 
+### D-074 — The focus-path weakness score stays below 1 (fixes D-070)
+
+**What:** a topic's score is now `(failed + lapses + hinted + 1) / (submissions + lapses + hinted + 2)`.
+D-070 divided by submissions alone, so lapses and hints could push it past 1: UI C's walkthrough
+showed "Score 1.25" (2 failed submissions, 1 lapse, 1 hint), and the worst case grows without
+bound.
+
+**Why this formula, not a cap:** a lapse or a hint is an event as well as a struggle, so it
+belongs in both counts. That keeps every score below 1, still raises it with each failure, lapse
+and hint, and leaves scores with no lapses or hints exactly as before (1 of 1 → 0.67, 6 of 10 →
+0.58, 0 of 3 → 0.2). A `min(1, …)` cap would have tied every heavy struggler at 1, losing the
+ranking between them. The 0.4 weak threshold is unchanged; with lapses or hints a topic now scores
+a little lower than under D-070, so slightly fewer borderline topics qualify.
+
+**Verified:**
+- A sweep test over submissions 0–6 with every failure count, and lapses and hints 0–4:
+  0 < score < 1, and each signal raises it. The new tests fail on the old formula.
+- The spec now declares `FocusTopic.score` as 0–1, so the route harness rejects anything above.
+- Backend 477 tests, build, `verify_learning.py` 34/34 live. The walkthrough user's path rebuilt
+  through the API: "array" went from 1.25 to 0.833, and no stored path has a score above 1. Paths
+  built earlier keep their old numbers until rebuilt.
+
 ### D-073 — UI Group C shipped: every coding, learning, sharing and email feature has a screen
 
 **What:** the web half of Group C, built by GPT from one handoff plus one follow-up (PR #25:

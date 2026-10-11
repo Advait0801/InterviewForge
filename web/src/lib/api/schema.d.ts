@@ -1700,7 +1700,7 @@ export interface components {
             lapses: number;
             hintedProblems: number;
             problemsSolved: number;
-            /** @description (failed + lapses + hintedProblems + 1) / (submissions + 2); weak at 0.4 and up. */
+            /** @description (failed + lapses + hintedProblems + 1) / (submissions + lapses + hintedProblems + 2); weak at 0.4 and up (D-074). */
             score: number;
         };
         /** @description A calendar date, YYYY-MM-DD (UTC days). */
