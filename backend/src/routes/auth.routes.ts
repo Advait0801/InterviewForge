@@ -62,6 +62,17 @@ router.post("/forgot-password", authWriteLimiter, async (req, res) => {
   }
 });
 
+/** A fresh verification email for the signed-in user (D-072). */
+router.post("/resend-verification", authWriteLimiter, requireAuth, async (req: AuthRequest, res) => {
+  try {
+    await auth.resendVerification(req.user!.id);
+    return res.json({ ok: true });
+  } catch (err) {
+    if (err instanceof DomainError) return sendDomainError(res, err);
+    return sendInternalError(res, "Resend verification error", err);
+  }
+});
+
 router.post("/reset-password", authWriteLimiter, async (req, res) => {
   const { token, newPassword } = req.body as { token?: string; newPassword?: string };
   if (!token || !newPassword) {

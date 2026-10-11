@@ -110,6 +110,30 @@ export async function findUserIdByLiveVerificationToken(token: string): Promise<
   return result.rows[0]?.id ?? null;
 }
 
+export type VerificationStateRow = {
+  email: string;
+  username: string;
+  email_verified: boolean;
+  email_verification_expires_at: string | null;
+};
+
+export async function findVerificationState(userId: string): Promise<VerificationStateRow | null> {
+  const result = await query<VerificationStateRow>(
+    `SELECT email, username, email_verified, email_verification_expires_at FROM users WHERE id = $1`,
+    [userId]
+  );
+  return result.rows[0] ?? null;
+}
+
+/** Replace the verification link; the previous one stops working. */
+export async function setVerificationToken(userId: string, token: string, expires: Date): Promise<void> {
+  await query(
+    `UPDATE users SET email_verification_token = $2, email_verification_expires_at = $3, updated_at = NOW()
+       WHERE id = $1`,
+    [userId, token, expires]
+  );
+}
+
 export async function markEmailVerified(userId: string): Promise<void> {
   await query(
     `UPDATE users SET

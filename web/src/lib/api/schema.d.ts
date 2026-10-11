@@ -87,6 +87,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/resend-verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description A new verification email for the signed-in user (D-072); the previous link stops working.
+         *     409 `already_verified`; 429 with `retryAfterSeconds` within a minute of the last one.
+         *     Sending happens in the background, so a 200 means queued, not delivered.
+         */
+        post: operations["resendVerification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/verify-email": {
         parameters: {
             query?: never;
@@ -979,10 +1000,13 @@ export interface components {
              * @description `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes.
              *     Hints (D-066): `hints_exhausted` and `hint_locked` (409). Sharing and proctoring (D-071):
              *     `report_not_ready`, `too_many_links`, `assessment_closed`, `event_limit` (409). Personal paths (D-070):
-             *     `not_enough_history`, `no_weak_topics`, `nothing_left_to_practise` (409).
+             *     `not_enough_history`, `no_weak_topics`, `nothing_left_to_practise` (409). Email (D-072):
+             *     `already_verified` (409).
              */
             code?: string;
             retryable?: boolean;
+            /** @description With a 429 from resend-verification (D-072). */
+            retryAfterSeconds?: number;
             /** @description With "Invalid custom test case" (400), which inputs are unusable and why. */
             customInputErrors?: {
                 index: number;
@@ -2018,6 +2042,24 @@ export interface operations {
         responses: {
             200: components["responses"]["Ok"];
             401: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    resendVerification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Ok"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            429: components["responses"]["Error"];
             500: components["responses"]["Error"];
             503: components["responses"]["Error"];
         };

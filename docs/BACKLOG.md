@@ -57,6 +57,14 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 - **Retention for proctoring events** *(S)* — `assessment_events` keeps everything forever. Drop
   raw events some months after submission and keep only the summary.
 
+## Found while wiring real email (D-072)
+
+- **A sending domain** *(S)* — Resend's shared test sender delivers only to the account owner's
+  address, and Gmail filed the first test email under Spam. Before real users: verify an owned
+  domain in Resend (SPF, DKIM, DMARC) and set `EMAIL_FROM` to it.
+- **Read delivery status** *(S)* — the send-only key can't query Resend for bounces. A webhook
+  (`email.bounced`, `email.complained`) would let the account page show "your address bounced".
+
 ## Alternative showpieces (considered and not chosen)
 
 - **Elo-rated adaptive difficulty** *(L, Loud)* — per-topic Elo for users *and* problems,
@@ -67,7 +75,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Engineering credibility
 
-- **Real email delivery** *(S)* — SES or Resend for verification and reset (F-07).
 
 ## Product
 

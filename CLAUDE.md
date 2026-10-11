@@ -259,6 +259,7 @@ docker compose exec ai-service python scripts/seed_rag.py              # seed RA
 python scripts/verify_resume_isolation.py   # Phase 5: cross-user isolation + deletion, live stack
 python scripts/verify_problems.py           # every problem x 7 languages via the real code-runner (1,050 cells)
 python scripts/verify_coding_engine.py      # Group C Phase 7: custom inputs, diffs, hidden cases, 7 languages (D-069); live stack
+python scripts/verify_email.py --to you@x.com # Group C Phase 10: real verification + reset email via Resend (D-072)
 python scripts/verify_sharing.py            # Group C Phase 9: replay, public links (CANARY privacy), proctoring (D-071); live stack
 python scripts/verify_learning.py           # Group C Phase 8: POTD, SM-2 review queue, personal paths (D-070); live stack
 python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
@@ -304,7 +305,11 @@ still accurate and redeployable.
   the README deploy section has the command.
 - Socket.IO is scaffolded on both ends but only emits a `hello` — realtime is unused
   (interview streaming is SSE over plain HTTP, D-065).
-- Email verification / password reset tokens work, but emails are only `console.log`ed.
+- ~~Emails are only `console.log`ed~~ — real delivery through Resend since D-072, with
+  `EMAIL_PROVIDER=resend`. Local dev stays on `log` (the default), even with a key in `.env`;
+  `scripts/verify_email.py --to <your Resend address>` switches to resend for one run and
+  restores `.env`. Sends run in the background (`deliverInBackground`): never await one inside
+  an auth response.
 - ~~Sandbox runs as root with no capability/pid/cpu limits~~ — fixed in Phase 6.
   Containers now run as the unprivileged `runner` user with `CapDrop: ALL`,
   `no-new-privileges`, `PidsLimit`, `NanoCpus`, and a size-bounded exec tmpfs.
