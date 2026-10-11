@@ -1,0 +1,162 @@
+{
+  "browser": "154.0.8037.98",
+  "observations": [
+    {
+      "name": "problem-custom-errors-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "problem-results-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "review-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "daily-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "paths-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "focus-path-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "replay-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "share-dialog-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "public-share-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "public-revoked-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "assessment-active-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "assessment-results-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "dashboard-light",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "problem-custom-errors-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "problem-results-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "review-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "daily-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "paths-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "focus-path-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "replay-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "share-dialog-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "public-share-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "public-revoked-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "assessment-active-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "assessment-results-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    },
+    {
+      "name": "dashboard-dark",
+      "serious": [],
+      "all": [],
+      "overflow": false
+    }
+  ],
+  "seriousOrCritical": 0
+}

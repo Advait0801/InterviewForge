@@ -1,0 +1,74 @@
+{
+  "eventBatches": [
+    {
+      "events": [
+        {
+          "type": "paste",
+          "at": "2026-10-11T07:48:14.513Z",
+          "chars": 22
+        },
+        {
+          "type": "copy",
+          "at": "2026-10-11T07:48:15.024Z",
+          "chars": 105
+        },
+        {
+          "type": "tab_hidden",
+          "at": "2026-10-11T07:48:15.481Z"
+        }
+      ]
+    },
+    {
+      "events": [
+        {
+          "type": "tab_visible",
+          "at": "2026-10-11T07:48:15.496Z"
+        }
+      ]
+    }
+  ],
+  "observations": {
+    "editor": {
+      "platform": "MacIntel",
+      "editors": [
+        {
+          "focused": true,
+          "readOnly": false,
+          "chars": 105,
+          "pasteInserted": true
+        }
+      ]
+    },
+    "nativeMonacoPasteEvent": true,
+    "nativeMonacoCopy": true,
+    "nativeTabBecameHidden": false,
+    "syntheticVisibilityFallback": true,
+    "serverIntegrityBeforeSubmit": {
+      "events": 4,
+      "tabSwitches": 1,
+      "hiddenSeconds": 0,
+      "windowBlurs": 0,
+      "pastes": 1,
+      "pastedChars": 22,
+      "largestPaste": 22,
+      "copies": 1,
+      "fullscreenExits": 0,
+      "flags": []
+    },
+    "resultsShowIntegrity": true,
+    "serverIntegrityAfterSubmit": {
+      "events": 4,
+      "tabSwitches": 1,
+      "hiddenSeconds": 0,
+      "windowBlurs": 0,
+      "pastes": 1,
+      "pastedChars": 22,
+      "largestPaste": 22,
+      "copies": 1,
+      "fullscreenExits": 0,
+      "flags": []
+    },
+    "stoppedAfterSubmit": true
+  },
+  "passed": true
+}

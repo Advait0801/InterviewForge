@@ -1,5 +1,6 @@
 "use client";
 
+import { InterviewHistory } from "@/components/interview/history";
 import { useState } from "react";
 import Image from "next/image";
 import { Protected } from "@/components/auth/protected";
@@ -246,6 +247,7 @@ export default function InterviewPage() {
                   </ul>
                 </Card>
               </div>
+              <InterviewHistory />
             </div>
           ) : (
             /* ── Active interview session ── */

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
-import { Toaster } from "sonner";
+import { AppToaster } from "./app-toaster";
 
 type Theme = "dark" | "light";
 
@@ -102,7 +102,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <ThemeContext.Provider value={{ theme, mounted, setTheme, toggleTheme }}>
       {children}
-      <Toaster theme={theme} richColors closeButton position="top-center" />
+      <AppToaster theme={theme} />
     </ThemeContext.Provider>
   );
 }

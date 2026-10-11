@@ -1,10 +1,13 @@
 "use client";
 
+import { useProctoring } from "@/hooks/use-proctoring";
+import { OutputDiff } from "@/components/output-diff";
+import { IntegritySummary, PROCTORING_NOTICE } from "@/components/integrity-summary";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { api, Assessment, AssessmentProblem, ProblemDetail, SubmissionDetail } from "@/lib/api";
+import { api, type Integrity, Assessment, AssessmentProblem, ProblemDetail, SubmissionDetail } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import type { WorkspaceLanguage } from "@/components/code-workspace-editor";
 import { WorkspacePaneSwitcher, type WorkspacePane } from "@/components/workspace-pane-switcher";
@@ -30,6 +33,9 @@ const LANGUAGES: { value: Language; label: string }[] = [
   { value: "cpp", label: "C++" },
   { value: "c", label: "C" },
   { value: "java", label: "Java" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "go", label: "Go" },
+  { value: "rust", label: "Rust" },
 ];
 
 function getSavedLanguage(): Language {
@@ -62,6 +68,7 @@ export default function AssessmentWorkspacePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [assessment, setAssessment] = useState<Assessment | null>(null);
+  const [integrity, setIntegrity] = useState<Integrity | null>(null);
   const [problems, setProblems] = useState<AssessmentProblem[]>([]);
   const [remainingMs, setRemainingMs] = useState(0);
   const [activeProblemIdx, setActiveProblemIdx] = useState(0);
@@ -101,6 +108,7 @@ export default function AssessmentWorkspacePage() {
   const progressLabel = `${attemptedCount} of ${problems.length} problems attempted`;
   const assessmentId = assessment?.id;
   const assessmentStatus = assessment?.status;
+  const { stop: stopProctoring } = useProctoring(assessmentId, Boolean(isActive && remainingMs > 0 && !timedOut && !submittingAll));
 
   const loadWorkspace = useCallback(async () => {
     if (!params.id || !getToken()) {
@@ -125,6 +133,7 @@ export default function AssessmentWorkspacePage() {
       if (sequence !== loadSequenceRef.current) return;
       loadedAssessmentIdRef.current = params.id;
       setAssessment(response.assessment);
+      setIntegrity(response.integrity);
       setProblems(response.problems);
       setRemainingMs(response.remainingMs);
       setTimedOut(response.assessment.status === "active" && response.remainingMs <= 0);
@@ -194,9 +203,11 @@ export default function AssessmentWorkspacePage() {
     setSubmittingAll(true);
     setFinishError(null);
     try {
+      void stopProctoring();
       if (submissionPromiseRef.current) await submissionPromiseRef.current;
       const response = await api.submitAssessment(params.id);
       setAssessment((previous) => previous ? { ...previous, status: "completed", score: String(response.score) } : previous);
+      setIntegrity(response.integrity);
       setRemainingMs(0);
       if (timerRef.current) clearInterval(timerRef.current);
       toast.success(automatic ? `Time is up. Final score: ${response.score}%` : `Assessment complete. Score: ${response.score}%`);
@@ -208,7 +219,7 @@ export default function AssessmentWorkspacePage() {
       finishingRef.current = false;
       setSubmittingAll(false);
     }
-  }, [params.id]);
+  }, [params.id, stopProctoring]);
 
   useEffect(() => {
     if (!assessmentId || assessmentStatus !== "active") return;
@@ -310,6 +321,7 @@ export default function AssessmentWorkspacePage() {
     return (
       <AssessmentResults
         assessment={assessment}
+        integrity={integrity}
         problems={problems}
         onBack={() => router.push("/assessments")}
       />
@@ -369,6 +381,7 @@ export default function AssessmentWorkspacePage() {
         </div>
       </header>
 
+      <p className="shrink-0 border-b border-border bg-surface px-3 py-2 text-xs leading-relaxed text-text-secondary sm:px-4">{PROCTORING_NOTICE}</p>
       {timedOut || finishError ? (
         <div className={`flex shrink-0 flex-wrap items-center justify-between gap-2 border-b px-4 py-2 text-sm ${finishError ? "border-error/30 bg-error/5 text-error" : "border-warning/30 bg-warning/5 text-warning"}`} role={finishError ? "alert" : "status"}>
           <span>{finishError ? `Time has expired, but completion failed: ${finishError}` : "Time is up. Your assessment is being completed."}</span>
@@ -522,6 +535,7 @@ function ExecutionPanel({ result, error, loading }: { result: ExecutionResult | 
         <div key={index} className={`rounded-lg border p-3 ${caseResult.passed ? "border-accent/30 bg-accent/5" : "border-error/30 bg-error/5"}`}>
           <p className={`text-xs font-semibold ${caseResult.passed ? "text-accent" : "text-error"}`}>{caseResult.passed ? "Passed" : "Failed"} case {index + 1}{"hidden" in caseResult && caseResult.hidden ? " (hidden)" : ""}</p>
           {"actualOutput" in caseResult && caseResult.actualOutput != null ? <pre className="mono mt-2 whitespace-pre-wrap break-all text-xs">{caseResult.actualOutput}</pre> : null}
+          {"diff" in caseResult && caseResult.diff && <OutputDiff diff={caseResult.diff} />}
           {"error" in caseResult && caseResult.error ? <pre className="mono mt-2 whitespace-pre-wrap break-all text-xs text-error">{caseResult.error}</pre> : null}
         </div>
       ))}
@@ -529,7 +543,7 @@ function ExecutionPanel({ result, error, loading }: { result: ExecutionResult | 
   );
 }
 
-function AssessmentResults({ assessment, problems, onBack }: { assessment: Assessment; problems: AssessmentProblem[]; onBack: () => void }) {
+function AssessmentResults({ assessment, integrity, problems, onBack }: { assessment: Assessment; integrity: Integrity | null; problems: AssessmentProblem[]; onBack: () => void }) {
   const solved = problems.filter((problem) => problem.submission_status === "passed").length;
   const attempted = problems.filter((problem) => Boolean(problem.submission_id)).length;
   const score = Number(assessment.score ?? 0);
@@ -548,6 +562,7 @@ function AssessmentResults({ assessment, problems, onBack }: { assessment: Asses
           </div>
         </header>
 
+        {integrity && <IntegritySummary integrity={integrity} />}
         <section className="py-8" aria-labelledby="question-results-heading">
           <h2 id="question-results-heading" className="mb-4 text-lg font-semibold">Problem results</h2>
           <div className="divide-y divide-border border-y border-border">

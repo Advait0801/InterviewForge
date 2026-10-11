@@ -22,6 +22,7 @@ Object.defineProperty(window, "scrollTo", { configurable: true, value: () => {} 
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  sessionStorage.clear();
   document.documentElement.className = "";
   document.documentElement.style.colorScheme = "";
 });
@@ -41,3 +42,5 @@ if (!window.matchMedia) {
     }),
   });
 }
+
+HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };

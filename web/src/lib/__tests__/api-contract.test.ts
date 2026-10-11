@@ -152,3 +152,39 @@ describe("interview streams and hints", () => {
     await expect(api.answerInterviewStream("s", "draft", onEvent, controller.signal)).rejects.toMatchObject({ name: "AbortError" });
   });
 });
+
+describe("Group C contract", () => {
+  it.each(["python3", "c", "cpp", "java", "javascript", "go", "rust"])("runs and submits supported language %s", async (language) => {
+    respond({ mode: "run", passed: true, results: [], testCases: [], customResults: [] });
+    await api.runCode("p", language, "code", ["nums = [3,3], target = 6"]);
+    expect(await request().json()).toEqual({ problemId: "p", language, code: "code", mode: "run", customInputs: ["nums = [3,3], target = 6"] });
+    respond({ mode: "submit", passed: true, results: [], review: null }, 201); await api.submitCode("p", language, "code"); expect(await request().json()).not.toHaveProperty("customInputs");
+  });
+  it("carries retry seconds and indexed custom input errors", async () => {
+    respond({ error: "Wait", retryAfterSeconds: 30 }, 429); await expect(api.resendVerification()).rejects.toMatchObject({ status: 429, retryAfterSeconds: 30 });
+    respond({ error: "Invalid custom test case", customInputErrors: [{ index: 1, error: "Missing target" }] }, 400); await expect(api.runCode("p", "go", "code", ["a", "b"])).rejects.toMatchObject({ status: 400, customInputErrors: [{ index: 1, error: "Missing target" }] });
+  });
+  it("keeps public shares anonymous even when the viewer has a token", async () => {
+    setToken("viewer-secret"); respond({ events: [] }); await api.getPublicInterview("token?/#"); expect(request().headers.has("Authorization")).toBe(false); expect(request().url).toBe("http://localhost:4000/api/public/interviews/token%3F%2F%23");
+  });
+  it("uses the generated paths for daily history, reviews, paths, hints and assessment events", async () => {
+    setToken("user-token");
+    const calls: [() => Promise<unknown>, string, string, unknown?][] = [
+      [() => api.getDailyProblem("2026-10-11"), "GET", "/api/problems/daily?date=2026-10-11"],
+      [() => api.getDailyHistory(30), "GET", "/api/problems/daily/history?days=30"],
+      [() => api.getReviewQueue(), "GET", "/api/review"],
+      [() => api.addToReview("p"), "POST", "/api/review/p"],
+      [() => api.removeFromReview("p"), "DELETE", "/api/review/p"],
+      [() => api.generateLearningPath(), "POST", "/api/learning-paths/generate"],
+      [() => api.recordHintViews("p", 2), "POST", "/api/problems/p/hints/viewed", { count: 2 }],
+      [() => api.recordAssessmentEvents("a", [{ type: "paste", at: "2026-10-11T00:00:00Z", chars: 3 }]), "POST", "/api/assessments/a/events", { events: [{ type: "paste", at: "2026-10-11T00:00:00Z", chars: 3 }] }],
+      [() => api.getInterviewReplay("s"), "GET", "/api/interviews/s/replay"],
+      [() => api.listInterviewShares("s"), "GET", "/api/interviews/s/share"],
+      [() => api.createInterviewShare("s", { displayName: "Ada", expiresInDays: 7 }), "POST", "/api/interviews/s/share", { displayName: "Ada", expiresInDays: 7 }],
+      [() => api.revokeInterviewShare("s", "l"), "DELETE", "/api/interviews/s/share/l"],
+    ];
+    for (const [call, method, path, body] of calls) {
+      respond({}); await call(); expect(request().method).toBe(method); expect(request().url).toBe(`http://localhost:4000${path}`); expect(request().headers.get("Authorization")).toBe("Bearer user-token"); if (body) expect(await request().json()).toEqual(body);
+    }
+  });
+});

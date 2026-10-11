@@ -8,7 +8,8 @@ import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Button, buttonStyles } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { api, LearningPathDetailResponse } from "@/lib/api";
+import { GenerateFocusPath, FocusTopics } from "@/components/focus-path";
+import { api, ApiError, LearningPathDetailResponse } from "@/lib/api";
 
 function difficultyClass(difficulty: string) {
   if (difficulty === "easy") return "border-accent/25 bg-accent/15 text-accent";
@@ -63,7 +64,7 @@ export default function LearningPathDetailPage() {
     } catch (error) {
       if (requestVersion.current !== version) return;
       const message = error instanceof Error ? error.message : "Failed to load learning path";
-      if (message.toLowerCase().includes("not found")) setNotFound(true);
+      if (error instanceof ApiError && error.status === 404 || message.toLowerCase().includes("not found")) setNotFound(true);
       else setLoadError(message);
     } finally {
       if (requestVersion.current === version) setLoading(false);
@@ -101,13 +102,13 @@ export default function LearningPathDetailPage() {
               </Link>
             </div>
           </section>
-        ) : data ? <PathContent data={data} reduceMotion={Boolean(reduceMotion)} /> : null}
+        ) : data ? <PathContent data={data} reduceMotion={Boolean(reduceMotion)} onGenerated={setData} /> : null}
       </PageShell>
     </Protected>
   );
 }
 
-function PathContent({ data, reduceMotion }: { data: LearningPathDetailResponse; reduceMotion: boolean }) {
+function PathContent({ data, reduceMotion, onGenerated }: { data: LearningPathDetailResponse; reduceMotion: boolean; onGenerated: (path: LearningPathDetailResponse) => void }) {
   const { path, problems } = data;
   const problemCount = Math.max(path.problemCount, 0);
   const completed = Math.min(Math.max(path.completedCount, 0), problemCount);
@@ -129,6 +130,7 @@ function PathContent({ data, reduceMotion }: { data: LearningPathDetailResponse;
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
+              {path.isPersonal && <span className="text-xs font-semibold text-primary">Personal</span>}
               <span className="rounded-full border border-border bg-background/70 px-2.5 py-1 text-xs text-text-secondary">{path.topic}</span>
               <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold uppercase ${levelClass(path.difficultyLevel)}`}>{path.difficultyLevel}</span>
             </div>
@@ -160,6 +162,7 @@ function PathContent({ data, reduceMotion }: { data: LearningPathDetailResponse;
         </div>
       </header>
 
+      {path.isPersonal && <><GenerateFocusPath rebuild onGenerated={onGenerated} /><FocusTopics topics={path.focusTopics ?? []} /></>}
       <section aria-labelledby="path-steps-title">
         <div className="mb-3">
           <h2 id="path-steps-title" className="text-xl font-semibold text-text-primary">Path steps</h2>
@@ -199,6 +202,7 @@ function PathContent({ data, reduceMotion }: { data: LearningPathDetailResponse;
                         <span className="flex flex-wrap items-center gap-2">
                           <span className="break-words font-semibold text-text-primary transition-colors group-hover:text-primary">{problem.title}</span>
                           <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${difficultyClass(problem.difficulty)}`}>{problem.difficulty}</span>
+                          {problem.focusTopic && <span className="rounded-full border border-border px-2 py-0.5 text-xs text-text-secondary">Focus: {problem.focusTopic}</span>}
                           {isNext ? <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-primary">Up next</span> : null}
                           {problem.isCompleted ? <span className="text-[11px] font-medium text-accent">Completed</span> : null}
                         </span>

@@ -1,0 +1,2 @@
+ok: backend/src/generated/ai-service.ts
+ok: web/src/lib/api/schema.d.ts

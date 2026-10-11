@@ -38,6 +38,7 @@ vi.mock("@/lib/api", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/lib/api")>();
   return { ...original, api: {
     ...original.api,
+    listInterviews: vi.fn().mockResolvedValue({ sessions: [] }),
     startInterviewStream: mocks.startInterviewStream,
     getInterview: mocks.getInterview,
     answerInterviewStream: mocks.answerInterviewStream,
