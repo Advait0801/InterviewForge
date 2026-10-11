@@ -432,8 +432,10 @@ ssh -i interviewforge-key.pem ec2-user@<ELASTIC_IP>
 # Clone and configure
 git clone <repo-url> ~/InterviewForge && cd ~/InterviewForge
 # Create .env files for each service (backend, ai-service, code-runner, web)
-# backend/.env needs JWT_SECRET (>= 32 chars; the backend refuses to boot otherwise)
-# and TRUST_PROXY=1, since Nginx sits in front and rate limits key on client IP
+# backend/.env needs JWT_SECRET (>= 32 chars; the backend refuses to boot otherwise),
+# and EMAIL_PROVIDER=resend with RESEND_API_KEY (and EMAIL_FROM on a verified domain) so
+# verification and reset emails are sent (the default, log, only prints them).
+# Set TRUST_PROXY=1 too, since Nginx sits in front and rate limits key on client IP
 
 # Build sandbox images
 for lang in python c cpp java javascript go rust; do

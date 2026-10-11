@@ -2,6 +2,12 @@ import { hashPassword, verifyPassword, signAccessToken } from "../auth";
 import { randomToken, hoursFromNow } from "../auth-tokens";
 import * as users from "../repositories/users.repository";
 import { DomainError, badRequest } from "./errors";
+import { deliverInBackground, resetEmail, verificationEmail } from "./email";
+
+/** How long a verification link lives. */
+const VERIFY_HOURS = 24 * 7;
+/** Minimum gap between verification emails to one account. */
+export const RESEND_COOLDOWN_SECONDS = 60;
 
 const frontendUrl = () => process.env.FRONTEND_URL || "http://localhost:3000";
 
@@ -32,7 +38,7 @@ export async function register(input: {
 
   const passwordHash = await hashPassword(input.password);
   const verifyToken = randomToken();
-  const verifyExpires = hoursFromNow(24 * 7);
+  const verifyExpires = hoursFromNow(VERIFY_HOURS);
 
   const { id: userId, token_version: tokenVersion } = await users.insertUser({
     username: input.username,
@@ -43,8 +49,8 @@ export async function register(input: {
     verifyExpires,
   });
 
-  // Email delivery isn't wired up yet; the link is logged (F-07).
-  console.log("[email-verify] Send verification email to", input.email, "link:", verificationLink(verifyToken));
+  // In the background: a provider outage mustn't fail sign-up (resend-verification exists).
+  deliverInBackground(verificationEmail(input.email, input.username, verificationLink(verifyToken)), "verification email");
   return signAccessToken({ userId, tokenVersion });
 }
 
@@ -62,7 +68,28 @@ export async function requestPasswordReset(email: string): Promise<void> {
   if (!userId) return;
   const resetToken = randomToken();
   await users.setPasswordResetToken(userId, resetToken, hoursFromNow(1));
-  console.log("[password-reset] Send reset email to", email, "link:", resetLink(resetToken));
+  // In the background, so the response takes the same time whether or not the account exists.
+  deliverInBackground(resetEmail(email, resetLink(resetToken)), "reset email");
+}
+
+/**
+ * A fresh verification link for a signed-in user whose address isn't confirmed yet. The old
+ * link stops working. At most one email a minute.
+ */
+export async function resendVerification(userId: string): Promise<void> {
+  const state = await users.findVerificationState(userId);
+  if (!state) throw new DomainError(404, "Account not found");
+  if (state.email_verified) throw new DomainError(409, "Your email is already confirmed", { code: "already_verified" });
+  if (state.email_verification_expires_at) {
+    const sentAt = new Date(state.email_verification_expires_at).getTime() - VERIFY_HOURS * 3_600_000;
+    const wait = Math.ceil((sentAt + RESEND_COOLDOWN_SECONDS * 1000 - Date.now()) / 1000);
+    if (wait > 0) {
+      throw new DomainError(429, `A confirmation email was just sent. Try again in ${wait} seconds.`, { retryAfterSeconds: wait });
+    }
+  }
+  const token = randomToken();
+  await users.setVerificationToken(userId, token, hoursFromNow(VERIFY_HOURS));
+  deliverInBackground(verificationEmail(state.email, state.username, verificationLink(token)), "verification email");
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<void> {

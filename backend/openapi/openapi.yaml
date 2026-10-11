@@ -137,6 +137,23 @@ paths:
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Error" }
 
+  /auth/resend-verification:
+    post:
+      tags: [auth]
+      operationId: resendVerification
+      description: |
+        A new verification email for the signed-in user (D-072); the previous link stops working.
+        409 `already_verified`; 429 with `retryAfterSeconds` within a minute of the last one.
+        Sending happens in the background, so a 200 means queued, not delivered.
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
   /auth/verify-email:
     get:
       tags: [auth]
@@ -1648,8 +1665,10 @@ components:
             `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes.
             Hints (D-066): `hints_exhausted` and `hint_locked` (409). Sharing and proctoring (D-071):
             `report_not_ready`, `too_many_links`, `assessment_closed`, `event_limit` (409). Personal paths (D-070):
-            `not_enough_history`, `no_weak_topics`, `nothing_left_to_practise` (409).
+            `not_enough_history`, `no_weak_topics`, `nothing_left_to_practise` (409). Email (D-072):
+            `already_verified` (409).
         retryable: { type: boolean }
+        retryAfterSeconds: { type: integer, minimum: 1, description: With a 429 from resend-verification (D-072). }
         customInputErrors:
           type: array
           description: With "Invalid custom test case" (400), which inputs are unusable and why.

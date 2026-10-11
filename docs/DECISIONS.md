@@ -9,6 +9,58 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-11
 
+### D-072 — Verification and reset emails are actually sent (closes F-07)
+
+**Why:** Group C, Phase 10. Sign-up and forgot-password created working links but only printed
+them to the server log, so a real user who forgot their password had no way back in.
+
+**Decided:**
+- **A two-mode mailer** (`services/email.ts`), chosen by `EMAIL_PROVIDER`:
+  - `log` (the default) prints the email, link included, as before. Local dev stays on it even
+    with a key in `.env`.
+  - `resend` sends through Resend's HTTP API with native fetch and a 10 s timeout.
+    `RESEND_API_KEY` is required and must look like one (`re_…`), or the backend refuses to
+    start, like `JWT_SECRET`: a deployment that silently fell back to logging would look
+    healthy while nobody could reset a password.
+  - An unknown provider is also a startup error, not a fallback.
+  - `EMAIL_FROM` defaults to Resend's test sender.
+- **Sending never decides an auth response.** Emails go through `deliverInBackground` and the
+  response returns at once:
+  - a provider outage doesn't fail sign-up;
+  - forgot-password returns the same 200 in about the same time whether or not the account
+    exists. Awaiting the send only for real accounts would have reopened the enumeration this
+    endpoint was built to close, as a timing difference.
+
+  Failures are logged with a masked address (`a***@gmail.com`). The key, full addresses and links
+  (which are credentials) never reach the log in resend mode. Shutdown waits for in-flight sends.
+- **`POST /auth/resend-verification`** (signed in): a new link replaces the old one; 409
+  `already_verified`; 429 with `retryAfterSeconds` within a minute of the last email. A failed
+  sign-up email can be re-sent.
+- Emails are plain text plus a small inline-styled HTML version; the username is HTML-escaped.
+
+**Verified:**
+- **A real email arrived.** `scripts/verify_email.py --to <Resend account address>` switched the
+  running backend to resend, signed up and asked for a reset. Resend accepted both (ids logged),
+  with no failure and neither the key nor a link in the log. `backend/.env` was restored byte
+  for byte, back in log mode.
+  - Advait received both. The reset link opened the reset page; the confirm link verified the
+    account, and `--confirm` saw `email_verified = true` in Postgres.
+  - The confirmation email landed in Gmail's Spam: Resend's shared test sender has no reputation
+    on our behalf (BACKLOG: a verified sending domain).
+- Startup with `EMAIL_PROVIDER=resend` and no key: exit 1, "Refusing to start". Default mode
+  live: the sign-up email is printed, and `[startup] email: log`.
+- Tests: backend **475** (was 452).
+  - The mailer against a fake Resend on a real socket: request shape and bearer key; a 403
+    reason surfaced without the key; timeout; unreachable; masked logging; HTML escaping;
+    config fail-closed.
+  - The auth routes: the right link per flow; the same response for a known and an unknown
+    address with nothing sent for the unknown one; a slow or failing provider never delays or
+    changes a response; resend-verification's 409 and 429.
+  - Mutation: awaiting the reset email inside forgot-password fails two of them.
+- The key was created send-only, so it can't read delivery status from Resend (BACKLOG: a
+  bounce webhook).
+
+
 ### D-071 — Interview replay, public share links that leak nothing, assessment proctoring
 
 **Why:** Group C, Phase 9. A finished interview could only be seen by its owner, and a timed

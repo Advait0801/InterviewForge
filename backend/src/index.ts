@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { apiLimiter } from "./middleware/rate-limit.middleware";
 import { optionalAuth } from "./middleware/auth.middleware";
 import { resolveJwtSecret } from "./auth";
+import { getMailer, resolveEmailConfig, settleEmails } from "./services/email";
 import {
   correlationId,
   setCurrentCorrelationId,
@@ -20,12 +21,16 @@ import { RUN_CONCURRENCY, startRunQueue, stopRunQueue } from "./services/run-que
 dotenv.config();
 
 // Fail at boot, not on the first login: a missing or weak secret means forgeable tokens.
+// Email too (D-072): EMAIL_PROVIDER=resend with no key would leave every user unable to
+// reset a password, while the server looked healthy.
 try {
   resolveJwtSecret();
+  resolveEmailConfig();
 } catch (err) {
   console.error(`[startup] ${(err as Error).message}`);
   process.exit(1);
 }
+console.log(`[startup] email: ${getMailer().provider}`);
 
 const app = express();
 
@@ -116,6 +121,7 @@ if (redisUrl()) {
 for (const signal of ["SIGTERM", "SIGINT"] as const) {
   process.once(signal, () => {
     // Let running jobs finish so no sandbox is orphaned mid-run.
-    stopRunQueue().finally(() => process.exit(0));
+    // Let an email already handed to the provider finish sending.
+    Promise.allSettled([stopRunQueue(), settleEmails()]).finally(() => process.exit(0));
   });
 }
