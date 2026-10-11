@@ -1,4 +1,4 @@
-import { query } from "../db";
+import { query, type Queryable } from "../db";
 
 export type SubmissionFilters = {
   problemId?: string;
@@ -116,7 +116,7 @@ export async function findOwnSubmissionProblemId(id: string, userId: string): Pr
   return result.rows[0]?.problem_id ?? null;
 }
 
-export async function insertSubmission(row: {
+export async function insertSubmission(db: Queryable, row: {
   userId: string;
   problemId: string;
   language: string;
@@ -125,7 +125,7 @@ export async function insertSubmission(row: {
   runtimeMs: number | null;
   memoryKb: number | null;
 }): Promise<string> {
-  const result = await query<{ id: string }>(
+  const result = await db.query<{ id: string }>(
     `INSERT INTO submissions (user_id, problem_id, language, code, status, runtime_ms, memory_kb)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,

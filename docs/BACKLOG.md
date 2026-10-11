@@ -40,6 +40,16 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
   whose `get` doesn't refresh recency (5 of 50) and a number-of-islands search that never looks up
   (2 of 50). Strengthen those generators as D-042 did, to fail at least ~8 cases.
 
+## Found while building the learning features (D-070)
+
+- **Topic names are inconsistent** *(S)* — problems use both `BFS` and `breadth-first-search`,
+  `DFS` and `depth-first-search`, so the weakness score and the personal path treat them as
+  different topics. Normalise the topic vocabulary in `scripts/problemgen/` (one canonical name
+  each) and re-seed.
+- **Self-graded reviews** *(S)* — the review queue grades recall from submissions only (pass,
+  failures, hints). SM-2 normally lets the learner grade themselves too ("easy" / "hard"); worth
+  adding once the UI shows the queue.
+
 ## Alternative showpieces (considered and not chosen)
 
 - **Elo-rated adaptive difficulty** *(L, Loud)* — per-topic Elo for users *and* problems,
@@ -54,12 +64,8 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Product
 
-- **Problem of the Day** *(S)* — deterministic date-seeded selection, POTD history, "solved
-  today" badge; ties into streaks, which already compute at query time.
 - **Session replay + shareable public report links** *(M, Loud)* — a permanent URL a recruiter
   can open without signing up.
-- **Spaced repetition** *(M)* — SM-2 over failed/hinted problems as a daily review queue.
-- **Weakness → auto-generated learning path** *(M)*.
 - **Peer mock interviews** *(L)* — WebRTC over the dormant Socket.IO (F-06).
 - **Assessment proctoring** *(S)* — tab-switch and paste detection.
 - **Semantic caching** *(M)* — serve cached context within a similarity threshold of a recent

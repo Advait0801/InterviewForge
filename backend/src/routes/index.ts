@@ -10,6 +10,7 @@ import leaderboardRoutes from "./leaderboard.routes";
 import learningPathsRoutes from "./learningPaths.routes";
 import recommendationsRoutes from "./recommendations.routes";
 import resumesRoutes from "./resumes.routes";
+import reviewRoutes from "./review.routes";
 import openapiRoutes from "./openapi.routes";
 
 /**
@@ -28,5 +29,6 @@ export const API_ROUTES: ReadonlyArray<readonly [mountPath: string, router: Rout
   ["/learning-paths", learningPathsRoutes],
   ["/recommendations", recommendationsRoutes],
   ["/resumes", resumesRoutes],
+  ["/review", reviewRoutes],
   ["/openapi.json", openapiRoutes],
 ];

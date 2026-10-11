@@ -40,6 +40,22 @@ const runner = {
   validateMode: "ok" as "ok" | "drop",
 };
 const DIFF = { kind: "value", path: [], expected: 4, actual: "wrong" };
+
+/** What the review queue sees for this user and problem (review.repository.ts). */
+const queue = {
+  item: null as null | Record<string, unknown>,
+  failures: 0,
+  hinted: false,
+};
+const DUE_ITEM = {
+  ease_factor: 2.5,
+  interval_days: 6,
+  repetitions: 2,
+  lapses: 0,
+  due_on: "2000-01-01", // long overdue
+  last_reviewed_at: "1999-12-26 00:00:00+00",
+  created_at: "1999-12-20 00:00:00+00",
+};
 let runnerServer: Server;
 let api: TestServer;
 
@@ -107,8 +123,16 @@ beforeEach(() => {
       reply: (params) => (params[0] === PROBLEM ? [{ id: PROBLEM, slug: "two-sum", test_cases: CASES }] : []),
     },
     { match: "INSERT INTO submissions", reply: [{ id: SUBMISSION }] },
-    { match: "INSERT INTO user_path_progress", reply: [] }
+    { match: "INSERT INTO user_path_progress", reply: [] },
+    { match: "FROM review_items WHERE user_id = $1 AND problem_id = $2 FOR UPDATE", reply: () => (queue.item ? [queue.item] : []) },
+    { match: "AS n FROM submissions", reply: () => [{ n: queue.failures }] },
+    { match: "FROM problem_hint_views", reply: () => (queue.hinted ? [{ "?column?": 1 }] : []) },
+    { match: "INSERT INTO review_items", reply: [] },
+    { match: "UPDATE review_items", reply: [] }
   );
+  queue.item = null;
+  queue.failures = 0;
+  queue.hinted = false;
 });
 
 const submit = (body: Record<string, unknown>) => api.request("POST", "/api/submissions", { body });
@@ -205,6 +229,76 @@ describe("hidden test cases (D-057)", () => {
   it("a passing hidden case doesn't leak its output, which equals the expected answer", async () => {
     const r = await submit(valid);
     expect(r.body.results[5]).toEqual({ passed: true, hidden: true });
+  });
+});
+
+describe("review queue on submit (D-070)", () => {
+  it("everything a submit writes lands in one transaction", async () => {
+    runner.mode = "fail";
+    await submit(valid);
+    const order = db.calls.map((c) => c.sql.trim().split(/\s+/).slice(0, 3).join(" "));
+    const begin = order.indexOf("BEGIN");
+    const commit = order.indexOf("COMMIT");
+    expect(begin).toBeGreaterThanOrEqual(0);
+    for (const write of ["INSERT INTO submissions", "INSERT INTO review_items"]) {
+      const i = order.findIndex((o) => write.startsWith(o));
+      expect(i, write).toBeGreaterThan(begin);
+      expect(i, write).toBeLessThan(commit);
+    }
+  });
+
+  it("a failure enrols the problem, due tomorrow", async () => {
+    runner.mode = "fail";
+    const r = await submit(valid);
+    expect(r.body.review).toMatchObject({ action: "enrolled", quality: 1, intervalDays: 1 });
+    const insert = callsMatching(db, "INSERT INTO review_items")[0];
+    expect(insert.params.at(-1)).toBe("failed");
+  });
+
+  it("a clean first pass doesn't enter the queue", async () => {
+    const r = await submit(valid);
+    expect(r.body.review).toBeNull();
+    expect(callsMatching(db, "INSERT INTO review_items")).toHaveLength(0);
+  });
+
+  it("a pass after failed attempts enrols it as struggled, graded down", async () => {
+    queue.failures = 2;
+    const r = await submit(valid);
+    expect(r.body.review).toMatchObject({ action: "enrolled", quality: 3 });
+    expect(callsMatching(db, "INSERT INTO review_items")[0].params.at(-1)).toBe("struggled");
+  });
+
+  it("a pass after hints enrols it too", async () => {
+    queue.hinted = true;
+    const r = await submit(valid);
+    expect(r.body.review).toMatchObject({ action: "enrolled", quality: 4 });
+  });
+
+  it("a clean pass on a due item reviews it: SM-2's third interval is round(6 x EF)", async () => {
+    queue.item = DUE_ITEM;
+    const r = await submit(valid);
+    expect(r.body.review).toMatchObject({ action: "reviewed", quality: 5, intervalDays: 16 });
+    expect(callsMatching(db, "UPDATE review_items")).toHaveLength(1);
+  });
+
+  it("a pass before the item is due changes nothing", async () => {
+    queue.item = { ...DUE_ITEM, due_on: "2999-01-01" };
+    const r = await submit(valid);
+    expect(r.body.review).toEqual({ action: "unchanged", dueOn: "2999-01-01" });
+    expect(callsMatching(db, "UPDATE review_items")).toHaveLength(0);
+  });
+
+  it("a failure on a queued item is a lapse, even before it's due", async () => {
+    queue.item = { ...DUE_ITEM, due_on: "2999-01-01" };
+    runner.mode = "fail";
+    const r = await submit(valid);
+    expect(r.body.review).toMatchObject({ action: "lapsed", quality: 1, intervalDays: 1 });
+  });
+
+  it("Run never touches the queue", async () => {
+    runner.mode = "fail";
+    await submit({ ...valid, mode: "run" });
+    expect(callsMatching(db, "review_items")).toHaveLength(0);
   });
 });
 
