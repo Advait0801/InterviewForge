@@ -82,3 +82,13 @@ def hit_factory():
         }
 
     return _make
+
+
+@pytest.fixture(autouse=True)
+def _no_retrieval_cache(monkeypatch):
+    """The module cache talks to Redis when REDIS_URL is set (it is, in the container), and a
+    shared cache would leak results between tests. Tests that exercise it install their own."""
+    from app.rag import cache as cache_module
+
+    store = cache_module.MemoryStore(max_entries=50, ttl_seconds=60, partition_max=8)
+    monkeypatch.setattr(cache_module, "cache", cache_module.RetrievalCache(store, enabled=False))

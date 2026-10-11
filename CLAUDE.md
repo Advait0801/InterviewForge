@@ -149,6 +149,19 @@ docker/sandboxes/            # python / c / cpp / java / javascript / go / rust 
 - `web/src/lib/api/schema.d.ts` is regenerated (never hand-edited) in the backend commit that
   changes the spec, so CI's drift check stays green.
 
+**Retrieval cache (D-075)**
+- `app/rag/cache.py` sits in front of `RAGService.retrieve` (shared corpus only; résumé retrieval
+  never goes through it). Keyed by partition: filter, route and its flags, top_k, parent window,
+  embedding model and the corpus **generation**. Any corpus write must go through
+  `ingest_documents`/`delete_source` (or call `cache.invalidate()`), or cached results go stale.
+- Exact tier on by default; the semantic tier only runs where a reranker sits behind the query
+  and ships off (`RAG_CACHE_SEMANTIC_ENABLED`) because no current path sends near-duplicate
+  reranked queries. A degraded (timed-out) rerank is cached for 5 minutes only.
+- Redis is `noeviction` (48 MB in prod): the cache is capped by entry count and size, and every
+  key has a TTL. Keep it that way. Unreachable Redis = cache bypassed behind a 30 s breaker.
+- `docker compose exec ai-service python -m app.eval.semantic_cache` measures it;
+  `python scripts/verify_retrieval_cache.py` checks it live (`--no-llm` skips the interview part).
+
 **Agentic interviewer and cost (D-067)**
 - `mode` (`fixed` | `agent`) is per session; default `INTERVIEW_MODE` (fixed until UI B). The
   agent proposes a move; the backend's rules decide (`MAX_STAGE_QUESTIONS`, finish only on the last
@@ -265,6 +278,8 @@ python scripts/verify_learning.py           # Group C Phase 8: POTD, SM-2 review
 python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
 python scripts/verify_streaming.py          # SSE interview streams, disconnect, 409, timings (D-065); live stack
 python scripts/verify_streaming.py --measure 6  # JSON vs stream latency medians at the ai-service
+python scripts/verify_retrieval_cache.py    # Group D Phase 11: exact hits, invalidation, bounds, Redis outage, interview path (D-075)
+docker compose exec ai-service python -m app.eval.semantic_cache  # cache threshold sweep + quality/latency replay; --mode dense is free
 python scripts/verify_interviewer.py        # personas, hint ladder + penalty, challenge wiring (D-066); live stack
 docker compose exec ai-service python -m app.eval.interviewer  # persona/hint/challenge quality, ~120 Gemini calls
 docker compose exec ai-service python -m app.eval.run --k 5 --no-filter --previous-answer strong  # why it stays off

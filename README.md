@@ -76,6 +76,11 @@ What produced that, in order of contribution:
 - **Small-to-big retrieval** — embeds small chunks for precision, returns the wider passage
   for context.
 
+- **A retrieval cache** — repeated interview queries skip retrieval and the reranker's LLM
+  call (13.6 s → 0.3 ms on the day it was measured). A semantic tier, calibrated on 126
+  paraphrased queries with zero wrong-intent hits, is built but ships off: on today's traffic it
+  would only merge difficulty levels ([`docs/eval/phase11.md`](docs/eval/phase11.md)).
+
 **Two techniques were implemented, measured, and reverted** because the numbers said so:
 contextual retrieval (it duplicates what structural chunking already provides) and MMR.
 Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase2.md) and
@@ -233,7 +238,7 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 | **Sandboxes** | Per-language images in `docker/sandboxes/` (python, c, cpp, java, javascript, go, rust), unprivileged and resource-capped |
 | **Database** | PostgreSQL 16 — 14 raw-SQL migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks, resumes, indexes and session revocation |
 | **Vector store** | ChromaDB 0.5.5 |
-| **Shared state** | Redis 7: rate-limit counters (backend and the ai-service's live-fetch limits), the BullMQ code-run queue with a global concurrency cap, and the leaderboard cache |
+| **Shared state** | Redis 7: rate-limit counters (backend and the ai-service's live-fetch limits), the BullMQ code-run queue with a global concurrency cap, the leaderboard cache, and the bounded retrieval cache |
 | **Orchestration** | Docker Compose (7 services) |
 
 ---
@@ -347,6 +352,9 @@ docker compose exec ai-service python -m app.eval.run --k 5 --no-filter
 
 # Judge calibration: asserts weak < mediocre < strong for the same question
 docker compose exec ai-service python -m app.eval.monotonicity --replay app/eval/fixtures/monotonicity.json
+
+# Retrieval cache: threshold sweep and quality/latency replay (--mode dense makes no LLM calls)
+docker compose exec ai-service python -m app.eval.semantic_cache --mode dense
 
 # Context sufficiency (uses an LLM judge, so this one costs money)
 docker compose exec ai-service python -m app.eval.sufficiency --window 0 --window 1

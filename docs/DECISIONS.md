@@ -9,6 +9,63 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-11
 
+### D-075 — A retrieval cache: the exact tier ships on; the semantic tier is calibrated but off
+
+**What:** `ai-service/app/rag/cache.py`, in front of `RAGService.retrieve` (shared corpus only;
+résumé retrieval never touches it).
+- **Two tiers in one partition.** Exact: the normalised query text matches, and no embedding is
+  needed. Semantic: cosine ≥ `RAG_CACHE_SEMANTIC_THRESHOLD` (0.80), and a miss reuses the
+  lookup's embedding for retrieval. The partition is everything besides the text that decides the
+  result: the filter, the route and its flags, top_k, the parent window, the embedding model, and
+  the **corpus generation**.
+- **Invalidation by generation.** `ingest_documents`, `delete_source` and a reindex drop each
+  increment `ragcache:gen`, so live write-back is visible to the very next retrieval. If Redis is
+  down during a write, the bump is retried before this process reads again.
+- **Bounded, because Redis is `noeviction`** (48 MB in prod, shared with BullMQ and the limits):
+  at most 200 entries (oldest dropped), ≤ 64 KB each, every key with a TTL (6 h).
+- **Degraded reranks are kept for 5 minutes only.** A reranker timeout is served in first-stage
+  order. Not caching it at all would make every repeat wait 5 s again and pay for an abandoned
+  call. Caching it for 6 h would freeze the worse ranking.
+- **Outages:** REDIS_URL unset = in-process; unreachable = bypassed behind a 30 s breaker (one
+  0.25 s timeout, not one per request). Hit/miss counts are in `/metrics/llm` → `retrievalCache`.
+
+**Why only the exact tier is on** (`docs/eval/phase11.md`, 126 queries: the golden set plus two
+hand-written paraphrases of each):
+- Inside a partition, similarity separates cleanly: paraphrases ≥ 0.63, different intent ≤ 0.54.
+  At 0.80 there are no false hits, and 0.26 of margin.
+- **Dense path (agent searches): a semantic hit can't win.** The embedding is 181 of 214 ms, and
+  a semantic hit has to embed first. So the tier runs only where a reranker sits behind the query.
+- **Reranked path: it wins per hit.** At 0.80, 52% of the workload hits, with 0 wrong-intent hits,
+  nDCG +0.018 (inside ±0.024; paraphrases get the better-phrased original's ranking), a reranked
+  p50 of 247 ms vs 13.6 s fresh, and 38 of 69 reranker calls skipped.
+- **But today's traffic has no free-text reranked path.** Interview queries are built from
+  company, stage and difficulty (`previous_answer` stays off, D-066), so they repeat exactly, and
+  the exact tier catches them. The only near-duplicates are one stage at different difficulties
+  (cosine 0.94–0.98, the same dense top-5 in 5 of 6 pairs). The semantic tier would make every
+  difficulty share one context, a product change, to save at most 40 cold reranker calls per 6 h.
+  So it ships off: one env var turns it on when a free-text reranked path exists.
+
+**Found on the way:** Gemini `gemini-3.1-flash-lite-preview` answered in ~13 s on 2026-10-11, so
+**every production rerank timed out at 5 s** and behavioural/system-design retrieval silently ran
+in first-stage order. The first routed eval run measured nothing but timeouts and was re-run with a
+30 s timeout for the eval process. The 5-minute degraded TTL is the cache's answer to this; the
+provider latency itself is not fixed here (BACKLOG: provider timeouts).
+
+**Verified:**
+- 54 new ai-service tests (586 total), each run against the in-process store and Redis (fakeredis).
+  They cover partitions, both tiers, invalidation (ingest, delete, live write-back, across two
+  instances), degraded TTL, count/size/TTL bounds, an unreachable Redis with the breaker, the
+  retried bump, and the semantic tier's restriction to reranked stages. Ten mutations of the
+  cache's rules were each caught. Unit tests make no network call (BM25 stubbed).
+- `scripts/verify_retrieval_cache.py`, 25/25 live:
+  - exact hits despite case and spacing; other filter or top_k = miss;
+  - a real ingest and delete each bump the generation, and the throwaway document is removed;
+  - every key has a TTL;
+  - Redis paused: retrieval answers in 0.45 s, the breaker skips Redis, and the cache recovers;
+  - two interviews opened on Airbnb/hard: the second's retrievals are all exact hits, and one
+    reranker call for both.
+- Backend 477, API contract check green (no spec changes). Spend ~$0.021 of a $0.50 cap.
+
 ### D-074 — The focus-path weakness score stays below 1 (fixes D-070)
 
 **What:** a topic's score is now `(failed + lapses + hinted + 1) / (submissions + lapses + hinted + 2)`.
