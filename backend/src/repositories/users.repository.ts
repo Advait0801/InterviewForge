@@ -173,12 +173,13 @@ export type AccountRow = {
   username: string | null;
   name: string | null;
   avatar_url: string | null;
+  email_verified: boolean;
   created_at: string;
 };
 
 export async function findAccount(userId: string): Promise<AccountRow | null> {
   const result = await query<AccountRow>(
-    "SELECT id, email, username, name, avatar_url, created_at FROM users WHERE id = $1",
+    "SELECT id, email, username, name, avatar_url, email_verified, created_at FROM users WHERE id = $1",
     [userId]
   );
   return result.rows[0] ?? null;

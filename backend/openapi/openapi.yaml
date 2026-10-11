@@ -1722,13 +1722,16 @@ components:
     Account:
       type: object
       additionalProperties: false
-      required: [id, email, username, name, avatar_url, created_at]
+      required: [id, email, username, name, avatar_url, email_verified, created_at]
       properties:
         id: { $ref: "#/components/schemas/Uuid" }
         email: { type: string }
         username: { type: [string, "null"] }
         name: { type: [string, "null"] }
         avatar_url: { type: [string, "null"] }
+        email_verified:
+          type: boolean
+          description: Whether the address is confirmed; when false, offer POST /auth/resend-verification (D-072).
         created_at: { $ref: "#/components/schemas/Timestamp" }
 
     UserStats:

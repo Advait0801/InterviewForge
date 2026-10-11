@@ -57,6 +57,16 @@ describe("users: own account", () => {
     }
   );
 
+  it("/me says whether the email is confirmed (D-072)", async () => {
+    db.handlers.push({
+      match: "SELECT id, email, username, name, avatar_url, email_verified, created_at FROM users",
+      reply: [{ id: USER_ID, email: "a@b.c", username: "ada", name: null, avatar_url: null, email_verified: false, created_at: "2026-10-11T00:00:00Z" }],
+    });
+    const r = await users.request("GET", "/api/users/me");
+    expect(r.status).toBe(200);
+    expect(r.body.user.email_verified).toBe(false);
+  });
+
   it("/me 404s when the account row is gone", async () => {
     db.handlers.push({ match: "FROM users WHERE id = $1", reply: [] });
     expect((await users.request("GET", "/api/users/me")).status).toBe(404);

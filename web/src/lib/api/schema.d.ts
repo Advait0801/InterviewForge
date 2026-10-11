@@ -1052,6 +1052,8 @@ export interface components {
             username: string | null;
             name: string | null;
             avatar_url: string | null;
+            /** @description Whether the address is confirmed; when false, offer POST /auth/resend-verification (D-072). */
+            email_verified: boolean;
             created_at: components["schemas"]["Timestamp"];
         };
         UserStats: {
