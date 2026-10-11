@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OutputDiff } from "@/components/output-diff";
 import { ReviewOutcome } from "@/components/review-outcome";
+import { ReviewDue } from "@/components/review-due";
 import { ProgressiveHints } from "@/components/progressive-hints";
 import { CustomResults } from "@/components/custom-cases";
 import { DailyProblemCard } from "@/components/daily-problem";
@@ -17,6 +18,7 @@ import {
   groupCIntegrity,
   groupCLink,
   groupCPath,
+  groupCQueue,
   groupCReplay,
   groupCSession,
 } from "@/test/group-c-fixtures";
@@ -394,11 +396,49 @@ it("confirms before revoking a link and refreshes the active list", async () => 
   expect(confirm).toHaveBeenCalledTimes(2);
   confirm.mockRestore();
 });
+it.each([
+  [0, "0 reviews due"],
+  [1, "1 review due"],
+  [2, "2 reviews due"],
+])("labels the dashboard review link for %i due", async (due, name) => {
+  responder = () => ({ body: { ...groupCQueue, counts: { due, total: due } } });
+  render(<ReviewDue />);
+  expect(await screen.findByRole("link", { name })).toHaveAttribute("href", "/review");
+});
+
+it.each([
+  [0, "0 seconds"],
+  [1, "1 second"],
+  [45, "45 seconds"],
+  [60, "1 minute"],
+  [61, "1 minute 1 second"],
+  [120, "2 minutes"],
+  [125, "2 minutes 5 seconds"],
+])("formats %i seconds away as %s", (hiddenSeconds, expected) => {
+  render(<IntegritySummary integrity={{ ...groupCIntegrity, hiddenSeconds }} />);
+  const row = screen.getByText("Time away").parentElement!;
+  expect(within(row).getByText(expected)).toBeInTheDocument();
+});
+
+it.each([
+  [0, "0 characters"],
+  [1, "1 character"],
+  [21, "21 characters"],
+])("formats paste character counts for %i characters", (characters, expected) => {
+  render(<IntegritySummary integrity={{
+    ...groupCIntegrity, pastedChars: characters, largestPaste: characters,
+  }} />);
+  const pastes = screen.getByText("Pastes").parentElement!;
+  const largest = screen.getByText("Largest paste").parentElement!;
+  expect(within(pastes).getByText(`2 (${expected})`)).toBeInTheDocument();
+  expect(within(largest).getByText(expected)).toBeInTheDocument();
+});
+
 it("summarizes integrity neutrally", () => {
   const { container } = render(
     <IntegritySummary integrity={groupCIntegrity} />,
   );
-  expect(screen.getByText("65 seconds")).toBeInTheDocument();
+  expect(screen.getByText("1 minute 5 seconds")).toBeInTheDocument();
   expect(screen.getByText("2 (240 characters)")).toBeInTheDocument();
   expect(
     screen.getByRole("heading", { name: "Worth reviewing" }),

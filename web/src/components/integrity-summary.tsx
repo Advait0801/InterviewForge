@@ -2,6 +2,20 @@ import type { Integrity } from "@/lib/api";
 
 export const PROCTORING_NOTICE =
   "This assessment records when you leave this tab or window, paste or copy (only how many characters, never the text), and exit fullscreen. It's shown to you with your result and doesn't change your score.";
+
+function countLabel(count: number, unit: string) {
+  return `${count} ${unit}${count === 1 ? "" : "s"}`;
+}
+
+function timeAway(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  if (!minutes) return countLabel(seconds, "second");
+  return [countLabel(minutes, "minute"), remainder ? countLabel(remainder, "second") : ""]
+    .filter(Boolean)
+    .join(" ");
+}
+
 export function IntegritySummary({ integrity }: { integrity: Integrity }) {
   return (
     <section
@@ -17,13 +31,13 @@ export function IntegritySummary({ integrity }: { integrity: Integrity }) {
       <dl className="grid gap-4 text-sm sm:grid-cols-2">
         {[
           ["Tab switches", integrity.tabSwitches],
-          ["Time away", `${integrity.hiddenSeconds} seconds`],
+          ["Time away", timeAway(integrity.hiddenSeconds)],
           ["Window blurs", integrity.windowBlurs],
           [
             "Pastes",
-            `${integrity.pastes} (${integrity.pastedChars} characters)`,
+            `${integrity.pastes} (${countLabel(integrity.pastedChars, "character")})`,
           ],
-          ["Largest paste", `${integrity.largestPaste} characters`],
+          ["Largest paste", countLabel(integrity.largestPaste, "character")],
           ["Copies", integrity.copies],
           ["Fullscreen exits", integrity.fullscreenExits],
         ].map(([name, value]) => (

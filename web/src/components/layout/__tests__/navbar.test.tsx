@@ -54,6 +54,20 @@ describe("Navbar", () => {
     expect(trigger).toHaveFocus();
   });
 
+  it.each([
+    [0, "0 reviews due"],
+    [1, "1 review due"],
+    [2, "2 reviews due"],
+  ])("labels desktop and mobile review badges for %i due", async (due, label) => {
+    localStorage.setItem("if-token", "test-token");
+    mocks.getReviewQueue.mockResolvedValue({ counts: { due } });
+    renderNavbar();
+    expect(await screen.findByLabelText(label)).toHaveTextContent(String(due));
+    await userEvent.setup().click(screen.getByRole("button", { name: "Toggle menu" }));
+    const mobile = await screen.findByRole("navigation", { name: "Mobile navigation" });
+    expect(within(mobile).getByLabelText(label)).toHaveTextContent(String(due));
+  });
+
   it("resolves signed-in account controls without blocking navigation", async () => {
     localStorage.setItem("if-token", "test-token");
     renderNavbar();

@@ -1,0 +1,39 @@
+
+> web@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /Users/advait0801/Desktop/Development/InterviewForge/web
+
+ ✓ src/components/layout/__tests__/navbar.test.tsx (3 tests) 401ms
+ ✓ src/app/__tests__/completion.test.tsx (7 tests) 557ms
+   ✓ completion pages > validates passwords locally and preserves values after a server error  331ms
+ ✓ src/components/__tests__/group-c.test.tsx (36 tests) 607ms
+ ✓ src/app/__tests__/workspaces.test.tsx (10 tests) 841ms
+ ✓ src/app/__tests__/onboarding.test.tsx (7 tests) 615ms
+ ✓ src/app/__tests__/discovery.test.tsx (6 tests) 803ms
+   ✓ practice discovery > combines every catalogue filter, reports exact counts, and resets a no-match state  602ms
+ ✓ src/app/__tests__/interview-upgrades.test.tsx (21 tests) 971ms
+ ✓ src/components/ui/__tests__/controls.test.tsx (5 tests) 115ms
+ ✓ src/components/ui/__tests__/theme-provider.test.tsx (1 test) 97ms
+ ✓ src/hooks/__tests__/use-speech-recording.test.tsx (22 tests) 89ms
+ ✓ src/app/__tests__/progress.test.tsx (4 tests) 241ms
+ ✓ src/hooks/__tests__/use-proctoring.test.tsx (11 tests) 62ms
+ ✓ src/components/interview/__tests__/conversation.test.tsx (3 tests) 60ms
+ ✓ src/app/__tests__/group-c.test.tsx (17 tests) 1464ms
+   ✓ Group C coding workspaces > persists cases, maps a rejected sent index past empties, and focuses the invalid input  306ms
+ ✓ src/components/auth/__tests__/protected.test.tsx (2 tests) 36ms
+ ✓ src/lib/__tests__/api-contract.test.ts (32 tests) 39ms
+ ✓ src/components/ui/__tests__/app-toaster.test.tsx (1 test) 14ms
+ ✓ src/components/__tests__/code-workspace-editor.test.tsx (2 tests) 11ms
+ ✓ src/lib/__tests__/session.test.ts (4 tests) 7ms
+ ✓ src/lib/__tests__/sse.test.ts (8 tests) 8ms
+ ✓ src/app/__tests__/interview-design.test.tsx (9 tests) 2089ms
+   ✓ interview flow > moves through a follow-up and all four stages with a multiline draft  418ms
+   ✓ interview flow > shows microphone denial and appends a successful transcript before voice evaluation  680ms
+
+ Test Files  21 passed (21)
+      Tests  211 passed (211)
+   Start at  13:00:40
+   Duration  3.46s (transform 1.23s, setup 3.06s, collect 4.03s, tests 9.13s, environment 7.22s, prepare 1.14s)
+

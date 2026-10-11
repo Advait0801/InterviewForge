@@ -119,11 +119,13 @@ function ReviewContent() {
                             <div className="flex flex-wrap gap-2">
                               <Link
                                 href={`/problems/${item.problemId}`}
+                                aria-label={`Practise ${item.title}`}
                                 className={buttonStyles({ size: "sm" })}
                               >
                                 Practise
                               </Link>
                               <Button
+                                aria-label={`Remove ${item.title} from your review queue`}
                                 variant="ghost"
                                 size="sm"
                                 disabled={Boolean(removing)}
@@ -131,7 +133,6 @@ function ReviewContent() {
                                 onClick={() => void remove(item)}
                               >
                                 Remove
-                                <span className="sr-only"> {item.title}</span>
                               </Button>
                             </div>
                           </div>

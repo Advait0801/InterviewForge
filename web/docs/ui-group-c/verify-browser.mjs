@@ -85,7 +85,7 @@ try {
     await audit(page, `problem-results-${theme}`); await screenshot(page, `problem-${theme}-${width}`);
     await page.getByRole("button", { name: "Submit", exact: true }).click(); await page.getByText(/Added to your review queue/).waitFor(); assert.equal("customInputs" in bodies.filter((b) => b.mode).at(-1), false);
     await page.goto(`${base}/review`); await page.getByRole("heading", { name: "Due now (1)" }).waitFor(); await audit(page, `review-${theme}`); await screenshot(page, `review-${theme}-${width}`);
-    page.once("dialog", (dialog) => dialog.accept()); await page.getByRole("button", { name: "Remove Two Sum" }).click(); await page.getByRole("heading", { name: "Due now (0)" }).waitFor();
+    page.once("dialog", (dialog) => dialog.accept()); await page.getByRole("button", { name: "Remove Two Sum from your review queue" }).click(); await page.getByRole("heading", { name: "Due now (0)" }).waitFor();
     await page.goto(`${base}/daily`); await page.getByText("3-day streak · best 7").waitFor(); assert.equal(await page.getByRole("listitem").count(), 30); await audit(page, `daily-${theme}`);
     await page.goto(`${base}/paths`); await page.getByRole("button", { name: "Rebuild my focus path" }).waitFor(); await audit(page, `paths-${theme}`);
     await page.getByRole("button", { name: "Rebuild my focus path" }).click(); await page.getByRole("heading", { name: "Built from" }).waitFor(); await audit(page, `focus-path-${theme}`);
@@ -148,7 +148,7 @@ try {
   await page.getByRole("tab", { name: "Test Cases", exact: true }).click(); await page.getByLabel("Custom case 1", { exact: true }).fill("broken"); await page.getByRole("button", { name: "Run code" }).click(); await page.locator('[aria-invalid="true"]').waitFor(); assert.equal(await page.getByText("Execution failed", { exact: true }).count(), 0); evidence.live.invalidCustomInline = true;
   await page.getByRole("tab", { name: "Hints", exact: true }).click(); const hintResponse = page.waitForResponse((r) => r.url().endsWith("/hints/viewed")); await page.getByRole("button", { name: "Show hint 1" }).click(); assert.equal((await hintResponse).status(), 200); evidence.live.hintReported = true;
   await page.getByRole("button", { name: "Add to review" }).click(); await page.getByRole("button", { name: "Added", exact: true }).waitFor(); await page.goto(`${base}/review`); await page.getByRole("heading", { name: "Two Sum" }).waitFor(); evidence.live.reviewAdded = true;
-  page.once("dialog", (dialog) => dialog.accept()); await page.getByRole("button", { name: "Remove Two Sum" }).click(); await page.getByText(/Nothing to review yet/).waitFor(); evidence.live.reviewRemoved = true;
+  page.once("dialog", (dialog) => dialog.accept()); await page.getByRole("button", { name: "Remove Two Sum from your review queue" }).click(); await page.getByText(/Nothing to review yet/).waitFor(); evidence.live.reviewRemoved = true;
   await page.goto(`${base}/share/unknown-public-token`); await page.getByText("This link doesn't exist or is no longer shared.", { exact: true }).waitFor(); evidence.live.public404 = true;
   await live.close();
   delete evidence.live.lastRun;

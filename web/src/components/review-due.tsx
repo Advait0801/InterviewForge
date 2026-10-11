@@ -29,7 +29,7 @@ export function ReviewDue() {
         </>
       ) : (
         <Link href="/review" className="font-semibold text-primary underline">
-          {state.data?.counts.due} reviews due
+          {state.data?.counts.due} {state.data?.counts.due === 1 ? "review" : "reviews"} due
         </Link>
       )}
     </div>

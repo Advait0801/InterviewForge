@@ -108,7 +108,7 @@ export function Navbar() {
                     : "text-text-primary/70 hover:text-text-primary"
                 }`}
               >
-                {link.label}{link.href === "/review" && isAuthed && reviewDue !== null && <span className="ml-1 rounded-full border border-border bg-surface px-1.5 text-xs" aria-label={`${reviewDue} reviews due`}>{reviewDue}</span>}
+                {link.label}{link.href === "/review" && isAuthed && reviewDue !== null && <span className="ml-1 rounded-full border border-border bg-surface px-1.5 text-xs" aria-label={`${reviewDue} ${reviewDue === 1 ? "review" : "reviews"} due`}>{reviewDue}</span>}
                 {isActive && (
                   <motion.div
                     layoutId="nav-indicator"
@@ -193,7 +193,7 @@ export function Navbar() {
                       isActive ? "bg-primary/10 text-primary" : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
                     }`}
                   >
-                    {link.label}{link.href === "/review" && isAuthed && reviewDue !== null && <span className="ml-1 rounded-full border border-border bg-surface px-1.5 text-xs" aria-label={`${reviewDue} reviews due`}>{reviewDue}</span>}
+                    {link.label}{link.href === "/review" && isAuthed && reviewDue !== null && <span className="ml-1 rounded-full border border-border bg-surface px-1.5 text-xs" aria-label={`${reviewDue} ${reviewDue === 1 ? "review" : "reviews"} due`}>{reviewDue}</span>}
                   </Link>
                 );
               })}

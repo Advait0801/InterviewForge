@@ -374,6 +374,20 @@ it.each([true, false])(
     expect(Boolean(screen.queryByText("Solved on the day"))).toBe(authed);
   },
 );
+it("names review actions by problem while retaining their visible labels", async () => {
+  handler = () => ({ body: groupCQueue });
+  render(<ReviewPage />);
+  await screen.findByRole("heading", { name: "Due now (1)" });
+  for (const [title, problemId] of [["Two Sum", "p"], ["Valid Parentheses", "q"]]) {
+    const practise = screen.getByRole("link", { name: `Practise ${title}`, exact: true });
+    expect(practise).toHaveAttribute("href", `/problems/${problemId}`);
+    expect(practise).toHaveTextContent(/^Practise$/);
+    expect(screen.getByRole("button", {
+      name: `Remove ${title} from your review queue`, exact: true,
+    })).toHaveTextContent(/^Remove$/);
+  }
+});
+
 it("renders due/upcoming review items and confirms removal", async () => {
   let removed = false;
   handler = (request) => {
@@ -398,9 +412,9 @@ it("renders due/upcoming review items and confirms removal", async () => {
   ).toBeInTheDocument();
   expect(screen.getByText(/You failed it/)).toBeInTheDocument();
   expect(screen.getByText(/Added by you.*Due 2026-10-13/)).toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Remove Two Sum" }));
+  await user.click(screen.getByRole("button", { name: "Remove Two Sum from your review queue" }));
   expect(removed).toBe(false);
-  await user.click(screen.getByRole("button", { name: "Remove Two Sum" }));
+  await user.click(screen.getByRole("button", { name: "Remove Two Sum from your review queue" }));
   expect(
     await screen.findByRole("heading", { name: "Due now (0)" }),
   ).toBeInTheDocument();
@@ -492,7 +506,7 @@ it("shows assessment integrity after finishing", async () => {
   expect(
     await screen.findByRole("heading", { name: "Integrity summary" }),
   ).toBeInTheDocument();
-  expect(screen.getByText("65 seconds")).toBeInTheDocument();
+  expect(screen.getByText("1 minute 5 seconds")).toBeInTheDocument();
 });
 
 it("finishes an assessment without waiting for a slow proctoring request", async () => {

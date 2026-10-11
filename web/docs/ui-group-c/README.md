@@ -102,3 +102,11 @@ A live attempt exposed the need to wait for language restoration before insertin
 2. `docs(ui): record Group C verification` — this report and final check outputs (the documentation commit).
 
 Both are on `feat/ui-group-c`, ending with `Co-Authored-By: GPT-6 <noreply@openai.com>`. Use `git log -2 --oneline feat/ui-group-c` for the documentation commit's hash; embedding its own hash would change it.
+
+## Follow-up
+
+- Navbar badges (desktop/mobile) and the dashboard link use “1 review due” and “0/2 reviews due”, with regression coverage for all three counts.
+- Review actions include each problem title in their accessible names: “Practise Two Sum” and “Remove Two Sum from your review queue”. Visible labels stay unchanged; tests query both due and upcoming items by their exact names. The browser harness selectors match the new names.
+- Integrity time away uses singular/plural seconds and minutes, omitting zero trailing seconds. Tests cover “1 second”, “45 seconds”, “1 minute”, “2 minutes 5 seconds” and boundary cases. Both paste character counts use “1 character”/“21 characters”, with zero also covered.
+
+Before: **21 files, 211 passing tests** ([baseline output](followup-tests-before.txt)). After: **21 files, 228 passing tests**, adding 17 regressions ([test output](followup-tests.txt)). `npm test`, bare `npm run lint` ([output](followup-lint.txt)) and `npm run build` ([output](followup-build.txt)) all pass before the single local follow-up commit, `fix(ui): clarify review controls and integrity counts`. Changes remain in `web/`; nothing was pushed.
