@@ -71,12 +71,18 @@ def llm_metrics():
     cost" without adding infrastructure.
     """
     from app.core.observability import snapshot
+    from app.rag.cache import cache
     from app.resume import store as resume_store
 
     # Surfaced here rather than in a separate endpoint so a resume isolation
     # failure shows up on the dashboard that is already being watched. Must
     # be 0; anything else is a data-leak incident, not a metric.
-    return {**snapshot(), "resumeIsolationViolations": resume_store.ISOLATION_VIOLATIONS}
+    return {
+        **snapshot(),
+        "resumeIsolationViolations": resume_store.ISOLATION_VIOLATIONS,
+        # Phase 11: hits here are reranker calls and embeddings that never happened.
+        "retrievalCache": cache.snapshot(),
+    }
 
 
 @app.get("/health")

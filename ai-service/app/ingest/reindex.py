@@ -140,6 +140,11 @@ def rebuild(*, drop: bool = True) -> Dict[str, Any]:
             client.delete_collection(config.CHROMA_COLLECTION)
         except Exception:
             pass
+        # Cached retrievals point at the dropped collection; ingest bumps again below, but
+        # a rebuild that fails before its first write must not leave them reachable.
+        from app.rag.cache import cache
+
+        cache.invalidate()
 
     rag = RAGService()
 

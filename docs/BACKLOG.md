@@ -79,8 +79,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 ## Product
 
 - **Peer mock interviews** *(L)* — WebRTC over the dormant Socket.IO (F-06).
-- **Semantic caching** *(M)* — serve cached context within a similarity threshold of a recent
-  query. Partially superseded by the Phase 4 write-back cache.
 
 ## Carried over from the UI workstream
 

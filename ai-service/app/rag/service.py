@@ -4,6 +4,7 @@ from app.core import config
 from app.rag.chunking import chunk_text
 from app.rag.embeddings import EmbeddingService
 from app.rag.chroma_client import get_chroma_collection
+from app.rag import cache as retrieval_cache
 
 class RAGService:
     def __init__(self) -> None:
@@ -59,6 +60,8 @@ class RAGService:
             embeddings=vectors,
             metadatas=metadatas,
         )
+        # Any cached retrieval may now be missing these chunks (Phase 11).
+        retrieval_cache.cache.invalidate()
 
         return {"ingested": len(ids)}
 
@@ -85,6 +88,7 @@ class RAGService:
             ids = found.get("ids") or []
             if ids:
                 self.collection.delete(ids=ids)
+                retrieval_cache.cache.invalidate()
             return len(ids)
         except Exception:
             return 0
@@ -133,6 +137,13 @@ class RAGService:
                 hit["expanded_from"] = len(ordered)
         return hits
 
+    def _embedding_identity(self) -> str:
+        """Which model the query would be embedded with: vectors from two models aren't
+        comparable, so a provider fallback must not reuse the other model's entries."""
+        provider = getattr(self.embedder, "active_provider", "unknown")
+        model = {"openai": config.OPENAI_EMBEDDING_MODEL, "gemini": config.GEMINI_EMBEDDING_MODEL}
+        return f"{provider}:{model.get(provider, '')}"
+
     def retrieve(
         self,
         query: str,
@@ -152,7 +163,29 @@ class RAGService:
             route = route_for(stage)
             use_rerank, use_hybrid, route_name = route.rerank, route.hybrid, route.stage
 
-        qvec = self.embedder.embed([query])[0]
+        # Everything besides the query text that decides the result is in the partition, so a
+        # cached result is only ever reused under the same filter, route and corpus (Phase 11).
+        cache = retrieval_cache.cache
+        generation = cache.generation()
+        found = retrieval_cache.Lookup(tier="off")
+        if generation is not None:
+            partition = retrieval_cache.partition_key(
+                where=where, route=route_name, rerank=use_rerank, hybrid=use_hybrid,
+                mmr=config.MMR_ENABLED, top_k=top_k, parent_window=config.PARENT_WINDOW,
+                embedding_model=self._embedding_identity(),
+                generation=generation,
+            )
+            # Semantic matching only pays where a reranker sits behind the query (cache.py).
+            found = cache.lookup(query, partition, lambda q: self.embedder.embed([q])[0],
+                                 semantic=use_rerank)
+            if found.result is not None:
+                hit = found.result
+                hit["query"] = query
+                hit["cache"] = {"tier": found.tier, "similarity": found.similarity,
+                                "cachedQuery": hit.pop("cachedQuery", None)}
+                return hit
+
+        qvec = found.vector if found.vector is not None else self.embedder.embed([query])[0]
 
         # When a second stage is active, first-stage retrieval must return a
         # wider candidate set for it to work on: a reranker cannot promote a
@@ -199,16 +232,26 @@ class RAGService:
             )
             stages.append("mmr")
 
+        degraded = False
         if use_rerank:
             from app.rag.rerank import rerank
 
-            hits = rerank(query, hits[: config.RERANK_CANDIDATES], keep=top_k)
+            candidates = hits[: config.RERANK_CANDIDATES]
+            hits = rerank(query, candidates, keep=top_k)
             stages.append("rerank")
+            # rerank() marks every hit it actually ordered; without the marks it fell back to
+            # first-stage order (timeout, provider error). Cached only briefly (see cache.py).
+            degraded = len(candidates) > 1 and top_k > 0 and not any(
+                "rerank_position" in h for h in hits
+            )
 
         hits = hits[:top_k]
         hits = self._expand_to_parent(hits, config.PARENT_WINDOW)
 
-        return {
+        result = {
             "query": query, "top_k": top_k, "where": where,
             "hits": hits, "stages": stages, "route": route_name,
         }
+        cache.store_result(found, {**result, "cachedQuery": query}, qvec, degraded=degraded)
+        result["cache"] = {"tier": found.tier, "similarity": found.similarity, "cachedQuery": None}
+        return result
