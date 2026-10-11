@@ -60,6 +60,10 @@ them to the server log, so a real user who forgot their password had no way back
 - The key was created send-only, so it can't read delivery status from Resend (BACKLOG: a
   bounce webhook).
 
+**Follow-up, found while writing the UI C handoff:** `GET /users/me` didn't say whether the
+address was confirmed, so the web couldn't decide when to offer "resend confirmation".
+`Account.email_verified` is now returned (additive; web types regenerated, web tests unchanged).
+
 
 ### D-071 — Interview replay, public share links that leak nothing, assessment proctoring
 
