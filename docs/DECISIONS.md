@@ -9,6 +9,44 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-11
 
+### D-073 — UI Group C shipped: every coding, learning, sharing and email feature has a screen
+
+**What:** the web half of Group C, built by GPT from one handoff plus one follow-up (PR #25:
+`b41df65`, `aca1a89`, `6f6f942`), verified independently before merge.
+- **Coding engine (D-069):** 7-language picker (saved preference restored); custom test cases
+  judged against the reference solution, with a malformed input's error shown inline on that box;
+  failing cases explain the diff in words and label the expected value "Expected (reference
+  solution)".
+- **Learning (D-070):** Problem of the Day card and `/daily` history; `/review` (due and upcoming,
+  remove) with a navbar badge; Submit shows the review-queue outcome; "Build my focus path";
+  hint reveals are recorded.
+- **Sharing and proctoring (D-071):** replay with step-through playback; share dialog that warns
+  about résumé content before creating a link and shows the token once; revoke; a public page with
+  no navbar that never sends the viewer's token. Assessments show the notice up front, batch events
+  (flushed when the tab hides), send paste/copy as a character count only, and show a neutral
+  integrity summary.
+- **Email (D-072):** a verify banner with resend and a live cooldown from `retryAfterSeconds`.
+
+**Verified (by Claude):**
+- web 228 tests (211 at handoff, +17 in the follow-up), lint, build, contract check clean; the only `fetch(` is the client
+  adapter.
+- Live against the stack, every flow above. The public page's requests carried no Authorization
+  header while signed in (checked by wrapping `fetch`); its HTML has robots noindex and
+  no-referrer; no CANARY or viewer data rendered. A 21-character paste reached the database as
+  `chars: 21` with no text.
+- axe: 18 audits (9 pages × light/dark), 0 violations; no horizontal scroll at 320 px.
+- The follow-up fixed three things the handoff's own audit missed: "1 reviews due", review-queue
+  buttons with identical accessible names, and "1 seconds" / "1 characters".
+- Method notes for this browser pane: it auto-cancels native `confirm`, doesn't hide the page on a
+  tab switch, and doesn't fire clipboard events for Cmd+C/V, so those handlers were driven
+  directly (GPT confirmed clipboard events in Chrome). `scrollWidth` includes the 6 px scrollbar;
+  check `scrollX` for overflow.
+
+**Found, fixed next:** the focus path's weakness score can exceed 1 ("Score 1.25"), because
+D-070's numerator counts lapses and hints on top of failures but the denominator counts only
+submissions. Backend-only; the UI shows whatever the API returns.
+
+
 ### D-072 — Verification and reset emails are actually sent (closes F-07)
 
 **Why:** Group C, Phase 10. Sign-up and forgot-password created working links but only printed
