@@ -2660,7 +2660,9 @@ components:
         problemsSolved: { type: integer }
         score:
           type: number
-          description: (failed + lapses + hintedProblems + 1) / (submissions + 2); weak at 0.4 and up.
+          minimum: 0
+          maximum: 1
+          description: (failed + lapses + hintedProblems + 1) / (submissions + lapses + hintedProblems + 2); weak at 0.4 and up (D-074).
 
     Date:
       type: string
