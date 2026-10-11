@@ -10,6 +10,7 @@ import {
 } from "../services/ai.service";
 import { DomainError } from "../services/errors";
 import * as interviews from "../services/interviews.service";
+import { createShareLink, getReplay, listShareLinks, revokeShareLink } from "../services/sharing.service";
 import { getAIServiceMessage, getSingleParam, sendDomainError, sendInternalError } from "./http";
 import { openEventStream } from "./sse";
 
@@ -128,6 +129,70 @@ router.get("/:id", requireAuth, async (req: AuthRequest, res) => {
     return res.json(await interviews.getSession(id, req.user!.id));
   } catch (err) {
     return sendInterviewError(res, "Get interview session error", err);
+  }
+});
+
+/** The session as a timeline: exactly what a share link of it would show (D-071). */
+router.get("/:id/replay", requireAuth, async (req: AuthRequest, res) => {
+  const id = getSingleParam(req.params.id);
+  if (!id || !UUID_REGEX.test(id)) return res.status(400).json({ error: "Invalid session id" });
+  try {
+    return res.json(await getReplay(id, req.user!.id));
+  } catch (err) {
+    return sendInterviewError(res, "Interview replay error", err);
+  }
+});
+
+const MAX_DISPLAY_NAME = 60;
+const MAX_EXPIRY_DAYS = 365;
+
+router.post("/:id/share", requireAuth, async (req: AuthRequest, res) => {
+  const id = getSingleParam(req.params.id);
+  if (!id || !UUID_REGEX.test(id)) return res.status(400).json({ error: "Invalid session id" });
+  const { displayName, expiresInDays } = (req.body ?? {}) as { displayName?: unknown; expiresInDays?: unknown };
+  const name = typeof displayName === "string" ? displayName.trim() : displayName;
+  if (name !== undefined && name !== null && (typeof name !== "string" || !name || name.length > MAX_DISPLAY_NAME)) {
+    return res.status(400).json({ error: `displayName must be 1-${MAX_DISPLAY_NAME} characters` });
+  }
+  if (
+    expiresInDays !== undefined &&
+    expiresInDays !== null &&
+    !(typeof expiresInDays === "number" && Number.isInteger(expiresInDays) && expiresInDays >= 1 && expiresInDays <= MAX_EXPIRY_DAYS)
+  ) {
+    return res.status(400).json({ error: `expiresInDays must be a whole number from 1 to ${MAX_EXPIRY_DAYS}` });
+  }
+  try {
+    const created = await createShareLink(id, req.user!.id, {
+      displayName: (name as string | undefined) ?? null,
+      expiresInDays: (expiresInDays as number | undefined) ?? null,
+    });
+    return res.status(201).json(created);
+  } catch (err) {
+    return sendInterviewError(res, "Create share link error", err);
+  }
+});
+
+router.get("/:id/share", requireAuth, async (req: AuthRequest, res) => {
+  const id = getSingleParam(req.params.id);
+  if (!id || !UUID_REGEX.test(id)) return res.status(400).json({ error: "Invalid session id" });
+  try {
+    return res.json(await listShareLinks(id, req.user!.id));
+  } catch (err) {
+    return sendInterviewError(res, "List share links error", err);
+  }
+});
+
+router.delete("/:id/share/:linkId", requireAuth, async (req: AuthRequest, res) => {
+  const id = getSingleParam(req.params.id);
+  const linkId = getSingleParam(req.params.linkId);
+  if (!id || !UUID_REGEX.test(id) || !linkId || !UUID_REGEX.test(linkId)) {
+    return res.status(400).json({ error: "Invalid id" });
+  }
+  try {
+    await revokeShareLink(id, linkId, req.user!.id);
+    return res.json({ ok: true });
+  } catch (err) {
+    return sendInterviewError(res, "Revoke share link error", err);
   }
 });
 

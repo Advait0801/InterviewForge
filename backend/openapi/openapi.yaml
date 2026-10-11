@@ -33,6 +33,7 @@ tags:
   - name: recommendations
   - name: resumes
   - name: review
+  - name: public
 
 paths:
   # ───────────────────────────── auth ─────────────────────────────
@@ -786,6 +787,113 @@ paths:
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Error" }
 
+  /interviews/{id}/replay:
+    get:
+      tags: [interviews]
+      operationId: getInterviewReplay
+      description: |
+        The session as a timeline (D-071), built by the same allowlist as a public share link, so
+        it shows exactly what a link would. Works for an interview in progress too.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The replay.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InterviewReplay" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/{id}/share:
+    post:
+      tags: [interviews]
+      operationId: createInterviewShareLink
+      description: |
+        A link anyone can open without signing in (D-071), to this completed interview's replay
+        and stored report. The token is returned once; only its hash is kept. At most 5 active
+        links per interview. 409 `report_not_ready` until the interview is finished and its
+        report generated; 409 `too_many_links` past the limit.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                displayName:
+                  type: [string, "null"]
+                  minLength: 1
+                  maxLength: 60
+                  description: Shown on the page as the candidate's name; nothing is taken from the account.
+                expiresInDays: { type: [integer, "null"], minimum: 1, maximum: 365, description: Never expires when absent. }
+      responses:
+        "201":
+          description: The new link and its token.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [link, token, resumeGrounded]
+                properties:
+                  link: { $ref: "#/components/schemas/ShareLink" }
+                  token:
+                    type: string
+                    pattern: '^[A-Za-z0-9_-]{43}$'
+                    description: Shown once. The page is the web app's /share/{token}; the API is GET /public/interviews/{token}.
+                  resumeGrounded:
+                    type: boolean
+                    description: The questions may mention the résumé; worth telling the user before they send the link.
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+    get:
+      tags: [interviews]
+      operationId: listInterviewShareLinks
+      description: The interview's working links (not revoked, not expired), newest first. Tokens are never returned again.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The links.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [links]
+                properties:
+                  links: { type: array, items: { $ref: "#/components/schemas/ShareLink" } }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /interviews/{id}/share/{linkId}:
+    delete:
+      tags: [interviews]
+      operationId: revokeInterviewShareLink
+      description: Revoke a link. It stops working at once.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+        - { name: linkId, in: path, required: true, schema: { $ref: "#/components/schemas/Uuid" } }
+      responses:
+        "200": { $ref: "#/components/responses/Ok" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
   /interviews/{id}/report:
     get:
       tags: [interviews]
@@ -1067,13 +1175,14 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
-                required: [assessment, problems, remainingMs]
+                required: [assessment, problems, remainingMs, integrity]
                 properties:
                   assessment: { $ref: "#/components/schemas/Assessment" }
                   problems:
                     type: array
                     items: { $ref: "#/components/schemas/AssessmentProblem" }
                   remainingMs: { type: number, minimum: 0 }
+                  integrity: { $ref: "#/components/schemas/Integrity" }
         "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
@@ -1107,6 +1216,56 @@ paths:
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Error" }
 
+  /assessments/{id}/events:
+    post:
+      tags: [assessments]
+      operationId: recordAssessmentEvents
+      description: |
+        Proctoring events from the browser (D-071), batched. Only while the assessment is active
+        (409 `assessment_closed`), at most 2000 per assessment (409 `event_limit`). Each event is
+        exactly `type`, `at` and, for a paste or copy, `chars`; any other field is a 400 -- pasted
+        text is never accepted.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [events]
+              properties:
+                events:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [type, at]
+                    properties:
+                      type: { $ref: "#/components/schemas/IntegrityEventType" }
+                      at: { type: string, format: date-time, description: When the browser saw it; within a minute of the assessment's window. }
+                      chars: { type: integer, minimum: 0, maximum: 1000000, description: Paste and copy only, and required for them. }
+      responses:
+        "201":
+          description: Recorded, with the updated summary.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [recorded, integrity]
+                properties:
+                  recorded: { type: integer }
+                  integrity: { $ref: "#/components/schemas/Integrity" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
   /assessments/{id}/submit:
     post:
       tags: [assessments]
@@ -1121,12 +1280,13 @@ paths:
               schema:
                 type: object
                 additionalProperties: false
-                required: [score, passed, total, status]
+                required: [score, passed, total, status, integrity]
                 properties:
                   score: { type: number }
                   passed: { type: integer }
                   total: { type: integer }
                   status: { type: string, const: completed }
+                  integrity: { $ref: "#/components/schemas/Integrity" }
         "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
@@ -1248,6 +1408,35 @@ paths:
         "200": { $ref: "#/components/responses/Ok" }
         "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  # ───────────────────────────── public ─────────────────────────────
+  /public/interviews/{token}:
+    get:
+      tags: [public]
+      operationId: getSharedInterview
+      description: |
+        A shared interview, for anyone with the link (D-071). No sign-in; the token decides
+        everything. Serves stored data only and never generates anything. An unknown, malformed,
+        revoked or expired token is the same 404. Sent with `Cache-Control: no-store`,
+        `X-Robots-Tag: noindex, nofollow` and `Referrer-Policy: no-referrer`.
+      security: []
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: The replay and report.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - { $ref: "#/components/schemas/InterviewReplay" }
+                  - type: object
+                    required: [candidate]
+                    properties:
+                      candidate: { type: [string, "null"], description: The name the owner chose to show, if any. }
         "404": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Error" }
@@ -1457,7 +1646,8 @@ components:
           type: string
           description: |
             `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes.
-            Hints (D-066): `hints_exhausted` and `hint_locked` (409). Personal paths (D-070):
+            Hints (D-066): `hints_exhausted` and `hint_locked` (409). Sharing and proctoring (D-071):
+            `report_not_ready`, `too_many_links`, `assessment_closed`, `event_limit` (409). Personal paths (D-070):
             `not_enough_history`, `no_weak_topics`, `nothing_left_to_practise` (409).
         retryable: { type: boolean }
         customInputErrors:
@@ -2340,6 +2530,30 @@ components:
           description: NUMERIC(5,2) as Postgres returns it, e.g. "66.67".
         created_at: { $ref: "#/components/schemas/Timestamp" }
 
+    IntegrityEventType:
+      type: string
+      enum: [tab_hidden, tab_visible, window_blur, window_focus, paste, copy, fullscreen_exit, fullscreen_enter]
+
+    Integrity:
+      type: object
+      additionalProperties: false
+      description: |
+        What the browser reported during the assessment (D-071). Indicators for a reviewer, not
+        proof, and never part of the score. `flags`: 3+ tab switches, 60+ seconds away, or a
+        single paste of 200+ characters.
+      required: [events, tabSwitches, hiddenSeconds, windowBlurs, pastes, pastedChars, largestPaste, copies, fullscreenExits, flags]
+      properties:
+        events: { type: integer }
+        tabSwitches: { type: integer }
+        hiddenSeconds: { type: integer }
+        windowBlurs: { type: integer }
+        pastes: { type: integer }
+        pastedChars: { type: integer }
+        largestPaste: { type: integer }
+        copies: { type: integer }
+        fullscreenExits: { type: integer }
+        flags: { type: array, items: { type: string } }
+
     AssessmentProblem:
       type: object
       additionalProperties: false
@@ -2525,6 +2739,109 @@ components:
           properties:
             action: { type: string, const: unchanged }
             dueOn: { $ref: "#/components/schemas/Date" }
+
+    ShareLink:
+      type: object
+      additionalProperties: false
+      required: [id, tokenHint, displayName, expiresAt, viewCount, lastViewedAt, createdAt]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        tokenHint: { type: string, description: The token's last 4 characters, to tell links apart. }
+        displayName: { type: [string, "null"] }
+        expiresAt: { type: [string, "null"] }
+        viewCount: { type: integer, minimum: 0 }
+        lastViewedAt: { type: [string, "null"] }
+        createdAt: { type: string }
+
+    InterviewReplay:
+      type: object
+      additionalProperties: false
+      description: |
+        An interview as a timeline, safe to show anyone (D-071). Built by allowlist: no ids,
+        no account details, no résumé excerpts, retrieved context, URLs, agent rationale or cost.
+        Times are offsets from the start; only the date is absolute.
+      required: [company, persona, mode, status, date, durationSeconds, stages, events, report]
+      properties:
+        candidate: { type: [string, "null"] }
+        company: { type: string }
+        persona: { type: string }
+        mode: { type: string }
+        status: { type: string, enum: [active, completed] }
+        date: { $ref: "#/components/schemas/Date" }
+        durationSeconds: { type: integer, minimum: 0 }
+        stages: { type: array, items: { type: string } }
+        events: { type: array, items: { $ref: "#/components/schemas/ReplayEvent" } }
+        report:
+          oneOf:
+            - { $ref: "#/components/schemas/ReplayReport" }
+            - { type: "null" }
+
+    ReplayEvent:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [offsetSeconds, stage, type, text, pushback]
+          properties:
+            offsetSeconds: { type: integer, minimum: 0 }
+            stage: { type: string }
+            type: { type: string, enum: [question, followup] }
+            text: { type: string }
+            pushback: { type: boolean, description: The follow-up pushed back on a contradiction (its evidence isn't shown). }
+        - type: object
+          additionalProperties: false
+          required: [offsetSeconds, stage, type, text]
+          properties:
+            offsetSeconds: { type: integer, minimum: 0 }
+            stage: { type: string }
+            type: { type: string, const: answer }
+            text: { type: string }
+        - type: object
+          additionalProperties: false
+          required: [offsetSeconds, stage, type, text, level]
+          properties:
+            offsetSeconds: { type: integer, minimum: 0 }
+            stage: { type: string }
+            type: { type: string, const: hint }
+            text: { type: string }
+            level: { type: integer, minimum: 1, maximum: 3 }
+        - type: object
+          additionalProperties: false
+          required: [offsetSeconds, stage, type, evaluation]
+          properties:
+            offsetSeconds: { type: integer, minimum: 0 }
+            stage: { type: string }
+            type: { type: string, const: evaluation }
+            evaluation:
+              type: object
+              additionalProperties: false
+              required: [score, strengths, weaknesses, suggestions]
+              properties:
+                score: { type: integer, minimum: 0, maximum: 10 }
+                rawScore: { type: integer }
+                hintsUsed: { type: integer }
+                hintPenalty: { type: integer }
+                strengths: { type: array, items: { type: string } }
+                weaknesses: { type: array, items: { type: string } }
+                suggestions: { type: array, items: { type: string } }
+
+    ReplayReport:
+      type: object
+      additionalProperties: false
+      required: [overallScore, stageScores, strengths, weaknesses, recommendations]
+      properties:
+        overallScore: { type: integer, minimum: 0, maximum: 10 }
+        stageScores:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: false
+            required: [score, feedback]
+            properties:
+              score: { type: [number, string] }
+              feedback: { type: string }
+        strengths: { type: array, items: { type: string } }
+        weaknesses: { type: array, items: { type: string } }
+        recommendations: { type: array, items: { type: string } }
 
     LeaderboardEntry:
       type: object

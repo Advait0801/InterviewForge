@@ -466,6 +466,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/interviews/{id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The session as a timeline (D-071), built by the same allowlist as a public share link, so
+         *     it shows exactly what a link would. Works for an interview in progress too.
+         */
+        get: operations["getInterviewReplay"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/interviews/{id}/share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The interview's working links (not revoked, not expired), newest first. Tokens are never returned again. */
+        get: operations["listInterviewShareLinks"];
+        put?: never;
+        /**
+         * @description A link anyone can open without signing in (D-071), to this completed interview's replay
+         *     and stored report. The token is returned once; only its hash is kept. At most 5 active
+         *     links per interview. 409 `report_not_ready` until the interview is finished and its
+         *     report generated; 409 `too_many_links` past the limit.
+         */
+        post: operations["createInterviewShareLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/interviews/{id}/share/{linkId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Revoke a link. It stops working at once. */
+        delete: operations["revokeInterviewShareLink"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/interviews/{id}/report": {
         parameters: {
             query?: never;
@@ -655,6 +715,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assessments/{id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Proctoring events from the browser (D-071), batched. Only while the assessment is active
+         *     (409 `assessment_closed`), at most 2000 per assessment (409 `event_limit`). Each event is
+         *     exactly `type`, `at` and, for a paste or copy, `chars`; any other field is a 400 -- pasted
+         *     text is never accepted.
+         */
+        post: operations["recordAssessmentEvents"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/assessments/{id}/submit": {
         parameters: {
             query?: never;
@@ -778,6 +860,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/interviews/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description A shared interview, for anyone with the link (D-071). No sign-in; the token decides
+         *     everything. Serves stored data only and never generates anything. An unknown, malformed,
+         *     revoked or expired token is the same 404. Sent with `Cache-Control: no-store`,
+         *     `X-Robots-Tag: noindex, nofollow` and `Referrer-Policy: no-referrer`.
+         */
+        get: operations["getSharedInterview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/leaderboard": {
         parameters: {
             query?: never;
@@ -873,7 +977,8 @@ export interface components {
             error: string;
             /**
              * @description `session_invalid` on a 401 means sign out (D-055); resume uploads use their own codes.
-             *     Hints (D-066): `hints_exhausted` and `hint_locked` (409). Personal paths (D-070):
+             *     Hints (D-066): `hints_exhausted` and `hint_locked` (409). Sharing and proctoring (D-071):
+             *     `report_not_ready`, `too_many_links`, `assessment_closed`, `event_limit` (409). Personal paths (D-070):
              *     `not_enough_history`, `no_weak_topics`, `nothing_left_to_practise` (409).
              */
             code?: string;
@@ -1490,6 +1595,25 @@ export interface components {
             score: string | null;
             created_at: components["schemas"]["Timestamp"];
         };
+        /** @enum {string} */
+        IntegrityEventType: "tab_hidden" | "tab_visible" | "window_blur" | "window_focus" | "paste" | "copy" | "fullscreen_exit" | "fullscreen_enter";
+        /**
+         * @description What the browser reported during the assessment (D-071). Indicators for a reviewer, not
+         *     proof, and never part of the score. `flags`: 3+ tab switches, 60+ seconds away, or a
+         *     single paste of 200+ characters.
+         */
+        Integrity: {
+            events: number;
+            tabSwitches: number;
+            hiddenSeconds: number;
+            windowBlurs: number;
+            pastes: number;
+            pastedChars: number;
+            largestPaste: number;
+            copies: number;
+            fullscreenExits: number;
+            flags: string[];
+        };
         AssessmentProblem: {
             id: components["schemas"]["Uuid"];
             assessment_id: components["schemas"]["Uuid"];
@@ -1617,6 +1741,82 @@ export interface components {
             /** @constant */
             action: "unchanged";
             dueOn: components["schemas"]["Date"];
+        };
+        ShareLink: {
+            id: components["schemas"]["Uuid"];
+            /** @description The token's last 4 characters */
+            tokenHint: string;
+            displayName: string | null;
+            expiresAt: string | null;
+            viewCount: number;
+            lastViewedAt: string | null;
+            createdAt: string;
+        };
+        /**
+         * @description An interview as a timeline, safe to show anyone (D-071). Built by allowlist: no ids,
+         *     no account details, no résumé excerpts, retrieved context, URLs, agent rationale or cost.
+         *     Times are offsets from the start; only the date is absolute.
+         */
+        InterviewReplay: {
+            candidate?: string | null;
+            company: string;
+            persona: string;
+            mode: string;
+            /** @enum {string} */
+            status: "active" | "completed";
+            date: components["schemas"]["Date"];
+            durationSeconds: number;
+            stages: string[];
+            events: components["schemas"]["ReplayEvent"][];
+            report: components["schemas"]["ReplayReport"] | null;
+        };
+        ReplayEvent: {
+            offsetSeconds: number;
+            stage: string;
+            /** @enum {string} */
+            type: "question" | "followup";
+            text: string;
+            /** @description The follow-up pushed back on a contradiction (its evidence isn't shown). */
+            pushback: boolean;
+        } | {
+            offsetSeconds: number;
+            stage: string;
+            /** @constant */
+            type: "answer";
+            text: string;
+        } | {
+            offsetSeconds: number;
+            stage: string;
+            /** @constant */
+            type: "hint";
+            text: string;
+            level: number;
+        } | {
+            offsetSeconds: number;
+            stage: string;
+            /** @constant */
+            type: "evaluation";
+            evaluation: {
+                score: number;
+                rawScore?: number;
+                hintsUsed?: number;
+                hintPenalty?: number;
+                strengths: string[];
+                weaknesses: string[];
+                suggestions: string[];
+            };
+        };
+        ReplayReport: {
+            overallScore: number;
+            stageScores: {
+                [key: string]: {
+                    score: number | string;
+                    feedback: string;
+                };
+            };
+            strengths: string[];
+            weaknesses: string[];
+            recommendations: string[];
         };
         LeaderboardEntry: {
             rank: number;
@@ -2564,6 +2764,125 @@ export interface operations {
             503: components["responses"]["Error"];
         };
     };
+    getInterviewReplay: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The replay. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewReplay"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    listInterviewShareLinks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The links. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        links: components["schemas"]["ShareLink"][];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    createInterviewShareLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** @description Shown on the page as the candidate's name; nothing is taken from the account. */
+                    displayName?: string | null;
+                    /** @description Never expires when absent. */
+                    expiresInDays?: number | null;
+                };
+            };
+        };
+        responses: {
+            /** @description The new link and its token. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        link: components["schemas"]["ShareLink"];
+                        /** @description Shown once. The page is the web app's /share/{token}; the API is GET /public/interviews/{token}. */
+                        token: string;
+                        /** @description The questions may mention the résumé; worth telling the user before they send the link. */
+                        resumeGrounded: boolean;
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    revokeInterviewShareLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+                linkId: components["schemas"]["Uuid"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["Ok"];
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
     getInterviewReport: {
         parameters: {
             query?: never;
@@ -2893,6 +3212,7 @@ export interface operations {
                         assessment: components["schemas"]["Assessment"];
                         problems: components["schemas"]["AssessmentProblem"][];
                         remainingMs: number;
+                        integrity: components["schemas"]["Integrity"];
                     };
                 };
             };
@@ -2929,6 +3249,52 @@ export interface operations {
             503: components["responses"]["Error"];
         };
     };
+    recordAssessmentEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    events: {
+                        type: components["schemas"]["IntegrityEventType"];
+                        /**
+                         * Format: date-time
+                         * @description When the browser saw it; within a minute of the assessment's window.
+                         */
+                        at: string;
+                        /** @description Paste and copy only */
+                        chars?: number;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description Recorded, with the updated summary. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        recorded: number;
+                        integrity: components["schemas"]["Integrity"];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
     submitAssessment: {
         parameters: {
             query?: never;
@@ -2952,6 +3318,7 @@ export interface operations {
                         total: number;
                         /** @constant */
                         status: "completed";
+                        integrity: components["schemas"]["Integrity"];
                     };
                 };
             };
@@ -3111,6 +3478,34 @@ export interface operations {
             200: components["responses"]["Ok"];
             400: components["responses"]["Error"];
             401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
+    getSharedInterview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The replay and report. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewReplay"] & {
+                        /** @description The name the owner chose to show */
+                        candidate: string | null;
+                    };
+                };
+            };
             404: components["responses"]["Error"];
             500: components["responses"]["Error"];
             503: components["responses"]["Error"];

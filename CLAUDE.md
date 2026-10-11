@@ -44,7 +44,7 @@ backend/src/repositories/    # all SQL, one file per table group; take a Queryab
 backend/src/db.ts            # query() over a pg Pool, plus withTransaction()
 backend/openapi/openapi.yaml # the Express API contract (D-062); served at /api/openapi.json
 backend/src/generated/       # ai-service types generated from ai-service/openapi.json — never hand-edit
-backend/sql_migrations/      # 001_init.sql … 017_learning_features.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 018_sharing_integrity.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java,js,go,rs}, run by scripts/verify_problems.py;
 #                              the .py ones are also the runtime oracle for custom test cases
@@ -214,6 +214,17 @@ docker/sandboxes/            # python / c / cpp / java / javascript / go / rust 
   anyone else, never listed, and `markCompletedInEveryPath` never writes progress on another
   user's path. Any new query over `learning_paths` must keep that filter.
 
+**Sharing and proctoring (D-071)**
+- Anything shown outside the owner's account goes through `services/replay.ts`, an **allowlist**
+  serializer. Never spread a message's metadata, an evaluation or the report into a response
+  there: they carry résumé excerpts, retrieved context, URLs, agent rationale and model output
+  with unknown keys. `sharing.routes.test.ts` seeds CANARY into every private field; keep it
+  passing, and add a CANARY for any new private field.
+- `/public/*` routes never read `req.user`, never call the ai-service, and return the same 404
+  for every kind of bad token. Share tokens are stored as SHA-256 only.
+- Proctoring stores event type, time and, for paste/copy, a character count. Never accept or
+  store pasted content. Integrity flags are for a reviewer; they never change a score.
+
 **Code-runner**
 - Languages: python3, c, cpp, java, javascript, go, rust. Images:
   `interviewforge-{python,c,cpp,java,javascript,go,rust}-sandbox:latest`, all run with the same
@@ -248,6 +259,7 @@ docker compose exec ai-service python scripts/seed_rag.py              # seed RA
 python scripts/verify_resume_isolation.py   # Phase 5: cross-user isolation + deletion, live stack
 python scripts/verify_problems.py           # every problem x 7 languages via the real code-runner (1,050 cells)
 python scripts/verify_coding_engine.py      # Group C Phase 7: custom inputs, diffs, hidden cases, 7 languages (D-069); live stack
+python scripts/verify_sharing.py            # Group C Phase 9: replay, public links (CANARY privacy), proctoring (D-071); live stack
 python scripts/verify_learning.py           # Group C Phase 8: POTD, SM-2 review queue, personal paths (D-070); live stack
 python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
 python scripts/verify_streaming.py          # SSE interview streams, disconnect, 409, timings (D-065); live stack

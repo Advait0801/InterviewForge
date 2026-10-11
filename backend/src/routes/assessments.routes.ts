@@ -98,6 +98,48 @@ router.post("/:id/solve", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+const EVENT_KEYS = new Set(["type", "at", "chars"]);
+const COUNTED = new Set(["paste", "copy"]);
+
+/**
+ * Proctoring events, batched by the browser (D-071). Strict on shape: only `type`, `at` and,
+ * for a paste or copy, `chars`. Pasted text is never accepted, even if a client sends it.
+ */
+router.post("/:id/events", requireAuth, async (req: AuthRequest, res) => {
+  const id = getSingleParam(req.params.id);
+  if (!id || !UUID_REGEX.test(id)) return res.status(400).json({ error: "Invalid assessment id" });
+  const events = (req.body as { events?: unknown } | undefined)?.events;
+  if (!Array.isArray(events) || events.length < 1 || events.length > assessments.MAX_EVENTS_PER_BATCH) {
+    return res.status(400).json({ error: `events must be 1-${assessments.MAX_EVENTS_PER_BATCH} items` });
+  }
+  const parsed: assessments.ProctoringEvent[] = [];
+  for (const [i, raw] of events.entries()) {
+    const e = raw as Record<string, unknown>;
+    const fail = (why: string) => res.status(400).json({ error: `Event ${i + 1}: ${why}` });
+    if (!e || typeof e !== "object" || Array.isArray(e)) return fail("must be an object");
+    const extra = Object.keys(e).filter((k) => !EVENT_KEYS.has(k));
+    if (extra.length) return fail(`unexpected field ${extra[0]}; only type, at and chars are accepted`);
+    if (typeof e.type !== "string" || !(assessments.EVENT_TYPES as readonly string[]).includes(e.type)) {
+      return fail(`type must be one of ${assessments.EVENT_TYPES.join(", ")}`);
+    }
+    if (typeof e.at !== "string" || Number.isNaN(Date.parse(e.at)) || !/^\d{4}-\d{2}-\d{2}T/.test(e.at)) {
+      return fail("at must be an ISO 8601 timestamp");
+    }
+    const counted = COUNTED.has(e.type);
+    if (counted && !(typeof e.chars === "number" && Number.isInteger(e.chars) && e.chars >= 0 && e.chars <= 1_000_000)) {
+      return fail(`a ${e.type} needs chars, a whole number of characters`);
+    }
+    if (!counted && e.chars !== undefined) return fail(`chars is only for paste and copy`);
+    parsed.push({ type: e.type as assessments.ProctoringEvent["type"], at: e.at, chars: counted ? (e.chars as number) : null });
+  }
+  try {
+    return res.status(201).json(await assessments.recordEvents(id, req.user!.id, parsed));
+  } catch (err) {
+    if (err instanceof DomainError) return sendDomainError(res, err);
+    return sendInternalError(res, "Record assessment events error", err);
+  }
+});
+
 router.post("/:id/submit", requireAuth, async (req: AuthRequest, res) => {
   const userId = req.user!.id;
   const id = getSingleParam(req.params.id);
