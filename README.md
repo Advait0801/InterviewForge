@@ -2,11 +2,13 @@
 
 <div align="center">
 
-**AI-powered mock interview platform — practice coding, system design, behavioral rounds, and timed assessments like the real thing.**
+**An AI mock-interview and coding-practice platform that interviews you like a real loop: behavioral, coding, system design and core CS, for 10 companies.**
 
-**Built around a measured RAG pipeline: retrieval quality is evaluated on a golden set, not asserted.**
+**The interviewer is grounded by a measured RAG pipeline, streams its questions, and adapts; the coding judge runs every solution in a locked-down sandbox, in seven languages.**
 
 [![CI](https://github.com/Advait0801/InterviewForge/actions/workflows/ci.yml/badge.svg)](https://github.com/Advait0801/InterviewForge/actions/workflows/ci.yml)
+![Tests](https://img.shields.io/badge/tests-2%2C052-brightgreen)
+![Problems](https://img.shields.io/badge/problems-150_%C3%97_7_languages-blue)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org)
@@ -15,12 +17,27 @@
 [![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white)](https://redis.io)
 [![ChromaDB](https://img.shields.io/badge/Chroma-0.5.5-7C3AED)](https://www.trychroma.com)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com)
 [![LangChain](https://img.shields.io/badge/LangChain-RAG-EC6227)](https://www.langchain.com)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-WebRTC-010101?logo=socket.io&logoColor=white)](https://socket.io)
 [![Gemini](https://img.shields.io/badge/Gemini-3.1_Flash_Lite-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
 
 </div>
+
+---
+
+## ✨ At a glance
+
+| | |
+|---|---|
+| 🎙️ **AI interviewer** | Four stages, 10 company profiles, questions **streamed token by token**; four personas, a hint ladder that costs points, and an **adaptive mode** where an agent decides to probe, pivot or move on |
+| 🔍 **Measured RAG** | nDCG@5 **0.77 → 0.90** at **6.6× lower** p50 latency, on a hand-labelled golden set; two techniques reverted because the numbers said so |
+| 💻 **Coding judge** | **150 problems × 7 languages**, 1,050 reference solutions verified against independent oracles, custom test cases, failing-case diffs |
+| 📈 **Measured, not guessed** | Time complexity **fitted from real runtimes** and checked against the AI reviewer's claim; **Elo picks** at 65% predicted success |
+| 🤝 **Peer interviews** | Two people, one room: WebRTC audio/video, a shared editor, a server-kept clock and feedback for both |
+| 🛡️ **Built to be trusted** | Unprivileged, network-less sandboxes; per-user vector namespaces; every model call metered per interview and capped; **2,052 tests** and two clean-boot end-to-end rounds |
 
 ---
 
@@ -28,13 +45,23 @@
 
 <div align="center">
 
-**Sandboxed coding workspace — write, run, and get instant results**
+**A live interview: the question streams in, the answer is scored, and the adaptive interviewer chooses a follow-up (and says why)**
 
-<img src="docs/assets/coding-demo.gif" alt="Solving a problem in the Monaco editor with live sandboxed execution" width="820">
+<img src="docs/assets/interview-stream.gif" alt="An Amazon interview with the Friendly persona in adaptive mode: the opening question streams in, an answer is sent, the evaluation appears with strengths, weaknesses and suggestions, and the interviewer asks a follow-up with a 'Why this question?' rationale" width="860">
 
-**Resume-grounded mock interview — questions that reference your actual projects**
+**The coding workspace: a failing case with its diff, your own test case, Submit with a rating change, then measured complexity**
 
-<img src="docs/assets/interview-demo.gif" alt="A RAG-grounded behavioral interview referencing the candidate's resume" width="820">
+<img src="docs/assets/coding-demo.gif" alt="Container With Most Water in Python: a buggy run fails case 4 with a diff, the fixed code passes a custom case judged against the reference solution, Submit is accepted with +14 rating at 65% predicted success, and the measured complexity is O(n) on a log-log chart" width="860">
+
+**Around the platform: daily practice, ratings, proctored assessments, peer rooms**
+
+<img src="docs/assets/screens.png" alt="Four screens: the dashboard with Problem of the Day and Elo next-up picks; analytics with per-topic ratings; an assessment result with its integrity summary; a peer interview room waiting for the partner" width="860">
+
+<details>
+<summary><b>And a résumé-grounded interview</b>: questions that quote the candidate's real projects</summary>
+<br>
+<img src="docs/assets/resume-interview-demo.gif" alt="A behavioral question that references the candidate's own StreamForge project from their uploaded résumé" width="860">
+</details>
 
 </div>
 
@@ -42,21 +69,25 @@
 
 ## 📱 Overview
 
-**InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (10 supported, from Amazon and Google to Microsoft, Uber and Bloomberg), choose a difficulty, and work through **behavioral → coding → system design → core CS** rounds — all powered by **RAG-backed LLM question generation**, with real-time evaluation and follow-ups.
+**InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (10 supported, from Amazon and Google to Microsoft, Uber and Bloomberg), a difficulty and an interviewer tone, and work through **behavioral → coding → system design → core CS**. Questions are generated from **retrieved, company-specific context**, streamed as they are written, and every answer is scored with strengths, weaknesses and suggestions. At the end there's a report, a PDF, a replay, and a share link you can revoke.
 
 On the coding side, work through **150 problems** (43 easy / 64 medium / 43 hard) in a **Monaco
 editor** with code execution in **isolated Docker sandboxes** in seven languages (Python, C, C++,
-Java, JavaScript, Go, Rust). Every problem is verified executable in all seven. Add your own test
-cases, get **AI code reviews** checked against **measured time complexity**, follow an
-**Elo-rated** next-problem pick, a daily problem and a **spaced-repetition** review queue, take
-**proctored timed assessments**, or practise with a friend in a **peer mock interview**.
+Java, JavaScript, Go, Rust). Add your own test cases, get **AI code reviews** checked against
+**measured time complexity**, follow **Elo-rated** next-problem picks, a daily problem and a
+**spaced-repetition** review queue, take **proctored timed assessments**, or practise with a
+friend in a **peer mock interview**.
 
-### 📈 Retrieval quality, measured
+---
 
-The RAG pipeline is evaluated against a hand-labelled golden set of 42 queries, so every
-change is a number rather than an opinion. Full method and results in
-[`docs/eval/`](docs/eval/); the reasoning behind each decision is in
-[`docs/DECISIONS.md`](docs/DECISIONS.md).
+## 📏 Measured, not asserted
+
+Every headline claim in this project comes from a measurement, and the negative results are
+written up too ([`docs/eval/`](docs/eval/), reasoning in [`docs/DECISIONS.md`](docs/DECISIONS.md)).
+
+### Retrieval quality
+
+Against a hand-labelled golden set of 42 queries:
 
 | Metric | Before | After | |
 |---|---|---|---|
@@ -67,62 +98,48 @@ change is a number rather than an opinion. Full method and results in
 
 What produced that, in order of contribution:
 
-- **Per-stage query routing** — behavioural and system-design questions go through an LLM
+- **Per-stage query routing**: behavioral and system-design questions go through an LLM
   reranker; coding and core-CS questions go through hybrid BM25 + RRF, where precise
   terminology matters. Equal quality to reranking everything, at **6.6× lower p50 latency**.
-- **Hybrid search with Reciprocal Rank Fusion** — dense retrieval is weak on rare exact
-  tokens; BM25 is not. RRF fuses them on rank alone, so no score normalisation is needed.
-- **Structural chunking** — splits on document structure instead of character counts, so a
+- **Hybrid search with Reciprocal Rank Fusion**: dense retrieval is weak on rare exact tokens;
+  BM25 is not. RRF fuses them on rank alone, so no score normalisation is needed.
+- **Structural chunking**: splits on document structure instead of character counts, so a
   section is not cut mid-argument.
-- **Small-to-big retrieval** — embeds small chunks for precision, returns the wider passage
+- **Small-to-big retrieval**: embeds small chunks for precision, returns the wider passage
   for context.
 
-- **A retrieval cache** — repeated interview queries skip retrieval and the reranker's LLM
-  call (13.6 s → 0.3 ms on the day it was measured). A semantic tier, calibrated on 126
-  paraphrased queries with zero wrong-intent hits, is built but ships off: on today's traffic it
-  would only merge difficulty levels ([`docs/eval/phase11.md`](docs/eval/phase11.md)).
+**Two techniques were implemented, measured, and reverted**: contextual retrieval (it duplicates
+what structural chunking already provides) and MMR ([`phase2.md`](docs/eval/phase2.md),
+[`phase3.md`](docs/eval/phase3.md)).
 
-**Two techniques were implemented, measured, and reverted** because the numbers said so:
-contextual retrieval (it duplicates what structural chunking already provides) and MMR.
-Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase2.md) and
-[`docs/eval/phase3.md`](docs/eval/phase3.md).
+### And beyond retrieval
 
-### ✨ Key Highlights
+| What | Result | How it's known |
+|---|---|---|
+| **Retrieval cache** | Repeated interview queries skip retrieval and the reranker's LLM call: **13.6 s → 0.3 ms** on the day measured. The semantic tier (126 paraphrases, zero wrong-intent hits) is built but **ships off**: on today's traffic it would only merge difficulty levels | [`phase11.md`](docs/eval/phase11.md) |
+| **Empirical complexity** | 26 known solutions × 7 languages: the true class is always among the candidates and every O(n²) is named exactly. O(n) vs O(n log n) is reported as "either" unless the fit is 3.5× better, because memory effects are as large as a log factor | [`phase12.md`](docs/eval/phase12.md) |
+| **Elo picks** | 200 simulated users in six worlds: first-try success **0.632–0.650** against a 0.65 target, within noise of an oracle that knows every true skill; random picks and a difficulty ladder sit near 0.50 | [`phase12.md`](docs/eval/phase12.md), `scripts/simulate_elo.ts` |
+| **Streaming** | Questions appear about **40% sooner** than with the JSON endpoint, and a turn is saved only once the whole question exists | D-065 |
+| **Interview cost** | Every model call is reported per request, summed per interview, and capped (`INTERVIEW_COST_CAP_USD`, about 4× a typical adaptive interview) | D-067 |
 
-- 🎙️ **Multi-stage AI interviews** — Company-specific questions **streamed token by token** (SSE),
-  follow-ups, voice evaluation, and downloadable PDF reports
-- 🧭 **An interviewer with a personality and a budget** — four personas, a hint ladder that costs
-  points, and an adaptive mode where an agent decides to probe, pivot or move on while the backend
-  enforces the rules; every model call is metered per interview and capped
-- 🔗 **Replay and share** — step through any interview as a timeline, or share it through a public
-  link built by an allowlist serializer, so nothing private leaves the account
-- 🔍 **Company-aware RAG** — Chroma vector store covering 10 companies, with retrieval
-  filtered by company and interview stage
-- 📐 **Evaluation harness** — golden-set retrieval metrics (nDCG, MRR, hit rate, recall) plus
-  an LLM-judge calibration test that asserts weak < mediocre < strong answers
-- 🌐 **Self-expanding corpus** — low-confidence retrieval triggers a live web fetch that is
-  cleaned, deduplicated and **written back** to the vector store, so the first user to ask
-  about a thin topic pays the latency and everyone after does not
-- 💻 **Sandboxed code execution** — Run/submit user code in ephemeral Docker containers, never on the host
-- 🔐 **Full auth system** — JWT tokens, bcrypt hashing, email verification, password reset,
-  server-side session revocation (password change/reset and "sign out everywhere" end other sessions)
-- 📊 **Practice ecosystem** — Problem bookmarks, filters, hints, editorials, submission history, streaks, heatmaps
-- 🏆 **Leaderboard & analytics** — Global rankings, topic radar, difficulty distribution, acceptance trends
-- 📋 **Timed assessments** — Multi-problem flows with a server-enforced deadline, scoring, and an
-  integrity summary (tab switches, paste sizes, never pasted text) that never changes the score
-- 🗺️ **Learning paths** — Curated problem sequences, plus a personal focus path built from your
-  weakest topics
-- 🔁 **Daily practice** — a deterministic Problem of the Day with streaks, and an SM-2 review queue
-  that brings back problems you struggled with
-- 🧱 **Bounded by design** — Redis-backed rate limits, a global cap on live sandboxes, and every
-  dependency outage degrading to a retryable 503
-- 📄 **Resume-grounded interviews** — an uploaded resume is parsed into a **per-user vector
-  namespace** so questions reference the candidate's real projects; isolation is defended three
-  independent ways and verified against a live stack (API-only, no upload UI yet)
-- 🏗️ **System design** — AI-analyzed architecture explanations rendered as React Flow diagrams
-- ♿ **Resilient, accessible UI** — every route distinguishes loading, empty, missing and error
-  states with local recovery; keyboard focus, reduced-motion and light/dark theming throughout;
-  verified by a scripted Chrome pass across widths and themes
+---
+
+## 🛡️ Built to be trusted
+
+- **User code never touches the host.** One ephemeral container per run, removed in a `finally`:
+  unprivileged user, `CapDrop: ALL`, `no-new-privileges`, no network, PID/CPU/memory caps, a 15 s
+  limit. Fork bombs, memory bombs, network egress, rootfs writes and the Docker socket are each
+  tested adversarially. A **Redis/BullMQ queue** caps live sandboxes globally, proven by a load test.
+- **Personal data stays personal.** Résumés live in a **per-user vector namespace** behind three
+  independent isolation layers, each mutation-tested. Public share links go through an
+  **allowlist serializer** that a test seeds with a canary in every private field.
+- **Contracts, not conventions.** OpenAPI specs for both APIs with generated TypeScript clients;
+  every route test validates its response against the spec, and CI fails on drift.
+- **Failure is designed.** Each dependency outage (Postgres, Redis, Chroma, the code-runner, the
+  ai-service) degrades to a **retryable 503**, and hostile input gets a clean 4xx. Both were
+  re-verified from a clean boot in the final round ([D-080](docs/DECISIONS.md)).
+- **2,052 tests** (689 backend, 586 ai-service, 444 code-runner, 333 web) plus 14 live verify
+  scripts against the running stack.
 
 ---
 
@@ -160,8 +177,9 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 
 ### AI interview simulator
 
-- Choose one of **10 companies** (Amazon, Google, Meta, Apple, Microsoft, Uber, Bloomberg, Adobe,
-  LinkedIn, Airbnb) and difficulty (**Easy / Medium / Hard**)
+- **10 company profiles** (Amazon, Google, Meta, Apple, Microsoft, Uber, Bloomberg, Adobe,
+  LinkedIn, Airbnb) and three difficulties (**Easy / Medium / Hard**). The web page currently
+  offers the first four; the API takes all ten
 - 4-stage flow: Behavioral → Coding → System Design → Core CS
 - RAG-retrieved context feeds the LLM for realistic, company-styled questions, streamed to the
   browser as they are generated; a turn is saved only once the whole question exists
@@ -171,7 +189,11 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 - **Adaptive mode:** a model-driven interviewer chooses the next move inside rules the backend
   enforces; every interview's model spend is recorded and capped
 - Replay any interview as a timeline, and share it through a revocable public link
+- **Résumé-grounded questions:** an uploaded résumé is parsed into a per-user vector namespace,
+  and questions quote the candidate's real projects (API only; no upload screen yet)
 - Voice recording → transcription → explanation scoring
+- **System-design analysis:** describe an architecture in words (or voice) and get a diagram of
+  its components, a rubric score, risks and improvements
 - Session report with per-stage scores, strengths, weaknesses, recommendations — generated once
   and stored, so reopening it costs no model call
 - **One-click PDF export** of the full report + transcript
@@ -201,33 +223,31 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 
 ## 🏗️ Architecture
 
+> **Node does orchestration and data. Python does AI. They talk over REST.** The Express backend
+> holds no model code at all: anything generated, evaluated, transcribed or embedded is an HTTP
+> call to the FastAPI service.
+
+```mermaid
+flowchart LR
+  subgraph Browser
+    Web["Next.js 16 web app<br/>Monaco · React Flow · Recharts"]
+  end
+  Peer["Partner's browser"]
+
+  Web -- "REST + SSE streams<br/>Socket.IO /peer" --> API["Express 5 backend<br/>routes → services → repositories"]
+  Web <-. "WebRTC audio/video<br/>(peer to peer)" .-> Peer
+
+  API --> PG[("PostgreSQL 16<br/>21 migrations")]
+  API --> Redis[("Redis 7<br/>rate limits · BullMQ queue<br/>caches · Socket.IO adapter")]
+  API -- REST --> AI["FastAPI ai-service<br/>RAG · LangChain chains · agent<br/>speech · review · résumés"]
+  API -- "REST (via the queue)" --> CR["code-runner<br/>Node + dockerode"]
+
+  AI --> Chroma[("ChromaDB<br/>shared corpus +<br/>per-user résumé namespaces")]
+  AI --> Redis
+  AI -- "Gemini → OpenAI fallback" --> LLM["LLM + embedding APIs"]
+  CR -- "Docker Engine API" --> SB["Ephemeral sandboxes<br/>Python · C · C++ · Java<br/>JavaScript · Go · Rust"]
 ```
-┌────────────────┐                    ┌──────────────────┐        ┌────────────────┐
-│                │     REST / WS      │                  │        │                │
-│   Next.js      │ ◄────────────────► │  Express backend │ ◄────► │  PostgreSQL    │
-│   :3000        │      /api/*        │  :4000           │        │                │
-│                │                    │                  │        └────────────────┘
-│                │                    │                  │        ┌────────────────┐
-│                │                    │                  │ ◄────► │  Redis: limits,│
-│                │                    │                  │        │  run queue,    │
-│                │                    │                  │        │  cache         │
-└────────────────┘                    └────────┬─────────┘        └────────────────┘
-                                   REST │      │ REST
-                          ┌─────────────┘      └──────────────┐
-                          ▼                                   ▼
-              ┌──────────────────┐                  ┌──────────────────┐
-              │                  │  ┌────────────┐  │                  │
-              │  FastAPI         │─►│  ChromaDB  │  │  code-runner     │
-              │  ai-service      │  │ (RAG vecs) │  │  :5000           │
-              │  :8000           │  └────────────┘  │                  │
-              └────────┬─────────┘                  └────────┬─────────┘
-                       │  Gemini / OpenAI                    │  Docker Engine API
-                       ▼                                     ▼
-              ┌──────────────────┐                  ┌──────────────────┐
-              │  LLM +           │                  │  Docker sandboxes│
-              │  embeddings APIs │                  │  (7 languages)   │
-              └──────────────────┘                  └──────────────────┘
-```
+
 ### 🔄 Data flow
 
 1. **Auth** — Web client → Express (bcrypt + JWT) → PostgreSQL `users`
@@ -544,12 +564,12 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ---
 
-## 🚧 Roadmap
+## 🗺️ Roadmap
 
 - [x] Production Docker Compose with multi-stage builds
 - [x] AWS deployment (EC2 + RDS + Nginx)
-- [x] CI pipeline (lint, typecheck, test, build) across all four services, plus production-image
-      builds and smoke tests
+- [x] CI pipeline (lint, typecheck, test, build, API-contract drift) across every service, plus
+      production-image builds and smoke tests and all seven sandboxes
 - [x] Test suites — 2,052 tests: 689 `backend` (route-level tests over a strict fake Postgres,
       every response checked against the OpenAPI contract), 586 `ai-service`, 444 `code-runner`,
       333 `web`
@@ -580,13 +600,21 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [x] A retrieval cache, empirical complexity measurement, and Elo-rated adaptive difficulty
 - [x] Peer mock interviews: WebRTC between two users, with Socket.IO signalling, a shared editor,
       a server-side clock and feedback
+
+**Next:**
+
 - [ ] HTTPS via Let's Encrypt (requires domain)
+- [ ] A TURN server in production, for peers behind symmetric NATs
+- [ ] Per-call model timeouts with fallback, so a slow provider can't stall retrieval
+- [ ] A résumé upload screen and all ten companies on the interview page
 - [ ] Horizontal scaling for code-runner and ai-service (the backend already runs as several
       instances: limits, the run queue and Socket.IO share state through Redis)
 - [ ] Offline resilience beyond the peer room's reconnect
 - [ ] User profile customization and social features
 
-The fuller version, with effort and impact estimates, is in [`docs/BACKLOG.md`](docs/BACKLOG.md).
+Every shipped item is recorded with its reasoning and verification in
+[`docs/DECISIONS.md`](docs/DECISIONS.md) (D-001 to D-080); the fuller backlog, with effort and
+impact estimates, is in [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
 ---
 
