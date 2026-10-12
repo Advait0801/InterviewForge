@@ -9,6 +9,53 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-11
 
+### D-079 — UI Group D shipped: complexity, Elo and peer interviews have screens (Group D done)
+
+**What:** the web half of Group D, built by GPT from one handoff plus one follow-up (PR #30:
+`e91d3e3`, `b725e43`), verified independently before merge.
+- **Complexity (D-076)** on accepted submissions:
+  - Measuring shows progress and offers Cancel; stored results load without re-measuring.
+  - The headline is the full candidate list ("O(n) or O(n log n)"), never just the best fit.
+  - Inconclusive, time-limit and error states; a log-log chart with a table alternative; the
+    AI reviewer's claim compared in plain words.
+- **Elo (D-077):**
+  - The rating change after a first Submit, and none after later ones.
+  - "Next up for you" on the dashboard, with a topic filter.
+  - A ratings section on analytics, marked provisional under 10 games.
+- **Peer interviews (D-078):**
+  - `/peer`: hosting, with the invite shown once as a URL fragment.
+  - `/peer/join`: reads and clears the fragment.
+  - `/peer/[id]`: presence, the server's clock, WebRTC with perfect negotiation, opt-in
+    microphone and camera (requested only from their buttons), a shared Monaco editor, ending,
+    and feedback per role.
+
+**Found in verification:**
+- **A real, older accessibility bug.** The analytics charts sat inside `aria-hidden` while
+  Recharts' accessibility layer made parts of them focusable (axe `aria-hidden-focus`). It
+  only shows once a user has data, which is why earlier checks with empty charts missed it.
+  Fixed with `accessibilityLayer={false}` on the decorative charts, which already have table
+  alternatives, and the scrollable tables became labelled, focusable regions.
+- "1 games" pluralised.
+- **A method trap, not a bug.** Toggling the `dark` class while the browser pane is hidden
+  freezes colour transitions halfway, so axe reported false contrast failures (dark-theme text
+  on a light background). Set the stored theme (`if-theme`) and reload before running axe.
+
+**Verified:**
+- 333 web tests, lint, build, 0 type errors (the 4 old test-file errors are gone); API contract
+  green.
+- Live walkthrough:
+  - complexity on a linear and a quadratic solution;
+  - the rating after a failed first Submit;
+  - next-up and ratings;
+  - a full peer session through the invite link. The second participant was a scripted
+    Socket.IO client, because tabs share one login. Code synced both ways, the session ended
+    from the other side, and both sides' feedback was stored and shown.
+- axe clean in light and dark on the dashboard, analytics (with data), `/peer`, the room, and
+  the problem page with the complexity panel. No horizontal scroll at 320 px.
+
+Group D is complete: Phases 11–13 (D-075 to D-078) and this UI. Next is Phase 14: the two
+end-to-end verification rounds and the final docs.
+
 ### D-078 — Peer mock interviews: WebRTC between the two browsers, signalling and the rules on the backend (closes F-06)
 
 **What** (`docs/peer-interviews.md` has the protocol):
