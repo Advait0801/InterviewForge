@@ -9,6 +9,7 @@ import {
 } from "../../src/test/group-c-fixtures.ts";
 import {
   complexity,
+  populatedAnalytics,
   peerSession,
   rating,
 } from "../../src/test/group-d-fixtures.ts";
@@ -123,12 +124,16 @@ try {
         if (p.endsWith("/users/activity"))
           return json({ daily: [], streak: { current: 0, best: 0 } });
         if (p.endsWith("/users/analytics"))
-          return json({
-            solvedOverTime: [],
-            topicStrengths: [],
-            difficultyDistribution: {},
-            acceptanceTrend: [],
-          });
+          return json(
+            ratingsEmpty
+              ? {
+                  solvedOverTime: [],
+                  topicStrengths: [],
+                  difficultyDistribution: {},
+                  acceptanceTrend: [],
+                }
+              : populatedAnalytics,
+          );
         if (p.endsWith("/recommendations"))
           return json({ error: "Recommendations unavailable in QA" }, 503);
         if (p.endsWith("/problems/daily")) return json(groupCDaily);

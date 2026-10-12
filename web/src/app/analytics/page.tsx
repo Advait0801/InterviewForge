@@ -109,7 +109,7 @@ function DataTable({
   return (
     <details className="mt-4 rounded-xl border border-border bg-background/50 px-3 py-2 text-xs">
       <summary className="cursor-pointer font-medium text-text-primary">View data table</summary>
-      <div className="mt-2 max-h-52 overflow-auto">
+      <div role="region" aria-label={label} tabIndex={0} className="mt-2 max-h-52 overflow-auto">
         <table className="w-full min-w-64 border-collapse text-left">
           <caption className="sr-only">{label}</caption>
           <thead>
@@ -243,7 +243,7 @@ export default function AnalyticsPage() {
                 ))}
               </motion.section>
 
-              <div className="grid gap-5 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <motion.section variants={fadeUp} custom={2} aria-labelledby="solved-title">
                   <Card className="h-full p-5 sm:p-6">
                     <h2 id="solved-title" className="text-lg font-semibold">Solved by day</h2>
@@ -252,7 +252,7 @@ export default function AnalyticsPage() {
                       <>
                         <div className="mt-4 h-[250px]" aria-hidden>
                           <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={data.solvedOverTime} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                            <LineChart accessibilityLayer={false} data={data.solvedOverTime} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
                               <XAxis dataKey="day" tick={{ fontSize: 10, fill: chartColors.tick }} tickFormatter={shortDate} interval="preserveStartEnd" />
                               <YAxis tick={{ fontSize: 10, fill: chartColors.tick }} allowDecimals={false} width={38} />
                               <Tooltip {...tooltipStyle} labelFormatter={(value) => longDate(String(value))} formatter={(value) => [value, "Solved"]} />
@@ -274,8 +274,8 @@ export default function AnalyticsPage() {
                       <>
                         <div className="mt-4 h-[250px]" aria-hidden>
                           <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie data={difficultyData} cx="50%" cy="46%" innerRadius={55} outerRadius={86} paddingAngle={4} dataKey="value" nameKey="name" isAnimationActive={!reduceMotion}>
+                            <PieChart accessibilityLayer={false}>
+                              <Pie rootTabIndex={-1} data={difficultyData} cx="50%" cy="46%" innerRadius={55} outerRadius={86} paddingAngle={4} dataKey="value" nameKey="name" isAnimationActive={!reduceMotion}>
                                 {difficultyData.map((entry) => <Cell key={entry.name} fill={difficultyColors[entry.name] ?? chartColors.primary} />)}
                               </Pie>
                               <Tooltip {...tooltipStyle} formatter={(value) => [value, "Solved"]} />
@@ -300,7 +300,7 @@ export default function AnalyticsPage() {
                     {data.topicStrengths.length >= 3 ? (
                       <div className="mt-4 h-[280px]" aria-hidden>
                         <ResponsiveContainer width="100%" height="100%">
-                          <RadarChart cx="50%" cy="50%" outerRadius="68%" data={data.topicStrengths}>
+                          <RadarChart accessibilityLayer={false} cx="50%" cy="50%" outerRadius="68%" data={data.topicStrengths}>
                             <PolarGrid stroke={chartColors.grid} />
                             <PolarAngleAxis dataKey="topic" tick={{ fontSize: 10, fill: chartColors.tick }} />
                             <PolarRadiusAxis tick={{ fontSize: 9, fill: chartColors.tick }} allowDecimals={false} />
@@ -333,7 +333,7 @@ export default function AnalyticsPage() {
                       <>
                         <div className="mt-4 h-[280px]" aria-hidden>
                           <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={data.acceptanceTrend} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                            <AreaChart accessibilityLayer={false} data={data.acceptanceTrend} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
                               <defs>
                                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                                   <stop offset="5%" stopColor={chartColors.secondary} stopOpacity={0.32} />

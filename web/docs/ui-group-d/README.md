@@ -42,3 +42,15 @@ No missing or incorrect API contract was found; no backend code change is requir
 ## Local commit
 
 `feat(ui): add Group D complexity ratings and peer interviews` contains the implementation, regression tests and this verification evidence. Its body records why the screens are needed and what passed; its final trailer attributes GPT 6.1 Sol. Use `git log -1 --format=full feat/ui-group-d` for the hash and full attribution.
+
+## Verification follow-up — 2026-10-11
+
+Populated analytics now disables the Recharts accessibility layer on all four decorative charts, and the pie component's separate root tab stop. The new page regression renders the real chart components (only responsive dimensions are supplied for jsdom), verifies four rendered charts and no keyboard focus targets beneath `aria-hidden="true"`, and keeps all four table alternatives available. Expanded tables use named, keyboard-focusable scroll regions; an explicit single-column grid prevents their minimum table widths from overflowing the page at 320 px.
+
+Overall and topic ratings now distinguish “1 game” from “2 games.” Peer-list duration labels and the feedback character counter also pluralise their dynamic counts. Next-up percentages and complexity's numeric values/unit symbols need no plural changes. Tests cover singular/plural games and zero, one and two feedback characters. The shared populated analytics fixture also replaces the empty-only analytics response in the main browser harness for future runs.
+
+- [Follow-up tests](followup-tests.txt): **25 files, 333 tests pass**, six more than the original Group D commit.
+- [Bare ESLint](followup-lint.txt), [production build](followup-build.txt), and [TypeScript](followup-types.txt): pass, with zero type errors.
+- [Populated analytics axe audit](followup-axe.json): **eight observations**, both themes at 320/1440 px, tables closed/open. Zero axe violations, hidden keyboard focus targets, horizontal overflow or page errors. Run `node web/docs/ui-group-d/verify-analytics-followup.mjs` from the repository root to reproduce.
+
+The follow-up commit is `fix(ui): make analytics charts accessible and pluralise counts`, on the same branch, committed locally with GPT 6.1 Sol attribution and no push.

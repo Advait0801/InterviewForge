@@ -141,7 +141,8 @@ export function RatingsSection() {
           <p className="text-lg font-semibold">
             Overall: {Math.round(state.data.overall.rating)}{" "}
             <span className="text-sm font-normal text-text-secondary">
-              · {state.data.overall.games} games
+              · {state.data.overall.games} game
+              {state.data.overall.games === 1 ? "" : "s"}
             </span>{" "}
             {state.data.overall.games < 10 && <Badge>Provisional</Badge>}
           </p>
@@ -155,7 +156,8 @@ export function RatingsSection() {
                 >
                   <h3 className="break-words font-semibold">{item.topic}</h3>
                   <p className="my-2 text-sm">
-                    {Math.round(item.rating)} rating · {item.games} games
+                    {Math.round(item.rating)} rating · {item.games} game
+                    {item.games === 1 ? "" : "s"}
                   </p>
                   {item.games < 10 && <Badge>Provisional</Badge>}
                 </li>

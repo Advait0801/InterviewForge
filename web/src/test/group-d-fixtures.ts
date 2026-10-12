@@ -1,4 +1,9 @@
-import type { ComplexityAnalysis, PeerSession, RatingOutcome } from "@/lib/api";
+import type {
+  AnalyticsResponse,
+  ComplexityAnalysis,
+  PeerSession,
+  RatingOutcome,
+} from "@/lib/api";
 export const complexity: ComplexityAnalysis = {
   fit: {
     status: "measured",
@@ -42,4 +47,15 @@ export const peerSession: PeerSession = {
   code: "# Shared code",
   language: "python3",
   feedback: { given: null, received: null },
+};
+
+export const populatedAnalytics: AnalyticsResponse = {
+  solvedOverTime: [{ day: "2026-10-11", count: 1 }],
+  difficultyDistribution: { easy: 1 },
+  topicStrengths: [
+    { topic: "Arrays", count: 1 },
+    { topic: "Graphs", count: 1 },
+    { topic: "Trees", count: 1 },
+  ],
+  acceptanceTrend: [{ week: "2026-10-05", rate: 100 }],
 };

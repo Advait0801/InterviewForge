@@ -11,7 +11,8 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ComplexityPanel, ComplexityResult } from "../complexity-panel";
 import { NextUp, RatingOutcome, RatingsSection } from "../ratings";
-import { complexity, rating } from "@/test/group-d-fixtures";
+import { PeerFeedback } from "../peer/feedback";
+import { complexity, rating, peerSession } from "@/test/group-d-fixtures";
 import type { ComplexityAnalysis } from "@/lib/api";
 
 vi.mock("recharts", () => {
@@ -443,3 +444,40 @@ it("retries a failed AI comparison through the review endpoint", async () => {
       .map((r) => new URL(r.url).pathname),
   ).toEqual(["/api/submissions/s/review", "/api/submissions/s/review"]);
 });
+
+it.each([1, 2])(
+  "uses the correct game label for %i in overall and topic ratings",
+  async (games) => {
+    handler = () => ({
+      body: {
+        overall: { rating: 1500, games },
+        topics: [{ topic: "Arrays", rating: 1500, games }],
+      },
+    });
+    render(<RatingsSection />);
+    const label = games === 1 ? "1 game" : "2 games";
+    expect(await screen.findByText(`· ${label}`)).toBeInTheDocument();
+    expect(screen.getByText(`1500 rating · ${label}`)).toBeInTheDocument();
+    expect(screen.queryByText(/\b1 games\b/)).not.toBeInTheDocument();
+  },
+);
+
+it.each([0, 1, 2])(
+  "pluralises the feedback counter for %i characters",
+  (count) => {
+    render(
+      <PeerFeedback
+        session={{ ...peerSession, status: "completed" }}
+        onSaved={() => {}}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Notes (optional)"), {
+      target: { value: "x".repeat(count) },
+    });
+    expect(
+      screen.getByText(
+        `${count} ${count === 1 ? "character" : "characters"} · 2,000 maximum`,
+      ),
+    ).toBeInTheDocument();
+  },
+);

@@ -112,7 +112,8 @@ export function PeerFeedback({
                 className="w-full rounded-xl border border-border bg-background px-3 py-2"
               />
               <p className="text-xs text-text-secondary">
-                {notes.length}/2,000 characters
+                {notes.length} character{notes.length === 1 ? "" : "s"} · 2,000
+                maximum
               </p>
             </div>
             {error && (

@@ -259,7 +259,8 @@ function PeerLobby() {
                       {s.partner?.username ?? "Waiting for someone to join"}
                     </p>
                     <p className="text-sm text-text-secondary">
-                      {s.durationMinutes} minutes · Created{" "}
+                      {s.durationMinutes} minute
+                      {s.durationMinutes === 1 ? "" : "s"} · Created{" "}
                       {new Date(s.createdAt).toLocaleString()}
                     </p>
                     {s.startedAt && (
