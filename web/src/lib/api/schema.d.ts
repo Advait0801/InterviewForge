@@ -2234,6 +2234,7 @@ export interface operations {
             409: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     login: {
@@ -2258,6 +2259,7 @@ export interface operations {
             401: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     forgotPassword: {
@@ -2279,6 +2281,7 @@ export interface operations {
             400: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     resetPassword: {
@@ -2301,6 +2304,7 @@ export interface operations {
             400: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     logoutAll: {
@@ -2580,6 +2584,7 @@ export interface operations {
             400: components["responses"]["Error"];
             404: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     listProblems: {
@@ -2612,6 +2617,7 @@ export interface operations {
             400: components["responses"]["Error"];
             401: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     getProblemOfTheDay: {
@@ -2637,6 +2643,7 @@ export interface operations {
             400: components["responses"]["Error"];
             404: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     getProblemOfTheDayHistory: {
@@ -2671,6 +2678,7 @@ export interface operations {
             };
             400: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     recordHintViews: {
@@ -2733,6 +2741,7 @@ export interface operations {
             400: components["responses"]["Error"];
             404: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     listBookmarks: {
@@ -2973,6 +2982,7 @@ export interface operations {
             401: components["responses"]["Error"];
             404: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     measureSubmissionComplexity: {
@@ -3106,6 +3116,7 @@ export interface operations {
             401: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     getInterview: {
@@ -3351,6 +3362,7 @@ export interface operations {
             404: components["responses"]["Error"];
             429: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     interviewHint: {
@@ -3724,6 +3736,7 @@ export interface operations {
                 };
             };
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     generateLearningPath: {
@@ -3773,6 +3786,7 @@ export interface operations {
             400: components["responses"]["Error"];
             404: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     completePathProblem: {
@@ -3823,6 +3837,7 @@ export interface operations {
             };
             401: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     getNextProblems: {
@@ -3863,6 +3878,7 @@ export interface operations {
             400: components["responses"]["Error"];
             401: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     listPeerSessions: {
@@ -3887,6 +3903,7 @@ export interface operations {
             };
             401: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     createPeerSession: {
@@ -3924,6 +3941,7 @@ export interface operations {
             404: components["responses"]["Error"];
             409: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     getPeerIceServers: {
@@ -3985,6 +4003,7 @@ export interface operations {
             404: components["responses"]["Error"];
             409: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     getPeerSession: {
@@ -4013,6 +4032,7 @@ export interface operations {
             401: components["responses"]["Error"];
             404: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     endPeerSession: {
@@ -4041,6 +4061,7 @@ export interface operations {
             401: components["responses"]["Error"];
             404: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     submitPeerFeedback: {
@@ -4079,6 +4100,7 @@ export interface operations {
             404: components["responses"]["Error"];
             409: components["responses"]["Error"];
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     getReviewQueue: {
@@ -4198,6 +4220,7 @@ export interface operations {
                 };
             };
             500: components["responses"]["Error"];
+            503: components["responses"]["Error"];
         };
     };
     getRecommendations: {

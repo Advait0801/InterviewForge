@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { AIServiceError } from "../services/ai.service";
-import { DomainError } from "../services/errors";
+import { DomainError, isDatabaseUnavailable } from "../services/errors";
 import { getAIServiceMessage } from "./http";
 import type { InterviewStreamEvent, TurnStream } from "../services/interviews.service";
 
@@ -105,5 +105,10 @@ function toErrorEvent(label: string, err: unknown): StreamError {
     };
   }
   console.error(label, err);
+  // Nothing is committed until the whole question exists, so a database outage at the
+  // commit is safe to retry, as sendInternalError says on the JSON endpoints.
+  if (isDatabaseUnavailable(err)) {
+    return { type: "error", status: 503, error: "Service temporarily unavailable. Please retry.", retryable: true };
+  }
   return { type: "error", status: 500, error: "Internal server error", retryable: false };
 }
