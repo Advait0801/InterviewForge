@@ -15,6 +15,7 @@ const navLinks = [
   { href: "/review", label: "Review" },
   { href: "/problems", label: "Practice" },
   { href: "/interview", label: "Interview" },
+  { href: "/peer", label: "Peer" },
   { href: "/system-design", label: "System Design" },
   { href: "/assessments", label: "Assessments" },
   { href: "/paths", label: "Paths" },

@@ -1,5 +1,7 @@
 "use client";
 
+import { languages as LANGUAGES } from "@/components/language-picker";
+
 import { useProctoring } from "@/hooks/use-proctoring";
 import { OutputDiff } from "@/components/output-diff";
 import { IntegritySummary, PROCTORING_NOTICE } from "@/components/integrity-summary";
@@ -28,15 +30,6 @@ type ExecutionResult = Awaited<ReturnType<typeof api.runCode>> | Awaited<ReturnT
 
 const RUN_CASE_LIMIT = 4;
 const LANG_KEY = "if-preferred-lang";
-const LANGUAGES: { value: Language; label: string }[] = [
-  { value: "python3", label: "Python 3" },
-  { value: "cpp", label: "C++" },
-  { value: "c", label: "C" },
-  { value: "java", label: "Java" },
-  { value: "javascript", label: "JavaScript" },
-  { value: "go", label: "Go" },
-  { value: "rust", label: "Rust" },
-];
 
 function getSavedLanguage(): Language {
   if (typeof window === "undefined") return "python3";

@@ -71,3 +71,15 @@ describe("CodeWorkspaceEditor", () => {
     expect(focus).not.toHaveBeenCalled();
   });
 });
+
+it("preserves a local selection when a partner replaces shared code", () => {
+  const view = render(<CodeWorkspaceEditor language="python3" value="local code" preserveCursor onChange={() => {}} />);
+  const selection = { startLineNumber: 1, startColumn: 3, endLineNumber: 1, endColumn: 3 };
+  const editor = { layout: vi.fn(), getValue: vi.fn(() => "local code"), getSelection: vi.fn(() => selection), setSelection: vi.fn() };
+  (mocks.editorProps?.onMount as (editor: unknown, monaco: unknown) => void)(editor, { editor: { setTheme: vi.fn() } });
+  view.rerender(<CodeWorkspaceEditor language="python3" value="partner code" preserveCursor onChange={() => {}} />);
+  expect(editor.setSelection).toHaveBeenCalledWith(selection);
+  editor.setSelection.mockClear(); editor.getValue.mockReturnValue("next local edit");
+  view.rerender(<CodeWorkspaceEditor language="python3" value="next local edit" preserveCursor onChange={() => {}} />);
+  expect(editor.setSelection).not.toHaveBeenCalled();
+});

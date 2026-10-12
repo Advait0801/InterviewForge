@@ -52,7 +52,8 @@ export default function LoginPage() {
       const response = await api.login(identifier.trim(), password);
       setToken(response.token);
       toast.success("Signed in");
-      router.push("/dashboard");
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next === "/peer/join" ? next : "/dashboard");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "We couldn’t sign you in. Try again.");
     } finally {

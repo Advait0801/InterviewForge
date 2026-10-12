@@ -1,5 +1,7 @@
 "use client";
 
+import { RatingsSection } from "@/components/ratings";
+
 import { ReactNode, useCallback, useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -197,6 +199,8 @@ export default function AnalyticsPage() {
             </div>
             <Link href="/problems" className={buttonStyles({ variant: "secondary" })}>Choose a problem</Link>
           </motion.header>
+
+          <RatingsSection />
 
           {error && data === null ? (
             <motion.div variants={fadeUp} custom={1}>

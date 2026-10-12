@@ -1,0 +1,57 @@
+{
+  "browser": "154.0.8037.98",
+  "media": "Synthetic audio and canvas video; getUserMedia is mocked",
+  "restAndSocket": "Fixtures using the documented Socket.IO packets",
+  "browserFlag": "WebRtcHideLocalIpsWithMdns disabled in this isolated QA browser to avoid this machine's mDNS resolution limitation",
+  "errors": [],
+  "signals": [
+    {
+      "role": "interviewer",
+      "type": "offer"
+    },
+    {
+      "role": "interviewer",
+      "type": "candidate",
+      "candidateType": "host"
+    },
+    {
+      "role": "candidate",
+      "type": "answer"
+    },
+    {
+      "role": "candidate",
+      "type": "candidate",
+      "candidateType": "host"
+    },
+    {
+      "role": "candidate",
+      "type": "offer"
+    },
+    {
+      "role": "interviewer",
+      "type": "offer"
+    },
+    {
+      "role": "candidate",
+      "type": "answer"
+    },
+    {
+      "role": "candidate",
+      "type": "offer"
+    },
+    {
+      "role": "interviewer",
+      "type": "offer"
+    },
+    {
+      "role": "candidate",
+      "type": "answer"
+    }
+  ],
+  "checks": [
+    "Two real RTCPeerConnections connect with no microphone or camera; candidate hosts",
+    "Simultaneous synthetic microphone/camera additions renegotiate; both remote videos render after audio arrives",
+    "Code and language sync between the real Monaco editors",
+    "Leave releases the room without emitting end"
+  ]
+}

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { NextUp } from "@/components/ratings";
 import { DailyProblemWidget } from "@/components/daily-problem";
 import { ReviewDue } from "@/components/review-due";
 import { EmailConfirmation } from "@/components/email-confirmation";
@@ -196,6 +197,7 @@ export default function DashboardPage() {
           {emailState?.verified === false && <EmailConfirmation email={emailState.email} confirmed={false} banner />}
           <DailyProblemWidget />
           <ReviewDue />
+          <NextUp />
           <motion.section variants={fadeUp} custom={0} className="relative overflow-hidden rounded-3xl border border-border bg-surface/75 p-6 sm:p-8" aria-labelledby="dashboard-title">
             <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-primary/12 blur-3xl" aria-hidden />
             <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
