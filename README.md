@@ -45,10 +45,11 @@
 **InterviewForge** simulates full technical interviews the way top companies run them. Pick a company (10 supported, from Amazon and Google to Microsoft, Uber and Bloomberg), choose a difficulty, and work through **behavioral → coding → system design → core CS** rounds — all powered by **RAG-backed LLM question generation**, with real-time evaluation and follow-ups.
 
 On the coding side, work through **150 problems** (43 easy / 64 medium / 43 hard) in a **Monaco
-editor** with code execution in **isolated Docker sandboxes** (Python, C, C++, Java). Every one is
-verified executable in all four languages. Get **AI code reviews**, filter by company, track
-progress with **analytics & leaderboards**, follow **learning paths**, and take **timed
-assessments**.
+editor** with code execution in **isolated Docker sandboxes** in seven languages (Python, C, C++,
+Java, JavaScript, Go, Rust). Every problem is verified executable in all seven. Add your own test
+cases, get **AI code reviews** checked against **measured time complexity**, follow an
+**Elo-rated** next-problem pick, a daily problem and a **spaced-repetition** review queue, take
+**proctored timed assessments**, or practise with a friend in a **peer mock interview**.
 
 ### 📈 Retrieval quality, measured
 
@@ -88,7 +89,13 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 
 ### ✨ Key Highlights
 
-- 🎙️ **Multi-stage AI interviews** — Company-specific questions, follow-ups, voice evaluation, and downloadable PDF reports
+- 🎙️ **Multi-stage AI interviews** — Company-specific questions **streamed token by token** (SSE),
+  follow-ups, voice evaluation, and downloadable PDF reports
+- 🧭 **An interviewer with a personality and a budget** — four personas, a hint ladder that costs
+  points, and an adaptive mode where an agent decides to probe, pivot or move on while the backend
+  enforces the rules; every model call is metered per interview and capped
+- 🔗 **Replay and share** — step through any interview as a timeline, or share it through a public
+  link built by an allowlist serializer, so nothing private leaves the account
 - 🔍 **Company-aware RAG** — Chroma vector store covering 10 companies, with retrieval
   filtered by company and interview stage
 - 📐 **Evaluation harness** — golden-set retrieval metrics (nDCG, MRR, hit rate, recall) plus
@@ -101,8 +108,14 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
   server-side session revocation (password change/reset and "sign out everywhere" end other sessions)
 - 📊 **Practice ecosystem** — Problem bookmarks, filters, hints, editorials, submission history, streaks, heatmaps
 - 🏆 **Leaderboard & analytics** — Global rankings, topic radar, difficulty distribution, acceptance trends
-- 📋 **Timed assessments** — Multi-problem flows with a server-enforced deadline and scoring
-- 🗺️ **Learning paths** — Curated problem sequences by topic with progress tracking
+- 📋 **Timed assessments** — Multi-problem flows with a server-enforced deadline, scoring, and an
+  integrity summary (tab switches, paste sizes, never pasted text) that never changes the score
+- 🗺️ **Learning paths** — Curated problem sequences, plus a personal focus path built from your
+  weakest topics
+- 🔁 **Daily practice** — a deterministic Problem of the Day with streaks, and an SM-2 review queue
+  that brings back problems you struggled with
+- 🧱 **Bounded by design** — Redis-backed rate limits, a global cap on live sandboxes, and every
+  dependency outage degrading to a retryable 503
 - 📄 **Resume-grounded interviews** — an uploaded resume is parsed into a **per-user vector
   namespace** so questions reference the candidate's real projects; isolation is defended three
   independent ways and verified against a live stack (API-only, no upload UI yet)
@@ -121,6 +134,8 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 - Monaco-based code editor with syntax highlighting
 - **Run** (the public example cases) and **Submit** (full suite, including hidden cases whose
   contents never leave the server; the first failing one is revealed for debugging)
+- **Custom test cases** on Run, judged against the problem's reference solution, and a diff on
+  every failing case showing where the output first goes wrong
 - Submission history with language, status, runtime
 - Progressive hints and editorials
 - AI-powered code review (complexity, quality, optimizations)
@@ -148,8 +163,14 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 - Choose one of **10 companies** (Amazon, Google, Meta, Apple, Microsoft, Uber, Bloomberg, Adobe,
   LinkedIn, Airbnb) and difficulty (**Easy / Medium / Hard**)
 - 4-stage flow: Behavioral → Coding → System Design → Core CS
-- RAG-retrieved context feeds the LLM for realistic, company-styled questions
+- RAG-retrieved context feeds the LLM for realistic, company-styled questions, streamed to the
+  browser as they are generated; a turn is saved only once the whole question exists
 - Real-time evaluation with follow-up questions
+- Interviewer personas (neutral, friendly, terse, adversarial) and a three-rung hint ladder, each
+  hint costing a point
+- **Adaptive mode:** a model-driven interviewer chooses the next move inside rules the backend
+  enforces; every interview's model spend is recorded and capped
+- Replay any interview as a timeline, and share it through a revocable public link
 - Voice recording → transcription → explanation scoring
 - Session report with per-stage scores, strengths, weaknesses, recommendations — generated once
   and stored, so reopening it costs no model call
@@ -166,11 +187,14 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 
 ### Platform
 
-- Dashboard with stats, activity heatmap, and AI-recommended problems
+- Dashboard with stats, activity heatmap, Problem of the Day, Elo "next up" picks and
+  AI-recommended problems
 - Global leaderboard (problems solved, acceptance rate)
-- Analytics page with charts (solved over time, difficulty pie, topic radar)
-- Structured learning paths with progress tracking
-- Timed assessment mode with scoring
+- Analytics page with charts (solved over time, difficulty pie, topic radar) and your ratings
+- Structured learning paths with progress tracking, and a personal focus path from weak topics
+- An SM-2 review queue, graded from your submissions
+- Timed assessment mode with scoring and an integrity summary
+- Real verification and password-reset email (Resend)
 - Dark mode, responsive layouts, loading skeletons, error boundaries
 
 ---
@@ -201,15 +225,16 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
                        ▼                                     ▼
               ┌──────────────────┐                  ┌──────────────────┐
               │  LLM +           │                  │  Docker sandboxes│
-              │  embeddings APIs │                  │  (py/c/cpp/java) │
+              │  embeddings APIs │                  │  (7 languages)   │
               └──────────────────┘                  └──────────────────┘
 ```
 ### 🔄 Data flow
 
 1. **Auth** — Web client → Express (bcrypt + JWT) → PostgreSQL `users`
 2. **Code submit** — Web client → Express → BullMQ queue (Redis; at most `CODE_RUN_CONCURRENCY` runs at once) → code-runner → ephemeral Docker container → test results → response
-3. **Interview question** — Express → FastAPI → Chroma retrieval + LLM chain → structured question → stored in `interview_messages`
-4. **RAG pipeline** — Seed documents → chunking → embeddings → Chroma → filtered retrieval by company + stage + difficulty calibration
+3. **Interview question** — Express → FastAPI → Chroma retrieval (behind a Redis retrieval cache) + LLM chain → streamed over SSE to the browser → stored in `interview_messages` once complete
+4. **Peer interview** — browser ↔ Socket.IO `/peer` on Express (signalling, shared code, clock) ↔ the other browser; audio and video go peer to peer over WebRTC
+5. **RAG pipeline** — Seed documents → chunking → embeddings → Chroma → filtered retrieval by company + stage + difficulty calibration
 
 ---
 
@@ -234,7 +259,7 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 | **Framework** | Express 5, TypeScript |
 | **Auth** | JWT (`jsonwebtoken`), bcrypt |
 | **Database** | PostgreSQL via `pg` |
-| **Realtime** | Socket.IO |
+| **Realtime** | Socket.IO (`/peer` namespace, Redis adapter for multiple instances) |
 | **Security** | `helmet`, CORS, per-user API rate limits + per-IP login/sign-up limits (`express-rate-limit`), revocable sessions (`token_version`), fail-closed `JWT_SECRET` |
 
 ### AI Service (Python)
@@ -253,7 +278,7 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 |---|---|
 | **Code runner** | Node.js service using Docker Engine API |
 | **Sandboxes** | Per-language images in `docker/sandboxes/` (python, c, cpp, java, javascript, go, rust), unprivileged and resource-capped |
-| **Database** | PostgreSQL 16 — 14 raw-SQL migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks, resumes, indexes and session revocation |
+| **Database** | PostgreSQL 16 — 21 raw-SQL migrations covering users, problems, submissions, interviews, assessments, paths, bookmarks, resumes, indexes, session revocation, interview cost, learning features, sharing and proctoring, complexity, Elo and peer sessions |
 | **Vector store** | ChromaDB 0.5.5 |
 | **Shared state** | Redis 7: rate-limit counters (backend and the ai-service's live-fetch limits), the BullMQ code-run queue with a global concurrency cap, the leaderboard cache, and the bounded retrieval cache |
 | **Orchestration** | Docker Compose (7 services) |
@@ -267,17 +292,20 @@ InterviewForge/
 ├── web/                    # Next.js frontend
 │   └── src/app/            # App Router pages (dashboard, problems, interview, etc.)
 ├── backend/                # Express API server
-│   ├── src/routes/         # Auth, problems, submissions, interviews, assessments, etc.
-│   ├── src/services/       # ai.service (REST client for ai-service), interview state, test-case visibility
+│   ├── src/routes/         # HTTP only: parse, validate, call a service, map errors
+│   ├── src/services/       # business rules; ai.service (REST client for ai-service), code-runner client
+│   ├── src/repositories/   # all SQL, one file per table group
+│   ├── src/realtime/       # Socket.IO /peer: signalling relay, presence, shared code (no SQL)
+│   ├── openapi/            # openapi.yaml, the API contract every route test is checked against
 │   ├── src/__tests__/      # unit + route-level tests; helpers/ holds the HTTP harness and fake Postgres
-│   ├── sql_migrations/     # 001_init.sql through 014_interview_report.sql
-│   ├── reference_solutions/# <slug>/solution.{py,c,cpp,java} — every problem, every language
+│   ├── sql_migrations/     # 001_init.sql through 021_peer_sessions.sql
+│   ├── reference_solutions/# <slug>/solution.{py,c,cpp,java,js,go,rs} — every problem, every language
 │   └── scripts/            # seed_problems.ts, seed_learning_paths.ts
 ├── ai-service/             # FastAPI AI backend
 │   ├── app/api/            # RAG, interview, code-review, speech, recommendations
-│   ├── app/interview/      # Company profiles, orchestrator
+│   ├── app/interview/      # Company profiles, orchestrator, the adaptive interviewer agent
 │   ├── app/llm/            # LLM chains (question, evaluation, report, etc.)
-│   ├── app/rag/            # Chroma client, chunking, embeddings, service
+│   ├── app/rag/            # Chroma client, chunking, embeddings, service, retrieval cache
 │   ├── app/resume/         # PDF parsing and per-user vector namespaces
 │   ├── seed_data/          # documents.json (RAG corpus)
 │   └── scripts/            # seed_rag.py
@@ -286,7 +314,7 @@ InterviewForge/
 ├── scripts/                # verify_*.py (live-stack checks), problemgen/ (specs + oracles),
 │                           # ci/smoke_prod_images.sh
 ├── .github/workflows/      # ci.yml: lint, tests, builds, prod-image smoke tests
-├── docs/                   # DECISIONS, BACKLOG, PROJECT_CONTEXT, eval/, ui-ux/
+├── docs/                   # DECISIONS, BACKLOG, PROJECT_CONTEXT, peer-interviews, eval/, audits/, ui-ux/
 ├── docker-compose.yml      # Local development stack
 └── docker-compose.prod.yml # Production stack (AWS)
 ```
@@ -388,19 +416,30 @@ cd web          && npm test    # Vitest + Testing Library
 cd code-runner  && npm test    # Vitest
 docker compose exec ai-service python -m pytest
 
-# Against the running stack
-python scripts/verify_phase7.py            # problems, filters, editorials, stats, streaks
-python scripts/verify_resume_isolation.py  # cross-user resume isolation and deletion
-python scripts/verify_problems.py          # every problem x 7 languages through the real sandbox
+# Against the running stack (CLAUDE.md lists them all; those marked $ make a few cheap model calls)
+python scripts/verify_problems.py          # every problem x 7 languages through the real sandbox (1,050 cells)
 python scripts/verify_coding_engine.py     # custom test cases, failing-case diffs, all 7 languages
+python scripts/verify_phase7.py            # problems, filters, editorials, stats, streaks
+python scripts/verify_learning.py          # Problem of the Day, SM-2 review queue, personal paths
+python scripts/verify_sharing.py           # replay, public links leak nothing, proctoring
+python scripts/verify_complexity.py        # empirical complexity on known solutions, 7 languages
+python scripts/verify_elo.py               # rated first Submits, racing pairs
+cd backend && npx ts-node scripts/verify_peer.ts && cd ..   # peer invites, room auth, relay, clock
+python scripts/verify_streaming.py         # $ SSE interview streams, disconnects, double submits
+python scripts/verify_interviewer.py       # $ personas, hint ladder and its penalty
+python scripts/verify_agent.py             # $ adaptive interviewer rules and cost
+python scripts/verify_retrieval_cache.py   # $ cache hits, invalidation, Redis outage
+python scripts/verify_resume_isolation.py  # $ cross-user resume isolation and deletion
+python scripts/load_test_run_queue.py --requests 20 --cap 4   # the live-sandbox cap holds
 
 # Production images: build each Dockerfile.prod tagged :ci first (see the script header)
 bash scripts/ci/smoke_prod_images.sh
 ```
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests and builds for every service, builds
-all four production images and the four sandboxes, and smoke-tests the production images: no
-`.env` baked in, required data files present, each image boots and answers its health check.
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests and builds for every service, checks
+that the generated API types match both OpenAPI specs, builds all four production images and the
+seven sandboxes, and smoke-tests the production images: no `.env` baked in, required data files
+present, each image boots and answers its health check.
 
 ---
 
@@ -412,17 +451,19 @@ Register with username, email, and password. Express hashes with **bcrypt**, ret
 
 ### 2. Solve coding problems
 
-Browse the problem list with filters (difficulty, topic, company, solved status, search). Open a problem → write code in the **Monaco editor** → **Run** to test against the example cases → **Submit** to run the full suite, hidden cases included. Code executes inside an **isolated Docker container** — never on the host. Request an **AI code review** for complexity analysis and optimization suggestions.
+Browse the problem list with filters (difficulty, topic, company, solved status, search), or take the Problem of the Day or an Elo pick from the dashboard. Open a problem → write code in the **Monaco editor** → **Run** against the example cases and your own → **Submit** to run the full suite, hidden cases included. Code executes inside an **isolated Docker container** — never on the host. A first Submit moves your rating; an accepted one can be **timed on growing inputs** to measure its complexity, and compared with an **AI code review**'s claim.
 
 ### 3. Take a mock interview
 
 Select one of the **10 companies** and a difficulty level. The platform creates a session and generates the first question using **RAG retrieval** from the company's interview knowledge base + **LLM generation** with company-specific style and difficulty calibration.
 
-Work through **4 stages**: Behavioral → Coding → System Design → Core CS. Each answer is evaluated; follow-up questions dig deeper. On completion, generate a **full report** with per-stage scores and download it as a **PDF**.
+Pick an interviewer tone and a mode (classic, or adaptive). Work through **4 stages**: Behavioral → Coding → System Design → Core CS, with questions streaming in as they are written. Each answer is evaluated; follow-up questions dig deeper, and hints are there at a price. On completion, generate a **full report** with per-stage scores, download it as a **PDF**, replay the interview, or share it through a link you can revoke.
+
+Or practise with a person: host a **peer interview**, send the one-time invite link, and take the interviewer or candidate seat with a shared editor, a server-kept clock, optional audio and video, and feedback for each other at the end.
 
 ### 4. Track your progress
 
-The **dashboard** shows solve stats, current streak, and an activity heatmap. **Analytics** breaks down your performance by difficulty, topic, and acceptance rate over time. The **leaderboard** ranks users globally. **Learning paths** give structured problem sequences to follow.
+The **dashboard** shows solve stats, the Problem of the Day and your streak, your next Elo picks, and an activity heatmap. **Analytics** breaks down your performance by difficulty, topic, acceptance rate and rating over time. The **review queue** brings back problems at SM-2 intervals. The **leaderboard** ranks users globally. **Learning paths** give structured problem sequences to follow, including one built from your weakest topics.
 
 ---
 
@@ -509,8 +550,9 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [x] AWS deployment (EC2 + RDS + Nginx)
 - [x] CI pipeline (lint, typecheck, test, build) across all four services, plus production-image
       builds and smoke tests
-- [x] Test suites — 690 tests: 405 `ai-service`, 178 `backend` (incl. route-level tests for every
-      core router), 59 `web`, 48 `code-runner`
+- [x] Test suites — 2,052 tests: 689 `backend` (route-level tests over a strict fake Postgres,
+      every response checked against the OpenAPI contract), 586 `ai-service`, 444 `code-runner`,
+      333 `web`
 - [x] RAG evaluation harness with a committed baseline
 - [x] Retrieval quality work: structural chunking, hybrid search, reranking, routing
 - [x] Live corpus ingestion with provenance and write-back caching
@@ -518,21 +560,31 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [x] Sandbox hardening (non-root, `CapDrop: ALL`, `no-new-privileges`, `PidsLimit`, CPU quota),
       each control proven adversarially
 - [x] Resume-grounded personalised interviews with per-user vector isolation
-- [x] Problem set expanded 42 → 150, all verified executable in four languages
+- [x] Problem set expanded 42 → 150, all verified executable in seven languages (1,050 cells)
 - [x] UI/UX pass across every core workflow — honest resource states, responsive panes,
       accessible analytics, route-level error recovery
-- [x] End-to-end verification: correctness and resilience rounds (dependency outages degrade to
-      retryable 503s)
+- [x] End-to-end verification, twice: correctness and resilience rounds from a clean boot
+      (Sep and Oct 2026); dependency outages degrade to retryable 503s, hostile input to 4xx
 - [x] Backend hardening — fail-closed JWT secret, per-user and auth rate limits, `helmet`, query
       indexes, session revocation, transactional multi-write routes, server-enforced assessment
       deadline, hidden test cases kept server-side
-- [ ] HTTPS via Let's Encrypt (requires domain)
-- [ ] Horizontal scaling for code-runner and ai-service
-- [ ] WebSocket reconnection and offline resilience
-- [ ] User profile customization and social features
-- [ ] Interview session replay and sharing
+- [x] Layered backend (routes → services → repositories, enforced by a test) and an OpenAPI
+      contract with generated clients for both APIs
+- [x] Redis: shared rate limits, a BullMQ code-run queue with a global sandbox cap, caches
+- [x] Streaming interview questions (SSE), interviewer personas, a hint ladder, and an adaptive
+      agent mode with per-interview cost accounting and a cap
+- [x] Custom test cases, failing-case diffs, and JavaScript, Go and Rust
+- [x] Problem of the Day, SM-2 review queue, personal learning paths
+- [x] Interview session replay, public share links, assessment proctoring
+- [x] Real verification and password-reset email
+- [x] A retrieval cache, empirical complexity measurement, and Elo-rated adaptive difficulty
 - [x] Peer mock interviews: WebRTC between two users, with Socket.IO signalling, a shared editor,
       a server-side clock and feedback
+- [ ] HTTPS via Let's Encrypt (requires domain)
+- [ ] Horizontal scaling for code-runner and ai-service (the backend already runs as several
+      instances: limits, the run queue and Socket.IO share state through Redis)
+- [ ] Offline resilience beyond the peer room's reconnect
+- [ ] User profile customization and social features
 
 The fuller version, with effort and impact estimates, is in [`docs/BACKLOG.md`](docs/BACKLOG.md).
 
@@ -542,9 +594,11 @@ The fuller version, with effort and impact estimates, is in [`docs/BACKLOG.md`](
 
 | Doc | What it covers |
 |---|---|
-| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only log of every non-obvious decision and finding, with the reasoning (D-001 … D-057) |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Append-only log of every non-obvious decision and finding, with the reasoning (D-001 … D-080) |
 | [`docs/BACKLOG.md`](docs/BACKLOG.md) | What is deliberately not built yet, with effort and impact estimates |
-| [`docs/eval/`](docs/eval/) | Retrieval baselines and per-phase results, including the negative ones |
+| [`docs/eval/`](docs/eval/) | Retrieval baselines and per-phase results (retrieval, the retrieval cache, complexity, Elo), including the negative ones |
+| [`docs/peer-interviews.md`](docs/peer-interviews.md) | Peer mock interviews: the flow, the Socket.IO protocol, deploying with Nginx and TURN |
+| [`docs/audits/`](docs/audits/) | Investigations with their evidence: homepage performance, accessibility, microphone error paths |
 | [`docs/ui-ux/`](docs/ui-ux/) | UI phase reports, route/state matrix, and re-runnable browser capture scripts |
 | [`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md) | Original product spec and long-term vision |
 

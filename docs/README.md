@@ -35,6 +35,10 @@ They remain in git history at `4083f5e`. Their still-relevant remainder is in
 verification rounds, backend hardening, CI production-image checks, session revocation, and the
 route-level test pass with the fixes it drove — is D-053 through D-058.
 
+The October 2026 roadmap (Groups A–D: foundations, the interviewer, practice features and the
+showpieces, then Phase 14's final verification) is D-059 through D-080. Its plan, `ROADMAP.md`,
+was kept local and never committed.
+
 ## Conventions
 
 - `DECISIONS.md` is append-only. New entries at the top, dated, never rewrite history —

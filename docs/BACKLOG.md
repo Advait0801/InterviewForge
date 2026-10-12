@@ -83,9 +83,14 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 - **Elo cold start** *(S)* — until problems have been played, their ratings are their labels'
   (1200/1500/1800), so a new user's first pick is a 50% medium rather than a 65% one. Seeding
   problem ratings from acceptance rates, once there is traffic, would spread them from day one.
-- **Pre-existing web type errors in tests** *(S)* — `npx tsc --noEmit` in `web/` reports 4 errors
-  in `src/app/__tests__/group-c.test.tsx` (testing-library's `exact` option). `next build` and
-  vitest don't typecheck tests, so nothing catches them.
+
+## Found in Phase 14 (D-080)
+
+- **Re-fetch the collection after an external reindex** *(S)* — `app.ingest.reindex --rebuild`
+  recreates the Chroma collection under a new id, and the running ai-service's cached
+  `RAGService` objects keep the old handle: the next query on each fails once with a retryable
+  503, then the service is rebuilt and recovers. Catching Chroma's "collection not found" and
+  re-fetching the collection once would make an online reindex invisible.
 
 ## Engineering credibility
 

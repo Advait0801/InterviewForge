@@ -7,6 +7,128 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ---
 
+## 2026-10-12
+
+### D-080 — Phase 14: both end-to-end rounds again, three fixes, the roadmap done
+
+**What:** the two rounds D-058 ran once, repeated over everything Groups A–D added (D-059 to
+D-079), from a clean boot.
+
+**Round 1, correctness: green.**
+- **Clean boot.** The Postgres and Chroma volumes were copied to backup volumes, wiped, and the
+  stack built from nothing. Migrations 001–021 applied in order to the empty database (0 → 25
+  tables), every seed ran, and the corpus was rebuilt from `.corpus_cache` (721 chunks).
+- **Suites.** 2,012 tests on `main`: backend 649 (with `REDIS_TEST_URL`), code-runner 444, web
+  333, ai-service 586. Web lint, `tsc` and `next build`, backend and code-runner builds, the API
+  contract check and the JS/Go/Rust template check all passed. All four production images were
+  rebuilt and `smoke_prod_images.sh` passed.
+- **Every live script:**
+
+  | Script | Result |
+  |---|---|
+  | `verify_problems.py` | 1,050/1,050 |
+  | `verify_coding_engine.py` | 20/20 |
+  | `verify_phase7.py` | 46/46 |
+  | `verify_learning.py` | 34/34 |
+  | `verify_sharing.py` | 27/27 |
+  | `verify_elo.py` | 16/16 |
+  | `verify_complexity.py --review` | 96/96 |
+  | `verify_peer.ts` | 29/29 |
+  | `verify_streaming.py` | 22/22 |
+  | `verify_interviewer.py` | 14/14 |
+  | `verify_agent.py`, then `--cap` | 19/19, then 18/18 |
+  | `verify_retrieval_cache.py` | 25/25 (see the finding below) |
+  | `verify_resume_isolation.py` | 31/31 |
+  | `verify_email.py` | 11/11 (both emails arrived) |
+  | load test, plain and `--custom` | peak 4 live sandboxes at a cap of 4 |
+
+- **Browser walkthrough** on the clean stack:
+  - sign-up;
+  - the Problem of the Day, with a custom case judged by the reference;
+  - Submit: +6 rating; complexity O(n), which the AI review's claim matched;
+  - a four-stage Friendly interview, streamed, with a hint and its penalty, then the report;
+  - replay; a share link, viewed logged out, then revoked;
+  - analytics with the rating, the leaderboard, the review queue and paths;
+  - an assessment with its integrity summary;
+  - hosting a peer room (no devices), and system-design analysis.
+
+  No `openapi_violation` was logged throughout.
+
+**Round 2, resilience: green after three fixes.**
+- **Each dependency stopped:**
+  - Redis: runs a retryable 503 in 5.0 s; login, the leaderboard, the daily problem and retrieval
+    still work.
+  - Chroma: interviews a retryable 503; coding unaffected.
+  - Code-runner: runs and submits a retryable 503.
+  - ai-service: a JSON 503, or a retryable `error` event on the stream; coding unaffected.
+  - Each recovered within 0–2 s with no other restart, and the same token still worked.
+- **The sandbox:** an infinite loop, a fork bomb, a memory bomb, network egress, DNS, rootfs
+  writes, reading secrets, 200 MB of output, the Docker socket and `setuid` were all contained.
+  Eight concurrent infinite loops all ended. TLE in C, Go, Rust and Java. 0 containers leaked.
+- **Rate limits:** login (11th failure), auth writes (21st), complexity (11th), LLM (41st), and
+  the per-user API limit (501st, with another user unaffected) all held.
+- **Hostile input:** malformed ids, forged, `alg=none` and garbage tokens, injection-shaped
+  search, path traversal, bad share and invite tokens, and pasted text in proctoring events each
+  got the right 4xx. The problems table was intact.
+
+**Found and fixed, each on its own branch and PR:**
+1. **A database outage was a 500 outside auth** (`fix/db-outage-503`, PR #31). With Postgres stopped,
+   authenticated requests correctly got 503, but public reads, the leaderboard and **login**
+   answered 500 "Internal server error", which clients don't retry and which reads as a bug.
+   `sendInternalError` now answers a connection-level `pg` failure with a retryable 503: the
+   network codes, SQLSTATE 08, 57P01–57P03 and 53300. A query error stays a 500. A commit that
+   fails mid-stream is now a retryable `error` event, which is safe because nothing is written
+   before the question is complete.
+2. **Unbounded input reached the model and the runner** (`fix/input-bounds`, PR #32).
+   - `difficulty` was never checked: any string, of any length, went into the opening question's
+     prompt and its retrieval query. Answers, hint drafts, explanations and design prompts were
+     only checked for being non-empty.
+   - Behind the 8 MB body limit (sized for résumés), a few MB of answer is about 750k tokens on
+     each of a turn's model calls. The cost cap doesn't stop that: past the cap, D-067 only stops
+     consulting the agent.
+   - 3 MB of code was queued, refused by the runner's 2 MB limit, and shown as "Code runner
+     unavailable".
+   - Now `difficulty` must be easy, medium or hard (any case); model-bound text is ≤ 20,000
+     characters; code is ≤ 50,000 (the peer editor's limit, now shared); all checked before any
+     query, queue or call.
+3. **Stack traces in production error pages** (`fix/json-errors`, PR #33). Malformed JSON got Express's
+   HTML error page with the stack trace and the `node_modules` layout. Express prints it unless
+   `NODE_ENV=production`, which nothing set; a production image built from `main` did the same.
+   There's now a JSON 404 and a JSON error handler (400 for bad JSON, 413 for oversize, 500
+   without a stack), and the prod image sets `NODE_ENV=production`.
+
+Merged as PRs #31–#33 (main `d98787a`): 689 backend tests, contract green, and live on the
+merged stack the hostile-input round and the Postgres outage pass 46/46. The dev-only response
+validator now logs `openapi_violation` for deliberately unknown paths (`/api/users/../../etc/passwd`):
+the JSON 404 answers inside `/api`, where Express's HTML 404 never reached the validator. Those
+paths aren't in the spec and the 404 is correct, so it's expected noise in a hostile run.
+
+**Found, not fixed:**
+- **One 503 after an external reindex.** `app.ingest.reindex --rebuild`, run in a separate
+  process, drops and recreates the Chroma collection. The running ai-service still holds the old
+  collection's handle, so the next query on each cached service fails once and then recovers
+  (reproduced: 503, 200, 200). It's operator-triggered, retryable and self-healing, so it goes to
+  BACKLOG. It cost one false failure in `verify_retrieval_cache.py`'s first run.
+- **Reranker slowness persists** (D-075): the first interview question took about 15 s.
+
+**Not exercised:** the PDF download (it would download a file; verified in D-058's round), the
+live-fetch spend caps (Gemini grounding still 429s on the free tier), real microphones, and a
+second real browser in the peer room (verified with a scripted client in D-079).
+
+**Method notes:**
+- The laptop slept mid-check and the stack stopped. Restarting only the backend left Redis down,
+  and 8 Redis integration tests failed, which looked like a merge regression until `docker compose
+  ps` showed the cause. After `up -d`, the still-running backend couldn't resolve `redis` until it
+  was restarted too. Check the stack before reading a failure.
+- A quiet `docker build` again left a stale `:ci` tag, and the first smoke run checked a
+  two-day-old backend image. Read an image's `Config.Env` or history before trusting a smoke
+  result.
+- A synthetic `paste` event is really pasted by Monaco, so a proctoring test edits the code.
+
+**Spend:** about $0.017 in model calls plus $0.006 of embeddings, against a $1.00 cap.
+
+With this, every phase of the roadmap (Groups A–D and Phase 14) is complete.
+
 ## 2026-10-11
 
 ### D-079 — UI Group D shipped: complexity, Elo and peer interviews have screens (Group D done)
