@@ -16,6 +16,7 @@ import type { Server } from "node:http";
 import express, { type Router } from "express";
 import { signAccessToken } from "../../auth";
 import { optionalAuth } from "../../middleware/auth.middleware";
+import { errorHandler, notFound } from "../../middleware/errors.middleware";
 import { createResponseValidator } from "../../openapi/spec";
 
 export * from "./fake-db";
@@ -65,6 +66,8 @@ export async function serve(mountPath: string, router: Router): Promise<TestServ
   app.use(express.json({ limit: "8mb" })); // as index.ts
   app.use("/api", optionalAuth);
   app.use(mountPath, router);
+  app.use(notFound); // as index.ts
+  app.use(errorHandler);
   const server: Server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
   const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
