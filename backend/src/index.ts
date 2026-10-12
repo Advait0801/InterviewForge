@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import { apiLimiter } from "./middleware/rate-limit.middleware";
+import { errorHandler, notFound } from "./middleware/errors.middleware";
 import { optionalAuth } from "./middleware/auth.middleware";
 import { resolveJwtSecret } from "./auth";
 import { getMailer, resolveEmailConfig, settleEmails } from "./services/email";
@@ -87,6 +88,11 @@ app.get("/", (req, res) => {
 for (const [mountPath, router] of API_ROUTES) {
   app.use(`/api${mountPath}`, router);
 }
+
+// JSON for unknown paths and for anything unhandled, including a malformed body, instead of
+// Express's HTML pages (whose error page prints the stack trace).
+app.use(notFound);
+app.use(errorHandler);
 
 const server = http.createServer(app);
 
