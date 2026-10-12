@@ -1,4 +1,5 @@
 import { hashPassword, verifyPassword, signAccessToken } from "../auth";
+import { disconnectUser } from "../realtime/peer.events";
 import * as users from "../repositories/users.repository";
 import * as activity from "../repositories/activity.repository";
 import { DomainError, badRequest, notFound } from "./errors";
@@ -21,6 +22,8 @@ export async function changePassword(userId: string, currentPassword: string, ne
   if (!(await verifyPassword(currentPassword, hash))) throw new DomainError(401, "Current password is incorrect");
 
   const tokenVersion = await users.changePassword(userId, await hashPassword(newPassword));
+  // Open sockets hold the old token; the client reconnects with the new one (D-078).
+  disconnectUser(userId);
   return signAccessToken({ userId, tokenVersion });
 }
 

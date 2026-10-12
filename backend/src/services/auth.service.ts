@@ -1,4 +1,5 @@
 import { hashPassword, verifyPassword, signAccessToken } from "../auth";
+import { disconnectUser } from "../realtime/peer.events";
 import { randomToken, hoursFromNow } from "../auth-tokens";
 import * as users from "../repositories/users.repository";
 import { DomainError, badRequest } from "./errors";
@@ -96,11 +97,13 @@ export async function resetPassword(token: string, newPassword: string): Promise
   const userId = await users.findUserIdByLiveResetToken(token);
   if (!userId) throw badRequest("Invalid or expired reset link");
   await users.resetPassword(userId, await hashPassword(newPassword));
+  disconnectUser(userId);
 }
 
-/** Sign out everywhere, the calling session included (D-055). */
-export function logoutEverywhere(userId: string): Promise<void> {
-  return users.bumpTokenVersion(userId);
+/** Sign out everywhere, the calling session included (D-055), live rooms too (D-078). */
+export async function logoutEverywhere(userId: string): Promise<void> {
+  await users.bumpTokenVersion(userId);
+  disconnectUser(userId);
 }
 
 export async function verifyEmail(token: string): Promise<boolean> {

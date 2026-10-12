@@ -20,6 +20,12 @@ describe("layering", () => {
     expect(text).not.toMatch(/from "\.\.\/db"/);
   });
 
+  it.each(sources("realtime"))("$file has no SQL and no database import (D-078)", ({ text }) => {
+    expect(text).not.toMatch(SQL);
+    expect(text).not.toMatch(/from "\.\.\/db"/);
+    expect(text).not.toMatch(/from "\.\.\/repositories\//);
+  });
+
   it.each(sources("services"))("$file has no SQL", ({ text }) => {
     expect(text).not.toMatch(SQL);
   });

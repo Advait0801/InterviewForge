@@ -895,6 +895,109 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/peer-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The caller's 50 most recent peer sessions, as host or guest (D-078). */
+        get: operations["listPeerSessions"];
+        put?: never;
+        /** @description Host a peer mock interview. `role` is the host's; whoever joins takes the other. The invite token is returned once and stored only as its SHA-256; the web turns it into a link. At most 5 open (waiting) invites per user. */
+        post: operations["createPeerSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/peer-sessions/ice-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description ICE servers for RTCPeerConnection: STUN always, TURN when configured, with credentials that expire (`expiresAt`); fetch again before reconnecting after that. */
+        get: operations["getPeerIceServers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/peer-sessions/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Take the other seat with an invite token. Joining again, or the host opening their own invite, returns the session. A full session is 409; an unknown, malformed or closed invite is the same 404 for all. */
+        post: operations["joinPeerSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/peer-sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One of the caller's peer sessions; 404 for anyone but its two participants. */
+        get: operations["getPeerSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/peer-sessions/{id}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Either participant ends it: a waiting session is cancelled, an active one completed. Ending an ended session changes nothing. The live room is told (`ended`). */
+        post: operations["endPeerSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/peer-sessions/{id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Once a session has completed, each participant may rate the other once, 1-5 per key. The interviewer rates problemSolving, communication and codeQuality; the candidate rates clarity and helpfulness. */
+        post: operations["submitPeerFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/review": {
         parameters: {
             query?: never;
@@ -1292,6 +1395,48 @@ export interface components {
             runtime_ms: number | null;
             memory_kb: number | null;
             created_at: components["schemas"]["Timestamp"];
+        };
+        /** @enum {string} */
+        PeerRole: "interviewer" | "candidate";
+        PeerFeedback: {
+            ratings: {
+                [key: string]: number;
+            };
+            notes: string;
+            createdAt: string;
+        };
+        /** @description A peer session as one of its two participants sees it. */
+        PeerSession: {
+            id: components["schemas"]["Uuid"];
+            /** @enum {string} */
+            status: "waiting" | "active" | "completed" | "cancelled";
+            myRole: components["schemas"]["PeerRole"];
+            isHost: boolean;
+            partner: {
+                username: string;
+                role: components["schemas"]["PeerRole"];
+            } | null;
+            problem: {
+                id: components["schemas"]["Uuid"];
+                slug: string;
+                title: string;
+                difficulty: string;
+            } | null;
+            durationMinutes: number;
+            createdAt: string;
+            /** @description When both participants were first in the room. */
+            startedAt: string | null;
+            endsAt: string | null;
+            endedAt: string | null;
+            endedReason: ("ended_by_participant" | "time_up" | "cancelled" | "expired") | null;
+            /** @description The shared editor's last saved state. */
+            code: string;
+            language: string;
+            feedback: {
+                given: components["schemas"]["PeerFeedback"] | null;
+                /** @description The partner's feedback; shown only once the session has completed. */
+                received: components["schemas"]["PeerFeedback"] | null;
+            };
         };
         Rating: {
             rating: number;
@@ -3717,6 +3862,222 @@ export interface operations {
             };
             400: components["responses"]["Error"];
             401: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    listPeerSessions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Newest first. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        sessions: components["schemas"]["PeerSession"][];
+                    };
+                };
+            };
+            401: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    createPeerSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    role: components["schemas"]["PeerRole"];
+                    problemId?: components["schemas"]["Uuid"] | null;
+                    /** @default 45 */
+                    durationMinutes?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description The session and its invite token. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        session: components["schemas"]["PeerSession"];
+                        inviteToken: string;
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    getPeerIceServers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The servers. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        iceServers: {
+                            urls: string[];
+                            username?: string;
+                            credential?: string;
+                        }[];
+                        expiresAt: string | null;
+                    };
+                };
+            };
+            401: components["responses"]["Error"];
+        };
+    };
+    joinPeerSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The session, as the caller sees it. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        session: components["schemas"]["PeerSession"];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    getPeerSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The session. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        session: components["schemas"]["PeerSession"];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    endPeerSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The session afterwards. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        session: components["schemas"]["PeerSession"];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    submitPeerFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    ratings: {
+                        [key: string]: number;
+                    };
+                    notes?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The session, with the feedback given. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        session: components["schemas"]["PeerSession"];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
             500: components["responses"]["Error"];
         };
     };

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peer signalling harness</title>
+<style>
+  body { font: 14px/1.4 ui-monospace, Menlo, monospace; margin: 16px; background: #fff; color: #111; }
+  #status { font-weight: bold; }
+</style>
+</head>
+<body>
+<!--
+  Phase 13 verification (D-078): two of these pages, one per participant, connect peer to
+  peer over WebRTC using only the backend's /peer signalling. A data channel, no camera or
+  microphone. Not part of the product; the real room is the web app's (UI D).
+
+  Serve:  python3 -m http.server 4999 --directory scripts/peer_harness
+  Open:   http://localhost:4999/ in two tabs, then in each: window.__start({ token, session, iceServers, relayOnly })
+          (the token is handed over in script, never put in the URL)
+  State:  window.__peer  { role, dc, ice, received[], log[] }
+-->
+<p>Status: <span id="status">waiting for __start</span></p>
+<pre id="log"></pre>
+<script src="http://localhost:4000/socket.io/socket.io.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  const api = q.get("api") || "http://localhost:4000";
+  const state = (window.__peer = { role: null, dc: "new", ice: "new", received: [], log: [] });
+  const log = (...parts) => {
+    state.log.push(parts.join(" "));
+    document.getElementById("log").textContent = state.log.join("\n");
+  };
+  const status = (s) => (document.getElementById("status").textContent = s);
+
+  window.__start = (opts) => {
+  status("starting");
+  // opts.iceServers: what GET /api/peer-sessions/ice-servers returned. Without them only
+  // mDNS-masked host candidates exist, and a browser that can't resolve .local names
+  // (the desktop app's embedded one can't) never connects.
+  // opts.relayOnly: use TURN relay candidates only, to prove the TURN path itself.
+  const pc = (state.pc = new RTCPeerConnection({
+    iceServers: opts.iceServers || [],
+    iceTransportPolicy: opts.relayOnly ? "relay" : "all",
+  }));
+  const socket = io(`${api}/peer`, { auth: { token: opts.token }, transports: ["websocket"] });
+  const pending = [];
+  let negotiated = false;
+
+  function wire(channel) {
+    channel.onopen = () => {
+      state.dc = "open";
+      status("connected peer to peer");
+      log("data channel open");
+      channel.send(`hello from the ${state.role}`);
+    };
+    channel.onmessage = (m) => {
+      state.received.push(m.data);
+      log("received:", m.data);
+    };
+  }
+
+  pc.onicecandidate = (e) => {
+    if (e.candidate) socket.emit("signal", { type: "candidate", candidate: e.candidate.toJSON() });
+  };
+  pc.oniceconnectionstatechange = () => {
+    state.ice = pc.iceConnectionState;
+    log("ice:", pc.iceConnectionState);
+  };
+  pc.ondatachannel = (e) => wire(e.channel);
+
+  // The interviewer offers, once both are in the room.
+  async function maybeOffer(presence) {
+    if (state.role !== "interviewer" || negotiated || !(presence.interviewer && presence.candidate)) return;
+    negotiated = true;
+    wire(pc.createDataChannel("room"));
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    socket.emit("signal", { type: "offer", sdp: offer.sdp });
+    log("sent offer");
+  }
+
+  async function addCandidate(c) {
+    try {
+      await pc.addIceCandidate(c);
+    } catch (err) {
+      log("candidate error:", err.message);
+    }
+  }
+
+  socket.on("connect", async () => {
+    const reply = await socket.emitWithAck("join", { sessionId: opts.session });
+    state.role = reply.session && reply.session.myRole;
+    log("joined:", JSON.stringify({ ok: reply.ok, role: state.role, code: reply.code }));
+    status(reply.ok ? `in the room as ${state.role}` : `refused: ${reply.code}`);
+    if (reply.ok) await maybeOffer(reply.presence);
+  });
+  socket.on("connect_error", (err) => {
+    log("connect_error:", err.message);
+    status(`refused: ${err.message}`);
+  });
+  socket.on("presence", (p) => {
+    log("presence:", JSON.stringify(p));
+    maybeOffer(p);
+  });
+  socket.on("signal", ({ from, data }) => {
+    log(`signal from ${from}:`, data.type);
+    onSignal(data).catch((err) => log("signal error:", err.name, err.message));
+  });
+  async function onSignal(data) {
+    if (data.type === "offer") {
+      await pc.setRemoteDescription({ type: "offer", sdp: data.sdp });
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      socket.emit("signal", { type: "answer", sdp: answer.sdp });
+      while (pending.length) await addCandidate(pending.shift());
+    } else if (data.type === "answer") {
+      await pc.setRemoteDescription({ type: "answer", sdp: data.sdp });
+      while (pending.length) await addCandidate(pending.shift());
+    } else if (data.type === "candidate") {
+      // A candidate can arrive before the description it belongs to: hold it until then.
+      if (pc.remoteDescription) await addCandidate(data.candidate);
+      else pending.push(data.candidate);
+    }
+  }
+  socket.on("ended", ({ reason }) => {
+    log("ended:", reason);
+    status(`ended: ${reason}`);
+  });
+  };
+</script>
+</body>
+</html>

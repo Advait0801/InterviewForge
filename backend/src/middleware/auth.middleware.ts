@@ -15,7 +15,7 @@ export interface AuthRequest extends Request {
  */
 export const SESSION_INVALID = "session_invalid";
 
-type AuthResult =
+export type AuthResult =
   | { kind: "none" }
   | { kind: "ok"; userId: string }
   | { kind: "invalid"; error: string }
@@ -48,6 +48,16 @@ async function checkToken(authHeader: string | undefined): Promise<AuthResult> {
     console.error("Auth token check failed", err);
     return { kind: "unavailable" };
   }
+}
+
+/**
+ * The same check for a token that didn't arrive in a header: a Socket.IO handshake (D-078).
+ * A revoked session (token_version bumped) is refused here too, so signing a user out
+ * everywhere also shuts them out of live rooms.
+ */
+export function authenticateToken(token: unknown): Promise<AuthResult> {
+  if (typeof token !== "string" || !token) return Promise.resolve({ kind: "none" });
+  return checkToken(`Bearer ${token}`);
 }
 
 /**
