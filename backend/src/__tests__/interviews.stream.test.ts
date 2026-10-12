@@ -170,6 +170,28 @@ describe("POST /api/interviews/stream", () => {
     expect(r.events!.at(-1)).toEqual({ type: "error", status: 429, error: "LLM rate limited", retryable: true });
     expect(callsMatching(db, "INSERT INTO interview_sessions")).toHaveLength(0);
   });
+
+  it("a database outage at the commit is a retryable 503 event, not a 500", async () => {
+    db.handlers.push(
+      { match: "FROM resumes", reply: [{ exists: false }] },
+      {
+        match: "INSERT INTO interview_sessions",
+        reply: () => {
+          throw Object.assign(new Error("getaddrinfo ENOTFOUND postgres"), { code: "ENOTFOUND" });
+        },
+      }
+    );
+    ai.streamNextQuestion.mockImplementation(streams(QUESTION));
+
+    const r = await api.request("POST", "/api/interviews/stream", { body: { company: "amazon" } });
+
+    expect(r.events!.at(-1)).toEqual({
+      type: "error",
+      status: 503,
+      error: "Service temporarily unavailable. Please retry.",
+      retryable: true,
+    });
+  });
 });
 
 describe("POST /api/interviews/:id/answer/stream", () => {

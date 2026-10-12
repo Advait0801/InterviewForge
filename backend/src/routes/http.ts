@@ -1,6 +1,6 @@
 import type { Response } from "express";
 import type { AIServiceError } from "../services/ai.service";
-import { DomainError } from "../services/errors";
+import { DomainError, isDatabaseUnavailable } from "../services/errors";
 
 /** HTTP helpers shared by the route files. Routes parse and validate; services decide. */
 
@@ -17,6 +17,11 @@ export function sendDomainError(res: Response, err: DomainError) {
 
 export function sendInternalError(res: Response, label: string, err: unknown) {
   console.error(label, err);
+  // A database outage is a retryable 503 like every other dependency being down (D-055),
+  // not a 500 that tells the client the request itself is broken.
+  if (isDatabaseUnavailable(err)) {
+    return res.status(503).json({ error: "Service temporarily unavailable. Please retry.", retryable: true });
+  }
   return res.status(500).json({ error: "Internal server error" });
 }
 

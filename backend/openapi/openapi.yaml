@@ -62,6 +62,7 @@ paths:
         "409": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /auth/login:
     post:
@@ -84,6 +85,7 @@ paths:
         "401": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /auth/forgot-password:
     post:
@@ -105,6 +107,7 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /auth/reset-password:
     post:
@@ -127,6 +130,7 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /auth/logout-all:
     post:
@@ -360,6 +364,7 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   # ───────────────────────────── problems ─────────────────────────────
   /problems:
@@ -393,6 +398,7 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /problems/daily:
     get:
@@ -416,6 +422,7 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /problems/daily/history:
     get:
@@ -449,6 +456,7 @@ paths:
                   streak: { $ref: "#/components/schemas/DailyStreak" }
         "400": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /problems/{id}/hints/viewed:
     post:
@@ -507,6 +515,7 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /problem-bookmarks:
     get:
@@ -718,6 +727,7 @@ paths:
         "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
     post:
       tags: [submissions]
       operationId: measureSubmissionComplexity
@@ -837,6 +847,7 @@ paths:
         "401": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /interviews/{id}:
     get:
@@ -1058,6 +1069,7 @@ paths:
         "404": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /interviews/{id}/hint:
     post:
@@ -1390,6 +1402,7 @@ paths:
                     type: array
                     items: { $ref: "#/components/schemas/LearningPathSummary" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /learning-paths/generate:
     post:
@@ -1426,6 +1439,7 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /learning-paths/{slug}/complete/{problemId}:
     post:
@@ -1475,6 +1489,7 @@ paths:
                         games: { type: integer, minimum: 0 }
         "401": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /ratings/next:
     get:
@@ -1525,6 +1540,7 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /peer-sessions:
     get:
@@ -1544,6 +1560,7 @@ paths:
                   sessions: { type: array, items: { $ref: "#/components/schemas/PeerSession" } }
         "401": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
     post:
       tags: [peer]
       operationId: createPeerSession
@@ -1580,6 +1597,7 @@ paths:
         "404": { $ref: "#/components/responses/Error" }
         "409": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /peer-sessions/ice-servers:
     get:
@@ -1645,6 +1663,7 @@ paths:
         "404": { $ref: "#/components/responses/Error" }
         "409": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /peer-sessions/{id}:
     get:
@@ -1668,6 +1687,7 @@ paths:
         "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /peer-sessions/{id}/end:
     post:
@@ -1693,6 +1713,7 @@ paths:
         "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /peer-sessions/{id}/feedback:
     post:
@@ -1733,6 +1754,7 @@ paths:
         "404": { $ref: "#/components/responses/Error" }
         "409": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   /review:
     get:
@@ -1835,6 +1857,7 @@ paths:
                   page: { type: integer }
                   limit: { type: integer }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
 
   # ───────────────────────────── recommendations ─────────────────────────────
   /recommendations:
