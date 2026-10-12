@@ -19,7 +19,7 @@ import { DomainError, badRequest, notFound } from "./errors";
 export const MAX_OPEN_INVITES = 5;
 export const DEFAULT_DURATION = 45;
 export const WAITING_TTL_HOURS = 24;
-export const MAX_CODE_CHARS = 50_000;
+export { MAX_CODE_CHARS } from "./limits";
 export const NOTES_MAX = 2_000;
 export const LANGUAGES = ["python3", "c", "cpp", "java", "javascript", "go", "rust"] as const;
 /** What each side rates: the interviewer rates the candidate, and the other way round. */
