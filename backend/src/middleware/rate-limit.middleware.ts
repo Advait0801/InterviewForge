@@ -89,6 +89,20 @@ export const llmLimiter = rateLimit({
 });
 
 /**
+ * Complexity measurements (Phase 12). Each one holds a sandbox for up to 20 s, a queue slot
+ * that Run and Submit share, so a user gets a few per window rather than the API's 500.
+ */
+export const complexityLimiter = rateLimit({
+  store: sharedStore("complexity"),
+  windowMs: intFromEnv("COMPLEXITY_RATE_LIMIT_WINDOW_MS", 15 * 60 * 1000),
+  max: intFromEnv("COMPLEXITY_RATE_LIMIT_MAX", 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: userOrIpKey,
+  message: { error: "Complexity measurement limit reached. Please wait a few minutes and try again." },
+});
+
+/**
  * Failed logins per IP. Credential guessing is what this is for, so successful logins
  * don't count: a real user who mistypes a few times and then gets in is never locked out,
  * while a script trying passwords hits the wall after a handful of tries. The global

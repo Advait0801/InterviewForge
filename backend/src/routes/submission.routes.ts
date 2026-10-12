@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthRequest, requireAuth } from "../middleware/auth.middleware";
-import { llmLimiter } from "../middleware/rate-limit.middleware";
+import { complexityLimiter, llmLimiter } from "../middleware/rate-limit.middleware";
+import { analyzeSubmission, getSubmissionComplexity } from "../services/complexity.service";
 import { AIServiceError } from "../services/ai.service";
 import { DomainError } from "../services/errors";
 import {
@@ -62,6 +63,29 @@ router.post("/:id/review", requireAuth, llmLimiter, async (req: AuthRequest, res
       });
     }
     return sendInternalError(res, "AI review error", err);
+  }
+});
+
+/** Measure an accepted submission's running time on growing inputs and fit its complexity. */
+router.post("/:id/complexity", requireAuth, complexityLimiter, async (req: AuthRequest, res) => {
+  const id = typeof req.params.id === "string" ? req.params.id : req.params.id?.[0];
+  if (!id || !UUID_REGEX.test(id)) return res.status(400).json({ error: "Invalid submission id" });
+  try {
+    return res.json({ analysis: await analyzeSubmission(id, req.user!.id) });
+  } catch (err) {
+    if (err instanceof DomainError) return sendDomainError(res, err);
+    return sendInternalError(res, "Complexity analysis error", err);
+  }
+});
+
+router.get("/:id/complexity", requireAuth, async (req: AuthRequest, res) => {
+  const id = typeof req.params.id === "string" ? req.params.id : req.params.id?.[0];
+  if (!id || !UUID_REGEX.test(id)) return res.status(400).json({ error: "Invalid submission id" });
+  try {
+    return res.json(await getSubmissionComplexity(id, req.user!.id));
+  } catch (err) {
+    if (err instanceof DomainError) return sendDomainError(res, err);
+    return sendInternalError(res, "Get complexity error", err);
   }
 });
 

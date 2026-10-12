@@ -9,6 +9,95 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-11
 
+### D-077 — Elo-rated adaptive difficulty: picks at 65% predicted success, matching an oracle in simulation
+
+**What:** per-topic Elo for users, one rating per problem (`backend/src/services/elo.ts`, pure),
+migration 020.
+- **A rated game is a user's first Submit of a problem.** It scores 1 for a pass, 0.5 for a pass
+  after viewing hints, 0 for a fail. It's rated inside the submission's transaction. One game per
+  user and problem means retries can't farm rating, and "success" means first try, which is what
+  the picker aims at.
+- **Ratings.** A problem's topics are averaged into the user's rating against it, and every topic
+  moves by the same delta. Users also have an **overall** rating: a new topic starts from it, and
+  a topic with few games is blended toward it (weight games/(games+4)). Problems start at
+  1200/1500/1800 by label and learn. K is 40→24 for users and 24→12 for problems once out of the
+  provisional phase.
+- **Picks.** `GET /ratings/next` returns the three unattempted problems whose predicted first-try
+  success is closest to `ELO_TARGET_SUCCESS` (0.65), with deterministic tie-breaks.
+  `GET /ratings/me` returns the ratings. Submit's response carries `rating` (null after the first
+  Submit).
+- **Concurrency.** `rated_games`' primary key decides "first" when two Submits race. The user's
+  row is locked with **`FOR NO KEY UPDATE`**: `FOR UPDATE` conflicts with the foreign-key lock the
+  other transaction's submission insert holds, and two racing first Submits deadlocked live.
+
+**Why it's believed** (`docs/eval/phase12.md`, `scripts/simulate_elo.ts`). 200 synthetic users
+with known true skill play the real 150 problems, whose true difficulty is the label plus unseen
+noise:
+- First-try success is 0.632–0.650 in six worlds, including true curves Elo doesn't assume.
+- That is within noise of an **oracle** that knows every true skill and difficulty, on both the
+  per-user gap and the share within ±0.10. Random and a difficulty-label ladder sit near 0.50.
+- Learned problem ratings correlate 0.888 with true difficulty, against 0.819 for the labels alone.
+
+**Calls made:**
+- The overall rating is there because per-topic ratings alone (2–3 games per topic) put only 46%
+  of users within ±0.10; with it, 58.5%.
+- The start rating stays 1500. 1300 would make a newcomer's first easy problem a 65% pick, but it
+  made steady state worse (0.69–0.72). The cost is a cold start: while problems are still at their
+  label's ratings, a new user is offered a 50% medium.
+- With a population centred far from 1500, even the oracle misses the band (0.525 at 1300, 0.691
+  at 1700). The limit is the problem set, not the picker.
+
+**Verified:** route tests pin every query of the game (first-only, the race loser writes nothing,
+lock order). `scripts/verify_elo.py` passes 16/16 live, including 5 races each rating exactly one
+submission, and there were 0 deadlocks in 15 more races. Backend tests 601.
+
+### D-076 — Empirical complexity: timed inside the sandbox, fitted honestly, compared with the AI's claim
+
+**What:**
+- **Timing.** `generateCode(..., { timing: true })` in all seven languages times the user's call
+  alone (`__IFT__ <ns>` per case) and flushes every case. Normal-mode code is unchanged: hashed
+  for all 1,050 problem×language pairs before and after the change. C was then changed on
+  purpose, see below.
+- **Measuring.** Code-runner `POST /complexity` runs five warm-ups, then 30 curated problems'
+  generated inputs, doubling from 256 (64 for quadratic ones) up to 131,072 (8,192), three
+  repeats each, in one sandbox with a 20 s limit. Every size finished before the limit is kept.
+  The job goes through the run queue like any run.
+- **The fit.** The backend fits `t = a + b·f(n)` for O(1), O(log n), O(n), O(n log n), O(n²) and
+  O(n³), minimising relative error over the fastest repeat per size, and reports every class the
+  data can't rule out.
+- **API.** `POST /submissions/{id}/complexity` (accepted submissions only, 10 per 15 minutes per
+  user) and `GET` (availability plus the latest analysis). `POST /submissions/{id}/review` now
+  stores its review. The claim is parsed ("O(N*logN)", "O(n·m)", "O(V+E)"; every variable grows
+  with n here) and compared when read: agrees, consistent, log_factor, disagrees or
+  not_comparable. Migration 019.
+
+**Calls made:**
+- **n vs n log n needs a 3.5× better fit to name one.** A log factor is ≤2.1× across 2⁸–2¹⁷, and
+  memory effects are as large: a C++ hash map measured O(n log n) 3× better than O(n), and C++
+  and Rust merge sorts measured O(n) 2× better than O(n log n). The usual 1.5× rule gave three
+  wrong answers. Now they're reported together, and Python's merge and counting sorts are still
+  named exactly.
+- **A sub-microsecond run is "O(1) or O(log n)",** not a guess: binary search sits under the
+  timer's noise.
+- **The fit is least squares, not ML, so it lives in the backend** (pure, beside the
+  comparison), not the ai-service.
+- **Curated inputs, not signature-derived ones.** A random valid input is often the easy case,
+  e.g. two-sum's pair at the front.
+
+**Found and fixed:** the C harness read each argument into a fixed 4,096/8,192-byte buffer (and
+one 4,096-byte `malloc` copy), so a longer line was split across arguments. That has silently
+broken C custom inputs over 4 KB since Phase 7 (they allow 10,000 characters). C now reads lines
+of any length.
+
+**Verified:**
+- 26 known solutions across 7 languages (`scripts/complexity_known.py`): the true class is always
+  among the candidates and no other family ever is, and every O(n²) is exact. This held on two
+  collections and live through the API.
+- `scripts/verify_complexity.py` passes 96/96, including a real review: "O(n^2)", measured O(n²),
+  agrees ($0.0001).
+- C: 150/150 reference solutions; a 5,400-character custom input judged in C.
+- `verify_coding_engine.py` 20/20. Code-runner tests 444, backend 601; ai-service untouched (586).
+
 ### D-075 — A retrieval cache: the exact tier ships on; the semantic tier is calibrated but off
 
 **What:** `ai-service/app/rag/cache.py`, in front of `RAGService.retrieve` (shared corpus only;

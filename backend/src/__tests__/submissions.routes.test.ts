@@ -126,6 +126,8 @@ beforeEach(() => {
     { match: "INSERT INTO user_path_progress", reply: [] },
     { match: "FROM review_items WHERE user_id = $1 AND problem_id = $2 FOR UPDATE", reply: () => (queue.item ? [queue.item] : []) },
     { match: "AS n FROM submissions", reply: () => [{ n: queue.failures }] },
+    // Not the user's first Submit of the problem, so not a rated game (elo.routes.test.ts covers those).
+    { match: "AS attempts FROM submissions", reply: [{ attempts: 2 }] },
     { match: "FROM problem_hint_views", reply: () => (queue.hinted ? [{ "?column?": 1 }] : []) },
     { match: "INSERT INTO review_items", reply: [] },
     { match: "UPDATE review_items", reply: [] }

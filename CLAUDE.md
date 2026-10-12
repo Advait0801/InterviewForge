@@ -44,7 +44,7 @@ backend/src/repositories/    # all SQL, one file per table group; take a Queryab
 backend/src/db.ts            # query() over a pg Pool, plus withTransaction()
 backend/openapi/openapi.yaml # the Express API contract (D-062); served at /api/openapi.json
 backend/src/generated/       # ai-service types generated from ai-service/openapi.json — never hand-edit
-backend/sql_migrations/      # 001_init.sql … 018_sharing_integrity.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 020_elo.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java,js,go,rs}, run by scripts/verify_problems.py;
 #                              the .py ones are also the runtime oracle for custom test cases
@@ -162,6 +162,22 @@ docker/sandboxes/            # python / c / cpp / java / javascript / go / rust 
 - `docker compose exec ai-service python -m app.eval.semantic_cache` measures it;
   `python scripts/verify_retrieval_cache.py` checks it live (`--no-llm` skips the interview part).
 
+**Complexity and Elo (D-076, D-077)**
+- Timing mode (`generateCode(..., { timing: true })`) wraps only the user's call and flushes per
+  case; normal-mode generation must stay unchanged by it (`complexity.test.ts` checks it only adds
+  lines). Design problems and the cycle/LCA special cases aren't timeable.
+- Complexity inputs are curated per problem in `code-runner/src/complexity-inputs.ts`: each must
+  force the full work (planted answers, worst-case strings) and pass the problem's validator. A
+  measurement holds one sandbox through the run queue (`measureQueued`), like any run.
+- The fit (`services/complexity.ts`) reports every class the data can't rule out; n and n log n
+  need a 3.5x better fit to separate. Don't narrow that to look decisive: memory effects match a
+  log factor on compiled languages (D-076).
+- A rated Elo game is a user's first Submit of a problem, in the submission's transaction; lock the
+  user's row `FOR NO KEY UPDATE`, never `FOR UPDATE` (that deadlocked against the submission's FK
+  lock). The picker is deterministic. Re-run `scripts/simulate_elo.ts` after changing any constant.
+- `scripts/complexity_known.py` holds the known-complexity solutions; the backend fixture
+  `src/__tests__/fixtures/complexity-measurements.json` is their recorded measurements.
+
 **Agentic interviewer and cost (D-067)**
 - `mode` (`fixed` | `agent`) is per session; default `INTERVIEW_MODE` (fixed until UI B). The
   agent proposes a move; the backend's rules decide (`MAX_STAGE_QUESTIONS`, finish only on the last
@@ -278,6 +294,9 @@ python scripts/verify_learning.py           # Group C Phase 8: POTD, SM-2 review
 python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
 python scripts/verify_streaming.py          # SSE interview streams, disconnect, 409, timings (D-065); live stack
 python scripts/verify_streaming.py --measure 6  # JSON vs stream latency medians at the ai-service
+python scripts/verify_complexity.py         # Group D Phase 12: 26 known solutions x 7 languages, availability, C long input (D-076); --review adds one model call
+python scripts/verify_elo.py                # Group D Phase 12: rated first Submits, /ratings, 5 racing pairs (D-077); no model calls
+cd backend && npx ts-node scripts/simulate_elo.ts  # Elo picker vs oracle/random/ladder; --scale/--noise/--center/--seed
 python scripts/verify_retrieval_cache.py    # Group D Phase 11: exact hits, invalidation, bounds, Redis outage, interview path (D-075)
 docker compose exec ai-service python -m app.eval.semantic_cache  # cache threshold sweep + quality/latency replay; --mode dense is free
 python scripts/verify_interviewer.py        # personas, hint ladder + penalty, challenge wiring (D-066); live stack

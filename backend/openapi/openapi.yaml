@@ -33,6 +33,7 @@ tags:
   - name: recommendations
   - name: resumes
   - name: review
+  - name: ratings
   - name: public
 
 paths:
@@ -684,6 +685,64 @@ paths:
         "404": { $ref: "#/components/responses/Error" }
         "429": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
+
+  /submissions/{id}/complexity:
+    get:
+      tags: [submissions]
+      operationId: getSubmissionComplexity
+      description: >
+        The latest empirical complexity measurement of one of the caller's submissions, compared
+        with the time complexity the latest AI review claimed (D-076). `available` says whether
+        it can be measured: an accepted submission of a problem with curated growing inputs,
+        while the code runner is reachable.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: Availability and the latest analysis, if any.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [available, analysis]
+                properties:
+                  available: { type: boolean }
+                  analysis:
+                    oneOf:
+                      - { $ref: "#/components/schemas/ComplexityAnalysis" }
+                      - { type: "null" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [submissions]
+      operationId: measureSubmissionComplexity
+      description: >
+        Time an accepted submission on generated inputs doubling in size (one sandbox, up to
+        20 s, queued like a run), fit its growth class and store the result, replacing the
+        previous one. Rate limited per user.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The new analysis.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [analysis]
+                properties:
+                  analysis: { $ref: "#/components/schemas/ComplexityAnalysis" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+        "502": { $ref: "#/components/responses/Error" }
         "503": { $ref: "#/components/responses/Error" }
 
   # ───────────────────────────── interviews ─────────────────────────────
@@ -1383,6 +1442,89 @@ paths:
         "503": { $ref: "#/components/responses/Error" }
 
   # ───────────────────────────── review ─────────────────────────────
+  /ratings/me:
+    get:
+      tags: [ratings]
+      operationId: getMyRatings
+      description: >
+        The caller's Elo ratings (D-076): overall, and per topic as used against a problem
+        (a topic with few games is blended toward the overall rating). A rated game is a
+        first Submit of a problem.
+      responses:
+        "200":
+          description: The ratings; a user who has never submitted is at the start rating.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [overall, topics]
+                properties:
+                  overall: { $ref: "#/components/schemas/Rating" }
+                  topics:
+                    type: array
+                    description: Most-played first.
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [topic, rating, games]
+                      properties:
+                        topic: { type: string }
+                        rating: { type: number }
+                        games: { type: integer, minimum: 0 }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /ratings/next:
+    get:
+      tags: [ratings]
+      operationId: getNextProblems
+      description: >
+        Up to three problems the caller has never submitted, closest first to the target
+        first-try success (`target`, 0.65 by default), predicted from the caller's ratings and
+        each problem's. Deterministic: the same state gives the same picks.
+      parameters:
+        - name: topic
+          in: query
+          required: false
+          description: Only problems with this topic.
+          schema: { type: string, minLength: 1, maxLength: 64 }
+      responses:
+        "200":
+          description: The picks; empty when nothing unattempted matches.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [target, picks]
+                properties:
+                  target: { type: number, minimum: 0, maximum: 1 }
+                  picks:
+                    type: array
+                    maxItems: 3
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [problem, predictedSuccess, problemRating, userRating]
+                      properties:
+                        problem:
+                          type: object
+                          additionalProperties: false
+                          required: [id, slug, title, difficulty, topics]
+                          properties:
+                            id: { $ref: "#/components/schemas/Uuid" }
+                            slug: { type: string }
+                            title: { type: string }
+                            difficulty: { type: string }
+                            topics: { type: array, items: { type: string } }
+                        predictedSuccess: { type: number, minimum: 0, maximum: 1 }
+                        problemRating: { type: number }
+                        userRating: { type: number }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
   /review:
     get:
       tags: [review]
@@ -1978,7 +2120,7 @@ components:
     SubmitResult:
       type: object
       additionalProperties: false
-      required: [mode, submissionId, status, passed, results, review]
+      required: [mode, submissionId, status, passed, results, review, rating]
       properties:
         mode: { type: string, const: submit }
         submissionId: { $ref: "#/components/schemas/Uuid" }
@@ -1989,6 +2131,13 @@ components:
           items: { $ref: "#/components/schemas/SubmitCaseResult" }
         runtimeMs: { type: number }
         review: { $ref: "#/components/schemas/ReviewOutcome" }
+        rating:
+          description: >
+            The Elo game this Submit was (D-076): only a user's first Submit of a problem is
+            rated, so null on every later one.
+          oneOf:
+            - { $ref: "#/components/schemas/RatingOutcome" }
+            - { type: "null" }
 
     SubmissionSummary:
       type: object
@@ -2018,6 +2167,101 @@ components:
         memory_kb: { type: [integer, "null"] }
         created_at: { $ref: "#/components/schemas/Timestamp" }
 
+    Rating:
+      type: object
+      additionalProperties: false
+      required: [rating, games]
+      properties:
+        rating: { type: number }
+        games: { type: integer, minimum: 0 }
+    RatingOutcome:
+      type: object
+      additionalProperties: false
+      required: [score, expected, before, after, delta]
+      properties:
+        score: { type: number, enum: [0, 0.5, 1], description: "1 a pass, 0.5 a pass after viewing hints, 0 a fail." }
+        expected: { type: number, minimum: 0, maximum: 1, description: "The predicted first-try success before the game." }
+        before: { type: number, description: "The user's rating against this problem before the game." }
+        after: { type: number }
+        delta: { type: number }
+    ComplexityClass:
+      type: string
+      enum: ["O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n²)", "O(n³)"]
+    ComplexityPoint:
+      type: object
+      additionalProperties: false
+      required: [n, ns]
+      description: An input size and the fastest of its timed repeats, in nanoseconds.
+      properties:
+        n: { type: integer, minimum: 1 }
+        ns: { type: number, minimum: 0 }
+    ComplexityFit:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [status, bestFit, candidates, confidence, fits, slope, points]
+          properties:
+            status: { type: string, enum: [measured] }
+            bestFit: { $ref: "#/components/schemas/ComplexityClass" }
+            candidates:
+              type: array
+              minItems: 1
+              description: The best fit and every class the data can't rule out, slowest-growing first.
+              items: { $ref: "#/components/schemas/ComplexityClass" }
+            confidence: { type: string, enum: [high, medium, low] }
+            fits:
+              type: array
+              description: Every class's relative fit error, best first.
+              items:
+                type: object
+                additionalProperties: false
+                required: [class, error]
+                properties:
+                  class: { $ref: "#/components/schemas/ComplexityClass" }
+                  error: { type: number, minimum: 0 }
+            slope: { type: number, description: "Slope of log time against log n over the larger sizes." }
+            points: { type: array, items: { $ref: "#/components/schemas/ComplexityPoint" } }
+        - type: object
+          additionalProperties: false
+          required: [status, reason, candidates, points]
+          properties:
+            status: { type: string, enum: [inconclusive] }
+            reason:
+              type: string
+              enum: [too_few_sizes, too_fast]
+              description: >
+                too_fast: every size ran in microseconds, so constant and logarithmic can't be
+                told apart. too_few_sizes: not enough sizes finished (an error, or a solution too
+                slow for even the smaller inputs).
+            candidates: { type: array, items: { $ref: "#/components/schemas/ComplexityClass" } }
+            points: { type: array, items: { $ref: "#/components/schemas/ComplexityPoint" } }
+    ComplexityAnalysis:
+      type: object
+      additionalProperties: false
+      required: [fit, stopped, error, errorAtN, measuredAt, claim]
+      properties:
+        fit: { $ref: "#/components/schemas/ComplexityFit" }
+        stopped:
+          type: string
+          enum: [done, time_limit, error]
+          description: time_limit means the largest sizes didn't finish within the run's limit.
+        error: { type: [string, "null"], description: "Why the run stopped early, when it failed." }
+        errorAtN: { type: [integer, "null"], description: "The input size that failed." }
+        measuredAt: { type: string }
+        claim:
+          type: object
+          additionalProperties: false
+          required: [text, class, verdict]
+          description: The latest AI review's time-complexity claim, compared with the measurement.
+          properties:
+            text: { type: [string, "null"] }
+            class:
+              oneOf:
+                - { $ref: "#/components/schemas/ComplexityClass" }
+                - { type: "null" }
+            verdict:
+              type: string
+              enum: [agrees, consistent, log_factor, disagrees, not_comparable]
     CodeReview:
       type: object
       description: LLM output; may carry extra keys.

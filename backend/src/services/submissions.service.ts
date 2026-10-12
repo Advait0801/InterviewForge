@@ -15,6 +15,8 @@ import { bumpCacheVersion } from "./cache";
 import { DomainError, badRequest, notFound } from "./errors";
 import { clientSubmitResults, exampleCases } from "./test-cases";
 import { recordSubmission } from "./review.service";
+import { saveSubmissionReview } from "../repositories/complexity.repository";
+import { recordRatedGame } from "./elo.service";
 
 export type { SubmissionFilters } from "../repositories/submissions.repository";
 
@@ -36,17 +38,22 @@ export async function getSubmission(id: string, userId: string) {
   return row;
 }
 
-/** An AI review of the user's own submission. An AIServiceError propagates. */
+/**
+ * An AI review of the user's own submission. An AIServiceError propagates. The latest review
+ * is kept, so a complexity measurement can be compared with its claim (Phase 12).
+ */
 export async function reviewSubmission(id: string, userId: string) {
   const s = await submissions.findReviewSource(id, userId);
   if (!s) throw submissionNotFound();
-  return reviewCode({
+  const review = await reviewCode({
     code: s.code,
     language: s.language,
     problem_title: s.title,
     problem_description: s.description,
     problem_difficulty: s.difficulty,
   });
+  await saveSubmissionReview(id, review);
+  return review;
 }
 
 /** A dependency being down is a retryable 503, not a 500 that implies a bug here. */
@@ -134,7 +141,7 @@ export async function executeSubmission(input: {
 
   const status = runResult.passed ? "passed" : "failed";
   // Code execution is done; only the writes are inside the transaction (D-057).
-  const { submissionId, review } = await withTransaction(async (tx) => {
+  const { submissionId, review, rating } = await withTransaction(async (tx) => {
     const submissionId = await submissions.insertSubmission(tx, {
       userId: input.userId,
       problemId: input.problemId,
@@ -148,7 +155,14 @@ export async function executeSubmission(input: {
       await markCompletedInEveryPath(tx, input.userId, input.problemId);
     }
     const review = await recordSubmission(tx, { userId: input.userId, problemId: input.problemId, passed: runResult.passed });
-    return { submissionId, review };
+    // A first Submit is a rated game (D-076), in the same transaction as the submission.
+    const rating = await recordRatedGame(tx, {
+      userId: input.userId,
+      problemId: input.problemId,
+      submissionId,
+      passed: runResult.passed,
+    });
+    return { submissionId, review, rating };
   });
   // Any new submission can change rankings and acceptance rates.
   await bumpCacheVersion("leaderboard");
@@ -164,6 +178,7 @@ export async function executeSubmission(input: {
       results: clientSubmitResults(testCases, runResult.results),
       runtimeMs: runResult.runtimeMs,
       review,
+      rating,
     },
   };
 }

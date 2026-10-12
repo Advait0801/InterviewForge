@@ -1,4 +1,5 @@
 import type { MethodMeta, ParamMeta, ProblemMeta } from "./problem-meta";
+import { TIMING_PREFIX, replaceOnce, wrapCallLine } from "./timing";
 
 /**
  * Rust: LeetCode's conventions. `impl Solution { pub fn two_sum(...) }` for a
@@ -367,7 +368,7 @@ const HARNESS_HELPERS = String.raw`
     }
 `;
 
-function regularCase(meta: ProblemMeta): string {
+function regularCase(meta: ProblemMeta, timing = false): string {
   const params = meta.params ?? [];
   const ret = meta.returnType ?? "void";
   const fn = snakeCase(meta.methodName ?? "solve");
@@ -394,10 +395,18 @@ function regularCase(meta: ProblemMeta): string {
   const mutated = rustMutatedParam(params, ret);
   const reads = params.map((p, k) => `        let ${k === mutated ? "mut " : ""}a${k} = ${reader(p.type)}(&line(lines, ${k}));`);
   const args = params.map((_, k) => (k === mutated ? `&mut a${k}` : `a${k}`)).join(", ");
-  if (ret === "void") {
-    return [...reads, `        Solution::${fn}(${args});`, mutated >= 0 ? `        ${writer(params[mutated].type)}(&a${mutated})` : `        "null".to_string()`].join("\n");
-  }
-  return [...reads, `        let result = Solution::${fn}(${args});`, `        ${writer(ret)}(&result)`].join("\n");
+  const body =
+    ret === "void"
+      ? [...reads, `        Solution::${fn}(${args});`, mutated >= 0 ? `        ${writer(params[mutated].type)}(&a${mutated})` : `        "null".to_string()`].join("\n")
+      : [...reads, `        let result = Solution::${fn}(${args});`, `        ${writer(ret)}(&result)`].join("\n");
+  if (!timing) return body;
+  // The call alone, into IFT, which run() writes after the result.
+  return wrapCallLine(
+    body,
+    `Solution::${fn}(`,
+    "let __if_t0 = std::time::Instant::now();",
+    "IFT.store(__if_t0.elapsed().as_nanos() as u64, std::sync::atomic::Ordering::Relaxed);"
+  );
 }
 
 const DESIGN_COLLECTION_TYPES = new Set(["TreeNode", "ListNode", "int[]", "int[][]", "string[]", "char[]", "char[][]", "ListNode[]"]);
@@ -453,8 +462,24 @@ const LIST_HELPERS = String.raw`
 `;
 
 /** The whole main.rs: the user's code, then the harness. */
-export function generateRust(userCode: string, meta: ProblemMeta): string {
-  const body = meta.isDesign ? designCase(meta) : regularCase(meta);
+/** Timing mode: IFT holds the last call's nanoseconds; u64::MAX means a panic came first. */
+function timedHelpers(): string {
+  return (
+    "\n    static IFT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(u64::MAX);\n" +
+    replaceOnce(
+      HARNESS_HELPERS,
+      `                writeln!(out, "{}", text).ok();`,
+      `                writeln!(out, "{}", text).ok();
+                let t = IFT.swap(u64::MAX, std::sync::atomic::Ordering::Relaxed);
+                if t != u64::MAX { writeln!(out, "${TIMING_PREFIX} {}", t).ok(); }
+                out.flush().ok();`
+    )
+  );
+}
+
+export function generateRust(userCode: string, meta: ProblemMeta, timing = false): string {
+  const body = meta.isDesign ? designCase(meta) : regularCase(meta, timing);
+  const helpers = timing ? timedHelpers() : HARNESS_HELPERS;
   const listHelpers = isCycleProblem(meta) ? "" : LIST_HELPERS;
   return `${userCode}
 
@@ -469,7 +494,7 @@ ${listNodeDefinition(meta)}
 ${TREE_DEFINITION}
 
 #[allow(dead_code, unused_imports, unused_variables, non_snake_case)]
-mod __if_harness {${HARNESS_HELPERS}${listHelpers}
+mod __if_harness {${helpers}${listHelpers}
     fn case(lines: &[String]) -> String {
 ${body}
     }

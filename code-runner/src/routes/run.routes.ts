@@ -2,6 +2,7 @@ import { Router } from "express";
 import { runCode } from "../runner";
 import { PROBLEM_META } from "../problem-meta";
 import { validateInput } from "../validate-input";
+import { complexitySupported, measureComplexity, supportedSlugs } from "../complexity";
 import { SUPPORTED_LANGUAGES, type SupportedLanguage, type TestCase } from "../types";
 
 const router = Router();
@@ -67,6 +68,28 @@ router.post("/validate", (req, res) => {
   const meta = PROBLEM_META[slug];
   if (!meta) return res.status(404).json({ error: `Unknown problem "${slug}"` });
   return res.json({ errors: (inputs as string[]).map((input) => validateInput(input, meta)) });
+});
+
+/** The problems a complexity measurement is available for (curated inputs, Phase 12). */
+router.get("/complexity/problems", (_req, res) => res.json({ slugs: supportedSlugs() }));
+
+/**
+ * Time the user's code on inputs doubling in size. One sandbox, up to COMPLEXITY_TIMEOUT_MS;
+ * the backend queues it like any run and fits the curve.
+ */
+router.post("/complexity", async (req, res) => {
+  const { language, code, slug } = req.body as { language?: unknown; code?: unknown; slug?: unknown };
+  if (!isLanguage(language) || typeof code !== "string" || !code || typeof slug !== "string") {
+    return res.status(400).json({ error: "language, code and slug are required" });
+  }
+  if (!PROBLEM_META[slug]) return res.status(404).json({ error: `Unknown problem "${slug}"` });
+  if (!complexitySupported(slug)) return res.status(422).json({ error: "Complexity measurement isn't available for this problem" });
+  try {
+    return res.json(await measureComplexity({ language, code, slug }));
+  } catch (err) {
+    console.error("Complexity error", err);
+    return res.status(500).json({ error: "Measurement failed" });
+  }
 });
 
 export default router;

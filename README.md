@@ -124,6 +124,14 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
 - Submission history with language, status, runtime
 - Progressive hints and editorials
 - AI-powered code review (complexity, quality, optimizations)
+- **Empirical complexity:** an accepted solution is timed inside the sandbox on inputs doubling
+  in size, the growth class is fitted, and the result is checked against the AI reviewer's claim.
+  Every O(n²) solution is named exactly in all seven languages, and O(n) vs O(n log n) is
+  reported as "either" when memory effects make them inseparable
+  ([`docs/eval/phase12.md`](docs/eval/phase12.md))
+- **Elo-rated adaptive difficulty:** per-topic ratings from each first Submit pick the next
+  problem at 65% predicted first-try success, which hits the target in simulation as well as an
+  oracle that knows every user's true skill does
 - Bookmarking and solved-state tracking
 - Hand-curated company tags (3–5 per problem, from the 10 interview companies) driving
   "practice Amazon problems"-style filtering
@@ -355,6 +363,9 @@ docker compose exec ai-service python -m app.eval.monotonicity --replay app/eval
 
 # Retrieval cache: threshold sweep and quality/latency replay (--mode dense makes no LLM calls)
 docker compose exec ai-service python -m app.eval.semantic_cache --mode dense
+
+# Elo picker: realised first-try success against an oracle and baselines (pure simulation, free)
+cd backend && npx ts-node scripts/simulate_elo.ts && cd ..
 
 # Context sufficiency (uses an LLM judge, so this one costs money)
 docker compose exec ai-service python -m app.eval.sufficiency --window 0 --window 1
