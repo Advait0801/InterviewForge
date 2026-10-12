@@ -14,7 +14,8 @@ All project documentation lives here, except two files that must stay at the rep
 | [`BACKLOG.md`](BACKLOG.md) | What is deliberately not built yet, with effort and impact estimates |
 | [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md) | Original product spec and long-term vision |
 | [`audits/`](audits) | Investigations with their evidence and harnesses: [`phase-0.md`](audits/phase-0.md) covers homepage performance, axe and microphone error paths |
-| [`eval/`](eval) | Retrieval evaluation results per phase, with the raw JSON behind each number |
+| [`eval/`](eval) | Evaluation results per phase (retrieval, the retrieval cache, complexity and Elo), with the raw JSON behind each number |
+| [`peer-interviews.md`](peer-interviews.md) | Peer mock interviews: the flow, the Socket.IO protocol, deploying (Nginx, TURN), how it was verified |
 | [`ui-ux/phase-0.md`](ui-ux/phase-0.md) | UI baseline, route/state matrix, verification evidence, and test approach |
 | [`ui-ux/phase-1.md`](ui-ux/phase-1.md) | Shared UI, navigation, motion, authentication hydration, and browser verification evidence |
 | [`ui-ux/phase-2.md`](ui-ux/phase-2.md) | Landing, authentication, onboarding-flow, contrast, and production-browser evidence |

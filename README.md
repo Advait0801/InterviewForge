@@ -155,6 +155,15 @@ Those results are written up too — see [`docs/eval/phase2.md`](docs/eval/phase
   and stored, so reopening it costs no model call
 - **One-click PDF export** of the full report + transcript
 
+### Peer mock interviews
+
+- Invite a friend: one interviews, the other is the candidate; audio and video go peer to peer
+  over WebRTC
+- The backend relays only signalling (authenticated Socket.IO, allowlisted and rate limited), keeps
+  a shared editor, runs the clock, and collects structured feedback from both sides afterwards
+- Works across backend instances (Redis adapter) and through firewalls with expiring TURN
+  credentials ([`docs/peer-interviews.md`](docs/peer-interviews.md))
+
 ### Platform
 
 - Dashboard with stats, activity heatmap, and AI-recommended problems
@@ -522,7 +531,8 @@ docker compose -f docker-compose.prod.yml up -d --build
 - [ ] WebSocket reconnection and offline resilience
 - [ ] User profile customization and social features
 - [ ] Interview session replay and sharing
-- [ ] Collaborative mock interviews (peer-to-peer)
+- [x] Peer mock interviews: WebRTC between two users, with Socket.IO signalling, a shared editor,
+      a server-side clock and feedback
 
 The fuller version, with effort and impact estimates, is in [`docs/BACKLOG.md`](docs/BACKLOG.md).
 

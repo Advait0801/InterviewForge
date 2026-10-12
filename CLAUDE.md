@@ -29,7 +29,7 @@ FastAPI `ai-service`. Do not add LLM calls, prompts, or embedding code to `backe
 | `code-runner/` | Node + dockerode | 5000 (5050 host in dev) | Ephemeral Docker sandboxes for user code |
 | `postgres` | PostgreSQL 16 | 5432 (5433 host in dev) | Relational data |
 | `chromadb` | Chroma 0.5.5 | 8000 (8001 host) | RAG vector store |
-| `redis` | Redis 7 | 6379 (6380 host) | Rate limits, code-run queue, leaderboard cache (D-063) |
+| `redis` | Redis 7 | 6379 (6380 host) | Rate limits, code-run queue, caches, Socket.IO adapter (D-063, D-078) |
 
 A native SwiftUI iOS client was removed in Sep 2026 (see `docs/DECISIONS.md` D-007). It
 remains in git history at commits `e24baf6` and `b19f09d` if it's ever needed.
@@ -44,7 +44,7 @@ backend/src/repositories/    # all SQL, one file per table group; take a Queryab
 backend/src/db.ts            # query() over a pg Pool, plus withTransaction()
 backend/openapi/openapi.yaml # the Express API contract (D-062); served at /api/openapi.json
 backend/src/generated/       # ai-service types generated from ai-service/openapi.json — never hand-edit
-backend/sql_migrations/      # 001_init.sql … 020_elo.sql (raw SQL, ordered)
+backend/sql_migrations/      # 001_init.sql … 021_peer_sessions.sql (raw SQL, ordered)
 backend/leetcode_problems.json, starter_templates.json, problem_hints.json, problem_editorials.json
 backend/reference_solutions/ # <slug>/solution.{py,c,cpp,java,js,go,rs}, run by scripts/verify_problems.py;
 #                              the .py ones are also the runtime oracle for custom test cases
@@ -178,6 +178,18 @@ docker/sandboxes/            # python / c / cpp / java / javascript / go / rust 
 - `scripts/complexity_known.py` holds the known-complexity solutions; the backend fixture
   `src/__tests__/fixtures/complexity-measurements.json` is their recorded measurements.
 
+**Peer interviews and realtime (D-078)**
+- `backend/src/realtime/` is a layer like routes: no SQL, no `db` or repository imports
+  (`architecture.test.ts`); it calls `services/peer.service.ts`. Every `/peer` connection
+  authenticates with the JWT plus `token_version`, and every client message goes through
+  `peer.protocol.ts` (allowlist, size, rate limit) before it is relayed to the partner only.
+- Anything that bumps `token_version` must also call `disconnectUser` (realtime/peer.events.ts),
+  or a revoked user keeps their open sockets.
+- A peer session exists only for its two participants (404 for anyone else); invites are stored
+  as SHA-256 only. The server owns the clock: never trust a client's end time.
+- `cd backend && npx ts-node scripts/verify_peer.ts` checks it live; `scripts/peer_harness/` is the
+  two-tab WebRTC check (docs/peer-interviews.md).
+
 **Agentic interviewer and cost (D-067)**
 - `mode` (`fixed` | `agent`) is per session; default `INTERVIEW_MODE` (fixed until UI B). The
   agent proposes a move; the backend's rules decide (`MAX_STAGE_QUESTIONS`, finish only on the last
@@ -294,6 +306,7 @@ python scripts/verify_learning.py           # Group C Phase 8: POTD, SM-2 review
 python scripts/verify_phase7.py             # Phase 7: company filter, curated tags, editorials, stats/streak; live stack
 python scripts/verify_streaming.py          # SSE interview streams, disconnect, 409, timings (D-065); live stack
 python scripts/verify_streaming.py --measure 6  # JSON vs stream latency medians at the ai-service
+cd backend && npx ts-node scripts/verify_peer.ts  # Group D Phase 13: invites, room auth, relay, clock, revocation, feedback (D-078); no model calls
 python scripts/verify_complexity.py         # Group D Phase 12: 26 known solutions x 7 languages, availability, C long input (D-076); --review adds one model call
 python scripts/verify_elo.py                # Group D Phase 12: rated first Submits, /ratings, 5 racing pairs (D-077); no model calls
 cd backend && npx ts-node scripts/simulate_elo.ts  # Elo picker vs oracle/random/ladder; --scale/--noise/--center/--seed
@@ -337,8 +350,8 @@ still accurate and redeployable.
   (`docker/sandboxes/*`, see README) or every code run fails.
 - Prod seeding needs a one-off global `ts-node` (the backend image ships `dist/` only);
   the README deploy section has the command.
-- Socket.IO is scaffolded on both ends but only emits a `hello` — realtime is unused
-  (interview streaming is SSE over plain HTTP, D-065).
+- ~~Socket.IO only emits a `hello`~~ — the `/peer` namespace carries peer interviews (D-078);
+  interview streaming is still SSE over plain HTTP (D-065).
 - ~~Emails are only `console.log`ed~~ — real delivery through Resend since D-072, with
   `EMAIL_PROVIDER=resend`. Local dev stays on `log` (the default), even with a key in `.env`;
   `scripts/verify_email.py --to <your Resend address>` switches to resend for one run and

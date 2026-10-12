@@ -9,6 +9,58 @@ Entry format: date, what was decided, why, and what it means going forward.
 
 ## 2026-10-11
 
+### D-078 — Peer mock interviews: WebRTC between the two browsers, signalling and the rules on the backend (closes F-06)
+
+**What** (`docs/peer-interviews.md` has the protocol):
+- **Sessions.** `/api/peer-sessions` handles create, join, read, end and feedback, plus
+  `/ice-servers`. Migration 021.
+  - A host picks their role, an optional problem and 15–90 minutes; the guest takes the other role.
+  - The invite is a 32-byte bearer token stored as SHA-256 only (like share links, D-071). It
+    seats exactly one guest, and every bad invite gets the same 404.
+  - Only the two participants can see a session: 404 for anyone else.
+  - Feedback is once each after the end, on per-role keys (1–5). The partner's feedback is shown
+    only once the session has completed.
+- **Realtime.** Socket.IO `/peer`, in a new `realtime/` layer that has no SQL (the architecture
+  test enforces it):
+  - Every connection authenticates like an HTTP request (JWT plus `token_version`).
+  - Signalling is relayed, never interpreted, as an allowlisted copy (offer/answer SDP ≤ 20 KB,
+    ICE candidate fields), and only to the *other* participant: the room minus the sender's
+    user room, so a second tab never receives its own offer.
+  - Per-socket token buckets limit signalling and code messages.
+  - Presence comes from `fetchSockets`. The shared code is relayed and saved at most every 2 s,
+    and the last save lands even when time runs out.
+  - The clock is the server's: `started` once both are in; a sweep ends overdue sessions
+    (`time_up`, `ended_at = ends_at`) and expires invites unused for a day. It's idempotent
+    across instances (a conditional UPDATE … RETURNING).
+- **The Redis adapter** (`@socket.io/redis-adapter`) when `REDIS_URL` is set, so the two
+  participants may be on different instances. Otherwise it's in-memory.
+- **TURN credentials** use coturn's `use-auth-secret` scheme: username `<expiry>:<user>`, an
+  HMAC-SHA1 password, and a one-hour lifetime by default. STUN defaults to Google's.
+
+**Calls made:**
+- **The server relays; it doesn't mix media.** P2P keeps audio and video off our boxes (cost,
+  privacy), and two participants don't need an SFU.
+- **Revocation reaches open sockets.** The first live run showed that "sign out everywhere"
+  refused new connections but left an open socket in its room. Every `token_version` bump (sign
+  out everywhere, password change, reset) now disconnects that user's sockets on every instance.
+- **Shared code goes through the server, not a data channel,** so it works before (or without)
+  a P2P connection and is saved for the feedback.
+
+**Verified:**
+- Backend 649 tests: route tests (19), protocol tests, and Socket.IO integration tests (15) with
+  real clients. Seven deliberate breakages of the realtime layer were each caught. A
+  cross-instance test runs two servers on one Redis, and fails without the adapter.
+- `backend/scripts/verify_peer.ts` passes 29/29 live: invites, outsiders, room auth, the clock
+  starting once, partner-only relay, saved code, revocation dropping an open socket, ending,
+  feedback, the server's timer, invite expiry, ICE servers, no `openapi_violation`.
+- **Two real browser tabs connected peer to peer** through our signalling (`scripts/peer_harness/`,
+  a data channel both ways, no camera or microphone):
+  - With STUN only it failed. The app's embedded browser can't resolve mDNS-masked host
+    candidates, and the router doesn't hairpin, so that's the environment, not our code.
+  - With a throwaway coturn (Advait approved the image pull; removed afterwards) and TURN
+    credentials from our own endpoint, it connected relay to relay.
+  - With one credential tampered: no relay candidate, no connection.
+
 ### D-077 — Elo-rated adaptive difficulty: picks at 65% predicted success, matching an oracle in simulation
 
 **What:** per-topic Elo for users, one rating per problem (`backend/src/services/elo.ts`, pure),
@@ -2487,7 +2539,7 @@ Things observed in the code that need a call made on them.
 | F-03 | Sandbox containers run as `User: "root"` despite the images defining a `runner` user; no `CapDrop`, `no-new-privileges`, `ReadonlyRootfs`, `PidsLimit`, or CPU quota | `code-runner/src/runner.ts:82` |
 | F-04 | Rate limiting is one global 500 req/15min bucket — a single user can exhaust the whole LLM API quota | `backend/src/index.ts` |
 | F-05 | `memoryKb` on submissions is never measured, always null | `code-runner/src/runner.ts` |
-| F-06 | Socket.IO is wired on both ends but only emits a `hello` — realtime is unused scaffolding | `backend/src/index.ts`, `web/src/lib/socket.ts` |
+| F-06 | ~~Socket.IO is wired on both ends but only emits a `hello` — realtime is unused scaffolding~~ — closed by D-078: the authenticated `/peer` namespace carries peer interviews | `backend/src/index.ts`, `web/src/lib/socket.ts` |
 | F-07 | Email verification and password reset generate valid tokens, but emails are only `console.log`ed — no SMTP | `backend/src/routes/auth.routes.ts` |
 | F-08 | RAG corpus is 34 hand-written documents — the weakest point in the project's strongest story | `ai-service/seed_data/documents.json` |
 | F-09 | ~~Web and iOS hand-mirror backend types~~ — narrowed by D-007 (iOS removed); contract and generated types by D-062; closed by D-064: `web/` uses the generated client | `web/src/lib/api.ts` |

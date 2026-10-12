@@ -34,6 +34,7 @@ tags:
   - name: resumes
   - name: review
   - name: ratings
+  - name: peer
   - name: public
 
 paths:
@@ -1525,6 +1526,214 @@ paths:
         "401": { $ref: "#/components/responses/Error" }
         "500": { $ref: "#/components/responses/Error" }
 
+  /peer-sessions:
+    get:
+      tags: [peer]
+      operationId: listPeerSessions
+      description: The caller's 50 most recent peer sessions, as host or guest (D-078).
+      responses:
+        "200":
+          description: Newest first.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [sessions]
+                properties:
+                  sessions: { type: array, items: { $ref: "#/components/schemas/PeerSession" } }
+        "401": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [peer]
+      operationId: createPeerSession
+      description: >
+        Host a peer mock interview. `role` is the host's; whoever joins takes the other. The
+        invite token is returned once and stored only as its SHA-256; the web turns it into a
+        link. At most 5 open (waiting) invites per user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [role]
+              properties:
+                role: { $ref: "#/components/schemas/PeerRole" }
+                problemId: { oneOf: [{ $ref: "#/components/schemas/Uuid" }, { type: "null" }] }
+                durationMinutes: { type: integer, minimum: 15, maximum: 90, default: 45 }
+      responses:
+        "201":
+          description: The session and its invite token.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [session, inviteToken]
+                properties:
+                  session: { $ref: "#/components/schemas/PeerSession" }
+                  inviteToken: { type: string, pattern: "^[A-Za-z0-9_-]{43}$" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /peer-sessions/ice-servers:
+    get:
+      tags: [peer]
+      operationId: getPeerIceServers
+      description: >
+        ICE servers for RTCPeerConnection: STUN always, TURN when configured, with credentials
+        that expire (`expiresAt`); fetch again before reconnecting after that.
+      responses:
+        "200":
+          description: The servers.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [iceServers, expiresAt]
+                properties:
+                  iceServers:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [urls]
+                      properties:
+                        urls: { type: array, items: { type: string } }
+                        username: { type: string }
+                        credential: { type: string }
+                  expiresAt: { type: [string, "null"] }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /peer-sessions/join:
+    post:
+      tags: [peer]
+      operationId: joinPeerSession
+      description: >
+        Take the other seat with an invite token. Joining again, or the host opening their own
+        invite, returns the session. A full session is 409; an unknown, malformed or closed
+        invite is the same 404 for all.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [token]
+              properties:
+                token: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: The session, as the caller sees it.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [session]
+                properties:
+                  session: { $ref: "#/components/schemas/PeerSession" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /peer-sessions/{id}:
+    get:
+      tags: [peer]
+      operationId: getPeerSession
+      description: One of the caller's peer sessions; 404 for anyone but its two participants.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The session.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [session]
+                properties:
+                  session: { $ref: "#/components/schemas/PeerSession" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /peer-sessions/{id}/end:
+    post:
+      tags: [peer]
+      operationId: endPeerSession
+      description: >
+        Either participant ends it: a waiting session is cancelled, an active one completed.
+        Ending an ended session changes nothing. The live room is told (`ended`).
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      responses:
+        "200":
+          description: The session afterwards.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [session]
+                properties:
+                  session: { $ref: "#/components/schemas/PeerSession" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
+  /peer-sessions/{id}/feedback:
+    post:
+      tags: [peer]
+      operationId: submitPeerFeedback
+      description: >
+        Once a session has completed, each participant may rate the other once, 1-5 per key.
+        The interviewer rates problemSolving, communication and codeQuality; the candidate
+        rates clarity and helpfulness.
+      parameters:
+        - { $ref: "#/components/parameters/Id" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ratings]
+              properties:
+                ratings:
+                  type: object
+                  additionalProperties: { type: integer, minimum: 1, maximum: 5 }
+                notes: { type: string, maxLength: 2000 }
+      responses:
+        "200":
+          description: The session, with the feedback given.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [session]
+                properties:
+                  session: { $ref: "#/components/schemas/PeerSession" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "500": { $ref: "#/components/responses/Error" }
+
   /review:
     get:
       tags: [review]
@@ -2167,6 +2376,67 @@ components:
         memory_kb: { type: [integer, "null"] }
         created_at: { $ref: "#/components/schemas/Timestamp" }
 
+    PeerRole:
+      type: string
+      enum: [interviewer, candidate]
+    PeerFeedback:
+      type: object
+      additionalProperties: false
+      required: [ratings, notes, createdAt]
+      properties:
+        ratings: { type: object, additionalProperties: { type: integer, minimum: 1, maximum: 5 } }
+        notes: { type: string }
+        createdAt: { type: string }
+    PeerSession:
+      type: object
+      additionalProperties: false
+      description: A peer session as one of its two participants sees it.
+      required: [id, status, myRole, isHost, partner, problem, durationMinutes, createdAt, startedAt, endsAt, endedAt, endedReason, code, language, feedback]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        status: { type: string, enum: [waiting, active, completed, cancelled] }
+        myRole: { $ref: "#/components/schemas/PeerRole" }
+        isHost: { type: boolean }
+        partner:
+          oneOf:
+            - type: object
+              additionalProperties: false
+              required: [username, role]
+              properties:
+                username: { type: string }
+                role: { $ref: "#/components/schemas/PeerRole" }
+            - { type: "null" }
+        problem:
+          oneOf:
+            - type: object
+              additionalProperties: false
+              required: [id, slug, title, difficulty]
+              properties:
+                id: { $ref: "#/components/schemas/Uuid" }
+                slug: { type: string }
+                title: { type: string }
+                difficulty: { type: string }
+            - { type: "null" }
+        durationMinutes: { type: integer }
+        createdAt: { type: string }
+        startedAt: { type: [string, "null"], description: "When both participants were first in the room." }
+        endsAt: { type: [string, "null"] }
+        endedAt: { type: [string, "null"] }
+        endedReason:
+          oneOf:
+            - { type: string, enum: [ended_by_participant, time_up, cancelled, expired] }
+            - { type: "null" }
+        code: { type: string, description: "The shared editor's last saved state." }
+        language: { type: string }
+        feedback:
+          type: object
+          additionalProperties: false
+          required: [given, received]
+          properties:
+            given: { oneOf: [{ $ref: "#/components/schemas/PeerFeedback" }, { type: "null" }] }
+            received:
+              description: The partner's feedback; shown only once the session has completed.
+              oneOf: [{ $ref: "#/components/schemas/PeerFeedback" }, { type: "null" }]
     Rating:
       type: object
       additionalProperties: false

@@ -65,6 +65,14 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 - **Read delivery status** *(S)* — the send-only key can't query Resend for bounces. A webhook
   (`email.bounced`, `email.complained`) would let the account page show "your address bounced".
 
+## Found in Phase 13 (D-078)
+
+- **Run a TURN server in production** *(S)* — peers behind symmetric NATs can't connect with STUN
+  alone. The backend already mints expiring coturn credentials (`TURN_URLS`, `TURN_SECRET`); what's
+  missing is the server itself, which needs a public IP and UDP ports (docs/peer-interviews.md).
+- **Interviewer-only material** *(S)* — both participants see the same problem summary. Showing
+  the interviewer the editorial and hints, but not the candidate, needs a role-scoped endpoint.
+
 ## Found in Phase 12 (D-076, D-077)
 
 - **C design inputs over 64 KB** *(S)* — Phase 12 made C read regular arguments of any length,
@@ -84,7 +92,6 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 
 ## Product
 
-- **Peer mock interviews** *(L)* — WebRTC over the dormant Socket.IO (F-06).
 
 ## Carried over from the UI workstream
 

@@ -12,8 +12,8 @@ import {
   setCurrentCorrelationId,
   type CorrelatedRequest,
 } from "./middleware/correlation.middleware";
-import { Server } from "socket.io";
 import { API_ROUTES } from "./routes";
+import { attachRealtime } from "./realtime";
 import { validateResponses } from "./openapi/validate-responses.middleware";
 import { redisUrl } from "./redis";
 import { RUN_CONCURRENCY, startRunQueue, stopRunQueue } from "./services/run-queue";
@@ -90,20 +90,8 @@ for (const [mountPath, router] of API_ROUTES) {
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: FRONTEND_URL,
-    methods: ["GET", "POST"],
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log(`[socket.io] client connected: ${socket.id}`);
-  socket.emit("hello", { message: "InterviewForge realtime channel ready" });
-  socket.on("disconnect", (reason) => {
-    console.log(`[socket.io] client disconnected: ${socket.id}`, reason);
-  });
-});
+// Socket.IO: the default namespace's hello, and peer interviews on /peer (D-078).
+const realtime = attachRealtime(server, { frontendUrl: FRONTEND_URL });
 
 server.listen(PORT, () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
@@ -122,6 +110,7 @@ for (const signal of ["SIGTERM", "SIGINT"] as const) {
   process.once(signal, () => {
     // Let running jobs finish so no sandbox is orphaned mid-run.
     // Let an email already handed to the provider finish sending.
-    Promise.allSettled([stopRunQueue(), settleEmails()]).finally(() => process.exit(0));
+    // Flush any shared code still waiting to be saved.
+    Promise.allSettled([stopRunQueue(), settleEmails(), realtime.close()]).finally(() => process.exit(0));
   });
 }
