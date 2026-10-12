@@ -11,6 +11,7 @@ import learningPathsRoutes from "./learningPaths.routes";
 import recommendationsRoutes from "./recommendations.routes";
 import resumesRoutes from "./resumes.routes";
 import reviewRoutes from "./review.routes";
+import ratingsRoutes from "./ratings.routes";
 import publicRoutes from "./public.routes";
 import openapiRoutes from "./openapi.routes";
 
@@ -31,6 +32,7 @@ export const API_ROUTES: ReadonlyArray<readonly [mountPath: string, router: Rout
   ["/recommendations", recommendationsRoutes],
   ["/resumes", resumesRoutes],
   ["/review", reviewRoutes],
+  ["/ratings", ratingsRoutes],
   ["/public", publicRoutes],
   ["/openapi.json", openapiRoutes],
 ];

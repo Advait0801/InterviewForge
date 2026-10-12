@@ -1,7 +1,7 @@
 import { Queue } from "bullmq";
 import { afterEach, describe, expect, it } from "vitest";
 import { CodeRunnerFailedError, CodeRunnerUnreachableError, type RunRequest } from "../services/code-runner.client";
-import { RunQueueBusyError, runQueued, startRunQueue, stopRunQueue } from "../services/run-queue";
+import { RunQueueBusyError, measureQueued, runQueued, startRunQueue, stopRunQueue } from "../services/run-queue";
 
 /**
  * Against a real Redis (D-063). Set REDIS_TEST_URL to run, e.g.
@@ -33,6 +33,30 @@ describe.skipIf(!url)("run queue (Redis)", () => {
     const results = await Promise.all(Array.from({ length: 15 }, () => runQueued(request)));
     expect(results.every((r) => r.passed)).toBe(true);
     expect(peak).toBe(3);
+  });
+
+  it("complexity measurements share the cap with runs: one sandbox each, never more at once", async () => {
+    let inFlight = 0;
+    let peak = 0;
+    const busy = async () => {
+      peak = Math.max(peak, ++inFlight);
+      await sleep(60);
+      inFlight--;
+    };
+    await startRunQueue({
+      url,
+      queueName: queueName(),
+      concurrency: 2,
+      runner: async () => (await busy(), { passed: true, results: [] }),
+      measurer: async (req) => (await busy(), { points: [{ n: req.code.length, ns: [1] }], stopped: "done" as const, elapsedMs: 1 }),
+    });
+    const measure = { language: "python3", code: "abc", slug: "two-sum" };
+    const results = await Promise.all([
+      ...Array.from({ length: 4 }, () => runQueued(request)),
+      ...Array.from({ length: 4 }, () => measureQueued(measure)),
+    ]);
+    expect(results.slice(4)).toEqual(Array(4).fill({ points: [{ n: 3, ns: [1] }], stopped: "done", elapsedMs: 1 }));
+    expect(peak).toBe(2);
   });
 
   it("leaves no job (code, hidden test cases) behind in Redis", async () => {

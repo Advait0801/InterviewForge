@@ -429,6 +429,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/submissions/{id}/complexity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The latest empirical complexity measurement of one of the caller's submissions, compared with the time complexity the latest AI review claimed (D-076). `available` says whether it can be measured: an accepted submission of a problem with curated growing inputs, while the code runner is reachable. */
+        get: operations["getSubmissionComplexity"];
+        put?: never;
+        /** @description Time an accepted submission on generated inputs doubling in size (one sandbox, up to 20 s, queued like a run), fit its growth class and store the result, replacing the previous one. Rate limited per user. */
+        post: operations["measureSubmissionComplexity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/interviews": {
         parameters: {
             query?: never;
@@ -843,6 +861,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ratings/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The caller's Elo ratings (D-076): overall, and per topic as used against a problem (a topic with few games is blended toward the overall rating). A rated game is a first Submit of a problem. */
+        get: operations["getMyRatings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ratings/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Up to three problems the caller has never submitted, closest first to the target first-try success (`target`, 0.65 by default), predicted from the caller's ratings and each problem's. Deterministic: the same state gives the same picks. */
+        get: operations["getNextProblems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/review": {
         parameters: {
             query?: never;
@@ -1216,6 +1268,8 @@ export interface components {
             results: components["schemas"]["SubmitCaseResult"][];
             runtimeMs?: number;
             review: components["schemas"]["ReviewOutcome"];
+            /** @description The Elo game this Submit was (D-076): only a user's first Submit of a problem is rated, so null on every later one. */
+            rating: components["schemas"]["RatingOutcome"] | null;
         };
         SubmissionSummary: {
             id: components["schemas"]["Uuid"];
@@ -1238,6 +1292,77 @@ export interface components {
             runtime_ms: number | null;
             memory_kb: number | null;
             created_at: components["schemas"]["Timestamp"];
+        };
+        Rating: {
+            rating: number;
+            games: number;
+        };
+        RatingOutcome: {
+            /**
+             * @description 1 a pass, 0.5 a pass after viewing hints, 0 a fail.
+             * @enum {number}
+             */
+            score: 0 | 0.5 | 1;
+            /** @description The predicted first-try success before the game. */
+            expected: number;
+            /** @description The user's rating against this problem before the game. */
+            before: number;
+            after: number;
+            delta: number;
+        };
+        /** @enum {string} */
+        ComplexityClass: "O(1)" | "O(log n)" | "O(n)" | "O(n log n)" | "O(n²)" | "O(n³)";
+        /** @description An input size and the fastest of its timed repeats, in nanoseconds. */
+        ComplexityPoint: {
+            n: number;
+            ns: number;
+        };
+        ComplexityFit: {
+            /** @enum {string} */
+            status: "measured";
+            bestFit: components["schemas"]["ComplexityClass"];
+            /** @description The best fit and every class the data can't rule out, slowest-growing first. */
+            candidates: components["schemas"]["ComplexityClass"][];
+            /** @enum {string} */
+            confidence: "high" | "medium" | "low";
+            /** @description Every class's relative fit error, best first. */
+            fits: {
+                class: components["schemas"]["ComplexityClass"];
+                error: number;
+            }[];
+            /** @description Slope of log time against log n over the larger sizes. */
+            slope: number;
+            points: components["schemas"]["ComplexityPoint"][];
+        } | {
+            /** @enum {string} */
+            status: "inconclusive";
+            /**
+             * @description too_fast: every size ran in microseconds, so constant and logarithmic can't be told apart. too_few_sizes: not enough sizes finished (an error, or a solution too slow for even the smaller inputs).
+             * @enum {string}
+             */
+            reason: "too_few_sizes" | "too_fast";
+            candidates: components["schemas"]["ComplexityClass"][];
+            points: components["schemas"]["ComplexityPoint"][];
+        };
+        ComplexityAnalysis: {
+            fit: components["schemas"]["ComplexityFit"];
+            /**
+             * @description time_limit means the largest sizes didn't finish within the run's limit.
+             * @enum {string}
+             */
+            stopped: "done" | "time_limit" | "error";
+            /** @description Why the run stopped early, when it failed. */
+            error: string | null;
+            /** @description The input size that failed. */
+            errorAtN: number | null;
+            measuredAt: string;
+            /** @description The latest AI review's time-complexity claim, compared with the measurement. */
+            claim: {
+                text: string | null;
+                class: components["schemas"]["ComplexityClass"] | null;
+                /** @enum {string} */
+                verdict: "agrees" | "consistent" | "log_factor" | "disagrees" | "not_comparable";
+            };
         };
         /** @description LLM output; may carry extra keys. */
         CodeReview: {
@@ -2676,6 +2801,66 @@ export interface operations {
             503: components["responses"]["Error"];
         };
     };
+    getSubmissionComplexity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Availability and the latest analysis, if any. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        available: boolean;
+                        analysis: components["schemas"]["ComplexityAnalysis"] | null;
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    measureSubmissionComplexity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The new analysis. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        analysis: components["schemas"]["ComplexityAnalysis"];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            429: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+            502: components["responses"]["Error"];
+            503: components["responses"]["Error"];
+        };
+    };
     listInterviews: {
         parameters: {
             query?: never;
@@ -3463,6 +3648,76 @@ export interface operations {
             404: components["responses"]["Error"];
             500: components["responses"]["Error"];
             503: components["responses"]["Error"];
+        };
+    };
+    getMyRatings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The ratings; a user who has never submitted is at the start rating. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        overall: components["schemas"]["Rating"];
+                        /** @description Most-played first. */
+                        topics: {
+                            topic: string;
+                            rating: number;
+                            games: number;
+                        }[];
+                    };
+                };
+            };
+            401: components["responses"]["Error"];
+            500: components["responses"]["Error"];
+        };
+    };
+    getNextProblems: {
+        parameters: {
+            query?: {
+                /** @description Only problems with this topic. */
+                topic?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The picks; empty when nothing unattempted matches. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        target: number;
+                        picks: {
+                            problem: {
+                                id: components["schemas"]["Uuid"];
+                                slug: string;
+                                title: string;
+                                difficulty: string;
+                                topics: string[];
+                            };
+                            predictedSuccess: number;
+                            problemRating: number;
+                            userRating: number;
+                        }[];
+                    };
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            500: components["responses"]["Error"];
         };
     };
     getReviewQueue: {

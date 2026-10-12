@@ -1,4 +1,5 @@
 import type { MethodMeta, ProblemMeta } from "./problem-meta";
+import { TIMING_PREFIX, replaceOnce } from "./timing";
 
 /**
  * Go: LeetCode's conventions. A regular problem is a top-level func (`twoSum`),
@@ -310,7 +311,7 @@ func _ifLine(lines []string, i int) string {
 }
 `;
 
-function regularBody(meta: ProblemMeta): string {
+function regularBody(meta: ProblemMeta, timing = false): string {
   const params = meta.params ?? [];
   const ret = meta.returnType ?? "void";
   const fn = meta.methodName ?? "solve";
@@ -335,13 +336,21 @@ function regularBody(meta: ProblemMeta): string {
       `\t\treturn strconv.Itoa(r.Val)`,
     ].join("\n");
   }
+  // Timing mode: the call alone, into _ifT, which main writes after the result.
+  const start = timing ? [`\t\t_ifT0 := time.Now()`] : [];
+  const stop = timing ? [`\t\t_ifT = time.Since(_ifT0).Nanoseconds()`] : [];
   if (ret === "void") {
     const k = params.findIndex((p) => ["char[]", "int[]", "int[][]"].includes(p.type));
     return [
       ...reads,
+      ...start,
       `\t\t${fn}(${args})`,
+      ...stop,
       k >= 0 ? `\t\treturn ${goWrite(`a${k}`, params[k].type)}` : `\t\treturn "null"`,
     ].join("\n");
+  }
+  if (timing) {
+    return [...reads, ...start, `\t\t_ifR := ${fn}(${args})`, ...stop, `\t\treturn ${goWrite("_ifR", ret)}`].join("\n");
   }
   return [...reads, `\t\treturn ${goWrite(`${fn}(${args})`, ret)}`].join("\n");
 }
@@ -376,9 +385,9 @@ function designBody(meta: ProblemMeta): string {
   ].join("\n");
 }
 
-export function generateGoMain(meta: ProblemMeta): string {
-  const body = meta.isDesign ? designBody(meta) : regularBody(meta);
-  return `package main
+export function generateGoMain(meta: ProblemMeta, timing = false): string {
+  const body = meta.isDesign ? designBody(meta) : regularBody(meta, timing);
+  const main = `package main
 
 import (
 	"bufio"
@@ -404,6 +413,15 @@ ${body}
 	}
 }
 `;
+  if (!timing) return main;
+  // A panic leaves _ifT at -1, so no timing line follows its error.
+  let timed = replaceOnce(main, '\t"strings"\n)', '\t"strings"\n\t"time"\n)\n\nvar _ifT int64 = -1');
+  timed = replaceOnce(timed, "\t\t_ifRun(out, func() string {", "\t\t_ifT = -1\n\t\t_ifRun(out, func() string {");
+  return replaceOnce(
+      timed,
+      "\t\t})\n\t}\n}\n",
+      `\t\t})\n\t\tif _ifT >= 0 {\n\t\t\tout.WriteString("${TIMING_PREFIX} " + strconv.FormatInt(_ifT, 10) + "\\n")\n\t\t}\n\t\tout.Flush()\n\t}\n}\n`
+    );
 }
 
 /**

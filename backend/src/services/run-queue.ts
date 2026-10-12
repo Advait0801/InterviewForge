@@ -4,7 +4,10 @@ import { createConnection, redisUrl } from "../redis";
 import {
   CodeRunnerFailedError,
   CodeRunnerUnreachableError,
+  measureComplexity,
   runCode,
+  type ComplexityMeasurement,
+  type ComplexityRequest,
   type RunRequest,
   type RunResult,
 } from "./code-runner.client";
@@ -51,17 +54,29 @@ const UNREACHABLE = "code_runner_unreachable";
 const FAILED = "code_runner_failed";
 
 type Runner = (request: RunRequest) => Promise<RunResult>;
+type Measurer = (request: ComplexityRequest) => Promise<ComplexityMeasurement>;
+/** Job names: a Run or Submit, or a complexity measurement (Phase 12). Both hold one sandbox. */
+const RUN_JOB = "run";
+const COMPLEXITY_JOB = "complexity";
 
 type State = { queue: Queue; events: QueueEvents; worker: Worker; connections: Redis[]; waitTimeoutMs: number };
 let state: State | null = null;
 
 export async function startRunQueue(
-  options: { runner?: Runner; concurrency?: number; url?: string; queueName?: string; waitTimeoutMs?: number } = {}
+  options: {
+    runner?: Runner;
+    measurer?: Measurer;
+    concurrency?: number;
+    url?: string;
+    queueName?: string;
+    waitTimeoutMs?: number;
+  } = {}
 ): Promise<void> {
   if (state) return;
   const url = options.url ?? redisUrl();
   if (!url) throw new Error("REDIS_URL is not set");
   const runner = options.runner ?? runCode;
+  const measurer = options.measurer ?? measureComplexity;
   const concurrency = options.concurrency ?? RUN_CONCURRENCY;
   const name = options.queueName ?? QUEUE_NAME;
 
@@ -69,11 +84,12 @@ export async function startRunQueue(
   const connections = [createConnection(bull, url), createConnection(bull, url), createConnection(bull, url)];
   const queue = new Queue(name, { connection: connections[0] });
   const events = new QueueEvents(name, { connection: connections[1] });
-  const worker = new Worker<RunRequest, RunResult>(
+  const worker = new Worker<RunRequest | ComplexityRequest, RunResult | ComplexityMeasurement>(
     name,
-    async (job: Job<RunRequest>) => {
+    async (job: Job<RunRequest | ComplexityRequest>) => {
       try {
-        return await runner(job.data);
+        if (job.name === COMPLEXITY_JOB) return await measurer(job.data as ComplexityRequest);
+        return await runner(job.data as RunRequest);
       } catch (err) {
         if (err instanceof CodeRunnerUnreachableError) throw new Error(UNREACHABLE);
         if (err instanceof CodeRunnerFailedError) throw new Error(FAILED);
@@ -109,16 +125,25 @@ export async function stopRunQueue(options: { obliterate?: boolean } = {}): Prom
  * unreachable queue is RunQueueUnavailableError, so an outage can't remove the cap.
  */
 export async function runQueued(request: RunRequest): Promise<RunResult> {
+  return enqueue<RunRequest, RunResult>(RUN_JOB, request, runCode);
+}
+
+/** A complexity measurement, through the same queue and cap as Run and Submit. */
+export async function measureQueued(request: ComplexityRequest): Promise<ComplexityMeasurement> {
+  return enqueue<ComplexityRequest, ComplexityMeasurement>(COMPLEXITY_JOB, request, measureComplexity);
+}
+
+async function enqueue<Req, Res>(name: string, request: Req, direct: (r: Req) => Promise<Res>): Promise<Res> {
   if (!state) {
-    if (!redisUrl()) return runCode(request);
+    if (!redisUrl()) return direct(request);
     throw new RunQueueUnavailableError("Run queue is not available");
   }
   const { queue, events, waitTimeoutMs } = state;
 
-  let job: Job<RunRequest, RunResult>;
+  let job: Job<Req, Res>;
   try {
     job = await withTimeout(
-      queue.add("run", request, { removeOnComplete: PURGE, removeOnFail: PURGE, attempts: 1 }),
+      queue.add(name, request, { removeOnComplete: PURGE, removeOnFail: PURGE, attempts: 1 }) as Promise<Job<Req, Res>>,
       ENQUEUE_TIMEOUT_MS,
       "enqueue"
     );

@@ -366,6 +366,66 @@ async function executeInSandbox(
   }
 }
 
+/**
+ * One sandbox for a timed run (Phase 12): the same container as every run, a longer limit,
+ * and on timeout the output so far is kept rather than discarded -- timing mode flushes
+ * each case, so everything that finished is in the log.
+ */
+export type TimedSandboxResult = { output: string; timedOut: boolean; statusCode: number | null; elapsedMs: number };
+
+export async function runTimedSandbox(
+  language: SupportedLanguage,
+  code: string,
+  testCases: TestCase[],
+  meta: ProblemMeta,
+  timeoutMs: number
+): Promise<TimedSandboxResult> {
+  const generated = generateCode(language, code, meta, { timing: true });
+  const inputContent =
+    language === "python3" || language === "javascript"
+      ? buildJsonInput(testCases, meta)
+      : buildLinePerArgInput(testCases, meta);
+  const tarBuffer = createTarBuffer([
+    { name: generated.filename, content: generated.code },
+    ...(generated.extraFiles ?? []),
+    { name: "input.txt", content: inputContent },
+  ]);
+
+  let container: Docker.Container | null = null;
+  try {
+    container = await docker.createContainer(sandboxConfigFor(language));
+    await container.putArchive(tarBuffer, { path: "/home/runner" });
+    const startTime = Date.now();
+    await container.start();
+    let timer: NodeJS.Timeout | undefined;
+    const outcome = await Promise.race([
+      (container.wait() as Promise<{ StatusCode: number }>).then((w) => ({ timedOut: false, statusCode: w.StatusCode })),
+      new Promise<{ timedOut: true; statusCode: null }>((resolve) => {
+        timer = setTimeout(() => resolve({ timedOut: true, statusCode: null }), timeoutMs);
+      }),
+    ]);
+    clearTimeout(timer);
+    const elapsedMs = Date.now() - startTime;
+    if (outcome.timedOut) {
+      try {
+        await container.kill();
+      } catch {
+        /* already stopped */
+      }
+    }
+    const output = await readContainerLogs(container);
+    return { output, timedOut: outcome.timedOut, statusCode: outcome.statusCode, elapsedMs };
+  } finally {
+    if (container) {
+      try {
+        await container.remove({ force: true });
+      } catch {
+        /* ok */
+      }
+    }
+  }
+}
+
 function buildJsonInput(testCases: TestCase[], meta: ProblemMeta): string {
   const lines = testCases.map((tc) => {
     const parsed = parseTestInput(tc.input, meta);

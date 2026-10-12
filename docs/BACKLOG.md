@@ -65,13 +65,19 @@ Effort: **S** hours · **M** a day or two · **L** a week+.
 - **Read delivery status** *(S)* — the send-only key can't query Resend for bounces. A webhook
   (`email.bounced`, `email.complained`) would let the account page show "your address bounced".
 
-## Alternative showpieces (considered and not chosen)
+## Found in Phase 12 (D-076, D-077)
 
-- **Elo-rated adaptive difficulty** *(L, Loud)* — per-topic Elo for users *and* problems,
-  selecting the next problem at ~60–70% success probability.
-- **Empirical complexity detection** *(L, Loud)* — run a passing solution against
-  geometrically increasing inputs, curve-fit against O(n) / O(n log n) / O(n²), then compare
-  with what the LLM reviewer *claimed*. Honest empiricism rather than another model opinion.
+- **C design inputs over 64 KB** *(S)* — Phase 12 made C read regular arguments of any length,
+  but the design-problem harness still reads its ops and args lines into fixed buffers. Design
+  inputs are short today; a custom design input near the limit would be split.
+- **More problems with growing inputs** *(M)* — complexity measurement covers 30 curated
+  problems. Trees, graphs, matrices and intervals with constraints need their own generators.
+- **Elo cold start** *(S)* — until problems have been played, their ratings are their labels'
+  (1200/1500/1800), so a new user's first pick is a 50% medium rather than a 65% one. Seeding
+  problem ratings from acceptance rates, once there is traffic, would spread them from day one.
+- **Pre-existing web type errors in tests** *(S)* — `npx tsc --noEmit` in `web/` reports 4 errors
+  in `src/app/__tests__/group-c.test.tsx` (testing-library's `exact` option). `next build` and
+  vitest don't typecheck tests, so nothing catches them.
 
 ## Engineering credibility
 

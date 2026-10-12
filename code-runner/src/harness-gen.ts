@@ -4,6 +4,8 @@ import { ProblemMeta } from "./problem-meta";
 import { SupportedLanguage } from "./types";
 import { generateGoMain, goSolutionFile } from "./harness-go";
 import { generateRust } from "./harness-rust";
+import { TIMING_PREFIX, replaceOnce, wrapCallLine } from "./timing";
+export { TIMING_PREFIX } from "./timing";
 
 function loadHarness(filename: string): string {
   const candidates = [
@@ -29,33 +31,66 @@ function getHarness(filename: string): string {
 /** `code` goes into `filename`; Go's solution is a second file next to it. */
 export type GeneratedCode = { code: string; filename: string; extraFiles?: Array<{ name: string; content: string }> };
 
+/**
+ * Timing mode (Phase 12, complexity measurement): every case also writes a line
+ * `__IFT__ <nanoseconds>` timing the user's call alone -- arguments already built, the
+ * result not yet formatted -- and output is flushed per case, so a run cut short by its
+ * timeout still yields every size it finished. Only regular problems are supported (not
+ * design classes, nor the cycle and LCA special cases); `timingSupported` says which.
+ * With timing off, the generated code is exactly what it was before timing existed.
+ */
+export type GenerateOptions = { timing?: boolean };
+
+export function timingSupported(meta: ProblemMeta): boolean {
+  const params = meta.params ?? [];
+  if (meta.isDesign) return false;
+  if (meta.methodName === "hasCycle" || meta.methodName === "lowestCommonAncestor") return false;
+  return !params.some((p) => p.type === "TreeNode[]") && meta.returnType !== "TreeNode[]";
+}
+
 export function generateCode(
   language: SupportedLanguage,
   userCode: string,
-  meta: ProblemMeta
+  meta: ProblemMeta,
+  options: GenerateOptions = {}
 ): GeneratedCode {
+  if (options.timing && !timingSupported(meta)) {
+    throw new Error("Timing isn't supported for this problem's signature");
+  }
+  const timing = Boolean(options.timing);
   switch (language) {
     case "python3":
-      return generatePython3(userCode);
+      return generatePython3(userCode, timing);
     case "cpp":
-      return generateCpp(userCode, meta);
+      return generateCpp(userCode, meta, timing);
     case "java":
-      return generateJava(userCode, meta);
+      return generateJava(userCode, meta, timing);
     case "c":
-      return generateC(userCode, meta);
+      return generateC(userCode, meta, timing);
     case "javascript":
-      return generateJavaScript(userCode, meta);
+      return generateJavaScript(userCode, meta, timing);
     case "go":
-      return { code: generateGoMain(meta), filename: "main.go", extraFiles: [{ name: "solution.go", content: goSolutionFile(userCode) }] };
+      return { code: generateGoMain(meta, timing), filename: "main.go", extraFiles: [{ name: "solution.go", content: goSolutionFile(userCode) }] };
     case "rust":
-      return { code: generateRust(userCode, meta), filename: "main.rs" };
+      return { code: generateRust(userCode, meta, timing), filename: "main.rs" };
   }
 }
 
 // A function replacement: a string one would expand `$&`, `$'` and friends in
 // the user's code (a JavaScript regex replacement, say) instead of copying it.
-function generatePython3(userCode: string): { code: string; filename: string } {
-  const combined = getHarness("python3.py").replace("{USER_CODE}", () => userCode);
+function generatePython3(userCode: string, timing = false): { code: string; filename: string } {
+  let harness = getHarness("python3.py");
+  if (timing) {
+    // python3 runs with -u, so every print is already flushed.
+    harness = replaceOnce(
+      harness,
+      "                result = fn(*converted)\n",
+      "                _if_t0 = __import__('time').perf_counter_ns()\n" +
+        "                result = fn(*converted)\n" +
+        `                print("${TIMING_PREFIX} " + str(__import__('time').perf_counter_ns() - _if_t0))\n`
+    );
+  }
+  const combined = harness.replace("{USER_CODE}", () => userCode);
   return { code: combined, filename: "run.py" };
 }
 
@@ -63,10 +98,28 @@ function generatePython3(userCode: string): { code: string; filename: string } {
  * The user's code comes first so a syntax error's line number matches the
  * editor. The harness's helpers are function declarations, hoisted above it.
  */
-function generateJavaScript(userCode: string, meta: ProblemMeta): { code: string; filename: string } {
+function generateJavaScript(userCode: string, meta: ProblemMeta, timing = false): { code: string; filename: string } {
   const name = meta.isDesign ? meta.className : meta.methodName || "solve";
   const target = `const __IF_TARGET = typeof ${name} !== "undefined" ? ${name} : undefined;`;
-  const combined = getHarness("javascript.js")
+  let harness = getHarness("javascript.js");
+  if (timing) {
+    // Results are normally written once at the end; written synchronously per case
+    // instead, a timeout can't take the finished sizes with it.
+    harness = replaceOnce(
+      harness,
+      "  const out = [];\n  for (const raw of lines) {\n",
+      '  const out = { length: 0, join: () => "", push: (s) => require("fs").writeSync(1, s + "\\n") };\n' +
+        "  for (const raw of lines) {\n"
+    );
+    harness = replaceOnce(
+      harness,
+      "      const result = __IF_TARGET(...args);\n",
+      "      const __ifT0 = process.hrtime.bigint();\n" +
+        "      const result = __IF_TARGET(...args);\n" +
+        `      out.push("${TIMING_PREFIX} " + String(process.hrtime.bigint() - __ifT0));\n`
+    );
+  }
+  const combined = harness
     .replace("{USER_CODE}", () => userCode)
     .replace("{TARGET}", () => target);
   return { code: combined, filename: "run.js" };
@@ -533,7 +586,8 @@ function generateCppDesign(userCode: string, meta: ProblemMeta): string {
 
 function generateCpp(
   userCode: string,
-  meta: ProblemMeta
+  meta: ProblemMeta,
+  timing = false
 ): { code: string; filename: string } {
   if (meta.isDesign) {
     // Was a stub that printed "[]" and never called the user's class, so no
@@ -565,6 +619,16 @@ function generateCpp(
     }
   } else {
     callAndPrint = `    ${cppTypeFor(retType)} _result = sol.${fnName}(${argNames});\n${cppPrintResult("_result", retType)}`;
+  }
+
+  if (timing) {
+    callAndPrint =
+      wrapCallLine(
+        callAndPrint,
+        `sol.${fnName}(`,
+        "auto __ifT0 = chrono::steady_clock::now();",
+        `cout << "${TIMING_PREFIX} " << chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now() - __ifT0).count() << "\\n";`
+      ) + "\n    cout.flush();";
   }
 
   const code = `#include <bits/stdc++.h>
@@ -1035,7 +1099,8 @@ const JAVA_JSON = String.raw`
 
 function generateJava(
   userCode: string,
-  meta: ProblemMeta
+  meta: ProblemMeta,
+  timing = false
 ): { code: string; filename: string } {
   if (meta.isDesign) {
     // Was a stub printing "[]" without ever calling the user's class. The
@@ -1100,6 +1165,15 @@ ${JAVA_JSON}
   } else {
     printLine = `            System.out.println(_toJson(_result, "${retType}"));`;
   }
+  if (timing) {
+    callLine = wrapCallLine(
+      callLine,
+      `_invoke(sol, "${fnName}"`,
+      "long __ifT0 = System.nanoTime();",
+      `System.out.println("${TIMING_PREFIX} " + (System.nanoTime() - __ifT0));`
+    );
+    printLine += "\n            System.out.flush();";
+  }
 
   const code = `import java.util.*;
 import java.io.*;
@@ -1137,7 +1211,7 @@ function cReadArg(varName: string, t: string): string {
       return `    char _buf_${varName}[16]; fgets(_buf_${varName},16,stdin);\n    bool ${varName} = (strncmp(_buf_${varName},"true",4)==0);`;
     case "int[]":
       return [
-        `    char _buf_${varName}[4096]; fgets(_buf_${varName},4096,stdin);`,
+        `    char* _buf_${varName} = _ifReadLine();`,
         `    int _cap_${varName}=64, ${varName}Size=0;`,
         `    int* ${varName} = (int*)malloc(_cap_${varName}*sizeof(int));`,
         `    { char*p=_buf_${varName}; while(*p&&*p!='[')p++; if(*p)p++;`,
@@ -1151,16 +1225,16 @@ function cReadArg(varName: string, t: string): string {
       ].join("\n");
     case "string":
       return [
-        `    char _buf_${varName}[4096]; fgets(_buf_${varName},4096,stdin);`,
+        `    char* _buf_${varName} = _ifReadLine();`,
         `    char* ${varName} = _buf_${varName};`,
         `    { int _l=strlen(${varName}); if(_l>0&&${varName}[_l-1]=='\\n')${varName}[--_l]='\\0';`,
         `      if(_l>1&&${varName}[0]=='"'){${varName}++;${varName}[_l-2]='\\0';} }`,
       ].join("\n");
     case "char[]":
       return [
-        `    char _buf_${varName}[4096]; fgets(_buf_${varName},4096,stdin);`,
+        `    char* _buf_${varName} = _ifReadLine();`,
         `    int ${varName}Size = 0;`,
-        `    char* ${varName} = (char*)malloc(4096);`,
+        `    char* ${varName} = (char*)malloc(strlen(_buf_${varName}) + 1);`,
         `    for(char* _p=_buf_${varName}; *_p; _p++){`,
         `      if(*_p=='"'){ _p++; if(*_p=='\\\\' && *(_p+1)) _p++; if(*_p){ ${varName}[${varName}Size++]=*_p; _p++; } }`,
         `    }`,
@@ -1168,7 +1242,7 @@ function cReadArg(varName: string, t: string): string {
       ].join("\n");
     case "int[][]":
       return [
-        `    char _buf_${varName}[8192]; fgets(_buf_${varName},8192,stdin);`,
+        `    char* _buf_${varName} = _ifReadLine();`,
         `    int ${varName}Rows=0; { char* _q=_buf_${varName}; while(*_q && *_q!='[') _q++; if(*_q) _q++; for(; *_q; _q++) if(*_q=='[') ${varName}Rows++; }`,
         `    int** ${varName} = (int**)malloc(${varName}Rows * sizeof(int*));`,
         `    int* ${varName}ColSize = (int*)calloc(${varName}Rows, sizeof(int));`,
@@ -1185,7 +1259,7 @@ function cReadArg(varName: string, t: string): string {
       ].join("\n");
     case "string[]":
       return [
-        `    char _buf_${varName}[8192]; fgets(_buf_${varName},8192,stdin);`,
+        `    char* _buf_${varName} = _ifReadLine();`,
         `    int ${varName}Size=0, _cap_${varName}=16;`,
         `    char** ${varName} = (char**)malloc(_cap_${varName} * sizeof(char*));`,
         `    for(char* _p=_buf_${varName}; *_p; _p++){`,
@@ -1197,7 +1271,7 @@ function cReadArg(varName: string, t: string): string {
       ].join("\n");
     case "ListNode":
       return [
-        `    char _buf_${varName}[8192]; fgets(_buf_${varName},8192,stdin);`,
+        `    char* _buf_${varName} = _ifReadLine();`,
         `    int _cap_${varName}=64, _size_${varName}=0;`,
         `    int* _arr_${varName}=(int*)malloc(_cap_${varName}*sizeof(int));`,
         `    { char* p=_buf_${varName}; while(*p&&*p!='[') p++; if(*p) p++;`,
@@ -1208,7 +1282,7 @@ function cReadArg(varName: string, t: string): string {
       ].join("\n");
     case "ListNode[]":
       return [
-        `    char _buf_${varName}[8192]; fgets(_buf_${varName},8192,stdin);`,
+        `    char* _buf_${varName} = _ifReadLine();`,
         `    int _rows_${varName}=0; { char* _q=_buf_${varName}; while(*_q && *_q!='[') _q++; if(*_q) _q++; for(; *_q; _q++) if(*_q=='[') _rows_${varName}++; }`,
         `    struct ListNode** ${varName} = (struct ListNode**)malloc(_rows_${varName} * sizeof(struct ListNode*));`,
         `    int ${varName}Size = _rows_${varName};`,
@@ -1225,12 +1299,12 @@ function cReadArg(varName: string, t: string): string {
       ].join("\n");
     case "TreeNode":
       return [
-        `    char _buf_${varName}[8192]; fgets(_buf_${varName},8192,stdin);`,
+        `    char* _buf_${varName} = _ifReadLine();`,
         `    struct TreeNode* ${varName} = _parseTree(_buf_${varName});`,
       ].join("\n");
     case "char[][]":
       return [
-        `    char _buf_${varName}[8192]; fgets(_buf_${varName},8192,stdin);`,
+        `    char* _buf_${varName} = _ifReadLine();`,
         `    int ${varName}Rows=0; { char* _q=_buf_${varName}; while(*_q && *_q!='[') _q++; if(*_q) _q++; for(; *_q; _q++) if(*_q=='[') ${varName}Rows++; }`,
         `    char** ${varName} = (char**)malloc(${varName}Rows * sizeof(char*));`,
         `    int* ${varName}ColSize = (int*)calloc(${varName}Rows, sizeof(int));`,
@@ -1307,7 +1381,13 @@ function cPrintResult(expr: string, t: string, sizeVar?: string): string {
 }
 
 // ── C helpers shared by regular and design problems ───────────────────
-const C_HELPERS = `struct ListNode { int val; struct ListNode* next; };
+const C_HELPERS = `/* One input line of any length (a fixed buffer silently split long inputs). */
+static char* _ifReadLine(void) {
+    char* line = NULL; size_t cap = 0;
+    if (getline(&line, &cap, stdin) < 0) { free(line); line = (char*)calloc(1, 1); }
+    return line;
+}
+struct ListNode { int val; struct ListNode* next; };
 struct TreeNode { int val; struct TreeNode* left; struct TreeNode* right; };
 
 struct ListNode* _arrToList(int* arr, int n) {
@@ -1550,7 +1630,8 @@ function generateCDesign(userCode: string, meta: ProblemMeta): string {
 
 function generateC(
   userCode: string,
-  meta: ProblemMeta
+  meta: ProblemMeta,
+  timing = false
 ): { code: string; filename: string } {
   const unsupportedTypes = new Set([
     "TreeNode[]",
@@ -1656,7 +1737,17 @@ int main() {
     callAndPrint = `    // unsupported return type: ${retType}\n    printf("null\\n");`;
   }
 
-  const code = `#include <stdio.h>
+  if (timing) {
+    callAndPrint =
+      wrapCallLine(
+        callAndPrint,
+        `${fnName}(`,
+        "struct timespec __ifA, __ifB; clock_gettime(CLOCK_MONOTONIC, &__ifA);",
+        `clock_gettime(CLOCK_MONOTONIC, &__ifB); printf("${TIMING_PREFIX} %lld\\n", (long long)(__ifB.tv_sec - __ifA.tv_sec) * 1000000000LL + (__ifB.tv_nsec - __ifA.tv_nsec));`
+      ) + "\n    fflush(stdout);";
+  }
+
+  const code = `${timing ? "#include <time.h>\n" : ""}#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
