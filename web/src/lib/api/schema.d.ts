@@ -3052,6 +3052,7 @@ export interface operations {
             content: {
                 "application/json": {
                     company: components["schemas"]["Company"];
+                    /** @description easy, medium or hard, in any case. */
                     difficulty?: string;
                     /**
                      * @description Ground questions in the caller's resume when one is indexed.
@@ -3091,6 +3092,7 @@ export interface operations {
             content: {
                 "application/json": {
                     company: components["schemas"]["Company"];
+                    /** @description easy, medium or hard, in any case. */
                     difficulty?: string;
                     /**
                      * @description Ground questions in the caller's resume when one is indexed.

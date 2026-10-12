@@ -4,6 +4,7 @@ import { complexityLimiter, llmLimiter } from "../middleware/rate-limit.middlewa
 import { analyzeSubmission, getSubmissionComplexity } from "../services/complexity.service";
 import { AIServiceError } from "../services/ai.service";
 import { DomainError } from "../services/errors";
+import { MAX_CODE_CHARS } from "../services/limits";
 import {
   executeSubmission,
   getSubmission,
@@ -127,6 +128,10 @@ router.post("/", requireAuth, async (req: AuthRequest, res) => {
   }
   if (!(LANGUAGES as readonly string[]).includes(language)) {
     return res.status(400).json({ error: `language must be one of: ${LANGUAGES.join(", ")}` });
+  }
+  if (typeof code !== "string" || code.length > MAX_CODE_CHARS) {
+    // Checked here: the runner's own body limit would reject it later as "unavailable".
+    return res.status(400).json({ error: `code must be a string of at most ${MAX_CODE_CHARS} characters` });
   }
   if (!(MODES as readonly string[]).includes(mode)) {
     return res.status(400).json({ error: "mode must be run or submit" });

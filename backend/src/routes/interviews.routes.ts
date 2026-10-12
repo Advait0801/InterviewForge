@@ -10,6 +10,7 @@ import {
 } from "../services/ai.service";
 import { DomainError } from "../services/errors";
 import * as interviews from "../services/interviews.service";
+import { DIFFICULTIES, isDifficulty, isTooLong, MAX_TEXT_CHARS } from "../services/limits";
 import { createShareLink, getReplay, listShareLinks, revokeShareLink } from "../services/sharing.service";
 import { getAIServiceMessage, getSingleParam, sendDomainError, sendInternalError } from "./http";
 import { openEventStream } from "./sse";
@@ -63,7 +64,12 @@ function parseStart(body: unknown) {
   if (mode !== undefined && !interviews.isMode(mode)) {
     return { error: `mode must be one of: ${interviews.MODES.join(", ")}` };
   }
-  return { company: normalized, difficulty, useResume, persona, mode };
+  // It goes into the opening question's prompt and retrieval query, so only the three levels.
+  const level = typeof difficulty === "string" ? difficulty.trim().toLowerCase() : difficulty;
+  if (level !== undefined && !isDifficulty(level)) {
+    return { error: `difficulty must be one of: ${DIFFICULTIES.join(", ")}` };
+  }
+  return { company: normalized, difficulty: level, useResume, persona, mode };
 }
 
 router.get("/", requireAuth, async (req: AuthRequest, res) => {
@@ -221,6 +227,9 @@ router.post("/:id/answer", requireAuth, llmLimiter, async (req: AuthRequest, res
   if (!answer?.trim()) {
     return res.status(400).json({ error: "answer is required" });
   }
+  if (isTooLong(answer)) {
+    return res.status(400).json({ error: `answer must be at most ${MAX_TEXT_CHARS} characters` });
+  }
 
   try {
     return res.json(await interviews.submitAnswer(id, req.user!.id, answer));
@@ -240,6 +249,9 @@ router.post("/:id/answer/stream", requireAuth, llmLimiter, async (req: AuthReque
 
   if (!answer?.trim()) {
     return res.status(400).json({ error: "answer is required" });
+  }
+  if (isTooLong(answer)) {
+    return res.status(400).json({ error: `answer must be at most ${MAX_TEXT_CHARS} characters` });
   }
 
   let turn: interviews.Turn;
@@ -271,8 +283,8 @@ router.post("/:id/hint", requireAuth, llmLimiter, async (req: AuthRequest, res) 
   if (!id || !UUID_REGEX.test(id)) {
     return res.status(400).json({ error: "Invalid session id" });
   }
-  if (draft !== undefined && typeof draft !== "string") {
-    return res.status(400).json({ error: "draft must be a string" });
+  if (draft !== undefined && (typeof draft !== "string" || isTooLong(draft))) {
+    return res.status(400).json({ error: `draft must be a string of at most ${MAX_TEXT_CHARS} characters` });
   }
 
   try {
@@ -326,6 +338,9 @@ router.post("/speech/evaluate-explanation", requireAuth, llmLimiter, async (req:
   if (!question?.trim()) {
     return res.status(400).json({ error: "question is required" });
   }
+  if (isTooLong(question) || isTooLong(context)) {
+    return res.status(400).json({ error: `question and context must each be at most ${MAX_TEXT_CHARS} characters` });
+  }
 
   try {
     const result = await evaluateVoiceExplanation({
@@ -357,6 +372,11 @@ router.post("/system-design/analyze", requireAuth, llmLimiter, async (req: AuthR
   }
   if (!explanation?.trim()) {
     return res.status(400).json({ error: "explanation is required" });
+  }
+  if (isTooLong(prompt) || isTooLong(explanation) || isTooLong(company, 100)) {
+    return res.status(400).json({
+      error: `prompt and explanation must each be at most ${MAX_TEXT_CHARS} characters, company at most 100`,
+    });
   }
 
   try {

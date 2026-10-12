@@ -622,7 +622,7 @@ paths:
               properties:
                 problemId: { $ref: "#/components/schemas/Uuid" }
                 language: { $ref: "#/components/schemas/Language" }
-                code: { type: string }
+                code: { type: string, maxLength: 50000 }
                 mode: { type: string, enum: [run, submit], default: submit }
                 customInputs:
                   type: array
@@ -790,7 +790,7 @@ paths:
               required: [company]
               properties:
                 company: { $ref: "#/components/schemas/Company" }
-                difficulty: { type: string }
+                difficulty: { type: string, description: "easy, medium or hard, in any case." }
                 useResume:
                   type: boolean
                   default: true
@@ -830,7 +830,7 @@ paths:
               required: [company]
               properties:
                 company: { $ref: "#/components/schemas/Company" }
-                difficulty: { type: string }
+                difficulty: { type: string, description: "easy, medium or hard, in any case." }
                 useResume:
                   type: boolean
                   default: true
@@ -1019,7 +1019,7 @@ paths:
               type: object
               required: [answer]
               properties:
-                answer: { type: string, minLength: 1 }
+                answer: { type: string, minLength: 1, maxLength: 20000 }
       responses:
         "200":
           description: What happened next.
@@ -1057,7 +1057,7 @@ paths:
               type: object
               required: [answer]
               properties:
-                answer: { type: string, minLength: 1 }
+                answer: { type: string, minLength: 1, maxLength: 20000 }
       responses:
         "200":
           description: An event stream; the schema describes one event's `data`.
@@ -1092,7 +1092,7 @@ paths:
             schema:
               type: object
               properties:
-                draft: { type: string, description: The answer so far; lets the hint build on it. }
+                draft: { type: string, maxLength: 20000, description: The answer so far; lets the hint build on it. }
       responses:
         "200":
           description: The hint, now part of the transcript.
@@ -1150,8 +1150,8 @@ paths:
                 - type: object
                   required: [question]
                   properties:
-                    question: { type: string }
-                    context: { type: string }
+                    question: { type: string, maxLength: 20000 }
+                    context: { type: string, maxLength: 20000 }
       responses:
         "200":
           description: The transcript and a rubric evaluation of it.
@@ -1184,9 +1184,9 @@ paths:
               type: object
               required: [prompt, explanation]
               properties:
-                prompt: { type: string }
-                explanation: { type: string }
-                company: { type: string }
+                prompt: { type: string, maxLength: 20000 }
+                explanation: { type: string, maxLength: 20000 }
+                company: { type: string, maxLength: 100 }
       responses:
         "200":
           description: Extracted architecture, risks and a rubric.
