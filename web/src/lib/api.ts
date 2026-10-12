@@ -13,7 +13,7 @@ export function emailVerificationUrl(token: string) {
 function endSession() {
   clearToken();
   if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-    window.location.assign("/login?expired=1");
+    window.location.assign(window.location.pathname === "/peer/join" ? "/login?expired=1&next=%2Fpeer%2Fjoin" : "/login?expired=1");
   }
 }
 
@@ -151,6 +151,12 @@ export type Integrity = components["schemas"]["Integrity"];
 export type IntegrityEventType = components["schemas"]["IntegrityEventType"];
 export type IntegrityEvent = operations["recordAssessmentEvents"]["requestBody"]["content"]["application/json"]["events"][number];
 export type DailyHistory = Awaited<ReturnType<typeof api.getDailyHistory>>;
+export type ComplexityAnalysis = components["schemas"]["ComplexityAnalysis"];
+export type RatingOutcome = components["schemas"]["RatingOutcome"];
+export type PeerSession = components["schemas"]["PeerSession"];
+export type PeerRole = components["schemas"]["PeerRole"];
+export type CreatePeerSession = operations["createPeerSession"]["requestBody"]["content"]["application/json"];
+export type PeerFeedbackInput = operations["submitPeerFeedback"]["requestBody"]["content"]["application/json"];
 
 // Preserve the public string argument signatures while validating the contract enums.
 function languageValue(value: string): components["schemas"]["Language"] {
@@ -173,6 +179,17 @@ function difficultyMixValue(value: string): Assessment["difficulty_mix"] {
 }
 
 export const api = {
+  getComplexity: (id: string, signal?: AbortSignal) => unwrap(client.GET("/submissions/{id}/complexity", { params: { path: { id } }, headers: authHeaders(), signal })),
+  measureComplexity: (id: string, signal?: AbortSignal) => unwrap(client.POST("/submissions/{id}/complexity", { params: { path: { id } }, headers: authHeaders(), signal })),
+  getRatings: () => unwrap(client.GET("/ratings/me", { headers: authHeaders() })),
+  getNextProblems: (topic?: string) => unwrap(client.GET("/ratings/next", { params: { query: { topic } }, headers: authHeaders() })),
+  listPeerSessions: () => unwrap(client.GET("/peer-sessions", { headers: authHeaders() })),
+  createPeerSession: (body: CreatePeerSession) => unwrap(client.POST("/peer-sessions", { body, headers: authHeaders() })),
+  joinPeerSession: (token: string) => unwrap(client.POST("/peer-sessions/join", { body: { token }, headers: authHeaders() })),
+  getPeerSession: (id: string, signal?: AbortSignal) => unwrap(client.GET("/peer-sessions/{id}", { params: { path: { id } }, headers: authHeaders(), signal })),
+  endPeerSession: (id: string) => unwrap(client.POST("/peer-sessions/{id}/end", { params: { path: { id } }, headers: authHeaders() })),
+  submitPeerFeedback: (id: string, body: PeerFeedbackInput) => unwrap(client.POST("/peer-sessions/{id}/feedback", { params: { path: { id } }, body, headers: authHeaders() })),
+  getPeerIceServers: (signal?: AbortSignal) => unwrap(client.GET("/peer-sessions/ice-servers", { headers: authHeaders(), signal })),
   resendVerification: () => unwrap(client.POST("/auth/resend-verification", { headers: authHeaders() })),
   recordHintViews: (id: string, count: number) => unwrap(client.POST("/problems/{id}/hints/viewed", { params: { path: { id } }, headers: authHeaders(), body: { count } })),
   getDailyProblem: (date?: string, auth = true) => unwrap(client.GET("/problems/daily", { headers: authHeaders(auth), params: { query: { date } } })),
@@ -283,7 +300,7 @@ export const api = {
     unwrap(client.GET("/learning-paths/{slug}", { params: { path: { slug } }, headers: authHeaders(auth) })),
   completePathProblem: (slug: string, problemId: string) =>
     unwrap(client.POST("/learning-paths/{slug}/complete/{problemId}", { params: { path: { slug, problemId } }, headers: authHeaders() })),
-  reviewSubmission: (submissionId: string) =>
-    unwrap(client.POST("/submissions/{id}/review", { params: { path: { id: submissionId } }, headers: authHeaders() })),
+  reviewSubmission: (submissionId: string, signal?: AbortSignal) =>
+    unwrap(client.POST("/submissions/{id}/review", { params: { path: { id: submissionId } }, headers: authHeaders(), signal })),
   getRecommendations: () => unwrap(client.GET("/recommendations", { headers: authHeaders() })),
 };

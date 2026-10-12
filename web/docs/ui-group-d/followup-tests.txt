@@ -1,0 +1,52 @@
+
+> web@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /Users/advait0801/Desktop/Development/InterviewForge/web
+
+ ✓ src/components/__tests__/group-d.test.tsx (35 tests) 994ms
+ ✓ src/components/__tests__/group-c.test.tsx (49 tests) 1036ms
+ ✓ src/app/__tests__/onboarding.test.tsx (7 tests) 1083ms
+   ✓ landing and onboarding > keeps registration rules visible and exposes API failures  412ms
+ ✓ src/app/__tests__/workspaces.test.tsx (10 tests) 1299ms
+   ✓ problem workspace > restores code per language and switches mobile panes without remounting the editor  387ms
+ ✓ src/app/__tests__/discovery.test.tsx (6 tests) 1554ms
+   ✓ practice discovery > combines every catalogue filter, reports exact counts, and resets a no-match state  1242ms
+ ✓ src/app/__tests__/interview-upgrades.test.tsx (21 tests) 2177ms
+   ✓ interviewer upgrades > retries a failed start with the selected preferences and local error recovery  343ms
+ ✓ src/hooks/__tests__/use-speech-recording.test.tsx (22 tests) 176ms
+ ✓ src/components/ui/__tests__/controls.test.tsx (5 tests) 226ms
+ ✓ src/app/__tests__/group-c.test.tsx (18 tests) 2443ms
+   ✓ Group C coding workspaces > restores javascript and loads every language starter on the problem page  521ms
+   ✓ Group C coding workspaces > persists cases, maps a rejected sent index past empties, and focuses the invalid input  467ms
+ ✓ src/app/__tests__/completion.test.tsx (7 tests) 1075ms
+   ✓ completion pages > validates passwords locally and preserves values after a server error  595ms
+ ✓ src/components/layout/__tests__/navbar.test.tsx (6 tests) 765ms
+   ✓ Navbar > opens by keyboard, exposes state, and closes on Escape with focus restored  350ms
+ ✓ src/app/__tests__/group-d.test.tsx (32 tests) 2746ms
+   ✓ peer hosting and invites > creates a role/problem/duration invite, shows a fragment once, and clears it on dismissal  463ms
+   ✓ peer room UI > shares code and language and applies partner updates  342ms
+ ✓ src/app/__tests__/progress.test.tsx (4 tests) 617ms
+ ✓ src/app/__tests__/interview-design.test.tsx (9 tests) 3195ms
+   ✓ interview flow > exposes company/difficulty selection and a durable start error  301ms
+   ✓ interview flow > moves through a follow-up and all four stages with a multiline draft  704ms
+   ✓ interview flow > shows microphone denial and appends a successful transcript before voice evaluation  761ms
+   ✓ system design review > renders theme-aware static diagram, text connections, rubric, risks, and improvements  358ms
+ ✓ src/components/ui/__tests__/theme-provider.test.tsx (1 test) 247ms
+ ✓ src/components/__tests__/peer-connection.test.ts (33 tests) 118ms
+ ✓ src/components/auth/__tests__/protected.test.tsx (2 tests) 122ms
+ ✓ src/components/ui/__tests__/app-toaster.test.tsx (1 test) 52ms
+ ✓ src/hooks/__tests__/use-proctoring.test.tsx (11 tests) 230ms
+ ✓ src/components/interview/__tests__/conversation.test.tsx (3 tests) 215ms
+ ✓ src/lib/__tests__/session.test.ts (4 tests) 20ms
+ ✓ src/lib/__tests__/api-contract.test.ts (35 tests) 62ms
+ ✓ src/components/__tests__/code-workspace-editor.test.tsx (3 tests) 24ms
+ ✓ src/lib/__tests__/sse.test.ts (8 tests) 9ms
+ ✓ src/app/__tests__/analytics-accessibility.test.tsx (1 test) 293ms
+
+ Test Files  25 passed (25)
+      Tests  333 passed (333)
+   Start at  23:16:02
+   Duration  6.55s (transform 2.43s, setup 4.54s, collect 10.32s, tests 20.78s, environment 12.95s, prepare 1.75s)
+

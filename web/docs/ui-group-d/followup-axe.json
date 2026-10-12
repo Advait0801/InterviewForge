@@ -1,0 +1,78 @@
+{
+  "browser": "154.0.8037.98",
+  "audits": [
+    {
+      "theme": "light",
+      "width": 320,
+      "tablesOpen": false,
+      "violations": [],
+      "hiddenFocus": [],
+      "overflow": false,
+      "tables": 0
+    },
+    {
+      "theme": "light",
+      "width": 320,
+      "tablesOpen": true,
+      "violations": [],
+      "hiddenFocus": [],
+      "overflow": false,
+      "tables": 4
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "tablesOpen": false,
+      "violations": [],
+      "hiddenFocus": [],
+      "overflow": false,
+      "tables": 0
+    },
+    {
+      "theme": "light",
+      "width": 1440,
+      "tablesOpen": true,
+      "violations": [],
+      "hiddenFocus": [],
+      "overflow": false,
+      "tables": 4
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "tablesOpen": false,
+      "violations": [],
+      "hiddenFocus": [],
+      "overflow": false,
+      "tables": 0
+    },
+    {
+      "theme": "dark",
+      "width": 320,
+      "tablesOpen": true,
+      "violations": [],
+      "hiddenFocus": [],
+      "overflow": false,
+      "tables": 4
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "tablesOpen": false,
+      "violations": [],
+      "hiddenFocus": [],
+      "overflow": false,
+      "tables": 0
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "tablesOpen": true,
+      "violations": [],
+      "hiddenFocus": [],
+      "overflow": false,
+      "tables": 4
+    }
+  ],
+  "errors": []
+}

@@ -2,7 +2,7 @@
 
 import Editor, { type BeforeMount, type OnMount } from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
-import { useRef, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { useTheme } from "@/components/ui/theme-provider";
 
 export type WorkspaceLanguage = "python3" | "cpp" | "c" | "java" | "javascript" | "go" | "rust";
@@ -78,14 +78,27 @@ export function CodeWorkspaceEditor({
   onChange,
   readOnly,
   className,
+  preserveCursor = false,
 }: {
   language: WorkspaceLanguage;
   value: string;
   onChange: (v: string) => void;
   readOnly?: boolean;
   className?: string;
+  preserveCursor?: boolean;
 }) {
   const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
+  const selectionToRestore = useRef<Monaco.Selection | null>(null);
+  useLayoutEffect(() => {
+    const editor = editorRef.current;
+    if (preserveCursor && editor && value !== editor.getValue()) selectionToRestore.current = editor.getSelection();
+  }, [preserveCursor, value]);
+  useEffect(() => {
+    const editor = editorRef.current;
+    const selection = selectionToRestore.current;
+    if (editor && selection) editor.setSelection(selection);
+    selectionToRestore.current = null;
+  }, [value]);
   const { theme } = useTheme();
   const reducedMotion = useSyncExternalStore(subscribeToReducedMotion, getReducedMotion, () => false);
   const editorTheme = theme === "dark" ? "interviewforge-dark" : "interviewforge-light";
@@ -134,7 +147,7 @@ export function CodeWorkspaceEditor({
           autoSurround: "languageDefined",
           bracketPairColorization: { enabled: true },
           readOnly: readOnly ?? false,
-          readOnlyMessage: { value: "This assessment is complete. The submitted code is read-only." },
+          readOnlyMessage: { value: "This code is read-only." },
           smoothScrolling: !reducedMotion,
           cursorBlinking: reducedMotion ? "solid" : "smooth",
           ariaLabel: readOnly ? "Read-only code editor" : "Code editor",

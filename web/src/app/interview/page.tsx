@@ -3,6 +3,7 @@
 import { InterviewHistory } from "@/components/interview/history";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Protected } from "@/components/auth/protected";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card } from "@/components/ui/card";
@@ -131,6 +132,8 @@ export default function InterviewPage() {
                   behavioral, coding, system design, and core CS rounds — just like the real thing.
                 </p>
               </div>
+
+              <Link href="/peer" className="inline-block font-semibold text-primary underline">Practise with a peer</Link>
 
               {/* Company selector */}
               <div>

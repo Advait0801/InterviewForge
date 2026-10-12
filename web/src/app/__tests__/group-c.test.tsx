@@ -379,11 +379,11 @@ it("names review actions by problem while retaining their visible labels", async
   render(<ReviewPage />);
   await screen.findByRole("heading", { name: "Due now (1)" });
   for (const [title, problemId] of [["Two Sum", "p"], ["Valid Parentheses", "q"]]) {
-    const practise = screen.getByRole("link", { name: `Practise ${title}`, exact: true });
+    const practise = screen.getByRole("link", { name: `Practise ${title}` });
     expect(practise).toHaveAttribute("href", `/problems/${problemId}`);
     expect(practise).toHaveTextContent(/^Practise$/);
     expect(screen.getByRole("button", {
-      name: `Remove ${title} from your review queue`, exact: true,
+      name: `Remove ${title} from your review queue`,
     })).toHaveTextContent(/^Remove$/);
   }
 });

@@ -1,6 +1,10 @@
 "use client";
 
+import { languages as LANGUAGES } from "@/components/language-picker";
+
 import { OutputDiff } from "@/components/output-diff";
+import { ComplexityPanel } from "@/components/complexity-panel";
+import { RatingOutcome } from "@/components/ratings";
 import { ReviewOutcome } from "@/components/review-outcome";
 import { CustomCases, CustomResults, type CustomCase } from "@/components/custom-cases";
 import { ProgressiveHints } from "@/components/progressive-hints";
@@ -25,15 +29,6 @@ const CodeWorkspaceEditor = dynamic(
 
 type Language = WorkspaceLanguage;
 
-const LANGUAGES: { value: Language; label: string }[] = [
-  { value: "python3", label: "Python 3" },
-  { value: "cpp", label: "C++" },
-  { value: "c", label: "C" },
-  { value: "java", label: "Java" },
-  { value: "javascript", label: "JavaScript" },
-  { value: "go", label: "Go" },
-  { value: "rust", label: "Rust" },
-];
 
 const LANG_KEY = "if-preferred-lang";
 const VALID_LANGS = new Set<string>(["python3", "cpp", "c", "java", "javascript", "go", "rust"]);
@@ -172,9 +167,11 @@ export default function WorkspacePage() {
   const [savingBookmark, setSavingBookmark] = useState(false);
   const [lastSubmissionId, setLastSubmissionId] = useState<string | null>(null);
   const [aiReview, setAiReview] = useState<CodeReview | null>(null);
+  const [aiReviewVersion, setAiReviewVersion] = useState(0);
   const [aiReviewLoading, setAiReviewLoading] = useState(false);
   const [aiReviewOpen, setAiReviewOpen] = useState(false);
   const [modalAiReview, setModalAiReview] = useState<CodeReview | null>(null);
+  const [modalReviewVersion, setModalReviewVersion] = useState(0);
   const [modalAiReviewLoading, setModalAiReviewLoading] = useState(false);
   const [modalAiReviewOpen, setModalAiReviewOpen] = useState(false);
 
@@ -449,7 +446,7 @@ export default function WorkspacePage() {
   return (
     <main className="flex h-dvh min-h-[560px] flex-col overflow-hidden bg-background text-text-primary">
       {detailId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label="Submission detail">
           <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-xl border border-border bg-background shadow-xl">
             <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
               <div>
@@ -469,6 +466,7 @@ export default function WorkspacePage() {
                   setModalAiReview(null);
                   setModalAiReviewOpen(false);
                 }}
+                aria-label="Close submission detail"
                 className="rounded-lg p-2 text-text-secondary hover:bg-surface-hover hover:text-text-primary"
               >
                 <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
@@ -505,6 +503,7 @@ export default function WorkspacePage() {
                   try {
                     const r = await api.reviewSubmission(submissionDetail.id);
                     setModalAiReview(r.review);
+                    setModalReviewVersion(version => version + 1);
                   } catch (e) {
                     toast.error(e instanceof Error ? e.message : "AI review failed");
                     setModalAiReviewOpen(false);
@@ -528,6 +527,7 @@ export default function WorkspacePage() {
                 {!modalAiReviewLoading && modalAiReview && <CodeReviewPanel review={modalAiReview} />}
               </div>
             )}
+            {submissionDetail?.status === "passed" && <div className="max-h-[45vh] shrink-0 overflow-y-auto px-4 py-3"><ComplexityPanel submissionId={submissionDetail.id} reviewVersion={modalReviewVersion} /></div>}
             <div className="min-h-0 flex-1 overflow-hidden p-2" style={{ height: "min(60vh, 480px)" }}>
               {loadingDetail || !submissionDetail ? (
                 <div className="flex h-full min-h-[280px] items-center justify-center text-sm text-text-secondary">Loading…</div>
@@ -756,6 +756,7 @@ export default function WorkspacePage() {
                           try {
                             const r = await api.reviewSubmission(submissionIdForReview);
                             setAiReview(r.review);
+                            setAiReviewVersion(version => version + 1);
                           } catch (err) {
                             toast.error(err instanceof Error ? err.message : "AI review failed");
                           } finally {
@@ -896,6 +897,7 @@ export default function WorkspacePage() {
                       result={runResult}
                       loading={running || submitting}
                       error={executionError}
+                      reviewVersion={aiReviewVersion}
                       expandPassedCap={SUBMIT_EXPAND_PASSED_CAP}
                     />
                   )}
@@ -984,11 +986,13 @@ function ResultPanel({
   loading,
   error,
   expandPassedCap,
+  reviewVersion,
 }: {
   result: RunResponse | null;
   loading: boolean;
   error: string | null;
   expandPassedCap: number;
+  reviewVersion: number;
 }) {
   const [showAllPassed, setShowAllPassed] = useState(false);
 
@@ -1058,6 +1062,8 @@ function ResultPanel({
       </div>
 
       {result.mode === "submit" && <ReviewOutcome outcome={result.review} />}
+      {result.mode === "submit" && <RatingOutcome outcome={result.rating} />}
+      {result.mode === "submit" && result.passed && <ComplexityPanel submissionId={result.submissionId} reviewVersion={reviewVersion} />}
       {isSubmitBulk && (
         <p className="text-[11px] text-text-secondary">
           Showing all failed cases first; then up to {expandPassedCap} passed cases

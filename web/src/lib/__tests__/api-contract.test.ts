@@ -188,3 +188,35 @@ describe("Group C contract", () => {
     }
   });
 });
+
+describe("Group D generated API methods", () => {
+  it("uses the complexity, Elo and peer paths with authenticated typed bodies", async () => {
+    setToken("group-d-token");
+    const calls: [() => Promise<unknown>, string, string, unknown?][] = [
+      [() => api.getComplexity("s"), "GET", "/api/submissions/s/complexity"],
+      [() => api.measureComplexity("s"), "POST", "/api/submissions/s/complexity"],
+      [() => api.getRatings(), "GET", "/api/ratings/me"],
+      [() => api.getNextProblems("Arrays"), "GET", "/api/ratings/next?topic=Arrays"],
+      [() => api.listPeerSessions(), "GET", "/api/peer-sessions"],
+      [() => api.createPeerSession({ role: "candidate", problemId: "p", durationMinutes: 60 }), "POST", "/api/peer-sessions", { role: "candidate", problemId: "p", durationMinutes: 60 }],
+      [() => api.joinPeerSession("invite#token"), "POST", "/api/peer-sessions/join", { token: "invite#token" }],
+      [() => api.getPeerSession("s"), "GET", "/api/peer-sessions/s"],
+      [() => api.endPeerSession("s"), "POST", "/api/peer-sessions/s/end"],
+      [() => api.submitPeerFeedback("s", { ratings: { clarity: 4, helpfulness: 5 }, notes: "Thanks" }), "POST", "/api/peer-sessions/s/feedback", { ratings: { clarity: 4, helpfulness: 5 }, notes: "Thanks" }],
+      [() => api.getPeerIceServers(), "GET", "/api/peer-sessions/ice-servers"],
+    ];
+    for (const [call, method, path, body] of calls) {
+      respond({}); await call(); expect(request().method).toBe(method); expect(request().url).toBe(`http://localhost:4000${path}`); expect(request().headers.get("Authorization")).toBe("Bearer group-d-token"); if (body) expect(await request().json()).toEqual(body);
+    }
+  });
+  it("passes abort signals to the long measurement and peer ICE requests", async () => {
+    const controller = transferableAbortController();
+    respond({}); await api.measureComplexity("s", controller.signal); const measurement = request();
+    respond({}); await api.getPeerIceServers(controller.signal); const ice = request();
+    controller.abort(); expect(measurement.signal.aborted).toBe(true); expect(ice.signal.aborted).toBe(true);
+  });
+  it("keeps a non-session 401 as a local request error", async () => {
+    setToken("group-d-token"); respond({ error: "Not authorised for this operation" }, 401);
+    await expect(api.getPeerSession("s")).rejects.toMatchObject({ status: 401 }); expect(getToken()).toBe("group-d-token");
+  });
+});
